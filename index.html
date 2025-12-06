@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCA FINANCIERA GAROSSA</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-glitch">ARCA</div>
+                <div class="version">FINANCIERA GAROSSA</div>
+            </div>
+            <div class="doctrine-quote">
+                "Acumular cuando todos dudan, mantener cuando todos temen"
+            </div>
+            <div class="log-feed" id="log-feed"></div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="dashboard">
+            <!-- TAB NAVIGATION -->
+            <div class="tabs-nav">
+                <div class="tab-btn active" data-tab="command">🎯 Command</div>
+                <div class="tab-btn" data-tab="fintech">💳 Fintech</div>
+                <div class="tab-btn" data-tab="debt">📉 Deudas</div>
+                <div class="tab-btn" data-tab="bot">🤖 Grid Bot</div>
+                <div class="tab-btn" data-tab="portfolio">📈 Portafolio</div>
+                <div class="tab-btn" data-tab="doctrine">✅ Doctrina</div>
+                <div class="tab-btn" data-tab="guia">📖 Guía</div>
+            </div>
+
+            <!-- TAB 1: COMMAND CENTER -->
+            <div class="tab-content active" id="command">
+                <div class="hud">
+                    <span class="hud-title">CENTRO DE COMANDO</span>
+                    <span class="separator">|</span>
+                    <span id="current-date">--</span>
+                </div>
+
+                <div class="networth-hero">
+                    <div class="networth-label">PATRIMONIO NETO</div>
+                    <div class="networth-value" id="net-worth">$0.00 MXN</div>
+                    <div class="networth-breakdown">
+                        Activos: <span id="total-assets">$0</span> | Deudas: <span id="total-debts">$0</span>
+                    </div>
+                </div>
+
+                <!-- AUTOMATION DASHBOARD -->
+                <div class="automation-dashboard">
+                    <!-- Phase Indicator -->
+                    <div class="auto-card phase-card">
+                        <div class="auto-card-header">
+                            <span class="auto-icon">🎯</span>
+                            <span class="auto-title">FASE ACTUAL</span>
+                        </div>
+                        <div class="phase-indicator" id="current-phase">FASE 1</div>
+                        <div class="phase-status" id="phase-status">Cargando...</div>
+                        <div class="phase-recommendation" id="phase-recommendation">--</div>
+                    </div>
+
+                    <!-- Independence Calculator -->
+                    <div class="auto-card independence-card">
+                        <div class="auto-card-header">
+                            <span class="auto-icon">🚀</span>
+                            <span class="auto-title">LIBERTAD FINANCIERA</span>
+                        </div>
+                        <div class="independence-years" id="years-to-freedom">-- años</div>
+                        <div class="independence-progress-bar">
+                            <div class="independence-fill" id="independence-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="passive-income">Ingreso pasivo actual: <span id="passive-income">$0/mes</span></div>
+                    </div>
+
+                    <!-- Macro Context -->
+                    <div class="auto-card macro-card">
+                        <div class="auto-card-header">
+                            <span class="auto-icon">🌍</span>
+                            <span class="auto-title">CONTEXTO MACRO</span>
+                        </div>
+                        <div class="macro-indicators">
+                            <div class="macro-item">
+                                <span class="macro-label">Oro</span>
+                                <span class="macro-value" id="gold-price">$--</span>
+                            </div>
+                            <div class="macro-item">
+                                <span class="macro-label">DXY</span>
+                                <span class="macro-value" id="dxy-index">--</span>
+                            </div>
+                        </div>
+                        <div class="macro-badge neutral" id="macro-signal">NEUTRAL</div>
+                        <div class="macro-advice" id="macro-advice">Analizando...</div>
+                    </div>
+
+                    <!-- Smart Alerts -->
+                    <div class="auto-card alerts-card">
+                        <div class="auto-card-header">
+                            <span class="auto-icon">🔔</span>
+                            <span class="auto-title">ALERTAS</span>
+                        </div>
+                        <div class="alerts-container" id="smart-alerts">
+                            <div class="alert-item">Cargando...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="command-grid">
+                    <div class="command-card emergency">
+                        <div class="card-icon">🛡️</div>
+                        <div class="card-label">FONDO DE EMERGENCIA</div>
+                        <div class="card-value" id="emergency-fund">$0 MXN</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="emergency-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="card-target">Meta: $60,000 MXN</div>
+                    </div>
+
+                    <div class="command-card fintech">
+                        <div class="card-icon">💰</div>
+                        <div class="card-label">RENDIMIENTO FINTECH</div>
+                        <div class="card-value" id="fintech-yield">+$0/año</div>
+                        <div class="card-sub">DiDi + Nu + MercadoPago</div>
+                    </div>
+
+                    <div class="command-card debt">
+                        <div class="card-icon">📉</div>
+                        <div class="card-label">DEUDA PENDIENTE</div>
+                        <div class="card-value negative" id="total-debt">$0 MXN</div>
+                        <div class="card-sub" id="debt-free-date">Libre de deudas: --</div>
+                    </div>
+
+                    <div class="command-card bot">
+                        <div class="card-icon">🤖</div>
+                        <div class="card-label">GRID BOT PROFIT</div>
+                        <div class="card-value positive" id="bot-profit">$0 USDT</div>
+                        <div class="card-sub" id="bot-status">Status: --</div>
+                    </div>
+                </div>
+
+                <div class="next-actions">
+                    <h3>📌 PRÓXIMAS ACCIONES</h3>
+                    <div class="action-list" id="next-actions">
+                        <!-- Populated dynamically from Doctrina checklist -->
+                    </div>
+                </div>
+
+                <!-- GOALS SECTION -->
+                <div class="goals-section">
+                    <h3>🎯 METAS</h3>
+                    <div class="goals-grid" id="goals-container">
+                        <!-- Populated dynamically by updateGoalsProgress() -->
+                    </div>
+                </div>
+
+                <!-- MONTHLY FLOW SECTION -->
+                <div class="flow-section">
+                    <h3>💸 FLUJO DEL MES</h3>
+                    <div class="flow-grid">
+                        <div class="flow-item">
+                            <label>Ingresos</label>
+                            <input type="number" id="flow-income" placeholder="0" value="0">
+                        </div>
+                        <div class="flow-item">
+                            <label>Gastos Fijos</label>
+                            <input type="number" id="flow-fixed" placeholder="0" value="0">
+                        </div>
+                        <div class="flow-item">
+                            <label>Gastos Variables</label>
+                            <input type="number" id="flow-variable" placeholder="0" value="0">
+                        </div>
+                        <div class="flow-item">
+                            <label>Deudas Pendientes</label>
+                            <span class="flow-value" id="flow-debts">$0</span>
+                        </div>
+                        <div class="flow-item result">
+                            <label>Ahorro Disponible</label>
+                            <span class="flow-value positive" id="flow-savings">$0</span>
+                        </div>
+                    </div>
+                    <div class="flow-summary" id="flow-summary">
+                        Ingresa tus datos para calcular
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: FINTECH ACCOUNTS -->
+            <div class="tab-content" id="fintech">
+                <div class="hud">
+                    <span class="hud-title">CUENTAS FINTECH</span>
+                    <span class="separator">|</span>
+                    <span>Rendimientos de Alto Rendimiento</span>
+                </div>
+
+                <div class="fintech-grid">
+                    <div class="fintech-card didi">
+                        <div class="fintech-header">
+                            <span class="fintech-logo">🟠</span>
+                            <span class="fintech-name">DiDi Cuenta</span>
+                            <span class="fintech-rate">16% APY</span>
+                        </div>
+                        <div class="fintech-body">
+                            <label>Saldo Actual:</label>
+                            <input type="number" id="didi-balance" class="fintech-input" value="52073.97" step="0.01">
+                            <div class="fintech-limit">Límite alto rendimiento: $10,000 MXN (resto 8.5%)</div>
+                            <div class="fintech-yield">
+                                Rendimiento: <span id="didi-yield" class="yield-value">+$1,600/año</span>
+                            </div>
+                        </div>
+                        <div class="fintech-status high-yield">✓ Máximo aprovechado</div>
+                    </div>
+
+                    <div class="fintech-card nubank">
+                        <div class="fintech-header">
+                            <span class="fintech-logo">🟣</span>
+                            <span class="fintech-name">Nu Bank</span>
+                            <span class="fintech-rate">15% APY</span>
+                        </div>
+                        <div class="fintech-body">
+                            <label>Saldo Actual:</label>
+                            <input type="number" id="nu-balance" class="fintech-input" value="31266.52" step="0.01">
+                            <div class="fintech-limit">Límite 15%: $25,000 MXN (resto 7.25%)</div>
+                            <div class="fintech-yield">
+                                Rendimiento: <span id="nu-yield" class="yield-value">+$3,750/año</span>
+                            </div>
+                        </div>
+                        <div class="fintech-status high-yield">✓ Máximo aprovechado</div>
+                    </div>
+
+                    <div class="fintech-card mercadopago">
+                        <div class="fintech-header">
+                            <span class="fintech-logo">🔵</span>
+                            <span class="fintech-name">Mercado Pago</span>
+                            <span class="fintech-rate">13% APY</span>
+                        </div>
+                        <div class="fintech-body">
+                            <label>Saldo Actual:</label>
+                            <input type="number" id="mp-balance" class="fintech-input" value="25000" step="0.01">
+                            <div class="fintech-limit">Límite 13%: $25,000 MXN (después 0%)</div>
+                            <div class="fintech-yield">
+                                Rendimiento: <span id="mp-yield" class="yield-value">+$3,250/año</span>
+                            </div>
+                        </div>
+                        <div class="fintech-status high-yield">✓ Máximo aprovechado</div>
+                    </div>
+                </div>
+
+                <div class="fintech-summary">
+                    <div class="summary-row">
+                        <span>Total en Fintech:</span>
+                        <span id="fintech-total" class="summary-value">$108,340.49 MXN</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Rendimiento Anual Total:</span>
+                        <span id="fintech-annual" class="summary-value positive">+$8,600 MXN/año</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tasa Promedio Efectiva:</span>
+                        <span id="fintech-avg-rate" class="summary-value">14.75% APY</span>
+                    </div>
+                </div>
+
+                <button class="btn-save" id="save-fintech">💾 Guardar Saldos</button>
+            </div>
+
+            <!-- TAB 3: DEBT TRACKER -->
+            <div class="tab-content" id="debt">
+                <div class="hud">
+                    <span class="hud-title">SEGUIMIENTO DE DEUDAS</span>
+                    <span class="separator">|</span>
+                    <span>Rotativa a cero, MSI se respeta</span>
+                </div>
+
+                <div class="debt-grid">
+                    <div class="debt-card rappi" id="debt-rappi">
+                        <div class="debt-header">
+                            <span class="debt-type">ROTATIVA</span>
+                            <span class="debt-name">RappiCard</span>
+                            <button class="btn-reset" id="reset-rappi" title="Reiniciar ciclo">🔄</button>
+                        </div>
+                        <div class="debt-amount">$<input type="number" id="rappi-amount" value="12917.22" step="0.01">
+                        </div>
+                        <div class="debt-due">
+                            <span class="due-label">Corte:</span>
+                            <span class="due-date">6 de Diciembre</span>
+                        </div>
+                        <div class="debt-countdown" id="rappi-countdown">⏰ Calcular días...</div>
+                        <div class="debt-status">
+                            <label><input type="checkbox" id="rappi-paid"> Pagado</label>
+                        </div>
+                        <div class="debt-rule">⚠️ REGLA: Liquidar en cada corte</div>
+                    </div>
+
+                    <div class="debt-card nubank" id="debt-nu-dic">
+                        <div class="debt-header">
+                            <span class="debt-type">ROTATIVA</span>
+                            <span class="debt-name">Nu Crédito - Diciembre</span>
+                            <button class="btn-reset" id="reset-nu-dic" title="Reiniciar ciclo">🔄</button>
+                        </div>
+                        <div class="debt-amount">$<input type="number" id="nu-dic-amount" value="15509.30" step="0.01">
+                        </div>
+                        <div class="debt-due">
+                            <span class="due-label">Límite pago:</span>
+                            <span class="due-date">12 de Diciembre</span>
+                        </div>
+                        <div class="debt-countdown" id="nu-dic-countdown">⏰ Calcular días...</div>
+                        <div class="debt-status">
+                            <label><input type="checkbox" id="nu-dic-paid"> Pagado</label>
+                        </div>
+                    </div>
+
+                    <div class="debt-card nubank" id="debt-nu-ene">
+                        <div class="debt-header">
+                            <span class="debt-type">ROTATIVA</span>
+                            <span class="debt-name">Nu Crédito - Enero</span>
+                            <button class="btn-reset" id="reset-nu-ene" title="Reiniciar ciclo">🔄</button>
+                        </div>
+                        <div class="debt-amount">$<input type="number" id="nu-ene-amount" value="6592.56" step="0.01">
+                        </div>
+                        <div class="debt-due">
+                            <span class="due-label">Límite pago:</span>
+                            <span class="due-date">12 de Enero 2026</span>
+                        </div>
+                        <div class="debt-countdown" id="nu-ene-countdown">⏰ Calcular días...</div>
+                        <div class="debt-status">
+                            <label><input type="checkbox" id="nu-ene-paid"> Pagado</label>
+                        </div>
+                    </div>
+
+                    <div class="debt-card kueski" id="debt-kueski">
+                        <div class="debt-header">
+                            <span class="debt-type">PRÉSTAMO</span>
+                            <span class="debt-name">Kueski</span>
+                            <button class="btn-reset" id="reset-kueski" title="Reiniciar ciclo">🔄</button>
+                        </div>
+                        <div class="debt-amount">$<input type="number" id="kueski-amount" value="3513.31" step="0.01">
+                        </div>
+                        <div class="debt-due">
+                            <span class="due-label">Límite pago:</span>
+                            <span class="due-date">15 de Diciembre</span>
+                        </div>
+                        <div class="debt-countdown" id="kueski-countdown">⏰ Calcular días...</div>
+                        <div class="debt-status">
+                            <label><input type="checkbox" id="kueski-paid"> Pagado</label>
+                        </div>
+                        <div class="debt-rule">⚠️ ¡URGENTE! Intereses altos</div>
+                    </div>
+                </div>
+
+                <div class="debt-summary">
+                    <div class="summary-row">
+                        <span>Deuda Total Pendiente:</span>
+                        <span id="debt-total" class="summary-value negative">$38,532.39 MXN</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Liquidez Neta:</span>
+                        <span id="net-liquidity" class="summary-value">$69,808.10 MXN</span>
+                    </div>
+                    <div class="summary-row highlight">
+                        <span>Fecha Libre de Deudas:</span>
+                        <span id="debt-free" class="summary-value positive">Febrero 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: GRID BOT - PROFESSIONAL TRADING TERMINAL -->
+            <div class="tab-content" id="bot">
+                <div class="terminal-header">
+                    <div class="terminal-status">
+                        <span class="status-dot live"></span>
+                        <span class="status-label">LIVE</span>
+                    </div>
+                    <div class="terminal-pair">
+                        <span class="pair-symbol">₿</span>
+                        <span class="pair-name">BTC/USDT</span>
+                    </div>
+                    <div class="terminal-regime">
+                        <span class="regime-icon">📈</span>
+                        <span class="regime-text" id="regime-text">BULL</span>
+                    </div>
+                </div>
+
+                <div class="trading-display">
+                    <div class="orderbook-panel">
+                        <div class="price-ticker">
+                            <div class="ticker-price" id="price-display">$93,440</div>
+                            <div class="ticker-mxn" id="price-mxn">≈ $1,912,512 MXN</div>
+                        </div>
+
+                        <div class="orderbook">
+                            <div class="ob-header"><span>SELL ORDERS</span></div>
+                            <div class="ob-stack sells">
+                                <div class="ob-row"><span class="ob-price" id="sell-4">--</span>
+                                    <div class="ob-depth sell" style="width:35%"></div>
+                                </div>
+                                <div class="ob-row"><span class="ob-price" id="sell-3">--</span>
+                                    <div class="ob-depth sell" style="width:50%"></div>
+                                </div>
+                                <div class="ob-row"><span class="ob-price" id="sell-2">--</span>
+                                    <div class="ob-depth sell" style="width:70%"></div>
+                                </div>
+                                <div class="ob-row"><span class="ob-price" id="sell-1">--</span>
+                                    <div class="ob-depth sell" style="width:95%"></div>
+                                </div>
+                            </div>
+                            <div class="ob-current">
+                                <div class="ob-pulse"></div>
+                                <span id="live-price">$93,440</span>
+                                <div class="ob-pulse"></div>
+                            </div>
+                            <div class="ob-stack buys">
+                                <div class="ob-row"><span class="ob-price" id="buy-1">--</span>
+                                    <div class="ob-depth buy" style="width:95%"></div>
+                                </div>
+                                <div class="ob-row"><span class="ob-price" id="buy-2">--</span>
+                                    <div class="ob-depth buy" style="width:70%"></div>
+                                </div>
+                                <div class="ob-row"><span class="ob-price" id="buy-3">--</span>
+                                    <div class="ob-depth buy" style="width:50%"></div>
+                                </div>
+                                <div class="ob-row"><span class="ob-price" id="buy-4">--</span>
+                                    <div class="ob-depth buy" style="width:35%"></div>
+                                </div>
+                            </div>
+                            <div class="ob-header bottom"><span>BUY ORDERS</span></div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-panel">
+                        <div class="metric-group capital">
+                            <div class="metric-title">💰 CAPITAL</div>
+                            <div class="metric-grid">
+                                <div class="metric-item">
+                                    <span class="metric-label">Libre USDT</span>
+                                    <span class="metric-value" id="free-usdt">$7.82</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">En Órdenes</span>
+                                    <span class="metric-value" id="locked-usdt">$100.92</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">BTC Holdings</span>
+                                    <span class="metric-value" id="btc-amount">0.000169</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metric-hero">
+                            <div class="hero-label">EQUITY TOTAL</div>
+                            <div class="hero-value" id="total-equity">$108.74</div>
+                            <div class="hero-sub" id="equity-mxn">≈ $2,229 MXN</div>
+                        </div>
+
+                        <div class="metric-group profit">
+                            <div class="profit-display">
+                                <div class="profit-main">
+                                    <span class="profit-label">Profit</span>
+                                    <span class="profit-value positive" id="profit-total">$0.00</span>
+                                </div>
+                                <div class="profit-pct"><span id="profit-percent">0.00</span>%</div>
+                            </div>
+                        </div>
+
+                        <div class="metric-group loops">
+                            <div class="loops-display">
+                                <div class="loop-total">
+                                    <span class="loop-number" id="active-loops">8</span>
+                                    <span class="loop-label">órdenes</span>
+                                </div>
+                                <div class="loop-breakdown">
+                                    <span class="loop-buy">🟢 <span id="buy-count">4</span></span>
+                                    <span class="loop-sell">🔴 <span id="sell-count">4</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="signals-panel">
+                        <div class="signal-gauge">
+                            <div class="gauge-title">SIGNAL</div>
+                            <div class="gauge-value" id="signal-score">72</div>
+                            <div class="gauge-label" id="signal-text">HOLD</div>
+                        </div>
+
+                        <div class="indicators-grid">
+                            <div class="indicator">
+                                <span class="ind-label">RSI</span>
+                                <span class="ind-value" id="rsi-value">54.2</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="ind-label">EMA</span>
+                                <span class="ind-value" id="ema-value">$92.8k</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="ind-label">Trend</span>
+                                <span class="ind-value bullish" id="trend-value">BULL</span>
+                            </div>
+                            <div class="indicator">
+                                <span class="ind-label">Vol</span>
+                                <span class="ind-value" id="volatility-value">LOW</span>
+                            </div>
+                        </div>
+
+                        <div class="emergency-controls">
+                            <button id="reset-grid" class="btn-emergency" title="Cancelar todo y resetear profit">
+                                ⚠️ RESET
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: ARCA PORTFOLIO -->
+            <div class="tab-content" id="portfolio">
+                <div class="hud">
+                    <span class="hud-title">PORTAFOLIO ARCA v2.1</span>
+                    <span class="separator">|</span>
+                    <span>Meta: $15,000 MXN/mes</span>
+                </div>
+
+                <div class="portfolio-header">
+                    <div class="portfolio-total">
+                        <span class="portfolio-label">Valor Total Invertido</span>
+                        <span class="portfolio-value" id="portfolio-total">$0 MXN</span>
+                    </div>
+                    <div class="portfolio-monthly">
+                        <span class="portfolio-label">Aportación Mensual</span>
+                        <input type="number" id="monthly-contribution" value="15000" class="portfolio-input">
+                    </div>
+                </div>
+
+                <div class="portfolio-grid">
+                    <div class="portfolio-card vt">
+                        <div class="portfolio-header-card">
+                            <span class="etf-name">VT</span>
+                            <span class="etf-desc">Vanguard Total World</span>
+                        </div>
+                        <div class="allocation">33%</div>
+                        <div class="monthly-amount">$<span id="vt-monthly">4,950</span>/mes</div>
+                        <div class="current-value">
+                            <label>Valor Actual:</label>
+                            <input type="number" id="vt-value" value="0" class="etf-input">
+                        </div>
+                        <div class="etf-role">🌍 Núcleo Global</div>
+                    </div>
+
+                    <div class="portfolio-card qqq">
+                        <div class="portfolio-header-card">
+                            <span class="etf-name">QQQ</span>
+                            <span class="etf-desc">Invesco Nasdaq 100</span>
+                        </div>
+                        <div class="allocation">24%</div>
+                        <div class="monthly-amount">$<span id="qqq-monthly">3,600</span>/mes</div>
+                        <div class="current-value">
+                            <label>Valor Actual:</label>
+                            <input type="number" id="qqq-value" value="0" class="etf-input">
+                        </div>
+                        <div class="etf-role">🧠 Tecnología / IA</div>
+                    </div>
+
+                    <div class="portfolio-card gold">
+                        <div class="portfolio-header-card">
+                            <span class="etf-name">IAU/GLD</span>
+                            <span class="etf-desc">iShares Gold Trust</span>
+                        </div>
+                        <div class="allocation">20%</div>
+                        <div class="monthly-amount">$<span id="gold-monthly">3,000</span>/mes</div>
+                        <div class="current-value">
+                            <label>Valor Actual:</label>
+                            <input type="number" id="gold-value" value="0" class="etf-input">
+                        </div>
+                        <div class="etf-role">🥇 Refugio Monetario</div>
+                    </div>
+
+                    <div class="portfolio-card vwo">
+                        <div class="portfolio-header-card">
+                            <span class="etf-name">VWO</span>
+                            <span class="etf-desc">Vanguard Emerging Markets</span>
+                        </div>
+                        <div class="allocation">18%</div>
+                        <div class="monthly-amount">$<span id="vwo-monthly">2,700</span>/mes</div>
+                        <div class="current-value">
+                            <label>Valor Actual:</label>
+                            <input type="number" id="vwo-value" value="0" class="etf-input">
+                        </div>
+                        <div class="etf-role">🌏 Emergentes / BRICS</div>
+                    </div>
+
+                    <div class="portfolio-card crypto">
+                        <div class="portfolio-header-card">
+                            <span class="etf-name">IBIT/ETHA</span>
+                            <span class="etf-desc">Bitcoin & Ethereum ETFs</span>
+                        </div>
+                        <div class="allocation">5%</div>
+                        <div class="monthly-amount">$<span id="crypto-monthly">750</span>/mes</div>
+                        <div class="current-value">
+                            <label>Valor Actual:</label>
+                            <input type="number" id="crypto-value" value="0" class="etf-input">
+                        </div>
+                        <div class="etf-role">₿ Cripto Regulada</div>
+                    </div>
+                </div>
+
+                <div class="portfolio-contribution">
+                    <label>💰 Contribución Mensual:</label>
+                    <input type="number" id="monthly-contribution" value="15000" class="contribution-input">
+                    <span class="contribution-hint">Se distribuye según las allocaciones</span>
+                </div>
+
+                <button class="btn-save" id="save-portfolio">💾 Guardar Portafolio</button>
+            </div>
+
+            <!-- TAB 6: DOCTRINE CHECKLIST -->
+            <div class="tab-content" id="doctrine">
+                <div class="hud">
+                    <span class="hud-title">DOCTRINA ARCA GAROSSA</span>
+                    <span class="separator">|</span>
+                    <span>Documento Vivo - Dic 2025</span>
+                </div>
+
+                <div class="doctrine-section">
+                    <h3>📋 CHECKLIST DICIEMBRE 2025</h3>
+                    <div class="checklist">
+                        <label class="check-item urgent"><input type="checkbox" id="check-1"> 6/Dic: Liquidar RappiCard
+                            ($12,917.22) 🔴</label>
+                        <label class="check-item"><input type="checkbox" id="check-2"> 12/Dic: Pagar Nu Crédito
+                            ($15,509.30) 🟣</label>
+                        <label class="check-item"><input type="checkbox" id="check-3"> 15/Dic: Pagar Kueski ($3,513.31)
+                            🟠</label>
+                        <label class="check-item"><input type="checkbox" id="check-4"> Liquidar gastos bodas y
+                            ropa</label>
+                        <label class="check-item"><input type="checkbox" id="check-5"> Reorganizar presupuesto:
+                            $12-15k</label>
+                        <label class="check-item"><input type="checkbox" id="check-6"> Fondear cuenta GBM+ en
+                            diciembre</label>
+                        <label class="check-item"><input type="checkbox" id="check-7"> Orden inicial: VT + IAU +
+                            VWO</label>
+                    </div>
+
+                    <!-- CUSTOM/EDITABLE CHECKLIST -->
+                    <div class="custom-checklist-section">
+                        <div class="custom-header">
+                            <span>✏️ Mis Tareas</span>
+                            <button id="add-checklist-item" class="btn-add">+ Agregar</button>
+                        </div>
+                        <div class="checklist" id="custom-checklist">
+                            <!-- Populated by renderCustomChecklist() -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doctrine-section">
+                    <h3>📜 REGLAS OPERATIVAS</h3>
+                    <div class="rules-grid">
+                        <div class="rule-card">
+                            <div class="rule-icon">🛡️</div>
+                            <div class="rule-text">Fondo emergencia intocable en Nu + DiDi + MP</div>
+                        </div>
+                        <div class="rule-card">
+                            <div class="rule-icon">💳</div>
+                            <div class="rule-text">Rotativa a cero: liquidar tarjetas en cada corte</div>
+                        </div>
+                        <div class="rule-card">
+                            <div class="rule-icon">📅</div>
+                            <div class="rule-text">Revisión trimestral; rebalanceo anual</div>
+                        </div>
+                        <div class="rule-card">
+                            <div class="rule-icon">📈</div>
+                            <div class="rule-text">Inversión solo si saldo ≥$60k después de deudas</div>
+                        </div>
+                        <div class="rule-card">
+                            <div class="rule-icon">📊</div>
+                            <div class="rule-text">Revisión quincenal: día 6 (post-corte) y día 21</div>
+                        </div>
+                        <div class="rule-card">
+                            <div class="rule-icon">💰</div>
+                            <div class="rule-text">Caja > Rendimiento: preferir liquidez</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doctrine-section">
+                    <h3>🏛️ MANIFIESTO ARCA</h3>
+                    <div class="philosophy-quote">
+                        "El Arca no elige bandos: extrae rentas del viejo orden (Big Tech) mientras acumula activos del
+                        nuevo (oro, emergentes, cripto). El objetivo no es ganarle al mercado, sino salirse de su
+                        dependencia."
+                    </div>
+                    <div class="tesis-grid">
+                        <div class="tesis-item">📉 Fin del sistema fiat y erosión del dólar</div>
+                        <div class="tesis-item">🥇 Resurgimiento del oro como activo monetario</div>
+                        <div class="tesis-item">🌏 Desdolarización impulsada por BRICS</div>
+                        <div class="tesis-item">🤖 IA como campo de batalla económico</div>
+                        <div class="tesis-item">₿ Cripto regulada como activo digital soberano</div>
+                    </div>
+                </div>
+
+                <div class="doctrine-section">
+                    <h3>🎯 FASES DEL ARCA</h3>
+                    <div class="phases-timeline">
+                        <div class="phase active">
+                            <div class="phase-period">Fase 1: 2025-2026</div>
+                            <div class="phase-goal">Hábito y base patrimonial</div>
+                            <div class="phase-config">Cripto 5%, Oro 20%</div>
+                        </div>
+                        <div class="phase">
+                            <div class="phase-period">Fase 2: 2026-2027</div>
+                            <div class="phase-goal">Expansión estratégica</div>
+                            <div class="phase-config">Cripto 10%, metales (REMX, SLV)</div>
+                        </div>
+                        <div class="phase">
+                            <div class="phase-period">Fase 3: 2028+</div>
+                            <div class="phase-goal">Independencia y flujo pasivo</div>
+                            <div class="phase-config">Dividendos y energía</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-save" id="save-doctrine">💾 Guardar Progreso</button>
+            </div>
+
+            <!-- TAB 7: GUÍA DE USO -->
+            <div class="tab-content" id="guia">
+                <div class="hud">
+                    <span class="hud-title">GUÍA DE USO</span>
+                    <span class="separator">|</span>
+                    <span>ARCA FINANCIERA GAROSSA v2.0</span>
+                </div>
+
+                <div class="guide-container">
+                    <div class="guide-section">
+                        <h3>🎯 Command Center</h3>
+                        <div class="guide-card">
+                            <p><strong>Tu dashboard principal.</strong> Muestra un resumen de:</p>
+                            <ul>
+                                <li>💰 <strong>Patrimonio Neto:</strong> Activos menos deudas</li>
+                                <li>🛡️ <strong>Fondo de Emergencia:</strong> DiDi + Nu (meta: $60,000)</li>
+                                <li>📈 <strong>Rendimiento Fintech:</strong> Intereses anuales proyectados</li>
+                                <li>📉 <strong>Deuda Pendiente:</strong> Total de deudas sin pagar</li>
+                                <li>🤖 <strong>Grid Bot:</strong> Ganancia del bot de trading</li>
+                            </ul>
+                            <p class="guide-tip">💡 Las "Próximas Acciones" se llenan automáticamente desde Doctrina.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>💳 Fintech</h3>
+                        <div class="guide-card">
+                            <p>Gestiona tus cuentas de alto rendimiento:</p>
+                            <ul>
+                                <li>🟠 <strong>DiDi:</strong> 16% en los primeros $10K, 8.5% después</li>
+                                <li>🟣 <strong>Nu:</strong> 15% en los primeros $25K, 7.25% después</li>
+                                <li>🔵 <strong>MercadoPago:</strong> 13% hasta $25K (sin rendimiento después)</li>
+                            </ul>
+                            <p class="guide-tip">💡 Los cambios se guardan automáticamente al escribir.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>📉 Deudas</h3>
+                        <div class="guide-card">
+                            <p>Controla tus obligaciones financieras:</p>
+                            <ul>
+                                <li>✅ Marca como "Pagada" cuando liquides una deuda</li>
+                                <li>🔄 Usa "Reiniciar Ciclo" para nuevo mes</li>
+                                <li>⏰ Los contadores muestran días restantes</li>
+                            </ul>
+                            <p class="guide-tip">💡 Las deudas pagadas se tachan visualmente.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>🤖 Grid Bot</h3>
+                        <div class="guide-card">
+                            <p>Monitorea tu bot de trading en BTC/USDT:</p>
+                            <ul>
+                                <li>📊 Visualización triangular de órdenes</li>
+                                <li>📈 Métricas de rentabilidad en tiempo real</li>
+                                <li>⚙️ Ajustes adaptativos según volatilidad</li>
+                            </ul>
+                            <p class="guide-tip">💡 Requiere conexión activa al servidor del bot.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>📈 Portafolio</h3>
+                        <div class="guide-card">
+                            <p>Estrategia de inversión a largo plazo:</p>
+                            <ul>
+                                <li>🌍 <strong>VT:</strong> 33% - Mercado global</li>
+                                <li>💻 <strong>QQQ:</strong> 24% - Tecnología</li>
+                                <li>🥇 <strong>IAU:</strong> 20% - Oro</li>
+                                <li>🌏 <strong>VWO:</strong> 18% - Mercados emergentes</li>
+                                <li>₿ <strong>Crypto:</strong> 5% - Bitcoin/altcoins</li>
+                            </ul>
+                            <p class="guide-tip">💡 Ajusta tu contribución mensual según tu flujo.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>✅ Doctrina</h3>
+                        <div class="guide-card">
+                            <p>Tu lista de tareas financieras:</p>
+                            <ul>
+                                <li>📋 Checklist de acciones pendientes</li>
+                                <li>📜 Reglas operativas del ARCA</li>
+                                <li>🏛️ Manifiesto y filosofía de inversión</li>
+                                <li>🎯 Fases del plan financiero</li>
+                            </ul>
+                            <p class="guide-tip">💡 Los items desmarcados aparecen en "Próximas Acciones".</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-section full-width">
+                        <h3>⚡ Tips Rápidos</h3>
+                        <div class="tips-grid">
+                            <div class="tip-card">
+                                <span class="tip-icon">💾</span>
+                                <span class="tip-text">Auto-guardado activo en todos los inputs</span>
+                            </div>
+                            <div class="tip-card">
+                                <span class="tip-icon">🔄</span>
+                                <span class="tip-text">Los datos persisten al recargar</span>
+                            </div>
+                            <div class="tip-card">
+                                <span class="tip-icon">📱</span>
+                                <span class="tip-text">Funciona en móvil y desktop</span>
+                            </div>
+                            <div class="tip-card">
+                                <span class="tip-icon">🔗</span>
+                                <span class="tip-text">Todas las pestañas están sincronizadas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

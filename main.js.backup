@@ -1,0 +1,162 @@
+/**
+ * VANTAGE // QUANTUM CLIENT
+ * Version: 2.0
+ */
+
+const socket = io();
+
+// ===== TAB SWITCHING =====
+document.addEventListener('DOMContentLoaded', () => {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active from all tabs and contents
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Add active to clicked tab and corresponding content
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+});
+
+// DOM Elements - UPDATED FOR 5-TAB DASHBOARD
+const ui = {
+    // Tab 1: Overview - Financial Panel
+    freeUSDT: document.getElementById('free-usdt'),
+    lockedUSDT: document.getElementById('locked-usdt'),
+    btcAmount: document.getElementById('btc-amount'),
+    btcValue: document.getElementById('btc-value'),
+    totalEquity: document.getElementById('total-equity'),
+    profitTotal: document.getElementById('profit-total'),
+    profitPercent: document.getElementById('profit-percent'),
+    activeLoops: document.getElementById('active-loops'),
+    buyCount: document.getElementById('buy-count'),
+    sellCount: document.getElementById('sell-count'),
+
+    // Tab 1: Overview - Market Intel Snapshot
+    rsiValue: document.getElementById('rsi-value'),
+    emaValue: document.getElementById('ema-value'),
+    trendValue: document.getElementById('trend-value'),
+    volatilityValue: document.getElementById('volatility-value'),
+
+    // Tab 1: Overview - HUD & Controls
+    hudStatus: document.getElementById('hud-status'),
+    hudDetail: document.getElementById('hud-detail'),
+    modeToggle: document.getElementById('mode-toggle'),
+    resetGrid: document.getElementById('reset-grid'),
+    triangleSvg: document.getElementById('triangle-svg'),
+
+    // Sidebar
+    logFeed: document.getElementById('log-feed')
+};
+
+// ===== LOGGING SYSTEM =====
+function log(type, msg, style = '') {
+    if (!ui.logFeed) return;
+
+    const time = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${style}`;
+    entry.innerHTML = `<span class="log-time">${time}</span><span class="log-type">[${type}]</span> ${msg}`;
+
+    ui.logFeed.insertBefore(entry, ui.logFeed.firstChild);
+
+    // Keep only last 50 logs
+    while (ui.logFeed.children.length > 50) {
+        ui.logFeed.removeChild(ui.logFeed.lastChild);
+    }
+}
+
+// ===== SOCKET EVENTS =====
+
+socket.on('connect', () => {
+    log("NETWORK", "QUANTUM LINK ESTABLISHED", "success");
+});
+
+socket.on('log_history', (logs) => {
+    logs.forEach(entry => {
+        const time = new Date(entry.timestamp).toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${entry.style || ''}`;
+        logEntry.innerHTML = `<span class="log-time">${time}</span><span class="log-type">[${entry.type}]</span> ${entry.msg}`;
+        ui.logFeed.appendChild(logEntry);
+    });
+});
+
+socket.on('log_message', (data) => {
+    log(data.type, data.msg, data.style);
+});
+
+// Financial Update (Tab 1 Overview + Tab 3 Performance)
+socket.on('financial_update', (data) => {
+    // Tab 1: Overview - Financial Panel
+    if (ui.freeUSDT) ui.freeUSDT.innerText = `$${data.freeUSDT.toFixed(2)}`;
+    if (ui.lockedUSDT) ui.lockedUSDT.innerText = `$${data.lockedUSDT.toFixed(2)}`;
+    if (ui.btcAmount) ui.btcAmount.innerText = data.freeBTC.toFixed(6);
+    if (ui.btcValue) ui.btcValue.innerText = data.btcValueUSDT.toFixed(2);
+
+    if (ui.totalEquity) {
+        ui.totalEquity.innerText = `$${data.totalEquity.toFixed(2)}`;
+        ui.totalEquity.style.color = data.totalEquity > 100 ? 'var(--accent-green)' : '#fff';
+    }
+
+    if (ui.profitTotal) {
+        ui.profitTotal.innerText = `$${data.profit.toFixed(2)}`;
+        ui.profitTotal.style.color = data.profit > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+    }
+    if (ui.profitPercent) ui.profitPercent.innerText = data.profitPercent.toFixed(2);
+
+    if (ui.activeLoops) ui.activeLoops.innerText = data.activeOrders.total;
+    if (ui.buyCount) ui.buyCount.innerText = data.activeOrders.buy;
+    if (ui.sellCount) ui.sellCount.innerText = data.activeOrders.sell;
+});
+
+// Market Analysis Update (Tab 1 Intel Snapshot)
+socket.on('analysis_update', (data) => {
+    if (ui.rsiValue) ui.rsiValue.innerText = data.rsi.toFixed(1);
+    if (ui.emaValue) ui.emaValue.innerText = `$${data.ema.toFixed(0)}`;
+
+    if (ui.trendValue) {
+        ui.trendValue.innerText = data.trend;
+        ui.trendValue.style.color = data.trend === 'BULLISH' ? 'var(--accent-green)' : 'var(--accent-red)';
+    }
+
+    if (ui.volatilityValue) {
+        ui.volatilityValue.innerText = data.volatility;
+        ui.volatilityValue.style.color = data.volatility === 'HIGH' ? 'var(--accent-red)' :
+            (data.volatility === 'LOW' ? 'var(--accent-green)' : '#fff');
+    }
+});
+
+// HUD Update
+socket.on('hud_update', (data) => {
+    if (ui.hudStatus) ui.hudStatus.innerText = data.status;
+    if (ui.hudDetail) ui.hudDetail.innerText = data.detail;
+});
+
+// Grid State (for visualization)
+socket.on('grid_state', (data) => {
+    // Can add grid visualization here later
+    console.log('Grid state:', data);
+});
+
+// ===== CONTROLS =====
+if (ui.modeToggle) {
+    ui.modeToggle.addEventListener('click', () => {
+        socket.emit('toggle_mode');
+    });
+}
+
+if (ui.resetGrid) {
+    ui.resetGrid.addEventListener('click', () => {
+        if (confirm('¿Estás seguro? Esto cancelará todas las órdenes y reseteará profit.')) {
+            socket.emit('reset_grid');
+            log("SYSTEM", "GRID RESET INITIATED", "error");
+        }
+    });
+}

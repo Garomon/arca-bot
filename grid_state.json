@@ -1,0 +1,153 @@
+{
+  "balance": {
+    "usdt": 1.79099869,
+    "btc": 0.00050897
+  },
+  "currentPrice": 89431.82,
+  "entryPrice": 89431.82,
+  "activeOrders": [
+    {
+      "id": "53483955821",
+      "side": "buy",
+      "price": 88565.95518292443,
+      "amount": 0.00014505488404306817,
+      "level": -2,
+      "status": "open",
+      "timestamp": 1765050642341
+    },
+    {
+      "id": "53483956610",
+      "side": "sell",
+      "price": 89864.75240853778,
+      "amount": 0.00016089831503223782,
+      "level": 1,
+      "status": "open",
+      "timestamp": 1765050651186
+    },
+    {
+      "id": "53483956653",
+      "side": "sell",
+      "price": 90297.68481707557,
+      "amount": 0.00014365048546728364,
+      "level": 2,
+      "status": "open",
+      "timestamp": 1765050651831
+    },
+    {
+      "id": "53483956726",
+      "side": "sell",
+      "price": 90730.61722561336,
+      "amount": 0.0001264026559023294,
+      "level": 3,
+      "status": "open",
+      "timestamp": 1765050652227
+    },
+    {
+      "id": "53483956769",
+      "side": "sell",
+      "price": 91163.54963415115,
+      "amount": 0.00010915482633737516,
+      "level": 4,
+      "status": "open",
+      "timestamp": 1765050653049
+    }
+  ],
+  "filledOrders": [],
+  "totalProfit": 0,
+  "initialCapital": 108.7459938609,
+  "isLive": true,
+  "startTime": 1765050636882,
+  "marketCondition": {
+    "rsi": 36.73,
+    "trend": "BEARISH",
+    "isOverbought": false,
+    "isOversold": false,
+    "bandwidth": 0.007283815013447798,
+    "adaptiveRSI": {
+      "overbought": 65,
+      "oversold": 35
+    },
+    "signalScore": 26.635,
+    "recommendation": "BUY",
+    "macd": {
+      "line": -192.76968083718384,
+      "signal": "BEARISH",
+      "crossing": "NONE"
+    },
+    "stochRSI": 3.747980613893366,
+    "volume": {
+      "current": 673.76948,
+      "avg": 366.32718250000005,
+      "ratio": 1.8392560317305964,
+      "signal": "HIGH"
+    }
+  },
+  "marketRegime": "BEAR",
+  "emergencyStop": false,
+  "maxDrawdown": 2.5250984358213873,
+  "lastRebalance": {
+    "timestamp": 1765050636267,
+    "triggers": [
+      "VOLATILITY"
+    ]
+  },
+  "lastFillTime": null,
+  "lastVolatility": null,
+  "lastRegime": null,
+  "compositeSignal": {
+    "score": 51.4,
+    "recommendation": "HOLD",
+    "sizeMultiplier": 0.8,
+    "reasons": [
+      "RSI low-ish (+5)",
+      "MTF aligned DOWN (-10)",
+      "Extreme Fear 23 (+15)",
+      "Weekend: reduced confidence"
+    ],
+    "components": {
+      "fearGreed": {
+        "value": 23,
+        "classification": "Extreme Fear",
+        "timestamp": 1765050754209
+      },
+      "funding": {
+        "rate": -0.0018219999999999998,
+        "signal": "NEUTRAL",
+        "timestamp": 1765050754194
+      },
+      "btcDominance": {
+        "value": 57.01678819306999,
+        "signal": "BTC_FLIGHT_TO_SAFETY",
+        "timestamp": 1765050754125
+      },
+      "openInterest": {
+        "current": 87971.414,
+        "change": 0.017107345963943622,
+        "signal": "STABLE",
+        "timestamp": 1765050754188
+      },
+      "timing": {
+        "isWeekend": true,
+        "isNYOpenClose": false,
+        "isAsianSession": false,
+        "recommendation": "REDUCE_SIZE"
+      },
+      "technicals": {
+        "rsi": 36.73,
+        "macd": {
+          "line": -192.76968083718384,
+          "signal": "BEARISH",
+          "crossing": "NONE"
+        },
+        "multiTF": {
+          "trend1h": "BEAR",
+          "trend4h": "BEAR",
+          "trend1d": "BEAR",
+          "confidence": "HIGH",
+          "direction": "DOWN"
+        }
+      }
+    },
+    "timestamp": 1765050895346
+  }
+}
