@@ -439,6 +439,26 @@ async function placeOrder(level) {
         return;
     }
 
+    // PHASE 4.5: WALL PROTECTION (Order Book Intelligence)
+    try {
+        const pressure = await fetchOrderBookPressure();
+        // Don't BUY if there is a massive SELL WALL (Ratio < 0.3)
+        if (level.side === 'buy' && pressure.ratio < 0.3) {
+            log('SMART', `🧱 SELL WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
+            logDecision('BLOCKED_BY_WALL', [`Sell Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for resistance to clear'], { level });
+            return;
+        }
+        // Don't SELL if there is a massive BUY WALL (Ratio > 3.0) - Wait for price to go up
+        if (level.side === 'sell' && pressure.ratio > 3.0) {
+            log('SMART', `🚀 BUY WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying SELL (Price might rise).`, 'warning');
+            logDecision('BLOCKED_BY_WALL', [`Buy Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for price rise'], { level });
+            return;
+        }
+    } catch (e) {
+        // Ignore error and proceed if order book fails
+        console.log('Wall check skipped');
+    }
+
     // PHASE 5: SMART BALANCE CHECK (New Intelligence)
     if (level.side === 'buy') {
         const balance = await binance.fetchBalance();
@@ -619,7 +639,9 @@ function monitorOrders() {
                 price: analysis.price,
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
+                pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' }, // Emit Pressure
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
+                signalScore: state.marketCondition.signalScore,
                 regime: state.marketRegime,
                 // Multi-timeframe data
                 multiTF: multiTF,
@@ -919,7 +941,8 @@ const externalDataCache = {
     fearGreed: { value: null, timestamp: 0 },
     fundingRate: { value: null, timestamp: 0 },
     btcDominance: { value: null, timestamp: 0 },
-    openInterest: { value: null, timestamp: 0 }
+    openInterest: { value: null, timestamp: 0 },
+    orderBook: { value: null, timestamp: 0 }
 };
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -1107,6 +1130,44 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
         reasons.push('MTF aligned DOWN (-10)');
     }
 
+    // ORDER BOOK PRESSURE (Binance Spot)
+    async function fetchOrderBookPressure() {
+        if (Date.now() - externalDataCache.orderBook.timestamp < 10000) { // 10s Cache
+            return externalDataCache.orderBook.value;
+        }
+
+        try {
+            // Fetch top 50 levels (Depth 50)
+            const orderBook = await binance.fetchOrderBook(CONFIG.pair, 50);
+            const bids = orderBook.bids;
+            const asks = orderBook.asks;
+
+            // Calculate volume sum
+            const bidVol = bids.reduce((acc, bid) => acc + bid[1], 0);
+            const askVol = asks.reduce((acc, ask) => acc + ask[1], 0);
+
+            const ratio = askVol > 0 ? bidVol / askVol : 1.0;
+            // Ratio > 1.0 = More Bids (Support) = BULLISH
+            // Ratio < 1.0 = More Asks (Resistance) = BEARISH
+
+            const pressure = {
+                bidVol,
+                askVol,
+                ratio,
+                signal: ratio > 1.5 ? 'BULLISH' : (ratio < 0.66 ? 'BEARISH' : 'NEUTRAL'),
+                timestamp: Date.now()
+            };
+
+            externalDataCache.orderBook = { value: pressure, timestamp: Date.now() };
+            log('INTEL', `Order Book Pressure: ${ratio.toFixed(2)}x (${pressure.signal}) | Bids: ${bidVol.toFixed(0)} vs Asks: ${askVol.toFixed(0)}`, 'info');
+            return pressure;
+
+        } catch (e) {
+            console.error('>> [ERROR] Order Book fetch failed:', e.message);
+            return { ratio: 1.0, signal: 'NEUTRAL', bidVol: 0, askVol: 0 };
+        }
+    }
+
     // === SENTIMENT INDICATORS (30% weight) ===
 
     // Fear & Greed (0-15 points)
@@ -1155,6 +1216,22 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
     } else if (openInterest.signal === 'OI_DECREASING' && score < 50) {
         score += 5; // OI falling with bearish signals = capitulation
         reasons.push('OI decreasing, possible bottom (+5)');
+    }
+
+    // === ORDER BOOK PRESSURE (New Intelligence) ===
+    const pressure = await fetchOrderBookPressure();
+    if (pressure.ratio > 2.0) { // 2x more buyers
+        score += 10;
+        reasons.push(`Strong Buy Wall (${pressure.ratio.toFixed(1)}x) (+10)`);
+    } else if (pressure.ratio < 0.5) { // 2x more sellers
+        score -= 10;
+        reasons.push(`Strong Sell Wall (${pressure.ratio.toFixed(1)}x) (-10)`);
+    } else if (pressure.ratio > 1.2) {
+        score += 5;
+        reasons.push('Buy Pressure (+5)');
+    } else if (pressure.ratio < 0.8) {
+        score -= 5;
+        reasons.push('Sell Pressure (-5)');
     }
 
     // === TIMING ADJUSTMENTS (10% weight) ===

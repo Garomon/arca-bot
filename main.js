@@ -284,6 +284,16 @@ socket.on('analysis_update', (data) => {
             (data.volatility === 'LOW' ? '#00ff9d' : '#fff');
     }
 
+    if (data.pressure) {
+        const pVal = document.getElementById('pressure-value');
+        if (pVal) {
+            pVal.innerText = `${data.pressure.ratio.toFixed(2)}x`;
+            // Red if ratio < 0.6 (Sell Pressure), Green if > 1.5 (Buy Pressure)
+            pVal.style.color = data.pressure.ratio > 1.2 ? '#00ff9d' :
+                (data.pressure.ratio < 0.8 ? '#ff3b3b' : '#fff');
+        }
+    }
+
     // Tab 2: Full Market Intel
     if (ui.intelRsi) ui.intelRsi.innerText = data.rsi.toFixed(1);
     if (ui.intelEma) ui.intelEma.innerText = `$${data.ema.toFixed(2)}`;
