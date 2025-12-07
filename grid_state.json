@@ -1,75 +1,202 @@
 {
   "balance": {
-    "usdt": 19.55736482,
-    "btc": 0.00026882
+    "usdt": 2.06774762,
+    "btc": 0.00005882
   },
-  "currentPrice": 89927.42,
-  "entryPrice": 89927.42,
+  "currentPrice": 89593.45,
+  "entryPrice": 89593.45,
   "activeOrders": [
     {
-      "id": "53530003459",
+      "id": "53534838871",
       "side": "buy",
-      "price": 88653.84806158708,
-      "amount": 0.0002204790918922402,
-      "level": -1,
-      "status": "open",
-      "timestamp": 1765145082477
-    },
-    {
-      "id": "53530003936",
-      "side": "buy",
-      "price": 87380.27612317415,
-      "amount": 0.00014564221670259136,
+      "price": 86880.88626660031,
+      "amount": 0.00014618108944116747,
       "level": -2,
       "status": "open",
-      "timestamp": 1765145083380
+      "timestamp": 1765149015532
     },
     {
-      "id": "53530005168",
+      "id": "53534839360",
       "side": "sell",
-      "price": 91200.99193841293,
-      "amount": 0.00021735661840817044,
+      "price": 90922.82186669984,
+      "amount": 0.00021242588919626813,
       "level": 1,
       "status": "open",
-      "timestamp": 1765145084209
+      "timestamp": 1765149016546
     },
     {
-      "id": "53530005352",
+      "id": "53534839634",
       "side": "sell",
-      "price": 92474.56387682585,
-      "amount": 0.00014151698236937742,
+      "price": 92270.13373339968,
+      "amount": 0.0001417836482992483,
       "level": 2,
       "status": "open",
-      "timestamp": 1765145084876
+      "timestamp": 1765149017155
+    },
+    {
+      "id": "53534839781",
+      "side": "buy",
+      "price": 88246.13813330016,
+      "amount": 0.00021566695801532315,
+      "level": -1,
+      "status": "open",
+      "timestamp": 1765149017906
+    },
+    {
+      "id": "53534839783",
+      "side": "buy",
+      "price": 88246.13813330016,
+      "amount": 0.00021566695801532315,
+      "level": -1,
+      "status": "open",
+      "timestamp": 1765149017919
+    },
+    {
+      "id": "53534849965",
+      "side": "sell",
+      "price": 90940.76186669985,
+      "amount": 0.00021242374490332454,
+      "level": 1,
+      "status": "open",
+      "timestamp": 1765149019589
     }
   ],
-  "filledOrders": [],
-  "totalProfit": 0,
+  "filledOrders": [
+    {
+      "id": "53503565532",
+      "side": "sell",
+      "price": 90629.16,
+      "amount": 0.00012,
+      "timestamp": 1765128242114,
+      "profit": 0.15919702576947944,
+      "status": "filled"
+    },
+    {
+      "id": "53503565502",
+      "side": "sell",
+      "price": 90300.74,
+      "amount": 0.00013,
+      "timestamp": 1765127941924,
+      "profit": 0.17183847526390314,
+      "status": "filled"
+    },
+    {
+      "id": "53503565435",
+      "side": "sell",
+      "price": 89972.32,
+      "amount": 0.00015,
+      "timestamp": 1765127770051,
+      "profit": 0.19755404532023485,
+      "status": "filled"
+    },
+    {
+      "id": "53503565376",
+      "side": "sell",
+      "price": 89643.9,
+      "amount": 0.00016,
+      "timestamp": 1765123045197,
+      "profit": 0.20995512199938943,
+      "status": "filled"
+    },
+    {
+      "id": "53503563200",
+      "side": "buy",
+      "price": 88658.64,
+      "amount": 0.00015,
+      "timestamp": 1765113774796,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53412734416",
+      "side": "buy",
+      "price": 88667.3,
+      "amount": 0.0001,
+      "timestamp": 1764952750592,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53412734383",
+      "side": "buy",
+      "price": 89559.3,
+      "amount": 0.00013,
+      "timestamp": 1764950865144,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53412734354",
+      "side": "buy",
+      "price": 90451.3,
+      "amount": 0.00017,
+      "timestamp": 1764942097232,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53339398223",
+      "side": "buy",
+      "price": 92810.47,
+      "amount": 0.00017,
+      "timestamp": 1764827453271,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53339397762",
+      "side": "buy",
+      "price": 93091.43,
+      "amount": 0.00018,
+      "timestamp": 1764825033583,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53339397572",
+      "side": "buy",
+      "price": 93372.39,
+      "amount": 0.00019,
+      "timestamp": 1764821057381,
+      "profit": 0,
+      "status": "filled"
+    },
+    {
+      "id": "53335283231",
+      "side": "buy",
+      "price": 93219.51,
+      "amount": 0.00009,
+      "timestamp": 1764812828048,
+      "profit": 0,
+      "status": "filled"
+    }
+  ],
+  "totalProfit": 0.7385446683530069,
   "initialCapital": 108.7459938609,
   "isLive": true,
-  "startTime": 1765145079938,
+  "startTime": 1765149015530,
   "marketCondition": {
-    "rsi": 43.1,
+    "rsi": 43.71,
     "trend": "BEARISH",
     "isOverbought": false,
     "isOversold": false,
-    "bandwidth": 0.04371849235222807,
+    "bandwidth": 0.04277547060630585,
     "adaptiveRSI": {
       "overbought": 70,
       "oversold": 30
     },
-    "signalScore": 13.45,
+    "signalScore": 13.145,
     "recommendation": "HOLD",
     "macd": {
-      "line": 269.59652302626637,
+      "line": 201.889655510211,
       "signal": "BULLISH",
       "crossing": "NONE"
     },
-    "stochRSI": 37.552024214907306,
+    "stochRSI": 38.70601589103292,
     "volume": {
-      "current": 116.62963,
-      "avg": 527.3757494999998,
-      "ratio": 0.22115091585188648,
+      "current": 128.50346,
+      "avg": 595.622771,
+      "ratio": 0.21574638555919146,
       "signal": "LOW"
     }
   },
@@ -77,7 +204,7 @@
   "emergencyStop": false,
   "maxDrawdown": 2.7826484699479357,
   "lastRebalance": {
-    "timestamp": 1765145079026,
+    "timestamp": 1765149007106,
     "triggers": [
       "VOLATILITY"
     ]
@@ -93,41 +220,40 @@
       "RSI low-ish (+5)",
       "MTF aligned DOWN (-10)",
       "Extreme Fear 20 (+15)",
-      "Weekend: reduced confidence",
-      "NY session: expect volatility"
+      "Weekend: reduced confidence"
     ],
     "components": {
       "fearGreed": {
         "value": 20,
         "classification": "Extreme Fear",
-        "timestamp": 1765145049246
+        "timestamp": 1765148914098
       },
       "funding": {
         "rate": 0.0052120000000000005,
         "signal": "NEUTRAL",
-        "timestamp": 1765145049164
+        "timestamp": 1765148914091
       },
       "btcDominance": {
-        "value": 57.02596767726374,
+        "value": 57.11774569731441,
         "signal": "BTC_FLIGHT_TO_SAFETY",
-        "timestamp": 1765145049094
+        "timestamp": 1765148914021
       },
       "openInterest": {
-        "current": 87314.278,
-        "change": -0.14092123589631783,
+        "current": 86952.347,
+        "change": 0.2682053086862782,
         "signal": "STABLE",
-        "timestamp": 1765145049221
+        "timestamp": 1765148914085
       },
       "timing": {
         "isWeekend": true,
-        "isNYOpenClose": true,
-        "isAsianSession": false,
+        "isNYOpenClose": false,
+        "isAsianSession": true,
         "recommendation": "REDUCE_SIZE"
       },
       "technicals": {
-        "rsi": 43.1,
+        "rsi": 43.71,
         "macd": {
-          "line": 269.59652302626637,
+          "line": 201.889655510211,
           "signal": "BULLISH",
           "crossing": "NONE"
         },
@@ -140,6 +266,7 @@
         }
       }
     },
-    "timestamp": 1765145128971
-  }
+    "timestamp": 1765149184738
+  },
+  "lastSyncTime": 1765149095230
 }

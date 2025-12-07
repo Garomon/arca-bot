@@ -323,8 +323,9 @@ async function initializeGrid(forceReset = false) {
     if (forceReset) {
         log('SYSTEM', 'FORCING GRID RESET');
         await cancelAllOrders();
-        state.totalProfit = 0;
-        state.filledOrders = [];
+        // Do NOT wipe profit/history on rebalance
+        // state.totalProfit = 0; 
+        // state.filledOrders = [];
         state.startTime = Date.now();
     }
 
@@ -583,7 +584,19 @@ function monitorOrders() {
                 state.lastRebalance = { timestamp: Date.now(), triggers: ['VOLATILITY'] };
                 await initializeGrid(true);
             } else {
-                // PHASE 3: Intelligent Rebalancing - TEMPORARILY DISABLED (too aggressive)
+
+                // --- AUTO-SYNC (Self-Healing) ---
+                // Every 5 minutes, ensure we are perfectly synced with exchange
+                const lastSync = state.lastSyncTime || 0;
+                if (Date.now() - lastSync > 5 * 60 * 1000) {
+                    log('SYSTEM', 'AUTO-SYNC: Validating state with exchange...', 'info');
+                    await syncWithExchange();
+                    state.lastSyncTime = Date.now();
+                }
+
+                // PHASE 3: Intelligent Rebalancing - TEMPORARILY DISABLED
+                // ... (rest of code)
+
                 // const rebalanceTriggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF);
                 // if (rebalanceTriggers && rebalanceTriggers.length > 0) {
                 //     log('REBALANCE', `Triggers: ${rebalanceTriggers.join(', ')}`, 'warning');
@@ -1425,8 +1438,92 @@ async function syncWithExchange() {
             log('SYNC', 'STATE IS IN SYNC');
         }
 
+        // 3. Sync recent history (for UI completeness)
+        await syncHistoricalTrades();
+
     } catch (e) {
         log('ERROR', `Sync Failed: ${e.message}`, 'error');
+    }
+}
+
+async function syncHistoricalTrades() {
+    try {
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 50); // Last 50 trades
+        if (trades.length > 0) log('DEBUG', `Fetched ${trades.length} trades. Verifying against known orders...`);
+        let addedCount = 0;
+
+        // Ensure filledOrders array exists
+        if (!state.filledOrders) state.filledOrders = [];
+
+        // AUTO-REPAIR: Remove invalid entries (ID is null/undefined)
+        const initialLength = state.filledOrders.length;
+        state.filledOrders = state.filledOrders.filter(o => o.id);
+        if (state.filledOrders.length < initialLength) {
+            log('SYSTEM', `Cleaned ${initialLength - state.filledOrders.length} corrupt history entries.`, 'warning');
+        }
+
+        const knownIds = new Set(state.filledOrders.map(o => o.id));
+
+        for (const trade of trades) {
+            // Fix ID access: CCXT sometimes uses .order, .orderId, or .id
+            const tradeId = trade.orderId || trade.order || trade.id;
+
+            // Check if we know this trade
+            if (!knownIds.has(tradeId)) {
+
+                // Estimate Profit (Heuristic for Grid Bot)
+                // We assume Sells are closing profitable grid levels (~gridSpacing)
+                // Buys are entries, so 0 realized profit.
+                let estimatedProfit = 0;
+                if (trade.side === 'sell') {
+                    // DEBUG: Log calculation details
+                    log('DEBUG', `Calc Profit: ${trade.amount} * ${trade.price} * ${CONFIG.gridSpacing}`);
+                    estimatedProfit = (trade.amount * trade.price) * CONFIG.gridSpacing;
+                    state.totalProfit += estimatedProfit; // Add to global counter
+                }
+
+                // Add to history
+                state.filledOrders.push({
+                    id: tradeId,
+                    side: trade.side,
+                    price: trade.price,
+                    amount: trade.amount,
+                    timestamp: trade.timestamp,
+                    profit: estimatedProfit,
+                    status: 'filled' // Mark as filled
+                });
+                knownIds.add(tradeId); // Prevent duplicates in this loop
+                addedCount++;
+            } else {
+                // BACKFILL CHECK: If we know it, but profit is 0 and it's a SELL, fix it!
+                const existingOrder = state.filledOrders.find(o => o.id === tradeId);
+                if (existingOrder && existingOrder.side === 'sell' && existingOrder.profit === 0) {
+                    const estimatedProfit = (trade.amount * trade.price) * CONFIG.gridSpacing;
+                    existingOrder.profit = estimatedProfit;
+                    state.totalProfit += estimatedProfit;
+                    log('SYNC', `REPAIRED history for Sell ${trade.orderId}: +$${estimatedProfit.toFixed(4)}`, 'success');
+                    addedCount++; // Count as an update so we save state
+                }
+            }
+        }
+
+        if (addedCount > 0) {
+            // Sort by date desc
+            state.filledOrders.sort((a, b) => b.timestamp - a.timestamp);
+            // Keep size manageable
+            if (state.filledOrders.length > 200) {
+                state.filledOrders = state.filledOrders.slice(0, 200);
+            }
+            log('SYNC', `Imported ${addedCount} historical trades from exchange`, 'success');
+            saveState();
+        }
+
+        // Emit updated history to UI (Debugging Payload)
+        if (state.filledOrders) {
+            io.emit('debug_trades', state.filledOrders);
+        }
+    } catch (e) {
+        console.error('>> [WARN] History sync failed (API permission?):', e.message);
     }
 }
 
@@ -1514,6 +1611,9 @@ server.listen(3000, async () => {
         // Send History
         socket.emit('log_history', logBuffer);
         socket.emit('init_state', state);
+        if (state.filledOrders) {
+            socket.emit('debug_trades', state.filledOrders);
+        }
         emitGridState();
 
         socket.on('reset_grid', () => {

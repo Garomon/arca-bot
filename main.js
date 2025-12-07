@@ -325,6 +325,48 @@ socket.on('analysis_update', (data) => {
     drawTriangle({ price: data.price, orders: [] });
 });
 
+// Listener for Debug Transaction Log
+socket.on('debug_trades', (trades) => {
+    console.log('Received debug_trades:', trades); // Debug: Check array content
+    const tbody = document.getElementById('transaction-log-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = ''; // Clear previous
+
+    if (!trades || !Array.isArray(trades) || trades.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 10px;">No transaction history found (Array is empty)</td></tr>';
+        return;
+    }
+
+    trades.forEach(t => {
+        try {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid rgba(255,255,255,0.02)';
+
+            const isBuy = (t.side || '').toLowerCase() === 'buy';
+            const profitClass = (t.profit && t.profit > 0) ? 'text-success' : 'text-muted';
+            const dateStr = t.timestamp ? new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A';
+            const shortId = t.id ? (t.id.toString().length > 6 ? '...' + t.id.toString().slice(-6) : t.id) : '?';
+
+            const sideBadge = isBuy
+                ? '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="width:50px; font-weight:500;">BUY</span>'
+                : '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="width:50px; font-weight:500;">SELL</span>';
+
+            row.innerHTML = `
+                <td class="ps-3 text-secondary" style="vertical-align: middle;">${dateStr}</td>
+                <td class="text-muted" title="${t.id}" style="vertical-align: middle; cursor: help;">${shortId}</td>
+                <td class="text-center" style="vertical-align: middle;">${sideBadge}</td>
+                <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${parseFloat(t.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
+                <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(t.profit || 0).toFixed(4)}</td>
+            `;
+            tbody.appendChild(row);
+        } catch (e) {
+            console.error('Error rendering row:', e);
+        }
+    });
+});
+
 // ULTIMATE INTELLIGENCE - Composite Signal Display
 socket.on('composite_signal', (data) => {
     // Update signal score
