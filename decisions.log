@@ -52,3 +52,1155 @@
   Details: {"orderId":"53483956726","level":3,"worthCheck":{"worth":true,"gross":0.05472380626536861,"fees":0.022608839140358123,"net":0.03211496712501048,"profitPercent":"0.284"}}
 [2025-12-06T19:50:53.048Z] ORDER_PLACED_SELL: Price: $91163.55 | Amount: 0.000109 BTC | Composite Score: 51 | Regime: BEAR | Price: $89432 | Score: 51
   Details: {"orderId":"53483956769","level":4,"worthCheck":{"worth":true,"gross":0.04725666186976372,"fees":0.019523829562270792,"net":0.027732832307492926,"profitPercent":"0.284"}}
+[2025-12-07T03:37:30.643Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89600 | Score: 51
+  Details: {"level":{"side":"buy","price":"89232.946779188146981","amount":"0.00016418269304039235593","level":-1}}
+[2025-12-07T03:37:31.001Z] ORDER_PLACED_BUY: Price: $88865.91 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89600 | Score: 51
+  Details: {"orderId":"53494516306","level":-2,"worthCheck":{"worth":true,"gross":0.05510964748336184,"fees":0.026906683277301904,"net":0.028202964206059937,"profitPercent":"0.210"}}
+[2025-12-07T03:37:35.094Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89600 | Score: 51
+  Details: {"level":{"side":"buy","price":"88498.880337564440943","amount":"0.00013599877344575370467","level":-3}}
+[2025-12-07T03:37:39.626Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89600 | Score: 51
+  Details: {"level":{"side":"buy","price":"88131.847116752587924","amount":"0.00012173075184236213621","level":-4}}
+[2025-12-07T03:37:40.157Z] ORDER_PLACED_SELL: Price: $89967.01 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89600 | Score: 51
+  Details: {"orderId":"53494518124","level":1,"worthCheck":{"worth":true,"gross":0.06001365428772871,"fees":0.029301011020274128,"net":0.03071264326745458,"profitPercent":"0.210"}}
+[2025-12-07T03:37:40.706Z] ORDER_PLACED_SELL: Price: $90334.05 | Amount: 0.000149 BTC | Composite Score: 51 | Regime: BEAR | Price: $89600 | Score: 51
+  Details: {"orderId":"53494518211","level":2,"worthCheck":{"worth":true,"gross":0.05465815025281261,"fees":0.026686244687368355,"net":0.027971905565444252,"profitPercent":"0.210"}}
+[2025-12-07T03:37:41.051Z] ORDER_PLACED_SELL: Price: $90701.08 | Amount: 0.000134 BTC | Composite Score: 51 | Regime: BEAR | Price: $89600 | Score: 51
+  Details: {"orderId":"53494518267","level":3,"worthCheck":{"worth":true,"gross":0.04930264621789651,"fees":0.024071478354462585,"net":0.025231167863433927,"profitPercent":"0.210"}}
+[2025-12-07T03:37:41.576Z] ORDER_PLACED_SELL: Price: $91068.11 | Amount: 0.000120 BTC | Composite Score: 51 | Regime: BEAR | Price: $89600 | Score: 51
+  Details: {"orderId":"53494518344","level":4,"worthCheck":{"worth":true,"gross":0.043947142182980424,"fees":0.021456712021556818,"net":0.022490430161423606,"profitPercent":"0.210"}}
+[2025-12-07T03:42:32.408Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89710 | Score: 51
+  Details: {"level":{"side":"buy","price":"89337.753207759575237","amount":"0.00016397471486875335833","level":-1}}
+[2025-12-07T03:42:32.938Z] ORDER_PLACED_BUY: Price: $88965.51 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89710 | Score: 51
+  Details: {"orderId":"53494618066","level":-2,"worthCheck":{"worth":true,"gross":0.05574734993194544,"fees":0.026869780299757402,"net":0.028877569632188037,"profitPercent":"0.215"}}
+[2025-12-07T03:42:36.926Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89710 | Score: 51
+  Details: {"level":{"side":"buy","price":"88593.259623278725711","amount":"0.0001354240530463532276","level":-3}}
+[2025-12-07T03:42:40.710Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89710 | Score: 51
+  Details: {"level":{"side":"buy","price":"88221.012831038300948","amount":"0.00012096801871872159102","level":-4}}
+[2025-12-07T03:42:41.053Z] ORDER_PLACED_SELL: Price: $90082.25 | Amount: 0.000163 BTC | Composite Score: 51 | Regime: BEAR | Price: $89710 | Score: 51
+  Details: {"orderId":"53494619874","level":1,"worthCheck":{"worth":true,"gross":0.060785783334084076,"fees":0.029298265218514863,"net":0.03148751811556921,"profitPercent":"0.215"}}
+[2025-12-07T03:42:41.584Z] ORDER_PLACED_SELL: Price: $90454.49 | Amount: 0.000149 BTC | Composite Score: 51 | Regime: BEAR | Price: $89710 | Score: 51
+  Details: {"orderId":"53494619942","level":2,"worthCheck":{"worth":true,"gross":0.05528470870603816,"fees":0.026646790900029624,"net":0.028637917806008537,"profitPercent":"0.215"}}
+[2025-12-07T03:42:42.110Z] ORDER_PLACED_SELL: Price: $90826.74 | Amount: 0.000134 BTC | Composite Score: 51 | Regime: BEAR | Price: $89710 | Score: 51
+  Details: {"orderId":"53494620004","level":3,"worthCheck":{"worth":true,"gross":0.04978363407799247,"fees":0.023995316581544482,"net":0.025788317496447985,"profitPercent":"0.215"}}
+[2025-12-07T03:42:42.453Z] ORDER_PLACED_SELL: Price: $91198.99 | Amount: 0.000119 BTC | Composite Score: 51 | Regime: BEAR | Price: $89710 | Score: 51
+  Details: {"orderId":"53494620041","level":4,"worthCheck":{"worth":true,"gross":0.044282559449946544,"fees":0.021343842263059236,"net":0.02293871718688731,"profitPercent":"0.215"}}
+[2025-12-07T03:47:32.592Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89724 | Score: 51
+  Details: {"level":{"side":"buy","price":"89350.221779188147404","amount":"0.00016391642774591074342","level":-1}}
+[2025-12-07T03:47:33.262Z] ORDER_PLACED_BUY: Price: $88976.47 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89724 | Score: 51
+  Details: {"orderId":"53494710135","level":-2,"worthCheck":{"worth":true,"gross":0.055929670050648236,"fees":0.026853543419330272,"net":0.029076126631317964,"profitPercent":"0.217"}}
+[2025-12-07T03:47:37.893Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89724 | Score: 51
+  Details: {"level":{"side":"buy","price":"88602.725337564442212","amount":"0.0001352538030982834877","level":-3}}
+[2025-12-07T03:47:41.646Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89724 | Score: 51
+  Details: {"level":{"side":"buy","price":"88228.977116752589616","amount":"0.00012074036345106813327","level":-4}}
+[2025-12-07T03:47:42.293Z] ORDER_PLACED_SELL: Price: $90097.72 | Amount: 0.000163 BTC | Composite Score: 51 | Regime: BEAR | Price: $89724 | Score: 51
+  Details: {"orderId":"53494712200","level":1,"worthCheck":{"worth":true,"gross":0.06100827816948857,"fees":0.02929193834469889,"net":0.03171633982478968,"profitPercent":"0.217"}}
+[2025-12-07T03:47:42.640Z] ORDER_PLACED_SELL: Price: $90471.47 | Amount: 0.000148 BTC | Composite Score: 51 | Regime: BEAR | Price: $89724 | Score: 51
+  Details: {"orderId":"53494712244","level":2,"worthCheck":{"worth":true,"gross":0.05546371619969796,"fees":0.026629824739127683,"net":0.02883389146057028,"profitPercent":"0.217"}}
+[2025-12-07T03:47:43.173Z] ORDER_PLACED_SELL: Price: $90845.21 | Amount: 0.000134 BTC | Composite Score: 51 | Regime: BEAR | Price: $89724 | Score: 51
+  Details: {"orderId":"53494712344","level":3,"worthCheck":{"worth":true,"gross":0.04991915422990757,"fees":0.023967711133556575,"net":0.025951443096350998,"profitPercent":"0.217"}}
+[2025-12-07T03:47:43.698Z] ORDER_PLACED_SELL: Price: $91218.96 | Amount: 0.000119 BTC | Composite Score: 51 | Regime: BEAR | Price: $89724 | Score: 51
+  Details: {"orderId":"53494712570","level":4,"worthCheck":{"worth":true,"gross":0.044374592260116974,"fees":0.021305597527985363,"net":0.02306899473213161,"profitPercent":"0.217"}}
+[2025-12-07T03:52:34.005Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89729 | Score: 51
+  Details: {"level":{"side":"buy","price":"89353.638922045290165","amount":"0.00016387372930803654811","level":-1}}
+[2025-12-07T03:52:34.533Z] ORDER_PLACED_BUY: Price: $88978.78 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89729 | Score: 51
+  Details: {"orderId":"53494784737","level":-2,"worthCheck":{"worth":true,"gross":0.05606437827669084,"fees":0.026839663342204022,"net":0.02922471493448682,"profitPercent":"0.218"}}
+[2025-12-07T03:52:38.655Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89729 | Score: 51
+  Details: {"level":{"side":"buy","price":"88603.916766135870496","amount":"0.00013512598797747325532","level":-3}}
+[2025-12-07T03:52:42.726Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89729 | Score: 51
+  Details: {"level":{"side":"buy","price":"88229.055688181160661","amount":"0.0001205689054005396182","level":-4}}
+[2025-12-07T03:52:43.068Z] ORDER_PLACED_SELL: Price: $90103.36 | Amount: 0.000163 BTC | Composite Score: 51 | Regime: BEAR | Price: $89729 | Score: 51
+  Details: {"orderId":"53494785699","level":1,"worthCheck":{"worth":true,"gross":0.06117324560470819,"fees":0.02928542807479858,"net":0.03188781752990961,"profitPercent":"0.218"}}
+[2025-12-07T03:52:43.410Z] ORDER_PLACED_SELL: Price: $90478.22 | Amount: 0.000148 BTC | Composite Score: 51 | Regime: BEAR | Price: $89729 | Score: 51
+  Details: {"orderId":"53494785745","level":2,"worthCheck":{"worth":true,"gross":0.055595935066882124,"fees":0.02661540582909726,"net":0.028980529237784863,"profitPercent":"0.218"}}
+[2025-12-07T03:52:43.770Z] ORDER_PLACED_SELL: Price: $90853.08 | Amount: 0.000133 BTC | Composite Score: 51 | Regime: BEAR | Price: $89729 | Score: 51
+  Details: {"orderId":"53494785804","level":3,"worthCheck":{"worth":true,"gross":0.05001862452905584,"fees":0.023945383583395832,"net":0.026073240945660006,"profitPercent":"0.218"}}
+[2025-12-07T03:52:44.104Z] ORDER_PLACED_SELL: Price: $91227.94 | Amount: 0.000119 BTC | Composite Score: 51 | Regime: BEAR | Price: $89729 | Score: 51
+  Details: {"orderId":"53494785825","level":4,"worthCheck":{"worth":true,"gross":0.044441313991229775,"fees":0.021275361337694514,"net":0.02316595265353526,"profitPercent":"0.218"}}
+[2025-12-07T03:57:34.301Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89706 | Score: 51
+  Details: {"level":{"side":"buy","price":"89331.038922045290097","amount":"0.00016387563829487800952","level":-1}}
+[2025-12-07T03:57:34.647Z] ORDER_PLACED_BUY: Price: $88956.18 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89706 | Score: 51
+  Details: {"orderId":"53494857355","level":-2,"worthCheck":{"worth":true,"gross":0.056063544936269714,"fees":0.026832504367424032,"net":0.029231040568845682,"profitPercent":"0.218"}}
+[2025-12-07T03:57:39.277Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89706 | Score: 51
+  Details: {"level":{"side":"buy","price":"88581.316766135870292","amount":"0.00013511956698932190478","level":-3}}
+[2025-12-07T03:57:43.564Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89706 | Score: 51
+  Details: {"level":{"side":"buy","price":"88206.45568818116039","amount":"0.00012055821938159805975","level":-4}}
+[2025-12-07T03:57:43.911Z] ORDER_PLACED_SELL: Price: $90080.76 | Amount: 0.000163 BTC | Composite Score: 51 | Regime: BEAR | Price: $89706 | Score: 51
+  Details: {"orderId":"53494858218","level":1,"worthCheck":{"worth":true,"gross":0.06117389356348295,"fees":0.029278362045789427,"net":0.03189553151769352,"profitPercent":"0.218"}}
+[2025-12-07T03:57:44.265Z] ORDER_PLACED_SELL: Price: $90455.62 | Amount: 0.000148 BTC | Composite Score: 51 | Regime: BEAR | Price: $89706 | Score: 51
+  Details: {"orderId":"53494858246","level":2,"worthCheck":{"worth":true,"gross":0.05559499067420262,"fees":0.026608250187678848,"net":0.028986740486523773,"profitPercent":"0.218"}}
+[2025-12-07T03:57:44.811Z] ORDER_PLACED_SELL: Price: $90830.48 | Amount: 0.000133 BTC | Composite Score: 51 | Regime: BEAR | Price: $89706 | Score: 51
+  Details: {"orderId":"53494858278","level":3,"worthCheck":{"worth":true,"gross":0.050016087784922496,"fees":0.02393813832956837,"net":0.026077949455354126,"profitPercent":"0.218"}}
+[2025-12-07T03:57:45.651Z] ORDER_PLACED_SELL: Price: $91205.34 | Amount: 0.000119 BTC | Composite Score: 51 | Regime: BEAR | Price: $89706 | Score: 51
+  Details: {"orderId":"53494858418","level":4,"worthCheck":{"worth":true,"gross":0.044437184895642176,"fees":0.0212680264714578,"net":0.023169158424184377,"profitPercent":"0.218"}}
+[2025-12-07T04:02:36.539Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89734 | Score: 51
+  Details: {"level":{"side":"buy","price":"89383.92459570598884","amount":"0.00016482831069323467569","level":-1}}
+[2025-12-07T04:02:37.074Z] ORDER_PLACED_BUY: Price: $89034.19 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89734 | Score: 51
+  Details: {"orderId":"53494933763","level":-2,"worthCheck":{"worth":true,"gross":0.052980205303032366,"fees":0.027186882832118876,"net":0.02579332247091349,"profitPercent":"0.190"}}
+[2025-12-07T04:02:41.114Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89734 | Score: 51
+  Details: {"level":{"side":"buy","price":"88684.453787117966521","amount":"0.00013803953448313723469","level":-3}}
+[2025-12-07T04:02:45.078Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89734 | Score: 51
+  Details: {"level":{"side":"buy","price":"88334.718382823955362","amount":"0.00012448605292678362698","level":-4}}
+[2025-12-07T04:02:45.520Z] ORDER_PLACED_SELL: Price: $90083.40 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89734 | Score: 51
+  Details: {"orderId":"53494934848","level":1,"worthCheck":{"worth":true,"gross":0.05742162042767236,"fees":0.029466002588483378,"net":0.027955617839188984,"profitPercent":"0.190"}}
+[2025-12-07T04:02:46.066Z] ORDER_PLACED_SELL: Price: $90433.13 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89734 | Score: 51
+  Details: {"orderId":"53494934931","level":2,"worthCheck":{"worth":true,"gross":0.05256722641592965,"fees":0.026974962010906853,"net":0.0255922644050228,"profitPercent":"0.190"}}
+[2025-12-07T04:02:46.420Z] ORDER_PLACED_SELL: Price: $90782.87 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89734 | Score: 51
+  Details: {"orderId":"53494935007","level":3,"worthCheck":{"worth":true,"gross":0.04771283240418674,"fees":0.024483921433330228,"net":0.023228910970856515,"profitPercent":"0.190"}}
+[2025-12-07T04:02:46.947Z] ORDER_PLACED_SELL: Price: $91132.60 | Amount: 0.000123 BTC | Composite Score: 51 | Regime: BEAR | Price: $89734 | Score: 51
+  Details: {"orderId":"53494935086","level":4,"worthCheck":{"worth":true,"gross":0.04285843839244384,"fees":0.021992880855753603,"net":0.020865557536690237,"profitPercent":"0.190"}}
+[2025-12-07T04:07:37.274Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89762 | Score: 51
+  Details: {"level":{"side":"buy","price":"89409.052452848845917","amount":"0.00016469365398186333019","level":-1}}
+[2025-12-07T04:07:37.796Z] ORDER_PLACED_BUY: Price: $89055.84 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89762 | Score: 51
+  Details: {"orderId":"53495013580","level":-2,"worthCheck":{"worth":true,"gross":0.05341302239344714,"fees":0.027148194550976817,"net":0.026264827842470324,"profitPercent":"0.193"}}
+[2025-12-07T04:07:41.887Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89762 | Score: 51
+  Details: {"level":{"side":"buy","price":"88702.637358546537752","amount":"0.00013764459859897087949","level":-3}}
+[2025-12-07T04:07:45.965Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89762 | Score: 51
+  Details: {"level":{"side":"buy","price":"88349.429811395383669","amount":"0.0001239578639098406937","level":-4}}
+[2025-12-07T04:07:46.322Z] ORDER_PLACED_SELL: Price: $90115.47 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89762 | Score: 51
+  Details: {"orderId":"53495019222","level":1,"worthCheck":{"worth":true,"gross":0.05794214300714776,"fees":0.029450207095031405,"net":0.028491935912116358,"profitPercent":"0.193"}}
+[2025-12-07T04:07:46.850Z] ORDER_PLACED_SELL: Price: $90468.68 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89762 | Score: 51
+  Details: {"orderId":"53495019533","level":2,"worthCheck":{"worth":true,"gross":0.0529926701735826,"fees":0.026934542461402918,"net":0.02605812771217968,"profitPercent":"0.193"}}
+[2025-12-07T04:07:47.372Z] ORDER_PLACED_SELL: Price: $90821.88 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89762 | Score: 51
+  Details: {"orderId":"53495019587","level":3,"worthCheck":{"worth":true,"gross":0.048043197340017454,"fees":0.024418877827774434,"net":0.02362431951224302,"profitPercent":"0.193"}}
+[2025-12-07T04:07:47.714Z] ORDER_PLACED_SELL: Price: $91175.09 | Amount: 0.000122 BTC | Composite Score: 51 | Regime: BEAR | Price: $89762 | Score: 51
+  Details: {"orderId":"53495019616","level":4,"worthCheck":{"worth":true,"gross":0.04309372450645208,"fees":0.02190321319414584,"net":0.021190511312306242,"profitPercent":"0.193"}}
+[2025-12-07T04:12:38.272Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89716 | Score: 51
+  Details: {"level":{"side":"buy","price":"89358.248881420274586","amount":"0.00016454286172427233666","level":-1}}
+[2025-12-07T04:12:38.802Z] ORDER_PLACED_BUY: Price: $89000.96 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89716 | Score: 51
+  Details: {"orderId":"53495119286","level":-2,"worthCheck":{"worth":true,"gross":0.05391745625644262,"fees":0.027077268098360273,"net":0.026840188158082347,"profitPercent":"0.198"}}
+[2025-12-07T04:12:43.225Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89716 | Score: 51
+  Details: {"level":{"side":"buy","price":"88643.666644260823758","amount":"0.0001371596724728109128","level":-3}}
+[2025-12-07T04:12:47.200Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89716 | Score: 51
+  Details: {"level":{"side":"buy","price":"88286.375525681098344","amount":"0.00012330184998474562729","level":-4}}
+[2025-12-07T04:12:47.755Z] ORDER_PLACED_SELL: Price: $90072.83 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89716 | Score: 51
+  Details: {"orderId":"53495121636","level":1,"worthCheck":{"worth":true,"gross":0.0585555737951484,"fees":0.029406523979237195,"net":0.029149049815911203,"profitPercent":"0.198"}}
+[2025-12-07T04:12:48.283Z] ORDER_PLACED_SELL: Price: $90430.12 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89716 | Score: 51
+  Details: {"orderId":"53495121669","level":2,"worthCheck":{"worth":true,"gross":0.053488004942727124,"fees":0.026861598273334394,"net":0.02662640666939273,"profitPercent":"0.198"}}
+[2025-12-07T04:12:48.610Z] ORDER_PLACED_SELL: Price: $90787.41 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89716 | Score: 51
+  Details: {"orderId":"53495121709","level":3,"worthCheck":{"worth":true,"gross":0.04842043609030586,"fees":0.024316672567431592,"net":0.024103763522874265,"profitPercent":"0.198"}}
+[2025-12-07T04:12:49.141Z] ORDER_PLACED_SELL: Price: $91144.70 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89716 | Score: 51
+  Details: {"orderId":"53495121750","level":4,"worthCheck":{"worth":true,"gross":0.04335286723788459,"fees":0.021771746861528794,"net":0.021581120376355796,"profitPercent":"0.198"}}
+[2025-12-07T04:17:39.442Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89682 | Score: 51
+  Details: {"level":{"side":"buy","price":"89324.828881420274602","amount":"0.00016454596968235199906","level":-1}}
+[2025-12-07T04:17:39.796Z] ORDER_PLACED_BUY: Price: $88967.54 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89682 | Score: 51
+  Details: {"orderId":"53495181681","level":-2,"worthCheck":{"worth":true,"gross":0.05391648721706371,"fees":0.027066695056962197,"net":0.026849792160101516,"profitPercent":"0.198"}}
+[2025-12-07T04:17:44.061Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89682 | Score: 51
+  Details: {"level":{"side":"buy","price":"88610.246644260823806","amount":"0.00013715105175003560933","level":-3}}
+[2025-12-07T04:17:48.175Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89682 | Score: 51
+  Details: {"level":{"side":"buy","price":"88252.955525681098408","amount":"0.00012328723074852427652","level":-4}}
+[2025-12-07T04:17:48.517Z] ORDER_PLACED_SELL: Price: $90039.41 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89682 | Score: 51
+  Details: {"orderId":"53495183269","level":1,"worthCheck":{"worth":true,"gross":0.058556592568798416,"fees":0.02939608117000692,"net":0.029160511398791496,"profitPercent":"0.198"}}
+[2025-12-07T04:17:49.043Z] ORDER_PLACED_SELL: Price: $90396.70 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89682 | Score: 51
+  Details: {"orderId":"53495183297","level":2,"worthCheck":{"worth":true,"gross":0.053486883589770266,"fees":0.02685102910809384,"net":0.026635854481676425,"profitPercent":"0.198"}}
+[2025-12-07T04:17:49.580Z] ORDER_PLACED_SELL: Price: $90753.99 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89682 | Score: 51
+  Details: {"orderId":"53495183323","level":3,"worthCheck":{"worth":true,"gross":0.04841717461074212,"fees":0.024305977046180764,"net":0.024111197564561353,"profitPercent":"0.198"}}
+[2025-12-07T04:17:49.921Z] ORDER_PLACED_SELL: Price: $91111.28 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89682 | Score: 51
+  Details: {"orderId":"53495183375","level":4,"worthCheck":{"worth":true,"gross":0.043347465631713974,"fees":0.02176092498426769,"net":0.021586540647446285,"profitPercent":"0.198"}}
+[2025-12-07T04:22:41.363Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89662 | Score: 51
+  Details: {"level":{"side":"buy","price":"89302.581024277417199","amount":"0.00016447376008534870018","level":-1}}
+[2025-12-07T04:22:42.012Z] ORDER_PLACED_BUY: Price: $88943.34 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89662 | Score: 51
+  Details: {"orderId":"53495268183","level":-2,"worthCheck":{"worth":true,"gross":0.054156165602800274,"fees":0.02703348300334898,"net":0.027122682599451293,"profitPercent":"0.201"}}
+[2025-12-07T04:22:46.303Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89662 | Score: 51
+  Details: {"level":{"side":"buy","price":"88584.103072832251596","amount":"0.00013691990587268373835","level":-3}}
+[2025-12-07T04:22:50.605Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89662 | Score: 51
+  Details: {"level":{"side":"buy","price":"88224.864097109668795","amount":"0.00012297468576075953809","level":-4}}
+[2025-12-07T04:22:50.936Z] ORDER_PLACED_SELL: Price: $90021.06 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89662 | Score: 51
+  Details: {"orderId":"53495269578","level":1,"worthCheck":{"worth":true,"gross":0.058848653649973104,"fees":0.02937586257277894,"net":0.029472791077194162,"profitPercent":"0.201"}}
+[2025-12-07T04:22:51.442Z] ORDER_PLACED_SELL: Price: $90380.30 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89662 | Score: 51
+  Details: {"orderId":"53495269626","level":2,"worthCheck":{"worth":true,"gross":0.05372220150391822,"fees":0.02681685834093778,"net":0.026905343162980436,"profitPercent":"0.201"}}
+[2025-12-07T04:22:51.785Z] ORDER_PLACED_SELL: Price: $90739.54 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89662 | Score: 51
+  Details: {"orderId":"53495269686","level":3,"worthCheck":{"worth":true,"gross":0.04859574935786353,"fees":0.02425785410909672,"net":0.02433789524876681,"profitPercent":"0.201"}}
+[2025-12-07T04:22:52.139Z] ORDER_PLACED_SELL: Price: $91098.78 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89662 | Score: 51
+  Details: {"orderId":"53495269714","level":4,"worthCheck":{"worth":true,"gross":0.04346929721180865,"fees":0.02169884987725556,"net":0.021770447334553092,"profitPercent":"0.201"}}
+[2025-12-07T04:27:42.440Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89659 | Score: 51
+  Details: {"level":{"side":"buy","price":"89299.761024277417146","amount":"0.0001644740198512977009","level":-1}}
+[2025-12-07T04:27:42.976Z] ORDER_PLACED_BUY: Price: $88940.52 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53495321152","level":-2,"worthCheck":{"worth":true,"gross":0.05415608134072737,"fees":0.027032590699055593,"net":0.02712349064167178,"profitPercent":"0.201"}}
+[2025-12-07T04:27:47.082Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89659 | Score: 51
+  Details: {"level":{"side":"buy","price":"88581.283072832251438","amount":"0.00013691916944008763842","level":-3}}
+[2025-12-07T04:27:51.199Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89659 | Score: 51
+  Details: {"level":{"side":"buy","price":"88222.044097109668584","amount":"0.00012297343976467800744","level":-4}}
+[2025-12-07T04:27:51.542Z] ORDER_PLACED_SELL: Price: $90018.24 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53495326610","level":1,"worthCheck":{"worth":true,"gross":0.05884873914832961,"fees":0.029374981334846288,"net":0.029473757813483322,"profitPercent":"0.201"}}
+[2025-12-07T04:27:52.065Z] ORDER_PLACED_SELL: Price: $90377.48 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53495326713","level":2,"worthCheck":{"worth":true,"gross":0.053722104267817976,"fees":0.02681596637369268,"net":0.026906137894125295,"profitPercent":"0.201"}}
+[2025-12-07T04:27:52.422Z] ORDER_PLACED_SELL: Price: $90736.72 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53495326818","level":3,"worthCheck":{"worth":true,"gross":0.04859546938730613,"fees":0.024256951412538974,"net":0.024338517974767153,"profitPercent":"0.201"}}
+[2025-12-07T04:27:52.949Z] ORDER_PLACED_SELL: Price: $91095.96 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53495326892","level":4,"worthCheck":{"worth":true,"gross":0.04346883450679448,"fees":0.021697936451385364,"net":0.021770898055409115,"profitPercent":"0.201"}}
+[2025-12-07T04:32:43.356Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89600 | Score: 55
+  Details: {"level":{"side":"buy","price":"89236.336738563131422","amount":"0.00016430986404873555673","level":-1}}
+[2025-12-07T04:32:43.712Z] ORDER_PLACED_BUY: Price: $88872.64 | Amount: 0.000150 BTC | Composite Score: 55 | Regime: BEAR | Price: $89600 | Score: 55
+  Details: {"orderId":"53495410437","level":-2,"worthCheck":{"worth":true,"gross":0.05470142567712639,"fees":0.026952654345860486,"net":0.027748771331265902,"profitPercent":"0.206"}}
+[2025-12-07T04:32:47.911Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89600 | Score: 55
+  Details: {"level":{"side":"buy","price":"88508.950215689394267","amount":"0.00013638663949820195697","level":-3}}
+[2025-12-07T04:32:51.937Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89600 | Score: 55
+  Details: {"level":{"side":"buy","price":"88145.256954252525689","amount":"0.00012225220756778504503","level":-4}}
+[2025-12-07T04:32:52.283Z] ORDER_PLACED_SELL: Price: $89963.72 | Amount: 0.000164 BTC | Composite Score: 55 | Regime: BEAR | Price: $89600 | Score: 55
+  Details: {"orderId":"53495412151","level":1,"worthCheck":{"worth":true,"gross":0.05951582654073988,"fees":0.029324820715440986,"net":0.03019100582529889,"profitPercent":"0.206"}}
+[2025-12-07T04:32:52.805Z] ORDER_PLACED_SELL: Price: $90327.42 | Amount: 0.000149 BTC | Composite Score: 55 | Regime: BEAR | Price: $89600 | Score: 55
+  Details: {"orderId":"53495412196","level":2,"worthCheck":{"worth":true,"gross":0.054257351274254864,"fees":0.02673384864315198,"net":0.027523502631102884,"profitPercent":"0.206"}}
+[2025-12-07T04:32:53.331Z] ORDER_PLACED_SELL: Price: $90691.11 | Amount: 0.000135 BTC | Composite Score: 55 | Regime: BEAR | Price: $89600 | Score: 55
+  Details: {"orderId":"53495412244","level":3,"worthCheck":{"worth":true,"gross":0.048998876007769844,"fees":0.024142876570862972,"net":0.024855999436906872,"profitPercent":"0.206"}}
+[2025-12-07T04:32:53.654Z] ORDER_PLACED_SELL: Price: $91054.80 | Amount: 0.000120 BTC | Composite Score: 55 | Regime: BEAR | Price: $89600 | Score: 55
+  Details: {"orderId":"53495412273","level":4,"worthCheck":{"worth":true,"gross":0.0437404007412848,"fees":0.021551904498573953,"net":0.02218849624271085,"profitPercent":"0.206"}}
+[2025-12-07T04:37:44.412Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89506 | Score: 48
+  Details: {"level":{"side":"buy","price":"89136.946738563131849","amount":"0.00016411437865105565982","level":-1}}
+[2025-12-07T04:37:44.944Z] ORDER_PLACED_BUY: Price: $88767.90 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53495488437","level":-2,"worthCheck":{"worth":true,"gross":0.055351259183558134,"fees":0.026849260066050464,"net":0.02850199911750767,"profitPercent":"0.212"}}
+[2025-12-07T04:37:49.157Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89506 | Score: 48
+  Details: {"level":{"side":"buy","price":"88398.860215689395547","amount":"0.00013573931124436573019","level":-3}}
+[2025-12-07T04:37:53.290Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89506 | Score: 48
+  Details: {"level":{"side":"buy","price":"88029.816954252527396","amount":"0.00012137334435017338955","level":-4}}
+[2025-12-07T04:37:53.818Z] ORDER_PLACED_SELL: Price: $89875.03 | Amount: 0.000163 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53495490275","level":1,"worthCheck":{"worth":true,"gross":0.06031558798092649,"fees":0.029257309257703167,"net":0.031058278723223323,"profitPercent":"0.212"}}
+[2025-12-07T04:37:54.157Z] ORDER_PLACED_SELL: Price: $90244.08 | Amount: 0.000149 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53495490443","level":2,"worthCheck":{"worth":true,"gross":0.05489482025218095,"fees":0.02662785502931633,"net":0.028266965222864617,"profitPercent":"0.212"}}
+[2025-12-07T04:37:54.501Z] ORDER_PLACED_SELL: Price: $90613.12 | Amount: 0.000134 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53495490491","level":3,"worthCheck":{"worth":true,"gross":0.0494740525234352,"fees":0.023998400800929392,"net":0.02547565172250581,"profitPercent":"0.212"}}
+[2025-12-07T04:37:55.031Z] ORDER_PLACED_SELL: Price: $90982.16 | Amount: 0.000119 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53495490536","level":4,"worthCheck":{"worth":true,"gross":0.04405328479468966,"fees":0.021368946572542555,"net":0.022684338222147105,"profitPercent":"0.212"}}
+[2025-12-07T04:42:45.227Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89535 | Score: 48
+  Details: {"level":{"side":"buy","price":"89164.559595705988849","amount":"0.00016406126388801748155","level":-1}}
+[2025-12-07T04:42:45.788Z] ORDER_PLACED_BUY: Price: $88794.19 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53495559794","level":-2,"worthCheck":{"worth":true,"gross":0.05551353170570717,"fees":0.026840158488352757,"net":0.028673373217354414,"profitPercent":"0.214"}}
+[2025-12-07T04:42:49.921Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89535 | Score: 48
+  Details: {"level":{"side":"buy","price":"88423.818787117966548","amount":"0.00013559303573062442507","level":-3}}
+[2025-12-07T04:42:54.011Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89535 | Score: 48
+  Details: {"level":{"side":"buy","price":"88053.448382823955397","amount":"0.00012117930706500653638","level":-4}}
+[2025-12-07T04:42:54.355Z] ORDER_PLACED_SELL: Price: $89905.30 | Amount: 0.000163 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53495560682","level":1,"worthCheck":{"worth":true,"gross":0.060512082458750074,"fees":0.02925690068257986,"net":0.03125518177617022,"profitPercent":"0.214"}}
+[2025-12-07T04:42:54.706Z] ORDER_PLACED_SELL: Price: $90275.67 | Amount: 0.000149 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53495560708","level":2,"worthCheck":{"worth":true,"gross":0.05505425689124894,"fees":0.026618104361529827,"net":0.02843615252971911,"profitPercent":"0.214"}}
+[2025-12-07T04:42:55.232Z] ORDER_PLACED_SELL: Price: $90646.04 | Amount: 0.000134 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53495560748","level":3,"worthCheck":{"worth":true,"gross":0.04959643132374778,"fees":0.023979308040479787,"net":0.025617123283267994,"profitPercent":"0.214"}}
+[2025-12-07T04:42:55.763Z] ORDER_PLACED_SELL: Price: $91016.41 | Amount: 0.000119 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53495560787","level":4,"worthCheck":{"worth":true,"gross":0.04413860575624663,"fees":0.021340511719429748,"net":0.022798094036816884,"profitPercent":"0.214"}}
+[2025-12-07T04:47:46.782Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89569 | Score: 48
+  Details: {"level":{"side":"buy","price":"89198.729595705988862","amount":"0.00016405829515239138236","level":-1}}
+[2025-12-07T04:47:47.308Z] ORDER_PLACED_BUY: Price: $88828.36 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89569 | Score: 48
+  Details: {"orderId":"53495613942","level":-2,"worthCheck":{"worth":true,"gross":0.05551472720195865,"fees":0.02685097996263066,"net":0.02866374723932799,"profitPercent":"0.214"}}
+[2025-12-07T04:47:51.230Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89569 | Score: 48
+  Details: {"level":{"side":"buy","price":"88457.988787117966587","amount":"0.0001356025579041763428","level":-3}}
+[2025-12-07T04:47:55.080Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89569 | Score: 48
+  Details: {"level":{"side":"buy","price":"88087.618382823955449","amount":"0.0001211952231456235392","level":-4}}
+[2025-12-07T04:47:55.608Z] ORDER_PLACED_SELL: Price: $89939.47 | Amount: 0.000163 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53495617348","level":1,"worthCheck":{"worth":true,"gross":0.06051108336342906,"fees":0.02926758301446147,"net":0.031243500348967588,"profitPercent":"0.214"}}
+[2025-12-07T04:47:56.136Z] ORDER_PLACED_SELL: Price: $90309.84 | Amount: 0.000149 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53495617429","level":2,"worthCheck":{"worth":true,"gross":0.05505561771089418,"fees":0.026628921053822932,"net":0.028426696657071246,"profitPercent":"0.214"}}
+[2025-12-07T04:47:56.466Z] ORDER_PLACED_SELL: Price: $90680.21 | Amount: 0.000134 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53495617462","level":3,"worthCheck":{"worth":true,"gross":0.04960015205835931,"fees":0.0239902590931844,"net":0.02560989296517491,"profitPercent":"0.214"}}
+[2025-12-07T04:47:56.812Z] ORDER_PLACED_SELL: Price: $91050.58 | Amount: 0.000119 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53495617635","level":4,"worthCheck":{"worth":true,"gross":0.04414468640582444,"fees":0.021351597132545863,"net":0.022793089273278576,"profitPercent":"0.214"}}
+[2025-12-07T04:52:47.328Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89520 | Score: 48
+  Details: {"level":{"side":"buy","price":"89149.659595705988912","amount":"0.00016406255895250835579","level":-1}}
+[2025-12-07T04:52:47.845Z] ORDER_PLACED_BUY: Price: $88779.29 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89520 | Score: 48
+  Details: {"orderId":"53495693324","level":-2,"worthCheck":{"worth":true,"gross":0.055513009981454926,"fees":0.02683543966426208,"net":0.028677570317192848,"profitPercent":"0.214"}}
+[2025-12-07T04:52:51.981Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89520 | Score: 48
+  Details: {"level":{"side":"buy","price":"88408.918787117966737","amount":"0.00013558888068956123868","level":-3}}
+[2025-12-07T04:52:55.966Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89520 | Score: 48
+  Details: {"level":{"side":"buy","price":"88038.548382823955649","amount":"0.00012117236218029777274","level":-4}}
+[2025-12-07T04:52:56.323Z] ORDER_PLACED_SELL: Price: $89890.40 | Amount: 0.000163 BTC | Composite Score: 48 | Regime: BEAR | Price: $89520 | Score: 48
+  Details: {"orderId":"53495695117","level":1,"worthCheck":{"worth":true,"gross":0.06051251829165033,"fees":0.02925224256603313,"net":0.031260275725617195,"profitPercent":"0.214"}}
+[2025-12-07T04:52:56.979Z] ORDER_PLACED_SELL: Price: $90260.77 | Amount: 0.000149 BTC | Composite Score: 48 | Regime: BEAR | Price: $89520 | Score: 48
+  Details: {"orderId":"53495695305","level":2,"worthCheck":{"worth":true,"gross":0.055053663040878414,"fees":0.026613387624336262,"net":0.028440275416542152,"profitPercent":"0.214"}}
+[2025-12-07T04:52:57.553Z] ORDER_PLACED_SELL: Price: $90631.14 | Amount: 0.000134 BTC | Composite Score: 48 | Regime: BEAR | Price: $89520 | Score: 48
+  Details: {"orderId":"53495695537","level":3,"worthCheck":{"worth":true,"gross":0.0495948077901063,"fees":0.023974532682639296,"net":0.025620275107467002,"profitPercent":"0.214"}}
+[2025-12-07T04:52:57.890Z] ORDER_PLACED_SELL: Price: $91001.51 | Amount: 0.000119 BTC | Composite Score: 48 | Regime: BEAR | Price: $89520 | Score: 48
+  Details: {"orderId":"53495695598","level":4,"worthCheck":{"worth":true,"gross":0.04413595253933438,"fees":0.021335677740942426,"net":0.022800274798391956,"profitPercent":"0.214"}}
+[2025-12-07T04:57:48.961Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89529 | Score: 48
+  Details: {"level":{"side":"buy","price":"89158.639595705988917","amount":"0.00016406177839840661943","level":-1}}
+[2025-12-07T04:57:49.493Z] ORDER_PLACED_BUY: Price: $88788.27 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89529 | Score: 48
+  Details: {"orderId":"53495764459","level":-2,"worthCheck":{"worth":true,"gross":0.05551332444731836,"fees":0.026838283631495746,"net":0.028675040815822613,"profitPercent":"0.214"}}
+[2025-12-07T04:57:53.413Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89529 | Score: 48
+  Details: {"level":{"side":"buy","price":"88417.898787117966751","amount":"0.00013559138507597111281","level":-3}}
+[2025-12-07T04:57:57.341Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89529 | Score: 48
+  Details: {"level":{"side":"buy","price":"88047.528382823955668","amount":"0.00012117654808959749776","level":-4}}
+[2025-12-07T04:57:57.709Z] ORDER_PLACED_SELL: Price: $89899.38 | Amount: 0.000163 BTC | Composite Score: 48 | Regime: BEAR | Price: $89529 | Score: 48
+  Details: {"orderId":"53495765216","level":1,"worthCheck":{"worth":true,"gross":0.06051225560935231,"fees":0.02925504994330813,"net":0.03125720566604418,"profitPercent":"0.214"}}
+[2025-12-07T04:57:58.212Z] ORDER_PLACED_SELL: Price: $90269.75 | Amount: 0.000149 BTC | Composite Score: 48 | Regime: BEAR | Price: $89529 | Score: 48
+  Details: {"orderId":"53495765240","level":2,"worthCheck":{"worth":true,"gross":0.05505402097866016,"fees":0.02661623033370637,"net":0.028437790644953793,"profitPercent":"0.214"}}
+[2025-12-07T04:57:58.750Z] ORDER_PLACED_SELL: Price: $90640.12 | Amount: 0.000134 BTC | Composite Score: 48 | Regime: BEAR | Price: $89529 | Score: 48
+  Details: {"orderId":"53495765289","level":3,"worthCheck":{"worth":true,"gross":0.04959578634796799,"fees":0.0239774107241046,"net":0.02561837562386339,"profitPercent":"0.214"}}
+[2025-12-07T04:57:59.289Z] ORDER_PLACED_SELL: Price: $91010.49 | Amount: 0.000119 BTC | Composite Score: 48 | Regime: BEAR | Price: $89529 | Score: 48
+  Details: {"orderId":"53495765319","level":4,"worthCheck":{"worth":true,"gross":0.04413755171727582,"fees":0.021338591114502835,"net":0.022798960602772984,"profitPercent":"0.214"}}
+[2025-12-07T05:02:49.406Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89522 | Score: 48
+  Details: {"level":{"side":"buy","price":"89174.790331330452209","amount":"0.00016495495644450662897","level":-1}}
+[2025-12-07T05:02:50.053Z] ORDER_PLACED_BUY: Price: $88827.84 | Amount: 0.000152 BTC | Composite Score: 48 | Regime: BEAR | Price: $89522 | Score: 48
+  Details: {"orderId":"53495825411","level":-2,"worthCheck":{"worth":true,"gross":0.052626996492644504,"fees":0.027158177236841077,"net":0.025468819255803427,"profitPercent":"0.188"}}
+[2025-12-07T05:02:54.348Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89522 | Score: 48
+  Details: {"level":{"side":"buy","price":"88480.890993991356627","amount":"0.00013831060535600767929","level":-3}}
+[2025-12-07T05:02:58.318Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89522 | Score: 48
+  Details: {"level":{"side":"buy","price":"88133.941325321808836","amount":"0.00012483109685961072308","level":-4}}
+[2025-12-07T05:02:58.660Z] ORDER_PLACED_SELL: Price: $89868.69 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89522 | Score: 48
+  Details: {"orderId":"53495826545","level":1,"worthCheck":{"worth":true,"gross":0.05700926326172821,"fees":0.02941964731010525,"net":0.027589615951622962,"profitPercent":"0.188"}}
+[2025-12-07T05:02:59.168Z] ORDER_PLACED_SELL: Price: $90215.64 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89522 | Score: 48
+  Details: {"orderId":"53495826595","level":2,"worthCheck":{"worth":true,"gross":0.05221907504258806,"fees":0.026947669250870596,"net":0.025271405791717466,"profitPercent":"0.188"}}
+[2025-12-07T05:02:59.697Z] ORDER_PLACED_SELL: Price: $90562.59 | Amount: 0.000137 BTC | Composite Score: 48 | Regime: BEAR | Price: $89522 | Score: 48
+  Details: {"orderId":"53495826674","level":3,"worthCheck":{"worth":true,"gross":0.04742888682344772,"fees":0.024475691191635847,"net":0.022953195631811876,"profitPercent":"0.188"}}
+[2025-12-07T05:03:00.022Z] ORDER_PLACED_SELL: Price: $90909.54 | Amount: 0.000123 BTC | Composite Score: 48 | Regime: BEAR | Price: $89522 | Score: 48
+  Details: {"orderId":"53495826709","level":4,"worthCheck":{"worth":true,"gross":0.04263869860430739,"fees":0.022003713132401098,"net":0.020634985471906293,"profitPercent":"0.188"}}
+[2025-12-07T05:07:50.702Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89512 | Score: 48
+  Details: {"level":{"side":"buy","price":"89163.767474187594699","amount":"0.0001648967166697559283","level":-1}}
+[2025-12-07T05:07:51.228Z] ORDER_PLACED_BUY: Price: $88815.26 | Amount: 0.000152 BTC | Composite Score: 48 | Regime: BEAR | Price: $89512 | Score: 48
+  Details: {"orderId":"53495896054","level":-2,"worthCheck":{"worth":true,"gross":0.05282073957248519,"fees":0.027133830902316386,"net":0.025686908670168804,"profitPercent":"0.189"}}
+[2025-12-07T05:07:55.143Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89512 | Score: 48
+  Details: {"level":{"side":"buy","price":"88466.762422562784097","amount":"0.00013812798283788875466","level":-3}}
+[2025-12-07T05:07:59.134Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89512 | Score: 48
+  Details: {"level":{"side":"buy","price":"88118.259896750378797","amount":"0.0001245848127743872687","level":-4}}
+[2025-12-07T05:07:59.474Z] ORDER_PLACED_SELL: Price: $89860.77 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89512 | Score: 48
+  Details: {"orderId":"53495896771","level":1,"worthCheck":{"worth":true,"gross":0.05724318346113111,"fees":0.029405625004798226,"net":0.027837558456332883,"profitPercent":"0.189"}}
+[2025-12-07T05:08:00.027Z] ORDER_PLACED_SELL: Price: $90209.28 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89512 | Score: 48
+  Details: {"orderId":"53495896819","level":2,"worthCheck":{"worth":true,"gross":0.0524094404029684,"fees":0.026922547944026553,"net":0.02548689245894185,"profitPercent":"0.189"}}
+[2025-12-07T05:08:00.564Z] ORDER_PLACED_SELL: Price: $90557.78 | Amount: 0.000137 BTC | Composite Score: 48 | Regime: BEAR | Price: $89512 | Score: 48
+  Details: {"orderId":"53495896881","level":3,"worthCheck":{"worth":true,"gross":0.04757569734480549,"fees":0.024439470883254773,"net":0.023136226461550717,"profitPercent":"0.189"}}
+[2025-12-07T05:08:00.889Z] ORDER_PLACED_SELL: Price: $90906.28 | Amount: 0.000123 BTC | Composite Score: 48 | Regime: BEAR | Price: $89512 | Score: 48
+  Details: {"orderId":"53495896903","level":4,"worthCheck":{"worth":true,"gross":0.042741954286642576,"fees":0.021956393822482993,"net":0.020785560464159584,"profitPercent":"0.189"}}
+[2025-12-07T05:12:51.186Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89461 | Score: 48
+  Details: {"level":{"side":"buy","price":"89107.213188473308879","amount":"0.00016470289522395119055","level":-1}}
+[2025-12-07T05:12:51.725Z] ORDER_PLACED_BUY: Price: $88753.50 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89461 | Score: 48
+  Details: {"orderId":"53495969535","level":-2,"worthCheck":{"worth":true,"gross":0.053467939033584024,"fees":0.027045881876421842,"net":0.02642205715716218,"profitPercent":"0.195"}}
+[2025-12-07T05:12:55.832Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89461 | Score: 48
+  Details: {"level":{"side":"buy","price":"88399.779565419926636","amount":"0.00013750932618346978351","level":-3}}
+[2025-12-07T05:12:59.929Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89461 | Score: 48
+  Details: {"level":{"side":"buy","price":"88046.062753893235515","amount":"0.00012374867023784912795","level":-4}}
+[2025-12-07T05:13:00.594Z] ORDER_PLACED_SELL: Price: $89814.65 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89461 | Score: 48
+  Details: {"orderId":"53495971376","level":1,"worthCheck":{"worth":true,"gross":0.05802783771536259,"fees":0.0293524319949587,"net":0.028675405720403887,"profitPercent":"0.195"}}
+[2025-12-07T05:13:00.980Z] ORDER_PLACED_SELL: Price: $90168.36 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89461 | Score: 48
+  Details: {"orderId":"53495971717","level":2,"worthCheck":{"worth":true,"gross":0.053045128563943875,"fees":0.0268320101202874,"net":0.026213118443656473,"profitPercent":"0.195"}}
+[2025-12-07T05:13:01.509Z] ORDER_PLACED_SELL: Price: $90522.08 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89461 | Score: 48
+  Details: {"orderId":"53495972189","level":3,"worthCheck":{"worth":true,"gross":0.04806241941252536,"fees":0.024311588245616203,"net":0.02375083116690916,"profitPercent":"0.195"}}
+[2025-12-07T05:13:01.836Z] ORDER_PLACED_SELL: Price: $90875.80 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89461 | Score: 48
+  Details: {"orderId":"53495972294","level":4,"worthCheck":{"worth":true,"gross":0.04307971026110666,"fees":0.021791166370944904,"net":0.021288543890161753,"profitPercent":"0.195"}}
+[2025-12-07T05:17:52.697Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89496 | Score: 48
+  Details: {"level":{"side":"buy","price":"89142.033188473308958","amount":"0.00016469958413896320535","level":-1}}
+[2025-12-07T05:17:53.226Z] ORDER_PLACED_BUY: Price: $88788.32 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89496 | Score: 48
+  Details: {"orderId":"53496041537","level":-2,"worthCheck":{"worth":true,"gross":0.05346890265629458,"fees":0.027056896302148123,"net":0.026412006354146457,"profitPercent":"0.195"}}
+[2025-12-07T05:17:57.294Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89496 | Score: 48
+  Details: {"level":{"side":"buy","price":"88434.599565419926875","amount":"0.00013751817677518006458","level":-3}}
+[2025-12-07T05:18:01.230Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89496 | Score: 48
+  Details: {"level":{"side":"buy","price":"88080.882753893235834","amount":"0.00012376373970793452923","level":-4}}
+[2025-12-07T05:18:01.971Z] ORDER_PLACED_SELL: Price: $89849.47 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89496 | Score: 48
+  Details: {"orderId":"53496046891","level":1,"worthCheck":{"worth":true,"gross":0.05802676077798708,"fees":0.029363311590886423,"net":0.02866344918710066,"profitPercent":"0.195"}}
+[2025-12-07T05:18:02.490Z] ORDER_PLACED_SELL: Price: $90203.18 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89496 | Score: 48
+  Details: {"orderId":"53496047118","level":2,"worthCheck":{"worth":true,"gross":0.05304624907188603,"fees":0.026843020691522942,"net":0.026203228380363087,"profitPercent":"0.195"}}
+[2025-12-07T05:18:02.832Z] ORDER_PLACED_SELL: Price: $90556.90 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89496 | Score: 48
+  Details: {"orderId":"53496049740","level":3,"worthCheck":{"worth":true,"gross":0.04806573736578477,"fees":0.024322729792159357,"net":0.02374300757362541,"profitPercent":"0.195"}}
+[2025-12-07T05:18:03.316Z] ORDER_PLACED_SELL: Price: $90910.62 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89496 | Score: 48
+  Details: {"orderId":"53496050200","level":4,"worthCheck":{"worth":true,"gross":0.04308522565968373,"fees":0.021802438892795883,"net":0.021282786766887846,"profitPercent":"0.195"}}
+[2025-12-07T05:22:53.727Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89444 | Score: 48
+  Details: {"level":{"side":"buy","price":"89090.393188473308931","amount":"0.00016470449538456616811","level":-1}}
+[2025-12-07T05:22:54.259Z] ORDER_PLACED_BUY: Price: $88736.68 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89444 | Score: 48
+  Details: {"orderId":"53496125706","level":-2,"worthCheck":{"worth":true,"gross":0.053467473133635875,"fees":0.027040561220404994,"net":0.02642691191323088,"profitPercent":"0.195"}}
+[2025-12-07T05:22:58.352Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89444 | Score: 48
+  Details: {"level":{"side":"buy","price":"88382.959565419926794","amount":"0.00013750504773665942006","level":-3}}
+[2025-12-07T05:23:02.185Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89444 | Score: 48
+  Details: {"level":{"side":"buy","price":"88029.242753893235725","amount":"0.00012374138574404233146","level":-4}}
+[2025-12-07T05:23:02.531Z] ORDER_PLACED_SELL: Price: $89797.83 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89444 | Score: 48
+  Details: {"orderId":"53496128332","level":1,"worthCheck":{"worth":true,"gross":0.05802835816423659,"fees":0.029347176507440176,"net":0.028681181656796416,"profitPercent":"0.195"}}
+[2025-12-07T05:23:02.889Z] ORDER_PLACED_SELL: Price: $90151.54 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89444 | Score: 48
+  Details: {"orderId":"53496128384","level":2,"worthCheck":{"worth":true,"gross":0.053044586839228816,"fees":0.02682669132787045,"net":0.026217895511358367,"profitPercent":"0.195"}}
+[2025-12-07T05:23:03.386Z] ORDER_PLACED_SELL: Price: $90505.26 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89444 | Score: 48
+  Details: {"orderId":"53496128477","level":3,"worthCheck":{"worth":true,"gross":0.048060815514220825,"fees":0.024306206148300615,"net":0.02375460936592021,"profitPercent":"0.195"}}
+[2025-12-07T05:23:03.915Z] ORDER_PLACED_SELL: Price: $90858.98 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89444 | Score: 48
+  Details: {"orderId":"53496128667","level":4,"worthCheck":{"worth":true,"gross":0.04307704418921306,"fees":0.021785720968730892,"net":0.021291323220482165,"profitPercent":"0.195"}}
+[2025-12-07T05:27:54.206Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89478 | Score: 48
+  Details: {"level":{"side":"buy","price":"89124.643188473308971","amount":"0.00016470123752771144922","level":-1}}
+[2025-12-07T05:27:54.754Z] ORDER_PLACED_BUY: Price: $88770.93 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89478 | Score: 48
+  Details: {"orderId":"53496182500","level":-2,"worthCheck":{"worth":true,"gross":0.05346842154369344,"fees":0.027051395441843977,"net":0.026417026101849463,"profitPercent":"0.195"}}
+[2025-12-07T05:27:58.861Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89478 | Score: 48
+  Details: {"level":{"side":"buy","price":"88417.209565419926913","amount":"0.00013751375765049149996","level":-3}}
+[2025-12-07T05:28:02.818Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89478 | Score: 48
+  Details: {"level":{"side":"buy","price":"88063.492753893235884","amount":"0.00012375621540751787916","level":-4}}
+[2025-12-07T05:28:03.199Z] ORDER_PLACED_SELL: Price: $89832.08 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89478 | Score: 48
+  Details: {"orderId":"53496184444","level":1,"worthCheck":{"worth":true,"gross":0.05802729854851521,"fees":0.029357878054714542,"net":0.028669420493800668,"profitPercent":"0.195"}}
+[2025-12-07T05:28:03.559Z] ORDER_PLACED_SELL: Price: $90185.79 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89478 | Score: 48
+  Details: {"orderId":"53496184484","level":2,"worthCheck":{"worth":true,"gross":0.053045689620895564,"fees":0.0268375217556692,"net":0.026208167865226364,"profitPercent":"0.195"}}
+[2025-12-07T05:28:04.090Z] ORDER_PLACED_SELL: Price: $90539.51 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89478 | Score: 48
+  Details: {"orderId":"53496184558","level":3,"worthCheck":{"worth":true,"gross":0.048064080693275696,"fees":0.024317165456623747,"net":0.02374691523665195,"profitPercent":"0.195"}}
+[2025-12-07T05:28:04.465Z] ORDER_PLACED_SELL: Price: $90893.23 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89478 | Score: 48
+  Details: {"orderId":"53496184616","level":4,"worthCheck":{"worth":true,"gross":0.043082471765656036,"fees":0.021796809157578402,"net":0.021285662608077634,"profitPercent":"0.195"}}
+[2025-12-07T05:32:54.703Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89486 | Score: 48
+  Details: {"level":{"side":"buy","price":"89131.953188473308985","amount":"0.00016470054245373246378","level":-1}}
+[2025-12-07T05:32:55.046Z] ORDER_PLACED_BUY: Price: $88778.24 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89486 | Score: 48
+  Details: {"orderId":"53496243026","level":-2,"worthCheck":{"worth":true,"gross":0.05346862381781602,"fees":0.027053707770710124,"net":0.0264149160471059,"profitPercent":"0.195"}}
+[2025-12-07T05:32:59.357Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89486 | Score: 48
+  Details: {"level":{"side":"buy","price":"88424.519565419926955","amount":"0.00013751561552268781975","level":-3}}
+[2025-12-07T05:33:03.473Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89486 | Score: 48
+  Details: {"level":{"side":"buy","price":"88070.80275389323594","amount":"0.00012375937872863361038","level":-4}}
+[2025-12-07T05:33:03.830Z] ORDER_PLACED_SELL: Price: $89839.39 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89486 | Score: 48
+  Details: {"orderId":"53496244970","level":1,"worthCheck":{"worth":true,"gross":0.05802707247382041,"fees":0.029360162080204383,"net":0.02866691039361603,"profitPercent":"0.195"}}
+[2025-12-07T05:33:04.359Z] ORDER_PLACED_SELL: Price: $90193.10 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89486 | Score: 48
+  Details: {"orderId":"53496245382","level":2,"worthCheck":{"worth":true,"gross":0.05304592482850169,"fees":0.02683983327543886,"net":0.026206091553062832,"profitPercent":"0.195"}}
+[2025-12-07T05:33:04.881Z] ORDER_PLACED_SELL: Price: $90546.82 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89486 | Score: 48
+  Details: {"orderId":"53496245507","level":3,"worthCheck":{"worth":true,"gross":0.048064777183182784,"fees":0.024319504470673246,"net":0.02374527271250954,"profitPercent":"0.195"}}
+[2025-12-07T05:33:05.227Z] ORDER_PLACED_SELL: Price: $90900.54 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89486 | Score: 48
+  Details: {"orderId":"53496245526","level":4,"worthCheck":{"worth":true,"gross":0.04308362953786406,"fees":0.021799175665907722,"net":0.021284453871956335,"profitPercent":"0.195"}}
+[2025-12-07T05:37:56.041Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89508 | Score: 48
+  Details: {"level":{"side":"buy","price":"89154.163188473308944","amount":"0.00016469843115263938996","level":-1}}
+[2025-12-07T05:37:56.581Z] ORDER_PLACED_BUY: Price: $88800.45 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89508 | Score: 48
+  Details: {"orderId":"53496292800","level":-2,"worthCheck":{"worth":true,"gross":0.0534692380739867,"fees":0.027060733271687842,"net":0.02640850480229886,"profitPercent":"0.195"}}
+[2025-12-07T05:38:00.648Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89508 | Score: 48
+  Details: {"level":{"side":"buy","price":"88446.729565419926832","amount":"0.00013752125795140074043","level":-3}}
+[2025-12-07T05:38:04.629Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89508 | Score: 48
+  Details: {"level":{"side":"buy","price":"88093.012753893235776","amount":"0.00012376898601268501321","level":-4}}
+[2025-12-07T05:38:05.166Z] ORDER_PLACED_SELL: Price: $89861.60 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89508 | Score: 48
+  Details: {"orderId":"53496294005","level":1,"worthCheck":{"worth":true,"gross":0.05802638576234,"fees":0.029367101615736,"net":0.028659284146604003,"profitPercent":"0.195"}}
+[2025-12-07T05:38:05.704Z] ORDER_PLACED_SELL: Price: $90215.31 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89508 | Score: 48
+  Details: {"orderId":"53496294129","level":2,"worthCheck":{"worth":true,"gross":0.05304663911607837,"fees":0.026846856319391894,"net":0.026199782796686475,"profitPercent":"0.195"}}
+[2025-12-07T05:38:06.046Z] ORDER_PLACED_SELL: Price: $90569.03 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89508 | Score: 48
+  Details: {"orderId":"53496294165","level":3,"worthCheck":{"worth":true,"gross":0.04806689246981694,"fees":0.024326611023047895,"net":0.023740281446769047,"profitPercent":"0.195"}}
+[2025-12-07T05:38:06.571Z] ORDER_PLACED_SELL: Price: $90922.75 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89508 | Score: 48
+  Details: {"orderId":"53496294196","level":4,"worthCheck":{"worth":true,"gross":0.04308714582355531,"fees":0.02180636572670379,"net":0.02128078009685152,"profitPercent":"0.195"}}
+[2025-12-07T05:42:57.295Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89525 | Score: 48
+  Details: {"level":{"side":"buy","price":"89171.403188473308972","amount":"0.00016469679286875858064","level":-1}}
+[2025-12-07T05:42:57.824Z] ORDER_PLACED_BUY: Price: $88817.69 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89525 | Score: 48
+  Details: {"orderId":"53496350935","level":-2,"worthCheck":{"worth":true,"gross":0.05346971455062791,"fees":0.027066186596276597,"net":0.026403527954351316,"profitPercent":"0.195"}}
+[2025-12-07T05:43:01.714Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89525 | Score: 48
+  Details: {"level":{"side":"buy","price":"88463.969565419926916","amount":"0.0001375256353190060276","level":-3}}
+[2025-12-07T05:43:05.706Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89525 | Score: 48
+  Details: {"level":{"side":"buy","price":"88110.252753893235888","amount":"0.00012377643945791759189","level":-4}}
+[2025-12-07T05:43:06.069Z] ORDER_PLACED_SELL: Price: $89878.84 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89525 | Score: 48
+  Details: {"orderId":"53496353971","level":1,"worthCheck":{"worth":true,"gross":0.05802585289686034,"fees":0.029372488241496988,"net":0.02865336465536335,"profitPercent":"0.195"}}
+[2025-12-07T05:43:06.626Z] ORDER_PLACED_SELL: Price: $90232.55 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89525 | Score: 48
+  Details: {"orderId":"53496354016","level":2,"worthCheck":{"worth":true,"gross":0.053047193208146826,"fees":0.026852307738074087,"net":0.02619488547007274,"profitPercent":"0.195"}}
+[2025-12-07T05:43:07.154Z] ORDER_PLACED_SELL: Price: $90586.27 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89525 | Score: 48
+  Details: {"orderId":"53496354076","level":3,"worthCheck":{"worth":true,"gross":0.04806853351943309,"fees":0.02433212723465107,"net":0.02373640628478202,"profitPercent":"0.195"}}
+[2025-12-07T05:43:07.493Z] ORDER_PLACED_SELL: Price: $90939.99 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89525 | Score: 48
+  Details: {"orderId":"53496354088","level":4,"worthCheck":{"worth":true,"gross":0.04308987383071956,"fees":0.021811946731228167,"net":0.021277927099491396,"profitPercent":"0.195"}}
+[2025-12-07T05:47:57.952Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89506 | Score: 48
+  Details: {"level":{"side":"buy","price":"89152.293188473308946","amount":"0.00016469860888480140254","level":-1}}
+[2025-12-07T05:47:58.480Z] ORDER_PLACED_BUY: Price: $88798.58 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53496399895","level":-2,"worthCheck":{"worth":true,"gross":0.05346918637409602,"fees":0.027060141753712325,"net":0.026409044620383695,"profitPercent":"0.195"}}
+[2025-12-07T05:48:02.583Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89506 | Score: 48
+  Details: {"level":{"side":"buy","price":"88444.859565419926838","amount":"0.00013752078301608792439","level":-3}}
+[2025-12-07T05:48:06.692Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89506 | Score: 48
+  Details: {"level":{"side":"buy","price":"88091.142753893235784","amount":"0.00012376817733788656198","level":-4}}
+[2025-12-07T05:48:07.052Z] ORDER_PLACED_SELL: Price: $89859.73 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53496401025","level":1,"worthCheck":{"worth":true,"gross":0.05802644357092914,"fees":0.02936651733406292,"net":0.02865992623686622,"profitPercent":"0.195"}}
+[2025-12-07T05:48:07.562Z] ORDER_PLACED_SELL: Price: $90213.44 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53496401129","level":2,"worthCheck":{"worth":true,"gross":0.05304657899568263,"fees":0.026846265008215943,"net":0.026200313987466688,"profitPercent":"0.195"}}
+[2025-12-07T05:48:08.092Z] ORDER_PLACED_SELL: Price: $90567.16 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53496401209","level":3,"worthCheck":{"worth":true,"gross":0.04806671442043591,"fees":0.02432601268236886,"net":0.02374070173806705,"profitPercent":"0.195"}}
+[2025-12-07T05:48:08.431Z] ORDER_PLACED_SELL: Price: $90920.88 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89506 | Score: 48
+  Details: {"orderId":"53496401233","level":4,"worthCheck":{"worth":true,"gross":0.043086849845189186,"fees":0.021805760356521774,"net":0.02128108948866741,"profitPercent":"0.195"}}
+[2025-12-07T05:52:59.396Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89471 | Score: 48
+  Details: {"level":{"side":"buy","price":"89117.603188473308975","amount":"0.00016470190701260586313","level":-1}}
+[2025-12-07T05:52:59.929Z] ORDER_PLACED_BUY: Price: $88763.89 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89471 | Score: 48
+  Details: {"orderId":"53496464518","level":-2,"worthCheck":{"worth":true,"gross":0.05346822669229178,"fees":0.027049168511786126,"net":0.026419058180505654,"profitPercent":"0.195"}}
+[2025-12-07T05:53:03.938Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89471 | Score: 48
+  Details: {"level":{"side":"buy","price":"88410.169565419926924","amount":"0.00013751196803764464346","level":-3}}
+[2025-12-07T05:53:07.709Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89471 | Score: 48
+  Details: {"level":{"side":"buy","price":"88056.452753893235898","amount":"0.00012375316833297267385","level":-4}}
+[2025-12-07T05:53:08.065Z] ORDER_PLACED_SELL: Price: $89825.04 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89471 | Score: 48
+  Details: {"orderId":"53496468521","level":1,"worthCheck":{"worth":true,"gross":0.05802751629950746,"fees":0.02935567838706858,"net":0.02867183791243888,"profitPercent":"0.195"}}
+[2025-12-07T05:53:08.501Z] ORDER_PLACED_SELL: Price: $90178.75 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89471 | Score: 48
+  Details: {"orderId":"53496468548","level":2,"worthCheck":{"worth":true,"gross":0.053045463047727816,"fees":0.026835295605017063,"net":0.026210167442710753,"profitPercent":"0.195"}}
+[2025-12-07T05:53:09.012Z] ORDER_PLACED_SELL: Price: $90532.47 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89471 | Score: 48
+  Details: {"orderId":"53496468578","level":3,"worthCheck":{"worth":true,"gross":0.048063409795948364,"fees":0.02431491282296564,"net":0.023748496972982723,"profitPercent":"0.195"}}
+[2025-12-07T05:53:09.355Z] ORDER_PLACED_SELL: Price: $90886.19 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89471 | Score: 48
+  Details: {"orderId":"53496468618","level":4,"worthCheck":{"worth":true,"gross":0.043081356544168704,"fees":0.021794530040914115,"net":0.02128682650325459,"profitPercent":"0.195"}}
+[2025-12-07T05:57:59.563Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89521 | Score: 48
+  Details: {"level":{"side":"buy","price":"89167.553188473308964","amount":"0.00016469715868401347877","level":-1}}
+[2025-12-07T05:57:59.930Z] ORDER_PLACED_BUY: Price: $88813.84 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89521 | Score: 48
+  Details: {"orderId":"53496527139","level":-2,"worthCheck":{"worth":true,"gross":0.05346960816954319,"fees":0.02706496877589707,"net":0.026404639393646116,"profitPercent":"0.195"}}
+[2025-12-07T05:58:04.358Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89521 | Score: 48
+  Details: {"level":{"side":"buy","price":"88460.119565419926893","amount":"0.0001375246579592829318","level":-3}}
+[2025-12-07T05:58:08.286Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89521 | Score: 48
+  Details: {"level":{"side":"buy","price":"88106.402753893235857","amount":"0.00012377477527252706713","level":-4}}
+[2025-12-07T05:58:08.648Z] ORDER_PLACED_SELL: Price: $89874.99 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89521 | Score: 48
+  Details: {"orderId":"53496529228","level":1,"worthCheck":{"worth":true,"gross":0.05802597188171867,"fees":0.029371285313894505,"net":0.02865468656782417,"profitPercent":"0.195"}}
+[2025-12-07T05:58:09.007Z] ORDER_PLACED_SELL: Price: $90228.70 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89521 | Score: 48
+  Details: {"orderId":"53496529282","level":2,"worthCheck":{"worth":true,"gross":0.053047069496548215,"fees":0.0268510903432189,"net":0.026195979153329316,"profitPercent":"0.195"}}
+[2025-12-07T05:58:09.352Z] ORDER_PLACED_SELL: Price: $90582.42 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89521 | Score: 48
+  Details: {"orderId":"53496529314","level":3,"worthCheck":{"worth":true,"gross":0.048068167111377964,"fees":0.024330895372543404,"net":0.02373727173883456,"profitPercent":"0.195"}}
+[2025-12-07T05:58:09.888Z] ORDER_PLACED_SELL: Price: $90936.14 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89521 | Score: 48
+  Details: {"orderId":"53496529382","level":4,"worthCheck":{"worth":true,"gross":0.04308926472620749,"fees":0.02181070040186779,"net":0.0212785643243397,"profitPercent":"0.195"}}
+[2025-12-07T06:03:00.067Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89535 | Score: 48
+  Details: {"level":{"side":"buy","price":"89203.060824437578492","amount":"0.00016553031234889925415","level":-1}}
+[2025-12-07T06:03:00.583Z] ORDER_PLACED_BUY: Price: $88871.25 | Amount: 0.000153 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53496598289","level":-2,"worthCheck":{"worth":true,"gross":0.05071632678271828,"fees":0.027370428907948913,"net":0.023345897874769365,"profitPercent":"0.171"}}
+[2025-12-07T06:03:04.695Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89535 | Score: 48
+  Details: {"level":{"side":"buy","price":"88539.442473312735477","amount":"0.00014007037692618324478","level":-3}}
+[2025-12-07T06:03:08.798Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89535 | Score: 48
+  Details: {"level":{"side":"buy","price":"88207.63329775031397","amount":"0.00012719675089637845072","level":-4}}
+[2025-12-07T06:03:09.141Z] ORDER_PLACED_SELL: Price: $89866.68 | Amount: 0.000165 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53496600169","level":1,"worthCheck":{"worth":true,"gross":0.05472093068767505,"fees":0.029531621041494024,"net":0.025189309646181025,"profitPercent":"0.171"}}
+[2025-12-07T06:03:09.672Z] ORDER_PLACED_SELL: Price: $90198.49 | Amount: 0.000152 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53496600270","level":2,"worthCheck":{"worth":true,"gross":0.050340425358450014,"fees":0.027167563600817936,"net":0.023172861757632078,"profitPercent":"0.171"}}
+[2025-12-07T06:03:10.198Z] ORDER_PLACED_SELL: Price: $90530.30 | Amount: 0.000139 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53496600400","level":3,"worthCheck":{"worth":true,"gross":0.04595992002922519,"fees":0.02480350616014196,"net":0.02115641386908323,"profitPercent":"0.171"}}
+[2025-12-07T06:03:10.545Z] ORDER_PLACED_SELL: Price: $90862.11 | Amount: 0.000125 BTC | Composite Score: 48 | Regime: BEAR | Price: $89535 | Score: 48
+  Details: {"orderId":"53496600420","level":4,"worthCheck":{"worth":true,"gross":0.041579414700000365,"fees":0.022439448719465984,"net":0.01913996598053438,"profitPercent":"0.171"}}
+[2025-12-07T06:08:00.994Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89569 | Score: 55
+  Details: {"level":{"side":"buy","price":"89234.662967294720773","amount":"0.00016542666977854296806","level":-1}}
+[2025-12-07T06:08:01.522Z] ORDER_PLACED_BUY: Price: $88900.23 | Amount: 0.000153 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53496664476","level":-2,"worthCheck":{"worth":true,"gross":0.05105122719797997,"fees":0.02734513242765299,"net":0.02370609477032698,"profitPercent":"0.173"}}
+[2025-12-07T06:08:05.619Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89569 | Score: 55
+  Details: {"level":{"side":"buy","price":"88565.788901884162318","amount":"0.00013977332047575169901","level":-3}}
+[2025-12-07T06:08:09.559Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89569 | Score: 55
+  Details: {"level":{"side":"buy","price":"88231.351869178883091","amount":"0.00012680078899730892746","level":-4}}
+[2025-12-07T06:08:09.895Z] ORDER_PLACED_SELL: Price: $89903.54 | Amount: 0.000165 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53496665759","level":1,"worthCheck":{"worth":true,"gross":0.05511823039004846,"fees":0.02952358624698059,"net":0.025594644143067873,"profitPercent":"0.173"}}
+[2025-12-07T06:08:10.429Z] ORDER_PLACED_SELL: Price: $90237.97 | Amount: 0.000152 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53496665781","level":2,"worthCheck":{"worth":true,"gross":0.050669992577110794,"fees":0.02714092751886118,"net":0.023529065058249615,"profitPercent":"0.173"}}
+[2025-12-07T06:08:10.954Z] ORDER_PLACED_SELL: Price: $90572.41 | Amount: 0.000138 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53496665881","level":3,"worthCheck":{"worth":true,"gross":0.04622175476417293,"fees":0.02475826879074166,"net":0.02146348597343127,"profitPercent":"0.173"}}
+[2025-12-07T06:08:11.283Z] ORDER_PLACED_SELL: Price: $90906.85 | Amount: 0.000125 BTC | Composite Score: 55 | Regime: BEAR | Price: $89569 | Score: 55
+  Details: {"orderId":"53496665933","level":4,"worthCheck":{"worth":true,"gross":0.04177351695123525,"fees":0.022375610062622245,"net":0.019397906888613002,"profitPercent":"0.173"}}
+[2025-12-07T06:13:01.615Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89582 | Score: 55
+  Details: {"level":{"side":"buy","price":"89243.838681580435627","amount":"0.00016526907227756203627","level":-1}}
+[2025-12-07T06:13:02.148Z] ORDER_PLACED_BUY: Price: $88905.30 | Amount: 0.000152 BTC | Composite Score: 55 | Regime: BEAR | Price: $89582 | Score: 55
+  Details: {"orderId":"53496756153","level":-2,"worthCheck":{"worth":true,"gross":0.051571433495044464,"fees":0.027292927043973,"net":0.024278506451071463,"profitPercent":"0.178"}}
+[2025-12-07T06:13:06.234Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89582 | Score: 55
+  Details: {"level":{"side":"buy","price":"88566.75604474130688","amount":"0.00013930051675785811087","level":-3}}
+[2025-12-07T06:13:10.340Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89582 | Score: 55
+  Details: {"level":{"side":"buy","price":"88228.214726321742506","amount":"0.00012616677271246988816","level":-4}}
+[2025-12-07T06:13:10.680Z] ORDER_PLACED_SELL: Price: $89920.92 | Amount: 0.000165 BTC | Composite Score: 55 | Regime: BEAR | Price: $89582 | Score: 55
+  Details: {"orderId":"53496759102","level":1,"worthCheck":{"worth":true,"gross":0.05573896708870274,"fees":0.02949849285078641,"net":0.02624047423791633,"profitPercent":"0.178"}}
+[2025-12-07T06:13:11.210Z] ORDER_PLACED_SELL: Price: $90259.46 | Amount: 0.000151 BTC | Composite Score: 55 | Regime: BEAR | Price: $89582 | Score: 55
+  Details: {"orderId":"53496759259","level":2,"worthCheck":{"worth":true,"gross":0.05118164565756573,"fees":0.02708664130999282,"net":0.024095004347572908,"profitPercent":"0.178"}}
+[2025-12-07T06:13:11.728Z] ORDER_PLACED_SELL: Price: $90598.00 | Amount: 0.000138 BTC | Composite Score: 55 | Regime: BEAR | Price: $89582 | Score: 55
+  Details: {"orderId":"53496759371","level":3,"worthCheck":{"worth":true,"gross":0.046624324226428725,"fees":0.024674789769199238,"net":0.021949534457229487,"profitPercent":"0.178"}}
+[2025-12-07T06:13:12.062Z] ORDER_PLACED_SELL: Price: $90936.55 | Amount: 0.000124 BTC | Composite Score: 55 | Regime: BEAR | Price: $89582 | Score: 55
+  Details: {"orderId":"53496759417","level":4,"worthCheck":{"worth":true,"gross":0.042067002795291714,"fees":0.022262938228405648,"net":0.019804064566886066,"profitPercent":"0.178"}}
+[2025-12-07T06:18:02.358Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89578 | Score: 55
+  Details: {"level":{"side":"buy","price":"89239.788681580435586","amount":"0.00016526948651908065102","level":-1}}
+[2025-12-07T06:18:02.807Z] ORDER_PLACED_BUY: Price: $88901.25 | Amount: 0.000152 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496842011","level":-2,"worthCheck":{"worth":true,"gross":0.05157134707911585,"fees":0.027291647405190723,"net":0.024279699673925126,"profitPercent":"0.178"}}
+[2025-12-07T06:18:04.545Z] ORDER_PLACED_BUY: Price: $88562.71 | Amount: 0.000139 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496845842","level":-3,"worthCheck":{"worth":true,"gross":0.0471753317271571,"fees":0.024965268363948887,"net":0.022210063363208212,"profitPercent":"0.178"}}
+[2025-12-07T06:18:08.459Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89610 | Score: 55
+  Details: {"level":{"side":"buy","price":"88224.164726321742342","amount":"0.00012616514936568586137","level":-4}}
+[2025-12-07T06:18:08.475Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89610 | Score: 55
+  Details: {"level":{"side":"buy","price":"89271.448681580435618","amount":"0.00016526624908078621906","level":-1}}
+[2025-12-07T06:18:08.799Z] ORDER_PLACED_SELL: Price: $89916.87 | Amount: 0.000165 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496846496","level":1,"worthCheck":{"worth":true,"gross":0.055739097236871475,"fees":0.029507653419219574,"net":0.0262314438176519,"profitPercent":"0.178"}}
+[2025-12-07T06:18:09.366Z] ORDER_PLACED_SELL: Price: $90255.41 | Amount: 0.000151 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496846602","level":2,"worthCheck":{"worth":true,"gross":0.05118154227179611,"fees":0.02709493489640276,"net":0.02408660737539335,"profitPercent":"0.178"}}
+[2025-12-07T06:18:09.895Z] ORDER_PLACED_SELL: Price: $90593.95 | Amount: 0.000138 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496846629","level":3,"worthCheck":{"worth":true,"gross":0.04662398730672073,"fees":0.024682216373585943,"net":0.021941770933134788,"profitPercent":"0.178"}}
+[2025-12-07T06:18:10.418Z] ORDER_PLACED_SELL: Price: $90932.50 | Amount: 0.000124 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496846705","level":4,"worthCheck":{"worth":true,"gross":0.042066432341645366,"fees":0.022269497850769128,"net":0.019796934490876238,"profitPercent":"0.178"}}
+[2025-12-07T06:18:12.236Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89610 | Score: 55
+  Details: {"level":{"side":"buy","price":"88932.907363160871236","amount":"0.00015233597634290681059","level":-2}}
+[2025-12-07T06:18:16.495Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89610 | Score: 55
+  Details: {"level":{"side":"buy","price":"88594.366044741306854","amount":"0.00013930688396726406811","level":-3}}
+[2025-12-07T06:18:20.634Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89610 | Score: 55
+  Details: {"level":{"side":"buy","price":"88255.824726321742471","amount":"0.00012617783476442406372","level":-4}}
+[2025-12-07T06:18:20.993Z] ORDER_PLACED_SELL: Price: $89948.53 | Amount: 0.000165 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496848750","level":1,"worthCheck":{"worth":true,"gross":0.05573808007896955,"fees":0.029507114947225396,"net":0.026230965131744152,"profitPercent":"0.178"}}
+[2025-12-07T06:18:21.524Z] ORDER_PLACED_SELL: Price: $90287.07 | Amount: 0.000151 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496848829","level":2,"worthCheck":{"worth":true,"gross":0.051182350086324005,"fees":0.027095362544360797,"net":0.024086987541963208,"profitPercent":"0.178"}}
+[2025-12-07T06:18:22.036Z] ORDER_PLACED_SELL: Price: $90625.61 | Amount: 0.000138 BTC | Composite Score: 55 | Regime: BEAR | Price: $89610 | Score: 55
+  Details: {"orderId":"53496848864","level":3,"worthCheck":{"worth":true,"gross":0.04662662009367846,"fees":0.024683610141496195,"net":0.021943009952182266,"profitPercent":"0.178"}}
+[2025-12-07T06:18:25.955Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89610 | Score: 55
+  Details: {"level":{"side":"sell","price":"90964.155273678257529","amount":"0.00012427106474753313147","level":4}}
+[2025-12-07T06:23:04.212Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"89314.644395866149602","amount":"0.0001651804539789176056","level":-1}}
+[2025-12-07T06:23:04.673Z] ORDER_PLACED_BUY: Price: $88973.97 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496935987","level":-2,"worthCheck":{"worth":true,"gross":0.05184239873380242,"fees":0.027286643314914247,"net":0.024555755418888173,"profitPercent":"0.180"}}
+[2025-12-07T06:23:08.782Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"88633.293187598448806","amount":"0.00013907009170487375128","level":-3}}
+[2025-12-07T06:23:08.795Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"89314.644395866149602","amount":"0.0001651804539789176056","level":-1}}
+[2025-12-07T06:23:12.875Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"88292.617583464598409","amount":"0.00012586379096659884609","level":-4}}
+[2025-12-07T06:23:12.888Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"88973.968791732299204","amount":"0.0001521752602908240502","level":-2}}
+[2025-12-07T06:23:13.213Z] ORDER_PLACED_SELL: Price: $89996.00 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496938667","level":1,"worthCheck":{"worth":true,"gross":0.05605912290802665,"fees":0.029506067016549627,"net":0.026553055891477023,"profitPercent":"0.180"}}
+[2025-12-07T06:23:13.557Z] ORDER_PLACED_SELL: Price: $90336.67 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496938686","level":2,"worthCheck":{"worth":true,"gross":0.051448413401791404,"fees":0.027079273719979147,"net":0.024369139681812257,"profitPercent":"0.180"}}
+[2025-12-07T06:23:14.084Z] ORDER_PLACED_SELL: Price: $90677.35 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496938719","level":3,"worthCheck":{"worth":true,"gross":0.04683770389555615,"fees":0.024652480423408667,"net":0.022185223472147485,"profitPercent":"0.180"}}
+[2025-12-07T06:23:14.612Z] ORDER_PLACED_SELL: Price: $91018.02 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496938749","level":4,"worthCheck":{"worth":true,"gross":0.0422269943893209,"fees":0.022225687126838187,"net":0.020001307262482712,"profitPercent":"0.180"}}
+[2025-12-07T06:23:17.106Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"88633.293187598448806","amount":"0.00013907009170487375128","level":-3}}
+[2025-12-07T06:23:21.020Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"buy","price":"88292.617583464598409","amount":"0.00012586379096659884609","level":-4}}
+[2025-12-07T06:23:21.424Z] ORDER_PLACED_SELL: Price: $89996.00 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496940312","level":1,"worthCheck":{"worth":true,"gross":0.05605912290802665,"fees":0.029506067016549627,"net":0.026553055891477023,"profitPercent":"0.180"}}
+[2025-12-07T06:23:21.767Z] ORDER_PLACED_SELL: Price: $90336.67 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496940343","level":2,"worthCheck":{"worth":true,"gross":0.051448413401791404,"fees":0.027079273719979147,"net":0.024369139681812257,"profitPercent":"0.180"}}
+[2025-12-07T06:23:22.126Z] ORDER_PLACED_SELL: Price: $90677.35 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89655 | Score: 51
+  Details: {"orderId":"53496940374","level":3,"worthCheck":{"worth":true,"gross":0.04683770389555615,"fees":0.024652480423408667,"net":0.022185223472147485,"profitPercent":"0.180"}}
+[2025-12-07T06:23:26.391Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89655 | Score: 51
+  Details: {"level":{"side":"sell","price":"91018.022416535401591","amount":"0.00012395074339614302997","level":4}}
+[2025-12-07T06:28:05.132Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"89322.881538723292699","amount":"0.00016509563486100146856","level":-1}}
+[2025-12-07T06:28:05.471Z] ORDER_PLACED_BUY: Price: $88980.00 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53496998212","level":-2,"worthCheck":{"worth":true,"gross":0.05211996795406207,"fees":0.027259668165654453,"net":0.024860299788407616,"profitPercent":"0.182"}}
+[2025-12-07T06:28:08.531Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"89322.881538723292699","amount":"0.00016509563486100146856","level":-1}}
+[2025-12-07T06:28:09.575Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"88637.124616169878097","amount":"0.00013881734670287345832","level":-3}}
+[2025-12-07T06:28:12.455Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"88980.003077446585398","amount":"0.00015200712159052939288","level":-2}}
+[2025-12-07T06:28:13.358Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"88294.246154893170796","amount":"0.00012552513049168821114","level":-4}}
+[2025-12-07T06:28:13.703Z] ORDER_PLACED_SELL: Price: $90008.64 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53496999874","level":1,"worthCheck":{"worth":true,"gross":0.056391271407037105,"fees":0.029493635670498997,"net":0.026897635736538108,"profitPercent":"0.182"}}
+[2025-12-07T06:28:14.196Z] ORDER_PLACED_SELL: Price: $90351.52 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53496999932","level":2,"worthCheck":{"worth":true,"gross":0.051721358397551556,"fees":0.0270511882938381,"net":0.024670170103713456,"profitPercent":"0.182"}}
+[2025-12-07T06:28:14.558Z] ORDER_PLACED_SELL: Price: $90694.40 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53497000003","level":3,"worthCheck":{"worth":true,"gross":0.047051445388066,"fees":0.024608740917177203,"net":0.022442704470888798,"profitPercent":"0.182"}}
+[2025-12-07T06:28:14.899Z] ORDER_PLACED_SELL: Price: $91037.27 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53497000061","level":4,"worthCheck":{"worth":true,"gross":0.042381532378580444,"fees":0.022166293540516305,"net":0.02021523883806414,"profitPercent":"0.182"}}
+[2025-12-07T06:28:16.939Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"88637.124616169878097","amount":"0.00013881734670287345832","level":-3}}
+[2025-12-07T06:28:20.993Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"buy","price":"88294.246154893170796","amount":"0.00012552513049168821114","level":-4}}
+[2025-12-07T06:28:21.521Z] ORDER_PLACED_SELL: Price: $90008.64 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53497000593","level":1,"worthCheck":{"worth":true,"gross":0.056391271407037105,"fees":0.029493635670498997,"net":0.026897635736538108,"profitPercent":"0.182"}}
+[2025-12-07T06:28:21.864Z] ORDER_PLACED_SELL: Price: $90351.52 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53497000611","level":2,"worthCheck":{"worth":true,"gross":0.051721358397551556,"fees":0.0270511882938381,"net":0.024670170103713456,"profitPercent":"0.182"}}
+[2025-12-07T06:28:22.204Z] ORDER_PLACED_SELL: Price: $90694.40 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89666 | Score: 51
+  Details: {"orderId":"53497000641","level":3,"worthCheck":{"worth":true,"gross":0.047051445388066,"fees":0.024608740917177203,"net":0.022442704470888798,"profitPercent":"0.182"}}
+[2025-12-07T06:28:26.483Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89666 | Score: 51
+  Details: {"level":{"side":"sell","price":"91037.273845106829204","amount":"0.00012360511716242803477","level":4}}
+[2025-12-07T06:33:07.565Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"89334.051538723292689","amount":"0.00016509451767973539517","level":-1}}
+[2025-12-07T06:33:08.096Z] ORDER_PLACED_BUY: Price: $88991.17 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497048346","level":-2,"worthCheck":{"worth":true,"gross":0.05212022484190011,"fees":0.02726319837838618,"net":0.024857026463513933,"profitPercent":"0.182"}}
+[2025-12-07T06:33:08.628Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"89334.051538723292689","amount":"0.00016509451767973539517","level":-1}}
+[2025-12-07T06:33:12.337Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"88648.294616169878068","amount":"0.00013881998950052819383","level":-3}}
+[2025-12-07T06:33:12.339Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"88991.173077446585378","amount":"0.00015200787080013878506","level":-2}}
+[2025-12-07T06:33:16.462Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"88305.416154893170757","amount":"0.00012552969454059175754","level":-4}}
+[2025-12-07T06:33:16.477Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"88648.294616169878068","amount":"0.00013881998950052819383","level":-3}}
+[2025-12-07T06:33:16.819Z] ORDER_PLACED_SELL: Price: $90019.81 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497050306","level":1,"worthCheck":{"worth":true,"gross":0.05639091677686047,"fees":0.029497124302324183,"net":0.02689379247453629,"profitPercent":"0.182"}}
+[2025-12-07T06:33:17.349Z] ORDER_PLACED_SELL: Price: $90362.69 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497050513","level":2,"worthCheck":{"worth":true,"gross":0.0517216629710779,"fees":0.02705471747901847,"net":0.02466694549205943,"profitPercent":"0.182"}}
+[2025-12-07T06:33:17.880Z] ORDER_PLACED_SELL: Price: $90705.57 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497050693","level":3,"worthCheck":{"worth":true,"gross":0.04705240916529535,"fees":0.02461231065571276,"net":0.02244009850958259,"profitPercent":"0.182"}}
+[2025-12-07T06:33:18.227Z] ORDER_PLACED_SELL: Price: $91048.44 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497050844","level":4,"worthCheck":{"worth":true,"gross":0.04238315535951278,"fees":0.022169903832407047,"net":0.020213251527105732,"profitPercent":"0.182"}}
+[2025-12-07T06:33:20.389Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"buy","price":"88305.416154893170757","amount":"0.00012552969454059175754","level":-4}}
+[2025-12-07T06:33:20.731Z] ORDER_PLACED_SELL: Price: $90019.81 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497051120","level":1,"worthCheck":{"worth":true,"gross":0.05639091677686047,"fees":0.029497124302324183,"net":0.02689379247453629,"profitPercent":"0.182"}}
+[2025-12-07T06:33:21.057Z] ORDER_PLACED_SELL: Price: $90362.69 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497051173","level":2,"worthCheck":{"worth":true,"gross":0.0517216629710779,"fees":0.02705471747901847,"net":0.02466694549205943,"profitPercent":"0.182"}}
+[2025-12-07T06:33:21.402Z] ORDER_PLACED_SELL: Price: $90705.57 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89677 | Score: 51
+  Details: {"orderId":"53497051200","level":3,"worthCheck":{"worth":true,"gross":0.04705240916529535,"fees":0.02461231065571276,"net":0.02244009850958259,"profitPercent":"0.182"}}
+[2025-12-07T06:33:25.310Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89677 | Score: 51
+  Details: {"level":{"side":"sell","price":"91048.443845106829243","amount":"0.00012360985056249722508","level":4}}
+[2025-12-07T06:38:10.703Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89659 | Score: 51
+  Details: {"level":{"side":"buy","price":"89316.00868158043544","amount":"0.00016509163791415838163","level":-1}}
+[2025-12-07T06:38:11.235Z] ORDER_PLACED_BUY: Price: $88973.01 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53497109362","level":-2,"worthCheck":{"worth":true,"gross":0.0521352578998595,"fees":0.027255846309478544,"net":0.024879411590380953,"profitPercent":"0.183"}}
+[2025-12-07T06:38:15.145Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89659 | Score: 51
+  Details: {"level":{"side":"buy","price":"88630.00604474130632","amount":"0.00013880151499111594289","level":-3}}
+[2025-12-07T06:38:19.170Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89659 | Score: 51
+  Details: {"level":{"side":"buy","price":"88287.00472632174176","amount":"0.00012550324502197820617","level":-4}}
+[2025-12-07T06:38:19.694Z] ORDER_PLACED_SELL: Price: $90002.01 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53497110722","level":1,"worthCheck":{"worth":true,"gross":0.05641001741140304,"fees":0.029490652330394503,"net":0.02691936508100854,"profitPercent":"0.183"}}
+[2025-12-07T06:38:20.023Z] ORDER_PLACED_SELL: Price: $90345.01 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53497110742","level":2,"worthCheck":{"worth":true,"gross":0.05173635850991966,"fees":0.027047305277878998,"net":0.02468905323204066,"profitPercent":"0.183"}}
+[2025-12-07T06:38:20.364Z] ORDER_PLACED_SELL: Price: $90688.01 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53497110832","level":3,"worthCheck":{"worth":true,"gross":0.047062699608436495,"fees":0.02460395822536361,"net":0.022458741383072887,"profitPercent":"0.183"}}
+[2025-12-07T06:38:20.813Z] ORDER_PLACED_SELL: Price: $91031.02 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89659 | Score: 51
+  Details: {"orderId":"53497111113","level":4,"worthCheck":{"worth":true,"gross":0.04238904070695312,"fees":0.022160611172848108,"net":0.02022842953410501,"profitPercent":"0.183"}}
+[2025-12-07T06:43:11.124Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89669 | Score: 51
+  Details: {"level":{"side":"buy","price":"89326.448681580435471","amount":"0.00016509059423271113816","level":-1}}
+[2025-12-07T06:43:11.656Z] ORDER_PLACED_BUY: Price: $88983.45 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89669 | Score: 51
+  Details: {"orderId":"53497157468","level":-2,"worthCheck":{"worth":true,"gross":0.05213549857874721,"fees":0.027259145851524447,"net":0.024876352727222766,"profitPercent":"0.183"}}
+[2025-12-07T06:43:15.746Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89669 | Score: 51
+  Details: {"level":{"side":"buy","price":"88640.446044741306414","amount":"0.00013880398748737451609","level":-3}}
+[2025-12-07T06:43:19.871Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89669 | Score: 51
+  Details: {"level":{"side":"buy","price":"88297.444726321741885","amount":"0.00012550751421044105678","level":-4}}
+[2025-12-07T06:43:20.205Z] ORDER_PLACED_SELL: Price: $90012.45 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89669 | Score: 51
+  Details: {"orderId":"53497158814","level":1,"worthCheck":{"worth":true,"gross":0.05640968601859522,"fees":0.02949391298707968,"net":0.026915773031515544,"profitPercent":"0.183"}}
+[2025-12-07T06:43:20.734Z] ORDER_PLACED_SELL: Price: $90355.45 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89669 | Score: 51
+  Details: {"orderId":"53497158856","level":2,"worthCheck":{"worth":true,"gross":0.051736643790433655,"fees":0.02705060385720946,"net":0.024686039933224196,"profitPercent":"0.183"}}
+[2025-12-07T06:43:21.262Z] ORDER_PLACED_SELL: Price: $90698.45 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89669 | Score: 51
+  Details: {"orderId":"53497158895","level":3,"worthCheck":{"worth":true,"gross":0.04706360156227189,"fees":0.024607294727339135,"net":0.022456306834932757,"profitPercent":"0.183"}}
+[2025-12-07T06:43:21.594Z] ORDER_PLACED_SELL: Price: $91041.46 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89669 | Score: 51
+  Details: {"orderId":"53497158913","level":4,"worthCheck":{"worth":true,"gross":0.04239055933411013,"fees":0.022163985597468815,"net":0.020226573736641315,"profitPercent":"0.183"}}
+[2025-12-07T06:48:13.451Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89652 | Score: 51
+  Details: {"level":{"side":"buy","price":"89308.998681580435445","amount":"0.0001650923388094419139","level":-1}}
+[2025-12-07T06:48:13.980Z] ORDER_PLACED_BUY: Price: $88966.00 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89652 | Score: 51
+  Details: {"orderId":"53497201425","level":-2,"worthCheck":{"worth":true,"gross":0.052135096243785026,"fees":0.027253630802261154,"net":0.02488146544152387,"profitPercent":"0.183"}}
+[2025-12-07T06:48:17.740Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89652 | Score: 51
+  Details: {"level":{"side":"buy","price":"88622.996044741306336","amount":"0.00013879985440804097269","level":-3}}
+[2025-12-07T06:48:21.797Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89652 | Score: 51
+  Details: {"level":{"side":"buy","price":"88279.994726321741781","amount":"0.0001255003777711217431","level":-4}}
+[2025-12-07T06:48:22.320Z] ORDER_PLACED_SELL: Price: $89995.00 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89652 | Score: 51
+  Details: {"orderId":"53497202293","level":1,"worthCheck":{"worth":true,"gross":0.056410239960901595,"fees":0.029488462938142956,"net":0.02692177702275864,"profitPercent":"0.183"}}
+[2025-12-07T06:48:22.661Z] ORDER_PLACED_SELL: Price: $90338.00 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89652 | Score: 51
+  Details: {"orderId":"53497202318","level":2,"worthCheck":{"worth":true,"gross":0.051736166900378314,"fees":0.027045090417286012,"net":0.0246910764830923,"profitPercent":"0.183"}}
+[2025-12-07T06:48:23.126Z] ORDER_PLACED_SELL: Price: $90681.00 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89652 | Score: 51
+  Details: {"orderId":"53497202421","level":3,"worthCheck":{"worth":true,"gross":0.04706209383985484,"fees":0.024601717896428964,"net":0.022460375943425873,"profitPercent":"0.183"}}
+[2025-12-07T06:48:23.485Z] ORDER_PLACED_SELL: Price: $91024.01 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89652 | Score: 51
+  Details: {"orderId":"53497202441","level":4,"worthCheck":{"worth":true,"gross":0.04238802077933157,"fees":0.02215834537557203,"net":0.02022967540375954,"profitPercent":"0.183"}}
+[2025-12-07T06:53:13.756Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89609 | Score: 55
+  Details: {"level":{"side":"buy","price":"89265.898681580435441","amount":"0.0001650966500942212094","level":-1}}
+[2025-12-07T06:53:14.302Z] ORDER_PLACED_BUY: Price: $88922.90 | Amount: 0.000152 BTC | Composite Score: 55 | Regime: BEAR | Price: $89609 | Score: 55
+  Details: {"orderId":"53497254790","level":-2,"worthCheck":{"worth":true,"gross":0.05213410142626495,"fees":0.02724000888872131,"net":0.024894092537543638,"profitPercent":"0.183"}}
+[2025-12-07T06:53:18.406Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89609 | Score: 55
+  Details: {"level":{"side":"buy","price":"88579.896044741306323","amount":"0.00013878963728776093954","level":-3}}
+[2025-12-07T06:53:22.537Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89609 | Score: 55
+  Details: {"level":{"side":"buy","price":"88236.894726321741764","amount":"0.00012548273688583611243","level":-4}}
+[2025-12-07T06:53:22.896Z] ORDER_PLACED_SELL: Price: $89951.90 | Amount: 0.000164 BTC | Composite Score: 55 | Regime: BEAR | Price: $89609 | Score: 55
+  Details: {"orderId":"53497256604","level":1,"worthCheck":{"worth":true,"gross":0.05641160887280448,"fees":0.029475001679958073,"net":0.02693660719284641,"profitPercent":"0.183"}}
+[2025-12-07T06:53:23.426Z] ORDER_PLACED_SELL: Price: $90294.90 | Amount: 0.000151 BTC | Composite Score: 55 | Regime: BEAR | Price: $89609 | Score: 55
+  Details: {"orderId":"53497256674","level":2,"worthCheck":{"worth":true,"gross":0.05173498782206185,"fees":0.027031472483016142,"net":0.02470351533904571,"profitPercent":"0.183"}}
+[2025-12-07T06:53:23.955Z] ORDER_PLACED_SELL: Price: $90637.90 | Amount: 0.000137 BTC | Composite Score: 55 | Regime: BEAR | Price: $89609 | Score: 55
+  Details: {"orderId":"53497256706","level":3,"worthCheck":{"worth":true,"gross":0.04705836677131944,"fees":0.024587943286074325,"net":0.022470423485245118,"profitPercent":"0.183"}}
+[2025-12-07T06:53:24.282Z] ORDER_PLACED_SELL: Price: $90980.91 | Amount: 0.000124 BTC | Composite Score: 55 | Regime: BEAR | Price: $89609 | Score: 55
+  Details: {"orderId":"53497256820","level":4,"worthCheck":{"worth":true,"gross":0.042381745720576826,"fees":0.022144414089132397,"net":0.02023733163144443,"profitPercent":"0.183"}}
+[2025-12-07T06:58:15.410Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89673 | Score: 51
+  Details: {"level":{"side":"buy","price":"89329.728681580435448","amount":"0.00016509026637295117028","level":-1}}
+[2025-12-07T06:58:15.937Z] ORDER_PLACED_BUY: Price: $88986.73 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89673 | Score: 51
+  Details: {"orderId":"53497338343","level":-2,"worthCheck":{"worth":true,"gross":0.052135574175651574,"fees":0.02726018248553478,"net":0.024875391690116794,"profitPercent":"0.183"}}
+[2025-12-07T06:58:19.848Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89673 | Score: 51
+  Details: {"level":{"side":"buy","price":"88643.726044741306343","amount":"0.00013880476413588819493","level":-3}}
+[2025-12-07T06:58:23.728Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89673 | Score: 51
+  Details: {"level":{"side":"buy","price":"88300.724726321741791","amount":"0.00012550885523834851328","level":-4}}
+[2025-12-07T06:58:24.065Z] ORDER_PLACED_SELL: Price: $90015.73 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89673 | Score: 51
+  Details: {"orderId":"53497339488","level":1,"worthCheck":{"worth":true,"gross":0.05640958191529062,"fees":0.029494937406131037,"net":0.026914644509159584,"profitPercent":"0.183"}}
+[2025-12-07T06:58:24.545Z] ORDER_PLACED_SELL: Price: $90358.73 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89673 | Score: 51
+  Details: {"orderId":"53497339513","level":2,"worthCheck":{"worth":true,"gross":0.0517367333981084,"fees":0.027051640188832174,"net":0.024685093209276227,"profitPercent":"0.183"}}
+[2025-12-07T06:58:25.064Z] ORDER_PLACED_SELL: Price: $90701.73 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89673 | Score: 51
+  Details: {"orderId":"53497339554","level":3,"worthCheck":{"worth":true,"gross":0.047063884880925985,"fees":0.02460834297153321,"net":0.022455541909392775,"profitPercent":"0.183"}}
+[2025-12-07T06:58:25.592Z] ORDER_PLACED_SELL: Price: $91044.74 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89673 | Score: 51
+  Details: {"orderId":"53497339588","level":4,"worthCheck":{"worth":true,"gross":0.04239103636374357,"fees":0.022165045754234246,"net":0.020225990609509324,"profitPercent":"0.183"}}
+[2025-12-07T07:03:16.306Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89672 | Score: 51
+  Details: {"level":{"side":"buy","price":"89346.831462895522774","amount":"0.0001657739775275690446","level":-1}}
+[2025-12-07T07:03:16.835Z] ORDER_PLACED_BUY: Price: $89021.81 | Amount: 0.000153 BTC | Composite Score: 51 | Regime: BEAR | Price: $89672 | Score: 51
+  Details: {"orderId":"53497427953","level":-2,"worthCheck":{"worth":true,"gross":0.04984992702764044,"fees":0.02750695525711873,"net":0.022342971770521712,"profitPercent":"0.162"}}
+[2025-12-07T07:03:20.748Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89672 | Score: 51
+  Details: {"level":{"side":"buy","price":"88696.794388686568323","amount":"0.00014088644357492738273","level":-3}}
+[2025-12-07T07:03:24.706Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89672 | Score: 51
+  Details: {"level":{"side":"buy","price":"88371.775851582091097","amount":"0.00012830537750396668499","level":-4}}
+[2025-12-07T07:03:25.049Z] ORDER_PLACED_SELL: Price: $89996.87 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89672 | Score: 51
+  Details: {"orderId":"53497430535","level":1,"worthCheck":{"worth":true,"gross":0.053684327246463534,"fees":0.029622759262179187,"net":0.024061567984284347,"profitPercent":"0.162"}}
+[2025-12-07T07:03:25.576Z] ORDER_PLACED_SELL: Price: $90321.89 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89672 | Score: 51
+  Details: {"orderId":"53497430565","level":2,"worthCheck":{"worth":true,"gross":0.0494885616636543,"fees":0.02730755554900827,"net":0.02218100611464603,"profitPercent":"0.162"}}
+[2025-12-07T07:03:26.104Z] ORDER_PLACED_SELL: Price: $90646.91 | Amount: 0.000139 BTC | Composite Score: 51 | Regime: BEAR | Price: $89672 | Score: 51
+  Details: {"orderId":"53497430639","level":3,"worthCheck":{"worth":true,"gross":0.04529279608084507,"fees":0.024992351835837357,"net":0.020300444245007713,"profitPercent":"0.162"}}
+[2025-12-07T07:03:26.436Z] ORDER_PLACED_SELL: Price: $90971.92 | Amount: 0.000126 BTC | Composite Score: 51 | Regime: BEAR | Price: $89672 | Score: 51
+  Details: {"orderId":"53497430704","level":4,"worthCheck":{"worth":true,"gross":0.04109703049803583,"fees":0.02267714812266644,"net":0.018419882375369387,"profitPercent":"0.162"}}
+[2025-12-07T07:08:16.979Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89543 | Score: 48
+  Details: {"level":{"side":"buy","price":"89208.860034324093826","amount":"0.00016545597719683136652","level":-1}}
+[2025-12-07T07:08:17.488Z] ORDER_PLACED_BUY: Price: $88875.12 | Amount: 0.000153 BTC | Composite Score: 48 | Regime: BEAR | Price: $89543 | Score: 48
+  Details: {"orderId":"53497541738","level":-2,"worthCheck":{"worth":true,"gross":0.050962149299747274,"fees":0.027346340379976786,"net":0.023615808919770487,"profitPercent":"0.173"}}
+[2025-12-07T07:08:22.044Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89543 | Score: 48
+  Details: {"level":{"side":"buy","price":"88541.380102972281477","amount":"0.00013984820043219180434","level":-3}}
+[2025-12-07T07:08:26.521Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89543 | Score: 48
+  Details: {"level":{"side":"buy","price":"88207.640137296375303","amount":"0.000126898978745548861","level":-4}}
+[2025-12-07T07:08:27.044Z] ORDER_PLACED_SELL: Price: $89876.34 | Amount: 0.000165 BTC | Composite Score: 48 | Regime: BEAR | Price: $89543 | Score: 48
+  Details: {"orderId":"53497542904","level":1,"worthCheck":{"worth":true,"gross":0.05501346086080982,"fees":0.029520278223189002,"net":0.025493182637620817,"profitPercent":"0.173"}}
+[2025-12-07T07:08:27.368Z] ORDER_PLACED_SELL: Price: $90210.08 | Amount: 0.000152 BTC | Composite Score: 48 | Regime: BEAR | Price: $89543 | Score: 48
+  Details: {"orderId":"53497542920","level":2,"worthCheck":{"worth":true,"gross":0.050582260711342204,"fees":0.027142491782777896,"net":0.02343976892856431,"profitPercent":"0.173"}}
+[2025-12-07T07:08:27.866Z] ORDER_PLACED_SELL: Price: $90543.82 | Amount: 0.000138 BTC | Composite Score: 48 | Regime: BEAR | Price: $89543 | Score: 48
+  Details: {"orderId":"53497543046","level":3,"worthCheck":{"worth":true,"gross":0.0461510605618746,"fees":0.0247647053423668,"net":0.021386355219507804,"profitPercent":"0.173"}}
+[2025-12-07T07:08:28.209Z] ORDER_PLACED_SELL: Price: $90877.56 | Amount: 0.000125 BTC | Composite Score: 48 | Regime: BEAR | Price: $89543 | Score: 48
+  Details: {"orderId":"53497543105","level":4,"worthCheck":{"worth":true,"gross":0.04171986041240699,"fees":0.022386918901955693,"net":0.019332941510451295,"profitPercent":"0.173"}}
+[2025-12-07T07:13:19.053Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89446 | Score: 48
+  Details: {"level":{"side":"buy","price":"89104.073605752665715","amount":"0.00016514899395432755107","level":-1}}
+[2025-12-07T07:13:19.583Z] ORDER_PLACED_BUY: Price: $88762.02 | Amount: 0.000152 BTC | Composite Score: 48 | Regime: BEAR | Price: $89446 | Score: 48
+  Details: {"orderId":"53497667443","level":-2,"worthCheck":{"worth":true,"gross":0.05201155874117288,"fees":0.027201553445024316,"net":0.024810005296148564,"profitPercent":"0.182"}}
+[2025-12-07T07:13:23.657Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89446 | Score: 48
+  Details: {"level":{"side":"buy","price":"88419.960817257997146","amount":"0.00013886071632866816105","level":-3}}
+[2025-12-07T07:13:27.596Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89446 | Score: 48
+  Details: {"level":{"side":"buy","price":"88077.904423010662861","amount":"0.00012556343910647557229","level":-4}}
+[2025-12-07T07:13:28.049Z] ORDER_PLACED_SELL: Price: $89788.19 | Amount: 0.000165 BTC | Composite Score: 48 | Regime: BEAR | Price: $89446 | Score: 48
+  Details: {"orderId":"53497673022","level":1,"worthCheck":{"worth":true,"gross":0.05627424150539115,"fees":0.029430896226444916,"net":0.026843345278946232,"profitPercent":"0.182"}}
+[2025-12-07T07:13:28.573Z] ORDER_PLACED_SELL: Price: $90130.24 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89446 | Score: 48
+  Details: {"orderId":"53497673622","level":2,"worthCheck":{"worth":true,"gross":0.05161375760115307,"fees":0.02699350721005973,"net":0.024620250391093338,"profitPercent":"0.182"}}
+[2025-12-07T07:13:28.917Z] ORDER_PLACED_SELL: Price: $90472.30 | Amount: 0.000137 BTC | Composite Score: 48 | Regime: BEAR | Price: $89446 | Score: 48
+  Details: {"orderId":"53497674293","level":3,"worthCheck":{"worth":true,"gross":0.04695327369691498,"fees":0.02455611819367454,"net":0.02239715550324044,"profitPercent":"0.182"}}
+[2025-12-07T07:13:29.261Z] ORDER_PLACED_SELL: Price: $90814.36 | Amount: 0.000124 BTC | Composite Score: 48 | Regime: BEAR | Price: $89446 | Score: 48
+  Details: {"orderId":"53497674377","level":4,"worthCheck":{"worth":true,"gross":0.0422927897926769,"fees":0.02211872917728935,"net":0.02017406061538755,"profitPercent":"0.182"}}
+[2025-12-07T07:18:19.496Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89426 | Score: 51
+  Details: {"level":{"side":"buy","price":"89084.213605752665727","amount":"0.00016515099658745518511","level":-1}}
+[2025-12-07T07:18:20.023Z] ORDER_PLACED_BUY: Price: $88742.16 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89426 | Score: 51
+  Details: {"orderId":"53497777366","level":-2,"worthCheck":{"worth":true,"gross":0.05201110472754671,"fees":0.027195276408139336,"net":0.024815828319407377,"profitPercent":"0.183"}}
+[2025-12-07T07:18:23.972Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89426 | Score: 48
+  Details: {"level":{"side":"buy","price":"88400.100817257997182","amount":"0.00013885601055370108057","level":-3}}
+[2025-12-07T07:18:28.401Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89426 | Score: 48
+  Details: {"level":{"side":"buy","price":"88058.04442301066291","amount":"0.00012555530550205009288","level":-4}}
+[2025-12-07T07:18:28.743Z] ORDER_PLACED_SELL: Price: $89768.33 | Amount: 0.000165 BTC | Composite Score: 48 | Regime: BEAR | Price: $89426 | Score: 48
+  Details: {"orderId":"53497780603","level":1,"worthCheck":{"worth":true,"gross":0.05627487592268579,"fees":0.029424693314399678,"net":0.026850182608286113,"profitPercent":"0.183"}}
+[2025-12-07T07:18:29.300Z] ORDER_PLACED_SELL: Price: $90110.38 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89426 | Score: 48
+  Details: {"orderId":"53497780630","level":2,"worthCheck":{"worth":true,"gross":0.05161321871611145,"fees":0.02698723198922925,"net":0.0246259867268822,"profitPercent":"0.183"}}
+[2025-12-07T07:18:29.830Z] ORDER_PLACED_SELL: Price: $90452.44 | Amount: 0.000137 BTC | Composite Score: 48 | Regime: BEAR | Price: $89426 | Score: 48
+  Details: {"orderId":"53497780651","level":3,"worthCheck":{"worth":true,"gross":0.04695156150953713,"fees":0.024549770664058834,"net":0.022401790845478296,"profitPercent":"0.183"}}
+[2025-12-07T07:18:30.177Z] ORDER_PLACED_SELL: Price: $90794.50 | Amount: 0.000124 BTC | Composite Score: 48 | Regime: BEAR | Price: $89426 | Score: 48
+  Details: {"orderId":"53497780690","level":4,"worthCheck":{"worth":true,"gross":0.04228990430296279,"fees":0.02211230933888841,"net":0.02017759496407438,"profitPercent":"0.183"}}
+[2025-12-07T07:23:20.421Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89435 | Score: 51
+  Details: {"level":{"side":"buy","price":"89090.717177181237407","amount":"0.00016507361685711908712","level":-1}}
+[2025-12-07T07:23:20.999Z] ORDER_PLACED_BUY: Price: $88746.65 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89435 | Score: 51
+  Details: {"orderId":"53497871928","level":-2,"worthCheck":{"worth":true,"gross":0.052263322012813265,"fees":0.02717037933939905,"net":0.025092942673414217,"profitPercent":"0.185"}}
+[2025-12-07T07:23:25.114Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89435 | Score: 51
+  Details: {"level":{"side":"buy","price":"88402.59153154371222","amount":"0.00013862488560805516517","level":-3}}
+[2025-12-07T07:23:29.221Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89435 | Score: 51
+  Details: {"level":{"side":"buy","price":"88058.528708724949626","amount":"0.00012524550901638034615","level":-4}}
+[2025-12-07T07:23:29.578Z] ORDER_PLACED_SELL: Price: $89778.84 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89435 | Score: 51
+  Details: {"orderId":"53497872836","level":1,"worthCheck":{"worth":true,"gross":0.056577196963966965,"fees":0.029413053825663844,"net":0.02716414313830312,"profitPercent":"0.185"}}
+[2025-12-07T07:23:30.112Z] ORDER_PLACED_SELL: Price: $90122.91 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89435 | Score: 51
+  Details: {"orderId":"53497873132","level":2,"worthCheck":{"worth":true,"gross":0.051861199570031734,"fees":0.0269613260513478,"net":0.024899873518683936,"profitPercent":"0.185"}}
+[2025-12-07T07:23:30.638Z] ORDER_PLACED_SELL: Price: $90466.97 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89435 | Score: 51
+  Details: {"orderId":"53497873185","level":3,"worthCheck":{"worth":true,"gross":0.047145202176096496,"fees":0.024509598277031745,"net":0.02263560389906475,"profitPercent":"0.185"}}
+[2025-12-07T07:23:30.967Z] ORDER_PLACED_SELL: Price: $90811.03 | Amount: 0.000123 BTC | Composite Score: 51 | Regime: BEAR | Price: $89435 | Score: 51
+  Details: {"orderId":"53497873236","level":4,"worthCheck":{"worth":true,"gross":0.04242920478216107,"fees":0.0220578705027156,"net":0.02037133427944547,"profitPercent":"0.185"}}
+[2025-12-07T07:28:21.359Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89353 | Score: 51
+  Details: {"level":{"side":"buy","price":"89003.854320038379887","amount":"0.00016487929905344234168","level":-1}}
+[2025-12-07T07:28:21.889Z] ORDER_PLACED_BUY: Price: $88654.49 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89353 | Score: 51
+  Details: {"orderId":"53497968015","level":-2,"worthCheck":{"worth":true,"gross":0.05292428516695381,"fees":0.027071664832018213,"net":0.0258526203349356,"profitPercent":"0.191"}}
+[2025-12-07T07:28:25.990Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89353 | Score: 51
+  Details: {"level":{"side":"buy","price":"88305.122960115139662","amount":"0.00013798830882678763858","level":-3}}
+[2025-12-07T07:28:29.957Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89353 | Score: 51
+  Details: {"level":{"side":"buy","price":"87955.75728015351955","amount":"0.00012438259471172734944","level":-4}}
+[2025-12-07T07:28:30.305Z] ORDER_PLACED_SELL: Price: $89702.59 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89353 | Score: 51
+  Details: {"orderId":"53497971297","level":1,"worthCheck":{"worth":true,"gross":0.05737794352466584,"fees":0.029349786226685246,"net":0.028028157297980593,"profitPercent":"0.191"}}
+[2025-12-07T07:28:30.645Z] ORDER_PLACED_SELL: Price: $90051.95 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89353 | Score: 51
+  Details: {"orderId":"53497971319","level":2,"worthCheck":{"worth":true,"gross":0.05251042366596178,"fees":0.026859967691350396,"net":0.025650455974611384,"profitPercent":"0.191"}}
+[2025-12-07T07:28:31.489Z] ORDER_PLACED_SELL: Price: $90401.32 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89353 | Score: 51
+  Details: {"orderId":"53497971481","level":3,"worthCheck":{"worth":true,"gross":0.04764290380725792,"fees":0.024370149156015646,"net":0.023272754651242275,"profitPercent":"0.191"}}
+[2025-12-07T07:28:32.024Z] ORDER_PLACED_SELL: Price: $90750.68 | Amount: 0.000122 BTC | Composite Score: 51 | Regime: BEAR | Price: $89353 | Score: 51
+  Details: {"orderId":"53497971591","level":4,"worthCheck":{"worth":true,"gross":0.04277538394855406,"fees":0.0218803306206809,"net":0.020895053327873163,"profitPercent":"0.191"}}
+[2025-12-07T07:33:22.406Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89333 | Score: 51
+  Details: {"level":{"side":"buy","price":"88983.144320038379829","amount":"0.00016488131704301769659","level":-1}}
+[2025-12-07T07:33:22.746Z] ORDER_PLACED_BUY: Price: $88633.78 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89333 | Score: 51
+  Details: {"orderId":"53498060128","level":-2,"worthCheck":{"worth":true,"gross":0.05292374760214508,"fees":0.027065115339465966,"net":0.02585863226267911,"profitPercent":"0.191"}}
+[2025-12-07T07:33:27.287Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89333 | Score: 51
+  Details: {"level":{"side":"buy","price":"88284.412960115139486","amount":"0.00013798316045261496288","level":-3}}
+[2025-12-07T07:33:31.552Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89333 | Score: 51
+  Details: {"level":{"side":"buy","price":"87935.047280153519314","amount":"0.00012437378271383174138","level":-4}}
+[2025-12-07T07:33:32.081Z] ORDER_PLACED_SELL: Price: $89681.88 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89333 | Score: 51
+  Details: {"orderId":"53498065989","level":1,"worthCheck":{"worth":true,"gross":0.0573785935697555,"fees":0.02934331606023359,"net":0.028035277509521908,"profitPercent":"0.191"}}
+[2025-12-07T07:33:32.611Z] ORDER_PLACED_SELL: Price: $90031.24 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89333 | Score: 51
+  Details: {"orderId":"53498066149","level":2,"worthCheck":{"worth":true,"gross":0.052509794360102516,"fees":0.02685342034905728,"net":0.025656374011045237,"profitPercent":"0.191"}}
+[2025-12-07T07:33:32.956Z] ORDER_PLACED_SELL: Price: $90380.61 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89333 | Score: 51
+  Details: {"orderId":"53498066184","level":3,"worthCheck":{"worth":true,"gross":0.047640995150449554,"fees":0.024363524637880975,"net":0.02327747051256858,"profitPercent":"0.191"}}
+[2025-12-07T07:33:33.487Z] ORDER_PLACED_SELL: Price: $90729.97 | Amount: 0.000122 BTC | Composite Score: 51 | Regime: BEAR | Price: $89333 | Score: 51
+  Details: {"orderId":"53498066281","level":4,"worthCheck":{"worth":true,"gross":0.04277219594079637,"fees":0.02187362892670456,"net":0.02089856701409181,"profitPercent":"0.191"}}
+[2025-12-07T07:38:23.801Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89256 | Score: 51
+  Details: {"level":{"side":"buy","price":"88902.272177181236835","amount":"0.00016470935331806291978","level":-1}}
+[2025-12-07T07:38:24.366Z] ORDER_PLACED_BUY: Price: $88548.21 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89256 | Score: 51
+  Details: {"orderId":"53498195385","level":-2,"worthCheck":{"worth":true,"gross":0.05350448853814674,"fees":0.02697646529836234,"net":0.0265280232397844,"profitPercent":"0.197"}}
+[2025-12-07T07:38:28.452Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89256 | Score: 51
+  Details: {"level":{"side":"buy","price":"88194.156531543710505","amount":"0.00013741739886207948045","level":-3}}
+[2025-12-07T07:38:32.568Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89256 | Score: 51
+  Details: {"level":{"side":"buy","price":"87840.09870872494734","amount":"0.000123606412769392128","level":-4}}
+[2025-12-07T07:38:33.221Z] ORDER_PLACED_SELL: Price: $89610.39 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89256 | Score: 51
+  Details: {"orderId":"53498197836","level":1,"worthCheck":{"worth":true,"gross":0.05808530734146859,"fees":0.02928607151761988,"net":0.02879923582384871,"profitPercent":"0.197"}}
+[2025-12-07T07:38:33.750Z] ORDER_PLACED_SELL: Price: $89964.45 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89256 | Score: 51
+  Details: {"orderId":"53498197893","level":2,"worthCheck":{"worth":true,"gross":0.05308001034768477,"fees":0.026762447344209857,"net":0.02631756300347491,"profitPercent":"0.197"}}
+[2025-12-07T07:38:34.280Z] ORDER_PLACED_SELL: Price: $90318.50 | Amount: 0.000136 BTC | Composite Score: 51 | Regime: BEAR | Price: $89256 | Score: 51
+  Details: {"orderId":"53498197930","level":3,"worthCheck":{"worth":true,"gross":0.04807471335390075,"fees":0.024238823170799735,"net":0.023835890183101012,"profitPercent":"0.197"}}
+[2025-12-07T07:38:34.624Z] ORDER_PLACED_SELL: Price: $90672.56 | Amount: 0.000122 BTC | Composite Score: 51 | Regime: BEAR | Price: $89256 | Score: 51
+  Details: {"orderId":"53498197947","level":4,"worthCheck":{"worth":true,"gross":0.04306941636011672,"fees":0.02171519899738961,"net":0.02135421736272711,"profitPercent":"0.197"}}
+[2025-12-07T07:43:25.394Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89248 | Score: 51
+  Details: {"level":{"side":"buy","price":"88890.592891466951115","amount":"0.00016457363609517105683","level":-1}}
+[2025-12-07T07:43:25.925Z] ORDER_PLACED_BUY: Price: $88532.97 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89248 | Score: 51
+  Details: {"orderId":"53498298548","level":-2,"worthCheck":{"worth":true,"gross":0.053945230499602,"fees":0.026924781062195525,"net":0.027020449437406478,"profitPercent":"0.201"}}
+[2025-12-07T07:43:30.138Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89248 | Score: 51
+  Details: {"level":{"side":"buy","price":"88175.338674400853344","amount":"0.00013699921355561465137","level":-3}}
+[2025-12-07T07:43:33.892Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89248 | Score: 51
+  Details: {"level":{"side":"buy","price":"87817.711565867804459","amount":"0.00012304356198786347395","level":-4}}
+[2025-12-07T07:43:34.255Z] ORDER_PLACED_SELL: Price: $89605.85 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89248 | Score: 51
+  Details: {"orderId":"53498300213","level":1,"worthCheck":{"worth":true,"gross":0.05862015139209215,"fees":0.029258096173608566,"net":0.029362055218483587,"profitPercent":"0.201"}}
+[2025-12-07T07:43:34.687Z] ORDER_PLACED_SELL: Price: $89963.47 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89248 | Score: 51
+  Details: {"orderId":"53498300257","level":2,"worthCheck":{"worth":true,"gross":0.05351290194889878,"fees":0.02670900014019712,"net":0.02680390180870166,"profitPercent":"0.201"}}
+[2025-12-07T07:43:35.200Z] ORDER_PLACED_SELL: Price: $90321.10 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89248 | Score: 51
+  Details: {"orderId":"53498300308","level":3,"worthCheck":{"worth":true,"gross":0.04840565250570562,"fees":0.02415990410678578,"net":0.024245748398919836,"profitPercent":"0.201"}}
+[2025-12-07T07:43:35.543Z] ORDER_PLACED_SELL: Price: $90678.73 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89248 | Score: 51
+  Details: {"orderId":"53498300366","level":4,"worthCheck":{"worth":true,"gross":0.04329840306251225,"fees":0.02161080807337434,"net":0.02168759498913791,"profitPercent":"0.201"}}
+[2025-12-07T07:48:25.903Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89300 | Score: 51
+  Details: {"level":{"side":"buy","price":"88942.195748609808484","amount":"0.0001645620238575191656","level":-1}}
+[2025-12-07T07:48:26.437Z] ORDER_PLACED_BUY: Price: $88584.39 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89300 | Score: 51
+  Details: {"orderId":"53498404247","level":-2,"worthCheck":{"worth":true,"gross":0.05396859914775253,"fees":0.026938729124482478,"net":0.027029870023270054,"profitPercent":"0.201"}}
+[2025-12-07T07:48:30.518Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89300 | Score: 51
+  Details: {"level":{"side":"buy","price":"88226.587245829425452","amount":"0.0001369921173023717496","level":-3}}
+[2025-12-07T07:48:34.652Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89300 | Score: 51
+  Details: {"level":{"side":"buy","price":"87868.782994439233936","amount":"0.00012303876582739975792","level":-4}}
+[2025-12-07T07:48:34.985Z] ORDER_PLACED_SELL: Price: $89657.80 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89300 | Score: 51
+  Details: {"orderId":"53498407233","level":1,"worthCheck":{"worth":true,"gross":0.05864506936641076,"fees":0.029273015477445735,"net":0.029372053888965022,"profitPercent":"0.201"}}
+[2025-12-07T07:48:35.643Z] ORDER_PLACED_SELL: Price: $90015.61 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89300 | Score: 51
+  Details: {"orderId":"53498407299","level":2,"worthCheck":{"worth":true,"gross":0.053536119993964425,"fees":0.026722854727891467,"net":0.026813265266072958,"profitPercent":"0.201"}}
+[2025-12-07T07:48:36.016Z] ORDER_PLACED_SELL: Price: $90373.41 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89300 | Score: 51
+  Details: {"orderId":"53498407541","level":3,"worthCheck":{"worth":true,"gross":0.04842717062151809,"fees":0.024172693978337198,"net":0.024254476643180894,"profitPercent":"0.201"}}
+[2025-12-07T07:48:36.545Z] ORDER_PLACED_SELL: Price: $90731.22 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89300 | Score: 51
+  Details: {"orderId":"53498407884","level":4,"worthCheck":{"worth":true,"gross":0.04331822124907156,"fees":0.02162253322878283,"net":0.02169568802028873,"profitPercent":"0.201"}}
+[2025-12-07T07:53:26.861Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89343 | Score: 51
+  Details: {"level":{"side":"buy","price":"88985.625748609808506","amount":"0.00016455796939553773551","level":-1}}
+[2025-12-07T07:53:27.432Z] ORDER_PLACED_BUY: Price: $88627.82 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53498526301","level":-2,"worthCheck":{"worth":true,"gross":0.053969884530778105,"fees":0.02695247237532314,"net":0.027017412155454966,"profitPercent":"0.200"}}
+[2025-12-07T07:53:31.563Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89343 | Score: 51
+  Details: {"level":{"side":"buy","price":"88270.017245829425519","amount":"0.00013700347338709628288","level":-3}}
+[2025-12-07T07:53:35.828Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89343 | Score: 51
+  Details: {"level":{"side":"buy","price":"87912.212994439234025","amount":"0.00012305800445859923869","level":-4}}
+[2025-12-07T07:53:36.171Z] ORDER_PLACED_SELL: Price: $89701.23 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53498531622","level":1,"worthCheck":{"worth":true,"gross":0.05864373915477355,"fees":0.029286587757164913,"net":0.029357151397608635,"profitPercent":"0.200"}}
+[2025-12-07T07:53:36.641Z] ORDER_PLACED_SELL: Price: $90059.04 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53498531661","level":2,"worthCheck":{"worth":true,"gross":0.05353760531042224,"fees":0.026736592837199927,"net":0.02680101247322231,"profitPercent":"0.200"}}
+[2025-12-07T07:53:37.171Z] ORDER_PLACED_SELL: Price: $90416.84 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53498531704","level":3,"worthCheck":{"worth":true,"gross":0.048431471466070936,"fees":0.024186597917234938,"net":0.024244873548835998,"profitPercent":"0.200"}}
+[2025-12-07T07:53:37.514Z] ORDER_PLACED_SELL: Price: $90774.65 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53498532509","level":4,"worthCheck":{"worth":true,"gross":0.04332533762171963,"fees":0.021636602997269955,"net":0.021688734624449677,"profitPercent":"0.200"}}
+[2025-12-07T07:58:27.827Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89320 | Score: 51
+  Details: {"level":{"side":"buy","price":"88962.265748609808526","amount":"0.00016456014981821292573","level":-1}}
+[2025-12-07T07:58:28.151Z] ORDER_PLACED_BUY: Price: $88604.46 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89320 | Score: 51
+  Details: {"orderId":"53498613503","level":-2,"worthCheck":{"worth":true,"gross":0.05396919339029635,"fees":0.0269450802372269,"net":0.02702411315306945,"profitPercent":"0.201"}}
+[2025-12-07T07:58:32.433Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89320 | Score: 51
+  Details: {"level":{"side":"buy","price":"88246.657245829425578","amount":"0.00013699736693967716256","level":-3}}
+[2025-12-07T07:58:36.583Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89320 | Score: 51
+  Details: {"level":{"side":"buy","price":"87888.852994439234104","amount":"0.00012304765925964475612","level":-4}}
+[2025-12-07T07:58:36.927Z] ORDER_PLACED_SELL: Price: $89677.87 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89320 | Score: 51
+  Details: {"orderId":"53498615471","level":1,"worthCheck":{"worth":true,"gross":0.058644454524450405,"fees":0.029279287559517916,"net":0.02936516696493249,"profitPercent":"0.201"}}
+[2025-12-07T07:58:37.467Z] ORDER_PLACED_SELL: Price: $90035.68 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89320 | Score: 51
+  Details: {"orderId":"53498615505","level":2,"worthCheck":{"worth":true,"gross":0.05353680665259814,"fees":0.026729203463665824,"net":0.026807603188932317,"profitPercent":"0.201"}}
+[2025-12-07T07:58:38.001Z] ORDER_PLACED_SELL: Price: $90393.48 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89320 | Score: 51
+  Details: {"orderId":"53498615548","level":3,"worthCheck":{"worth":true,"gross":0.04842915878074588,"fees":0.024179119367813733,"net":0.024250039412932144,"profitPercent":"0.201"}}
+[2025-12-07T07:58:38.344Z] ORDER_PLACED_SELL: Price: $90751.29 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89320 | Score: 51
+  Details: {"orderId":"53498615581","level":4,"worthCheck":{"worth":true,"gross":0.04332151090889361,"fees":0.021629035271961642,"net":0.021692475636931965,"profitPercent":"0.201"}}
+[2025-12-07T08:03:29.789Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89335 | Score: 51
+  Details: {"level":{"side":"buy","price":"88998.581023361527296","amount":"0.00016539269381506404229","level":-1}}
+[2025-12-07T08:03:30.134Z] ORDER_PLACED_BUY: Price: $88662.61 | Amount: 0.000153 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53498691815","level":-2,"worthCheck":{"worth":true,"gross":0.05124080523186079,"fees":0.02724998196456535,"net":0.023990823267295437,"profitPercent":"0.176"}}
+[2025-12-07T08:03:34.240Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89335 | Score: 51
+  Details: {"level":{"side":"buy","price":"88326.643070084581889","amount":"0.00013954230857258087936","level":-3}}
+[2025-12-07T08:03:38.184Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89335 | Score: 51
+  Details: {"level":{"side":"buy","price":"87990.674093446109186","amount":"0.00012646906172459723303","level":-4}}
+[2025-12-07T08:03:38.714Z] ORDER_PLACED_SELL: Price: $89670.52 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53498692812","level":1,"worthCheck":{"worth":true,"gross":0.05535783865830042,"fees":0.02943943012234401,"net":0.02591840853595641,"profitPercent":"0.176"}}
+[2025-12-07T08:03:39.057Z] ORDER_PLACED_SELL: Price: $90006.49 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53498692826","level":2,"worthCheck":{"worth":true,"gross":0.05085539284895023,"fees":0.027045018743638002,"net":0.023810374105312226,"profitPercent":"0.176"}}
+[2025-12-07T08:03:39.385Z] ORDER_PLACED_SELL: Price: $90342.46 | Amount: 0.000138 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53498692846","level":3,"worthCheck":{"worth":true,"gross":0.046352947039599864,"fees":0.024650607364931913,"net":0.02170233967466795,"profitPercent":"0.176"}}
+[2025-12-07T08:03:39.823Z] ORDER_PLACED_SELL: Price: $90678.43 | Amount: 0.000125 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53498692872","level":4,"worthCheck":{"worth":true,"gross":0.04185050123024967,"fees":0.02225619598622591,"net":0.019594305244023762,"profitPercent":"0.176"}}
+[2025-12-07T08:08:30.595Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89282 | Score: 51
+  Details: {"level":{"side":"buy","price":"88942.079594790098374","amount":"0.0001652452682719482051","level":-1}}
+[2025-12-07T08:08:31.123Z] ORDER_PLACED_BUY: Price: $88602.11 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89282 | Score: 51
+  Details: {"orderId":"53498781212","level":-2,"worthCheck":{"worth":true,"gross":0.05174524911177087,"fees":0.02717837698612142,"net":0.02456687212564945,"profitPercent":"0.181"}}
+[2025-12-07T08:08:35.018Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89282 | Score: 51
+  Details: {"level":{"side":"buy","price":"88262.138784370295121","amount":"0.00013906459049621193342","level":-3}}
+[2025-12-07T08:08:38.826Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89282 | Score: 51
+  Details: {"level":{"side":"buy","price":"87922.168379160393495","amount":"0.00012582240158355133746","level":-4}}
+[2025-12-07T08:08:39.188Z] ORDER_PLACED_SELL: Price: $89622.02 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89282 | Score: 51
+  Details: {"orderId":"53498785411","level":1,"worthCheck":{"worth":true,"gross":0.055964582924164126,"fees":0.029394515606612225,"net":0.0265700673175519,"profitPercent":"0.181"}}
+[2025-12-07T08:08:39.753Z] ORDER_PLACED_SELL: Price: $89961.99 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89282 | Score: 51
+  Details: {"orderId":"53498785628","level":2,"worthCheck":{"worth":true,"gross":0.05135117542488292,"fees":0.026971395989674445,"net":0.024379779435208474,"profitPercent":"0.181"}}
+[2025-12-07T08:08:40.331Z] ORDER_PLACED_SELL: Price: $90301.96 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89282 | Score: 51
+  Details: {"orderId":"53498785736","level":3,"worthCheck":{"worth":true,"gross":0.046737767925601525,"fees":0.024548276372736565,"net":0.02218949155286496,"profitPercent":"0.181"}}
+[2025-12-07T08:08:40.740Z] ORDER_PLACED_SELL: Price: $90641.93 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89282 | Score: 51
+  Details: {"orderId":"53498785784","level":4,"worthCheck":{"worth":true,"gross":0.04212436042632031,"fees":0.022125156755798778,"net":0.019999203670521534,"profitPercent":"0.181"}}
+[2025-12-07T08:13:31.949Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89263 | Score: 51
+  Details: {"level":{"side":"buy","price":"88922.258166218670176","amount":"0.00016522232918512824994","level":-1}}
+[2025-12-07T08:13:32.292Z] ORDER_PLACED_BUY: Price: $88581.64 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89263 | Score: 51
+  Details: {"orderId":"53498854160","level":-2,"worthCheck":{"worth":true,"gross":0.05182688266471581,"fees":0.027163360356074626,"net":0.024663522308641182,"profitPercent":"0.182"}}
+[2025-12-07T08:13:36.206Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89263 | Score: 51
+  Details: {"level":{"side":"buy","price":"88241.014498656010527","amount":"0.00013898423861591727532","level":-3}}
+[2025-12-07T08:13:40.332Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89263 | Score: 51
+  Details: {"level":{"side":"buy","price":"87900.392664874680703","amount":"0.00012571268093198761485","level":-4}}
+[2025-12-07T08:13:40.862Z] ORDER_PLACED_SELL: Price: $89603.50 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89263 | Score: 51
+  Details: {"orderId":"53498869618","level":1,"worthCheck":{"worth":true,"gross":0.056063577982704595,"fees":0.029383885221247987,"net":0.026679692761456607,"profitPercent":"0.182"}}
+[2025-12-07T08:13:41.186Z] ORDER_PLACED_SELL: Price: $89944.12 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89263 | Score: 51
+  Details: {"orderId":"53498869781","level":2,"worthCheck":{"worth":true,"gross":0.0514313460696067,"fees":0.02695605282541587,"net":0.02447529324419083,"profitPercent":"0.182"}}
+[2025-12-07T08:13:41.526Z] ORDER_PLACED_SELL: Price: $90284.75 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89263 | Score: 51
+  Details: {"orderId":"53498869954","level":3,"worthCheck":{"worth":true,"gross":0.04679911415650881,"fees":0.02452822042958375,"net":0.02227089372692506,"profitPercent":"0.182"}}
+[2025-12-07T08:13:42.356Z] ORDER_PLACED_SELL: Price: $90625.37 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89263 | Score: 51
+  Details: {"orderId":"53498870188","level":4,"worthCheck":{"worth":true,"gross":0.04216688224341091,"fees":0.022100388033751632,"net":0.02006649420965928,"profitPercent":"0.182"}}
+[2025-12-07T08:18:32.616Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89232 | Score: 51
+  Details: {"level":{"side":"buy","price":"88886.391737647241298","amount":"0.00016502905757157690011","level":-1}}
+[2025-12-07T08:18:33.131Z] ORDER_PLACED_BUY: Price: $88540.63 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89232 | Score: 51
+  Details: {"orderId":"53498988755","level":-2,"worthCheck":{"worth":true,"gross":0.05247083921224339,"fees":0.027083001651806674,"net":0.025387837560436714,"profitPercent":"0.187"}}
+[2025-12-07T08:18:37.221Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89232 | Score: 51
+  Details: {"level":{"side":"buy","price":"88194.875212941723893","amount":"0.00013837857138625344209","level":-3}}
+[2025-12-07T08:18:41.654Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89232 | Score: 51
+  Details: {"level":{"side":"buy","price":"87849.116950588965191","amount":"0.00012489599104113860071","level":-4}}
+[2025-12-07T08:18:42.184Z] ORDER_PLACED_SELL: Price: $89577.91 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89232 | Score: 51
+  Details: {"orderId":"53498991304","level":1,"worthCheck":{"worth":true,"gross":0.05683906249818979,"fees":0.029337674918803743,"net":0.027501387579386048,"profitPercent":"0.187"}}
+[2025-12-07T08:18:42.713Z] ORDER_PLACED_SELL: Price: $89923.67 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89232 | Score: 51
+  Details: {"orderId":"53498991729","level":2,"worthCheck":{"worth":true,"gross":0.05206420940022551,"fees":0.026873118294957594,"net":0.025191091105267918,"profitPercent":"0.187"}}
+[2025-12-07T08:18:43.057Z] ORDER_PLACED_SELL: Price: $90269.42 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89232 | Score: 51
+  Details: {"orderId":"53498991793","level":3,"worthCheck":{"worth":true,"gross":0.04728935630226123,"fees":0.02440856167111144,"net":0.022880794631149788,"profitPercent":"0.187"}}
+[2025-12-07T08:18:43.400Z] ORDER_PLACED_SELL: Price: $90615.18 | Amount: 0.000123 BTC | Composite Score: 51 | Regime: BEAR | Price: $89232 | Score: 51
+  Details: {"orderId":"53498991951","level":4,"worthCheck":{"worth":true,"gross":0.04251450320429695,"fees":0.021944005047265288,"net":0.02057049815703166,"profitPercent":"0.187"}}
+[2025-12-07T08:23:34.826Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89335 | Score: 51
+  Details: {"level":{"side":"buy","price":"88989.651737647241365","amount":"0.00016501880335262267376","level":-1}}
+[2025-12-07T08:23:35.468Z] ORDER_PLACED_BUY: Price: $88643.89 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53499083745","level":-2,"worthCheck":{"worth":true,"gross":0.052473369630134395,"fees":0.027115649865263176,"net":0.02535771976487122,"profitPercent":"0.187"}}
+[2025-12-07T08:23:39.400Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89335 | Score: 51
+  Details: {"level":{"side":"buy","price":"88298.135212941724094","amount":"0.00013840372185389394393","level":-3}}
+[2025-12-07T08:23:43.393Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89335 | Score: 51
+  Details: {"level":{"side":"buy","price":"87952.376950588965459","amount":"0.00012493923734728702095","level":-4}}
+[2025-12-07T08:23:43.914Z] ORDER_PLACED_SELL: Price: $89681.17 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53499085502","level":1,"worthCheck":{"worth":true,"gross":0.05683578629935719,"fees":0.029369931681026376,"net":0.027465854618330815,"profitPercent":"0.187"}}
+[2025-12-07T08:23:44.570Z] ORDER_PLACED_SELL: Price: $90026.93 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53499085548","level":2,"worthCheck":{"worth":true,"gross":0.052067190241623165,"fees":0.026905756386742745,"net":0.02516143385488042,"profitPercent":"0.187"}}
+[2025-12-07T08:23:44.924Z] ORDER_PLACED_SELL: Price: $90372.68 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53499085601","level":3,"worthCheck":{"worth":true,"gross":0.047298594183889146,"fees":0.024441581092459117,"net":0.02285701309143003,"profitPercent":"0.187"}}
+[2025-12-07T08:23:45.252Z] ORDER_PLACED_SELL: Price: $90718.44 | Amount: 0.000123 BTC | Composite Score: 51 | Regime: BEAR | Price: $89335 | Score: 51
+  Details: {"orderId":"53499085624","level":4,"worthCheck":{"worth":true,"gross":0.04252999812615512,"fees":0.021977405798175486,"net":0.020552592327979635,"profitPercent":"0.187"}}
+[2025-12-07T08:28:35.926Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89356 | Score: 51
+  Details: {"level":{"side":"buy","price":"89010.61173764724131","amount":"0.00016501672422326487838","level":-1}}
+[2025-12-07T08:28:36.462Z] ORDER_PLACED_BUY: Price: $88664.85 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89356 | Score: 51
+  Details: {"orderId":"53499173894","level":-2,"worthCheck":{"worth":true,"gross":0.052473882122135766,"fees":0.027122276670040295,"net":0.02535160545209547,"profitPercent":"0.187"}}
+[2025-12-07T08:28:40.394Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89356 | Score: 51
+  Details: {"level":{"side":"buy","price":"88319.09521294172393","amount":"0.00013840881795746776473","level":-3}}
+[2025-12-07T08:28:44.205Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89356 | Score: 51
+  Details: {"level":{"side":"buy","price":"87973.336950588965241","amount":"0.00012494800076062320288","level":-4}}
+[2025-12-07T08:28:44.564Z] ORDER_PLACED_SELL: Price: $89702.13 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89356 | Score: 51
+  Details: {"orderId":"53499177253","level":1,"worthCheck":{"worth":true,"gross":0.05683512200376292,"fees":0.029376479140110767,"net":0.027458642863652155,"profitPercent":"0.187"}}
+[2025-12-07T08:28:45.089Z] ORDER_PLACED_SELL: Price: $90047.89 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89356 | Score: 51
+  Details: {"orderId":"53499177294","level":2,"worthCheck":{"worth":true,"gross":0.052067794043547486,"fees":0.026912381141551648,"net":0.025155412901995838,"profitPercent":"0.187"}}
+[2025-12-07T08:28:45.619Z] ORDER_PLACED_SELL: Price: $90393.64 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89356 | Score: 51
+  Details: {"orderId":"53499177348","level":3,"worthCheck":{"worth":true,"gross":0.04730046608333204,"fees":0.024448283142992525,"net":0.022852182940339517,"profitPercent":"0.187"}}
+[2025-12-07T08:28:45.961Z] ORDER_PLACED_SELL: Price: $90739.40 | Amount: 0.000123 BTC | Composite Score: 51 | Regime: BEAR | Price: $89356 | Score: 51
+  Details: {"orderId":"53499177368","level":4,"worthCheck":{"worth":true,"gross":0.04253313812311659,"fees":0.021984185144433403,"net":0.02054895297868319,"profitPercent":"0.187"}}
+[2025-12-07T08:33:36.791Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89343 | Score: 51
+  Details: {"level":{"side":"buy","price":"88997.691737647241354","amount":"0.00016501800573230450573","level":-1}}
+[2025-12-07T08:33:37.144Z] ORDER_PLACED_BUY: Price: $88651.93 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53499275771","level":-2,"worthCheck":{"worth":true,"gross":0.05247356626117953,"fees":0.027118191835394472,"net":0.025355374425785056,"profitPercent":"0.187"}}
+[2025-12-07T08:33:41.151Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89343 | Score: 51
+  Details: {"level":{"side":"buy","price":"88306.175212941724061","amount":"0.00013840567701581996348","level":-3}}
+[2025-12-07T08:33:44.955Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89343 | Score: 51
+  Details: {"level":{"side":"buy","price":"87960.416950588965414","amount":"0.00012494259947685612975","level":-4}}
+[2025-12-07T08:33:45.302Z] ORDER_PLACED_SELL: Price: $89689.21 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53499278509","level":1,"worthCheck":{"worth":true,"gross":0.05683553145512842,"fees":0.029372443210649885,"net":0.027463088244478538,"profitPercent":"0.187"}}
+[2025-12-07T08:33:46.140Z] ORDER_PLACED_SELL: Price: $90034.97 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53499278822","level":2,"worthCheck":{"worth":true,"gross":0.052067421902753104,"fees":0.026908297570349654,"net":0.02515912433240345,"profitPercent":"0.187"}}
+[2025-12-07T08:33:46.975Z] ORDER_PLACED_SELL: Price: $90380.72 | Amount: 0.000137 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53499278936","level":3,"worthCheck":{"worth":true,"gross":0.047299312350377994,"fees":0.02444415193004953,"net":0.022855160420328462,"profitPercent":"0.187"}}
+[2025-12-07T08:33:47.438Z] ORDER_PLACED_SELL: Price: $90726.48 | Amount: 0.000123 BTC | Composite Score: 51 | Regime: BEAR | Price: $89343 | Score: 51
+  Details: {"orderId":"53499278964","level":4,"worthCheck":{"worth":true,"gross":0.042531202798002876,"fees":0.021980006289749405,"net":0.02055119650825347,"profitPercent":"0.187"}}
+[2025-12-07T08:38:37.936Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89462 | Score: 48
+  Details: {"level":{"side":"buy","price":"89109.681737647240849","amount":"0.00016475306665824158823","level":-1}}
+[2025-12-07T08:38:38.500Z] ORDER_PLACED_BUY: Price: $88757.28 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89462 | Score: 48
+  Details: {"orderId":"53499382528","level":-2,"worthCheck":{"worth":true,"gross":0.053304378712378815,"fees":0.027064381991438576,"net":0.02623999672094024,"profitPercent":"0.194"}}
+[2025-12-07T08:38:42.621Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89462 | Score: 48
+  Details: {"level":{"side":"buy","price":"88404.885212941722546","amount":"0.00013766288041727160687","level":-3}}
+[2025-12-07T08:38:46.397Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89462 | Score: 48
+  Details: {"level":{"side":"buy","price":"88052.486950588963395","amount":"0.00012395515927419362882","level":-4}}
+[2025-12-07T08:38:46.738Z] ORDER_PLACED_SELL: Price: $89814.48 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89462 | Score: 48
+  Details: {"orderId":"53499384310","level":1,"worthCheck":{"worth":true,"gross":0.05782999658368378,"fees":0.029362186670434574,"net":0.02846780991324921,"profitPercent":"0.194"}}
+[2025-12-07T08:38:47.254Z] ORDER_PLACED_SELL: Price: $90166.88 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89462 | Score: 48
+  Details: {"orderId":"53499384453","level":2,"worthCheck":{"worth":true,"gross":0.052884438321231485,"fees":0.02685116447658916,"net":0.026033273844642324,"profitPercent":"0.194"}}
+[2025-12-07T08:38:47.767Z] ORDER_PLACED_SELL: Price: $90519.27 | Amount: 0.000136 BTC | Composite Score: 48 | Regime: BEAR | Price: $89462 | Score: 48
+  Details: {"orderId":"53499384530","level":3,"worthCheck":{"worth":true,"gross":0.04793888005877897,"fees":0.02434014228274364,"net":0.02359873777603533,"profitPercent":"0.194"}}
+[2025-12-07T08:38:48.111Z] ORDER_PLACED_SELL: Price: $90871.67 | Amount: 0.000122 BTC | Composite Score: 48 | Regime: BEAR | Price: $89462 | Score: 48
+  Details: {"orderId":"53499384575","level":4,"worthCheck":{"worth":true,"gross":0.042993321796326665,"fees":0.021829120088898223,"net":0.021164201707428443,"profitPercent":"0.194"}}
+[2025-12-07T08:43:38.953Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89539 | Score: 48
+  Details: {"level":{"side":"buy","price":"89181.546737647241287","amount":"0.00016456610775799368867","level":-1}}
+[2025-12-07T08:43:39.483Z] ORDER_PLACED_BUY: Price: $88824.43 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89539 | Score: 48
+  Details: {"orderId":"53499484266","level":-2,"worthCheck":{"worth":true,"gross":0.053890356636473125,"fees":0.027023753127294825,"net":0.0268666035091783,"profitPercent":"0.199"}}
+[2025-12-07T08:43:43.594Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89539 | Score: 48
+  Details: {"level":{"side":"buy","price":"88467.320212941723862","amount":"0.00013713461243196914618","level":-3}}
+[2025-12-07T08:43:47.437Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89539 | Score: 48
+  Details: {"level":{"side":"buy","price":"88110.206950588965149","amount":"0.00012325209378192639582","level":-4}}
+[2025-12-07T08:43:47.969Z] ORDER_PLACED_SELL: Price: $89895.77 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89539 | Score: 48
+  Details: {"orderId":"53499486442","level":1,"worthCheck":{"worth":true,"gross":0.058534348164381786,"fees":0.02935252006090452,"net":0.029181828103477265,"profitPercent":"0.199"}}
+[2025-12-07T08:43:48.495Z] ORDER_PLACED_SELL: Price: $90252.89 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89539 | Score: 48
+  Details: {"orderId":"53499486524","level":2,"worthCheck":{"worth":true,"gross":0.05346048732487511,"fees":0.026808191700748933,"net":0.026652295624126174,"profitPercent":"0.199"}}
+[2025-12-07T08:43:48.823Z] ORDER_PLACED_SELL: Price: $90610.00 | Amount: 0.000135 BTC | Composite Score: 48 | Regime: BEAR | Price: $89539 | Score: 48
+  Details: {"orderId":"53499486598","level":3,"worthCheck":{"worth":true,"gross":0.04838662648536863,"fees":0.02426386334059345,"net":0.02412276314477518,"profitPercent":"0.199"}}
+[2025-12-07T08:43:49.165Z] ORDER_PLACED_SELL: Price: $90967.11 | Amount: 0.000121 BTC | Composite Score: 48 | Regime: BEAR | Price: $89539 | Score: 48
+  Details: {"orderId":"53499486681","level":4,"worthCheck":{"worth":true,"gross":0.043312765645861964,"fees":0.021719534980437872,"net":0.021593230665424092,"profitPercent":"0.199"}}
+[2025-12-07T08:48:39.900Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89433 | Score: 48
+  Details: {"level":{"side":"buy","price":"89075.876737647241313","amount":"0.00016457598021915635433","level":-1}}
+[2025-12-07T08:48:40.436Z] ORDER_PLACED_BUY: Price: $88718.76 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89433 | Score: 48
+  Details: {"orderId":"53499572027","level":-2,"worthCheck":{"worth":true,"gross":0.053887278418073996,"fees":0.02699031898249857,"net":0.026896959435575424,"profitPercent":"0.199"}}
+[2025-12-07T08:48:44.347Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89433 | Score: 48
+  Details: {"level":{"side":"buy","price":"88361.650212941723938","amount":"0.00013710721915730783075","level":-3}}
+[2025-12-07T08:48:48.282Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89433 | Score: 48
+  Details: {"level":{"side":"buy","price":"88004.536950588965251","amount":"0.00012320564056111095005","level":-4}}
+[2025-12-07T08:48:48.623Z] ORDER_PLACED_SELL: Price: $89790.10 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89433 | Score: 48
+  Details: {"orderId":"53499574474","level":1,"worthCheck":{"worth":true,"gross":0.05853758272683918,"fees":0.029319499455958187,"net":0.02921808327088099,"profitPercent":"0.199"}}
+[2025-12-07T08:48:49.170Z] ORDER_PLACED_SELL: Price: $90147.22 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89433 | Score: 48
+  Details: {"orderId":"53499574506","level":2,"worthCheck":{"worth":true,"gross":0.053456925775381636,"fees":0.026774769868826275,"net":0.02668215590655536,"profitPercent":"0.199"}}
+[2025-12-07T08:48:49.696Z] ORDER_PLACED_SELL: Price: $90504.33 | Amount: 0.000135 BTC | Composite Score: 48 | Regime: BEAR | Price: $89433 | Score: 48
+  Details: {"orderId":"53499574545","level":3,"worthCheck":{"worth":true,"gross":0.048376268823924276,"fees":0.024230040281694457,"net":0.02414622854222982,"profitPercent":"0.199"}}
+[2025-12-07T08:48:50.040Z] ORDER_PLACED_SELL: Price: $90861.44 | Amount: 0.000121 BTC | Composite Score: 48 | Regime: BEAR | Price: $89433 | Score: 48
+  Details: {"orderId":"53499574559","level":4,"worthCheck":{"worth":true,"gross":0.04329561187246673,"fees":0.021685310694562542,"net":0.021610301177904186,"profitPercent":"0.199"}}
+[2025-12-07T08:53:40.453Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89447 | Score: 48
+  Details: {"level":{"side":"buy","price":"89090.196737647241275","amount":"0.00016457464128027400057","level":-1}}
+[2025-12-07T08:53:40.979Z] ORDER_PLACED_BUY: Price: $88733.08 | Amount: 0.000151 BTC | Composite Score: 48 | Regime: BEAR | Price: $89447 | Score: 48
+  Details: {"orderId":"53499654980","level":-2,"worthCheck":{"worth":true,"gross":0.05388769621955924,"fees":0.026994849965417466,"net":0.02689284625414177,"profitPercent":"0.199"}}
+[2025-12-07T08:53:45.088Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89447 | Score: 48
+  Details: {"level":{"side":"buy","price":"88375.970212941723826","amount":"0.00013711093617026562157","level":-3}}
+[2025-12-07T08:53:49.055Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89447 | Score: 48
+  Details: {"level":{"side":"buy","price":"88018.856950588965102","amount":"0.00012321194352162811103","level":-4}}
+[2025-12-07T08:53:49.415Z] ORDER_PLACED_SELL: Price: $89804.42 | Amount: 0.000164 BTC | Composite Score: 48 | Regime: BEAR | Price: $89447 | Score: 48
+  Details: {"orderId":"53499657032","level":1,"worthCheck":{"worth":true,"gross":0.058537144054318854,"fees":0.02932397433937456,"net":0.029213169714944295,"profitPercent":"0.199"}}
+[2025-12-07T08:53:49.776Z] ORDER_PLACED_SELL: Price: $90161.54 | Amount: 0.000150 BTC | Composite Score: 48 | Regime: BEAR | Price: $89447 | Score: 48
+  Details: {"orderId":"53499657065","level":2,"worthCheck":{"worth":true,"gross":0.0534574091377534,"fees":0.02677929918053923,"net":0.026678109957214174,"profitPercent":"0.199"}}
+[2025-12-07T08:53:50.119Z] ORDER_PLACED_SELL: Price: $90518.65 | Amount: 0.000135 BTC | Composite Score: 48 | Regime: BEAR | Price: $89447 | Score: 48
+  Details: {"orderId":"53499657096","level":3,"worthCheck":{"worth":true,"gross":0.04837767422118773,"fees":0.02423462402170379,"net":0.02414305019948394,"profitPercent":"0.199"}}
+[2025-12-07T08:53:50.597Z] ORDER_PLACED_SELL: Price: $90875.76 | Amount: 0.000121 BTC | Composite Score: 48 | Regime: BEAR | Price: $89447 | Score: 48
+  Details: {"orderId":"53499657131","level":4,"worthCheck":{"worth":true,"gross":0.04329793930462227,"fees":0.02168994886286846,"net":0.02160799044175381,"profitPercent":"0.199"}}
+[2025-12-07T08:58:40.945Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89302 | Score: 51
+  Details: {"level":{"side":"buy","price":"88944.886737647241247","amount":"0.00016458824341200962479","level":-1}}
+[2025-12-07T08:58:41.470Z] ORDER_PLACED_BUY: Price: $88587.77 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89302 | Score: 51
+  Details: {"orderId":"53499784965","level":-2,"worthCheck":{"worth":true,"gross":0.05388344710856444,"fees":0.026948870853952193,"net":0.02693457625461225,"profitPercent":"0.200"}}
+[2025-12-07T08:58:45.548Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89302 | Score: 51
+  Details: {"level":{"side":"buy","price":"88230.660212941723741","amount":"0.00013707314858236227509","level":-3}}
+[2025-12-07T08:58:49.668Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89302 | Score: 51
+  Details: {"level":{"side":"buy","price":"87873.546950588964988","amount":"0.00012314787141917465692","level":-4}}
+[2025-12-07T08:58:50.021Z] ORDER_PLACED_SELL: Price: $89659.11 | Amount: 0.000164 BTC | Composite Score: 51 | Regime: BEAR | Price: $89302 | Score: 51
+  Details: {"orderId":"53499785862","level":1,"worthCheck":{"worth":true,"gross":0.058541600325843594,"fees":0.029278565337259022,"net":0.029263034988584572,"profitPercent":"0.200"}}
+[2025-12-07T08:58:50.543Z] ORDER_PLACED_SELL: Price: $90016.23 | Amount: 0.000150 BTC | Composite Score: 51 | Regime: BEAR | Price: $89302 | Score: 51
+  Details: {"orderId":"53499785890","level":2,"worthCheck":{"worth":true,"gross":0.05345249385816128,"fees":0.02673333706551794,"net":0.02671915679264334,"profitPercent":"0.200"}}
+[2025-12-07T08:58:51.075Z] ORDER_PLACED_SELL: Price: $90373.34 | Amount: 0.000135 BTC | Composite Score: 51 | Regime: BEAR | Price: $89302 | Score: 51
+  Details: {"orderId":"53499785910","level":3,"worthCheck":{"worth":true,"gross":0.04836338739047917,"fees":0.02418810879377696,"net":0.02417527859670221,"profitPercent":"0.200"}}
+[2025-12-07T08:58:51.412Z] ORDER_PLACED_SELL: Price: $90730.45 | Amount: 0.000121 BTC | Composite Score: 51 | Regime: BEAR | Price: $89302 | Score: 51
+  Details: {"orderId":"53499785929","level":4,"worthCheck":{"worth":true,"gross":0.04327428092279685,"fees":0.021642880522035876,"net":0.021631400400760975,"profitPercent":"0.200"}}
+[2025-12-07T09:03:42.003Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89360 | Score: 51
+  Details: {"level":{"side":"buy","price":"89022.433345266823013","amount":"0.00016533557217267011942","level":-1}}
+[2025-12-07T09:03:42.459Z] ORDER_PLACED_BUY: Price: $88685.04 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499882462","level":-2,"worthCheck":{"worth":true,"gross":0.05142201870942774,"fees":0.027238342678680028,"net":0.02418367603074771,"profitPercent":"0.178"}}
+[2025-12-07T09:03:46.470Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89360 | Score: 51
+  Details: {"level":{"side":"buy","price":"88347.640035800469038","amount":"0.0001393821005915873154","level":-3}}
+[2025-12-07T09:03:50.292Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89360 | Score: 51
+  Details: {"level":{"side":"buy","price":"88010.243381067292051","amount":"0.00012625612169898552989","level":-4}}
+[2025-12-07T09:03:50.636Z] ORDER_PLACED_SELL: Price: $89697.23 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499885519","level":1,"worthCheck":{"worth":true,"gross":0.0555730460957399,"fees":0.02943714990668616,"net":0.026135896189053744,"profitPercent":"0.178"}}
+[2025-12-07T09:03:50.968Z] ORDER_PLACED_SELL: Price: $90034.62 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499885575","level":2,"worthCheck":{"worth":true,"gross":0.05103370962038451,"fees":0.02703265460384242,"net":0.02400105501654209,"profitPercent":"0.178"}}
+[2025-12-07T09:03:51.312Z] ORDER_PLACED_SELL: Price: $90372.02 | Amount: 0.000138 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499885723","level":3,"worthCheck":{"worth":true,"gross":0.04649437314502891,"fees":0.024628159300998577,"net":0.021866213844030334,"profitPercent":"0.178"}}
+[2025-12-07T09:03:51.781Z] ORDER_PLACED_SELL: Price: $90709.42 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499885763","level":4,"worthCheck":{"worth":true,"gross":0.041955036669673325,"fees":0.022223663998154734,"net":0.01973137267151859,"profitPercent":"0.178"}}
+[2025-12-07T09:08:42.500Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89360 | Score: 51
+  Details: {"level":{"side":"buy","price":"89021.122630981108319","amount":"0.00016528515896404233631","level":-1}}
+[2025-12-07T09:08:43.029Z] ORDER_PLACED_BUY: Price: $88682.41 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499949983","level":-2,"worthCheck":{"worth":true,"gross":0.05158889479677208,"fees":0.027220188903624064,"net":0.02436870589314802,"profitPercent":"0.179"}}
+[2025-12-07T09:08:46.962Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89360 | Score: 51
+  Details: {"level":{"side":"buy","price":"88343.687892943324957","amount":"0.00013922854266762159951","level":-3}}
+[2025-12-07T09:08:50.923Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89360 | Score: 51
+  Details: {"level":{"side":"buy","price":"88004.970523924433276","amount":"0.00012604980275746190392","level":-4}}
+[2025-12-07T09:08:51.263Z] ORDER_PLACED_SELL: Price: $89698.56 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499953585","level":1,"worthCheck":{"worth":true,"gross":0.05577274390532466,"fees":0.029427740810438436,"net":0.026345003094886226,"profitPercent":"0.179"}}
+[2025-12-07T09:08:51.826Z] ORDER_PLACED_SELL: Price: $90037.27 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499953837","level":2,"worthCheck":{"worth":true,"gross":0.051197800660610616,"fees":0.027013833324436874,"net":0.024183967336173742,"profitPercent":"0.179"}}
+[2025-12-07T09:08:52.355Z] ORDER_PLACED_SELL: Price: $90375.99 | Amount: 0.000138 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499954123","level":3,"worthCheck":{"worth":true,"gross":0.04662285741589656,"fees":0.024599925838435305,"net":0.02202293157746125,"profitPercent":"0.179"}}
+[2025-12-07T09:08:52.681Z] ORDER_PLACED_SELL: Price: $90714.71 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89360 | Score: 51
+  Details: {"orderId":"53499954176","level":4,"worthCheck":{"worth":true,"gross":0.04204791417118251,"fees":0.022186018352433747,"net":0.019861895818748764,"profitPercent":"0.179"}}
+[2025-12-07T09:13:43.422Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89364 | Score: 51
+  Details: {"level":{"side":"buy","price":"89025.322630981108325","amount":"0.00016528472804539436625","level":-1}}
+[2025-12-07T09:13:43.943Z] ORDER_PLACED_BUY: Price: $88686.61 | Amount: 0.000152 BTC | Composite Score: 51 | Regime: BEAR | Price: $89364 | Score: 51
+  Details: {"orderId":"53500016638","level":-2,"worthCheck":{"worth":true,"gross":0.05158898543214414,"fees":0.027221516103949284,"net":0.024367469328194852,"profitPercent":"0.179"}}
+[2025-12-07T09:13:47.859Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89364 | Score: 51
+  Details: {"level":{"side":"buy","price":"88347.887892943324974","amount":"0.00013922951884159307541","level":-3}}
+[2025-12-07T09:13:51.822Z] ORDER_FAILED: binance Account has insufficient balance for requested action. | Price: $89364 | Score: 51
+  Details: {"level":{"side":"buy","price":"88009.170523924433298","amount":"0.00012605149777982448987","level":-4}}
+[2025-12-07T09:13:52.186Z] ORDER_PLACED_SELL: Price: $89702.76 | Amount: 0.000165 BTC | Composite Score: 51 | Regime: BEAR | Price: $89364 | Score: 51
+  Details: {"orderId":"53500018072","level":1,"worthCheck":{"worth":true,"gross":0.055772608472548016,"fees":0.0294290524804303,"net":0.026343555992117716,"profitPercent":"0.179"}}
+[2025-12-07T09:13:52.717Z] ORDER_PLACED_SELL: Price: $90041.47 | Amount: 0.000151 BTC | Composite Score: 51 | Regime: BEAR | Price: $89364 | Score: 51
+  Details: {"orderId":"53500018143","level":2,"worthCheck":{"worth":true,"gross":0.05119790898985397,"fees":0.027015160162220612,"net":0.024182748827633358,"profitPercent":"0.179"}}
+[2025-12-07T09:13:53.223Z] ORDER_PLACED_SELL: Price: $90380.19 | Amount: 0.000138 BTC | Composite Score: 51 | Regime: BEAR | Price: $89364 | Score: 51
+  Details: {"orderId":"53500018208","level":3,"worthCheck":{"worth":true,"gross":0.046623209507159896,"fees":0.024601267844010902,"net":0.022021941663148994,"profitPercent":"0.179"}}
+[2025-12-07T09:13:53.564Z] ORDER_PLACED_SELL: Price: $90718.91 | Amount: 0.000124 BTC | Composite Score: 51 | Regime: BEAR | Price: $89364 | Score: 51
+  Details: {"orderId":"53500018223","level":4,"worthCheck":{"worth":true,"gross":0.04204851002446584,"fees":0.02218737552580121,"net":0.019861134498664633,"profitPercent":"0.179"}}

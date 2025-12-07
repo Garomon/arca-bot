@@ -462,6 +462,27 @@ function loadArcaData() {
             // Ensure new fields exist (migration)
             if (!data.goals) data.goals = getDefaultGoals();
             if (!data.flow) data.flow = getDefaultFlow();
+
+            // Flow Manager Migration
+            if (typeof data.flow.fixedExpenses === 'number') {
+                data.flow.fixedItems = [{ name: 'General', amount: data.flow.fixedExpenses }];
+                delete data.flow.fixedExpenses;
+            }
+            if (typeof data.flow.variableExpenses === 'number') {
+                data.flow.variableItems = [{ name: 'General', amount: data.flow.variableExpenses }];
+                delete data.flow.variableExpenses;
+            }
+            if (!data.flow.fixedItems) data.flow.fixedItems = [];
+            if (!data.flow.variableItems) data.flow.variableItems = [];
+
+            // Migration: Rename GBM goal if exists
+            if (data.goals) {
+                const gbmGoal = data.goals.find(g => g.id === 'firstinvest');
+                if (gbmGoal && gbmGoal.name === 'Primera Inversión GBM+') {
+                    gbmGoal.name = 'Meta de Portafolio';
+                }
+            }
+
             if (!data.customChecklist) data.customChecklist = [];
             if (!data.botEquity) data.botEquity = 0;
             return data;
@@ -511,7 +532,7 @@ function getDefaultGoals() {
     return [
         { id: 'emergency', name: 'Fondo de Emergencia', target: 60000, current: 0, deadline: '2025-06-01', icon: '🛡️' },
         { id: 'debtfree', name: 'Libre de Deudas', target: 100, current: 0, deadline: '2025-02-01', icon: '💳', isPercent: true },
-        { id: 'firstinvest', name: 'Primera Inversión GBM+', target: 15000, current: 0, deadline: '2025-03-01', icon: '📈' }
+        { id: 'firstinvest', name: 'Meta de Portafolio', target: 15000, current: 0, deadline: '2025-03-01', icon: '📈' }
     ];
 }
 
@@ -745,7 +766,7 @@ function calculateNetWorth() {
     if (totalDebtsEl) totalDebtsEl.innerText = `$${totalDebt.toLocaleString('es-MX', { minimumFractionDigits: 0 })}`;
 
     // Emergency fund (DiDi + Nu)
-    const emergencyFund = arcaData.fintech.didi + arcaData.fintech.nu;
+    const emergencyFund = arcaData.fintech.didi + arcaData.fintech.mp;
     if (emergencyFundEl) emergencyFundEl.innerText = `$${emergencyFund.toLocaleString('es-MX', { minimumFractionDigits: 0 })} MXN`;
 
     const emergencyProgress = Math.min(100, (emergencyFund / 60000) * 100);
@@ -1041,7 +1062,7 @@ async function fetchExchangeRate() {
 function detectCurrentPhase() {
     const totalPortfolio = arcaData.portfolio.vt + arcaData.portfolio.qqq +
         arcaData.portfolio.gold + arcaData.portfolio.vwo + arcaData.portfolio.crypto;
-    const emergencyFund = arcaData.fintech.didi + arcaData.fintech.nu;
+    const emergencyFund = arcaData.fintech.didi + arcaData.fintech.mp;
     const totalDebt = (!arcaData.debts.rappiPaid ? arcaData.debts.rappiAmount : 0) +
         (!arcaData.debts.nuDicPaid ? arcaData.debts.nuDicAmount : 0) +
         (!arcaData.debts.nuEnePaid ? arcaData.debts.nuEneAmount : 0) +
@@ -1270,7 +1291,7 @@ function generateSmartAlerts() {
     }
 
     // Goal completion alerts
-    const emergencyFund = arcaData.fintech.didi + arcaData.fintech.nu;
+    const emergencyFund = arcaData.fintech.didi + arcaData.fintech.mp;
     if (emergencyFund >= 60000 && !arcaData.goalAlerts?.emergency) {
         alerts.push({ type: 'success', text: '🎉 ¡Fondo de emergencia completo!' });
         arcaData.goalAlerts = arcaData.goalAlerts || {};
@@ -1339,17 +1360,19 @@ function updateGoalsProgress() {
     });
 
     // Render goals
-    goalsContainer.innerHTML = arcaData.goals.map(goal => {
-        const progress = goal.isPercent ? goal.current : (goal.current / goal.target * 100);
-        const clampedProgress = Math.min(100, Math.max(0, progress));
-        const deadline = new Date(goal.deadline);
-        const daysLeft = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
-        const valueDisplay = goal.isPercent ?
-            `${goal.current.toFixed(0)}%` :
-            `$${goal.current.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
-        const targetDisplay = goal.isPercent ? '100%' : `$${goal.target.toLocaleString('es-MX')}`;
+    goalsContainer.innerHTML = arcaData.goals
+        .filter(goal => goal.id !== 'emergency') // Hide Emergency Fund (already in HUD)
+        .map(goal => {
+            const progress = goal.isPercent ? goal.current : (goal.current / goal.target * 100);
+            const clampedProgress = Math.min(100, Math.max(0, progress));
+            const deadline = new Date(goal.deadline);
+            const daysLeft = Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24));
+            const valueDisplay = goal.isPercent ?
+                `${goal.current.toFixed(0)}%` :
+                `$${goal.current.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
+            const targetDisplay = goal.isPercent ? '100%' : `$${goal.target.toLocaleString('es-MX')}`;
 
-        return `
+            return `
             <div class="goal-card ${clampedProgress >= 100 ? 'completed' : ''}">
                 <div class="goal-header">
                     <span class="goal-icon">${goal.icon}</span>
@@ -1365,50 +1388,136 @@ function updateGoalsProgress() {
                 </div>
             </div>
         `;
-    }).join('');
+        }).join('');
 }
 
 // ===== MONTHLY FLOW TRACKER =====
+// ===== SMART FLOW MANAGER =====
 function updateMonthlyFlow() {
-    const income = parseFloat(document.getElementById('flow-income')?.value || arcaData.flow?.income || 0);
-    const fixedExpenses = parseFloat(document.getElementById('flow-fixed')?.value || arcaData.flow?.fixedExpenses || 0);
-    const variableExpenses = parseFloat(document.getElementById('flow-variable')?.value || arcaData.flow?.variableExpenses || 0);
+    const incomeInput = document.getElementById('flow-income');
+    // Update input from data if empty (first load)
+    if (incomeInput && incomeInput.value == 0 && arcaData.flow?.income > 0) {
+        incomeInput.value = arcaData.flow.income;
+    }
+    const income = parseFloat(incomeInput?.value || 0);
 
-    // Calculate debt payments (unpaid debts only)
+    // Sum arrays
+    const fixedTotal = (arcaData.flow?.fixedItems || []).reduce((sum, item) => sum + item.amount, 0);
+    const variableTotal = (arcaData.flow?.variableItems || []).reduce((sum, item) => sum + item.amount, 0);
+
+    // Debts
     let debtPayments = 0;
-    if (!arcaData.debts.rappiPaid) debtPayments += arcaData.debts.rappiAmount;
-    if (!arcaData.debts.nuDicPaid) debtPayments += arcaData.debts.nuDicAmount;
-    if (!arcaData.debts.nuEnePaid) debtPayments += arcaData.debts.nuEneAmount;
-    if (!arcaData.debts.kueskiPaid) debtPayments += arcaData.debts.kueskiAmount;
+    if (arcaData.debts && !arcaData.debts.rappiPaid) debtPayments += arcaData.debts.rappiAmount;
+    if (arcaData.debts && !arcaData.debts.nuDicPaid) debtPayments += arcaData.debts.nuDicAmount;
+    if (arcaData.debts && !arcaData.debts.nuEnePaid) debtPayments += arcaData.debts.nuEneAmount;
+    if (arcaData.debts && !arcaData.debts.kueskiPaid) debtPayments += arcaData.debts.kueskiAmount;
 
-    const totalExpenses = fixedExpenses + variableExpenses + debtPayments;
+    const totalExpenses = fixedTotal + variableTotal + debtPayments;
     const savings = income - totalExpenses;
 
     // Update arcaData
-    arcaData.flow = { income, fixedExpenses, variableExpenses, debtPayments, savings };
+    arcaData.flow.income = income;
 
-    // Update UI
-    const debtPaymentsEl = document.getElementById('flow-debts');
-    const savingsEl = document.getElementById('flow-savings');
-    const flowSummaryEl = document.getElementById('flow-summary');
+    // Update Totals UI
+    const fixedDisplay = document.getElementById('total-fixed-display');
+    const variableDisplay = document.getElementById('total-variable-display');
+    const debtDisplay = document.getElementById('flow-debts-display');
+    const savingsDisplay = document.getElementById('flow-savings-display');
 
-    if (debtPaymentsEl) debtPaymentsEl.innerText = `$${debtPayments.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
-    if (savingsEl) {
-        savingsEl.innerText = `$${savings.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
-        savingsEl.className = savings >= 0 ? 'positive' : 'negative';
+    if (fixedDisplay) fixedDisplay.innerText = `$${fixedTotal.toLocaleString('es-MX')}`;
+    if (variableDisplay) variableDisplay.innerText = `$${variableTotal.toLocaleString('es-MX')}`;
+    if (debtDisplay) debtDisplay.innerText = `$${debtPayments.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
+    if (savingsDisplay) {
+        savingsDisplay.innerText = `$${savings.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
+        savingsDisplay.className = `summary-val ${savings >= 0 ? 'positive' : 'negative'}`;
     }
-    if (flowSummaryEl) {
-        if (savings >= arcaData.portfolio.monthlyContribution) {
-            flowSummaryEl.innerHTML = `✅ Puedes invertir $${arcaData.portfolio.monthlyContribution.toLocaleString('es-MX')} este mes`;
-            flowSummaryEl.className = 'flow-summary positive';
-        } else if (savings > 0) {
-            flowSummaryEl.innerHTML = `⚠️ Solo puedes ahorrar $${savings.toLocaleString('es-MX', { maximumFractionDigits: 0 })} este mes`;
-            flowSummaryEl.className = 'flow-summary warning';
-        } else {
-            flowSummaryEl.innerHTML = `🚨 Déficit de $${Math.abs(savings).toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
-            flowSummaryEl.className = 'flow-summary negative';
-        }
+
+    // Update Health Bar
+    if (income > 0) {
+        const fixedPct = Math.min(100, (fixedTotal / income) * 100);
+        const variablePct = Math.min(100 - fixedPct, (variableTotal / income) * 100);
+        const debtPct = Math.min(100 - fixedPct - variablePct, (debtPayments / income) * 100);
+        const savingsPct = Math.max(0, 100 - fixedPct - variablePct - debtPct);
+
+        setBarWidth('bar-fixed', fixedPct);
+        setBarWidth('bar-variable', variablePct);
+        setBarWidth('bar-debt', debtPct);
+        setBarWidth('bar-savings', savingsPct);
+    } else {
+        setBarWidth('bar-fixed', 0);
+        setBarWidth('bar-variable', 0);
+        setBarWidth('bar-debt', 0);
+        setBarWidth('bar-savings', 0);
     }
+}
+
+function setBarWidth(id, pct) {
+    const el = document.getElementById(id);
+    if (el) el.style.width = `${pct}%`;
+}
+
+function renderFlowManager() {
+    renderFlowItems('fixed');
+    renderFlowItems('variable');
+    updateMonthlyFlow();
+}
+
+function renderFlowItems(type) {
+    const container = document.getElementById(`list-${type}`);
+    const items = arcaData.flow?.[`${type}Items`] || [];
+    if (!container) return;
+
+    if (items.length === 0) {
+        container.innerHTML = `<div class="empty-list">Sin gastos registrados</div>`;
+        return;
+    }
+
+    container.innerHTML = items.map((item, index) => `
+        <div class="flow-list-item">
+            <span class="item-name">${item.name}</span>
+            <span class="item-amount">$${item.amount.toLocaleString('es-MX')}</span>
+            <button class="btn-delete-flow" onclick="removeFlowItem('${type}', ${index})">×</button>
+        </div>
+    `).join('');
+}
+
+function addFlowItem(type) {
+    const nameInput = document.getElementById(`new-${type}-name`);
+    const amountInput = document.getElementById(`new-${type}-amount`);
+    const name = nameInput.value.trim();
+    const amount = parseFloat(amountInput.value);
+
+    if (name && amount > 0) {
+        if (!arcaData.flow[`${type}Items`]) arcaData.flow[`${type}Items`] = [];
+        arcaData.flow[`${type}Items`].push({ name, amount });
+        saveArcaData(arcaData);
+        renderFlowItems(type);
+        updateMonthlyFlow();
+        nameInput.value = '';
+        amountInput.value = '';
+    }
+}
+
+// Global scope for onclick
+window.removeFlowItem = function (type, index) {
+    if (confirm('¿Borrar este gasto?')) {
+        arcaData.flow[`${type}Items`].splice(index, 1);
+        saveArcaData(arcaData);
+        renderFlowItems(type);
+        updateMonthlyFlow();
+    }
+};
+
+function setupFlowManager() {
+    document.getElementById('btn-add-fixed')?.addEventListener('click', () => addFlowItem('fixed'));
+    document.getElementById('btn-add-variable')?.addEventListener('click', () => addFlowItem('variable'));
+    document.getElementById('flow-income')?.addEventListener('input', () => {
+        updateMonthlyFlow();
+        saveArcaData(arcaData);
+    });
+
+    // Initial Render
+    renderFlowManager();
 }
 
 // ===== EDITABLE CHECKLIST =====
@@ -1514,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupChecklistHandlers();
         setupDebtResetHandlers();
         setupEditableChecklist();
-        setupFlowHandlers();
+        setupFlowManager();
 
         // Initial data fetch
         await fetchExchangeRate();

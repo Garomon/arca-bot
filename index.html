@@ -164,26 +164,71 @@
                 <!-- MONTHLY FLOW SECTION -->
                 <div class="flow-section">
                     <h3>💸 FLUJO DEL MES</h3>
-                    <div class="flow-grid">
-                        <div class="flow-item">
-                            <label>Ingresos</label>
-                            <input type="number" id="flow-income" placeholder="0" value="0">
+                    <div class="flow-manager">
+                        <!-- Health Bar -->
+                        <div class="flow-health-container">
+                            <div class="flow-health-bar">
+                                <div class="bar-segment fixed" id="bar-fixed" title="Fijos"></div>
+                                <div class="bar-segment variable" id="bar-variable" title="Variables"></div>
+                                <div class="bar-segment debt" id="bar-debt" title="Deuda"></div>
+                                <div class="bar-segment savings" id="bar-savings" title="Ahorro"></div>
+                            </div>
+                            <div class="flow-legend">
+                                <span class="legend-item"><span class="dot fixed"></span>Fijos</span>
+                                <span class="legend-item"><span class="dot variable"></span>Variables</span>
+                                <span class="legend-item"><span class="dot debt"></span>Deudas</span>
+                                <span class="legend-item"><span class="dot savings"></span>Ahorro</span>
+                            </div>
                         </div>
-                        <div class="flow-item">
-                            <label>Gastos Fijos</label>
-                            <input type="number" id="flow-fixed" placeholder="0" value="0">
+
+                        <!-- Income -->
+                        <div class="flow-section-group">
+                            <div class="group-header">
+                                <span class="emoji">💰</span> <span class="group-title">Ingreso Mensual</span>
+                            </div>
+                            <input type="number" id="flow-income" class="modern-input" placeholder="$0.00" value="0">
                         </div>
-                        <div class="flow-item">
-                            <label>Gastos Variables</label>
-                            <input type="number" id="flow-variable" placeholder="0" value="0">
+
+                        <!-- Fixed Expenses -->
+                        <div class="flow-section-group">
+                            <div class="group-header">
+                                <span class="emoji">🏠</span> <span class="group-title">Gastos Fijos</span>
+                                <span class="group-total" id="total-fixed-display">$0</span>
+                            </div>
+                            <div id="list-fixed" class="flow-list"></div>
+                            <div class="add-flow-row">
+                                <input type="text" id="new-fixed-name" placeholder="Ej. Internet"
+                                    class="add-input-name">
+                                <input type="number" id="new-fixed-amount" placeholder="$" class="add-input-amount">
+                                <button id="btn-add-fixed" class="btn-add-flow">+</button>
+                            </div>
                         </div>
-                        <div class="flow-item">
-                            <label>Deudas Pendientes</label>
-                            <span class="flow-value" id="flow-debts">$0</span>
+
+                        <!-- Variable Expenses -->
+                        <div class="flow-section-group">
+                            <div class="group-header">
+                                <span class="emoji">🍔</span> <span class="group-title">Gastos Variables</span>
+                                <span class="group-total" id="total-variable-display">$0</span>
+                            </div>
+                            <div id="list-variable" class="flow-list"></div>
+                            <div class="add-flow-row">
+                                <input type="text" id="new-variable-name" placeholder="Ej. Salida"
+                                    class="add-input-name">
+                                <input type="number" id="new-variable-amount" placeholder="$" class="add-input-amount">
+                                <button id="btn-add-variable" class="btn-add-flow">+</button>
+                            </div>
                         </div>
-                        <div class="flow-item result">
-                            <label>Ahorro Disponible</label>
-                            <span class="flow-value positive" id="flow-savings">$0</span>
+
+                        <!-- Summary -->
+                        <div class="flow-summary-grid">
+                            <div class="summary-box">
+                                <label>Deuda (Auto)</label>
+                                <div class="summary-val negative" id="flow-debts-display">$0</div>
+                            </div>
+                            <div class="summary-box highlight">
+                                <label>Ahorro Potencial</label>
+                                <div class="summary-val positive" id="flow-savings-display">$0</div>
+                            </div>
                         </div>
                     </div>
                     <div class="flow-summary" id="flow-summary">
