@@ -438,6 +438,28 @@ async function placeOrder(level) {
         return;
     }
 
+    // PHASE 5: SMART BALANCE CHECK (New Intelligence)
+    if (level.side === 'buy') {
+        const balance = await binance.fetchBalance();
+        const availableUSDT = balance.USDT ? balance.USDT.free : 0;
+        const requiredUSDT = amount * price;
+
+        if (availableUSDT < requiredUSDT) {
+            log('SMART', `INSUFFICIENT FUNDS for BUY. Available: $${availableUSDT.toFixed(2)}, Req: $${requiredUSDT.toFixed(2)}`, 'warning');
+            log('DECISION', 'HOLDING (Waiting for liquidity or sells)', 'info');
+            return; // EXIT GRACEFULLY - DO NOT ERROR
+        }
+    } else if (level.side === 'sell') {
+        const balance = await binance.fetchBalance();
+        const availableBTC = balance.BTC ? balance.BTC.free : 0;
+
+        if (availableBTC < amount) {
+            log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBTC.toFixed(6)} BTC, Req: ${amount.toFixed(6)} BTC`, 'warning');
+            log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
+            return; // EXIT GRACEFULLY
+        }
+    }
+
     try {
         let order;
         // LIVE - Using resilient API call with retries
@@ -1356,6 +1378,24 @@ async function syncWithExchange() {
         const openIds = new Set(openOrders.map(o => o.id));
 
         // 1. Remove local orders that are no longer open on exchange
+        // CRITICAL FIX: Check if they were filled while offline, don't just delete them!
+        const missingOrders = state.activeOrders.filter(o => !openIds.has(o.id));
+
+        for (const missingOrder of missingOrders) {
+            try {
+                const orderInfo = await binance.fetchOrder(missingOrder.id, CONFIG.pair);
+                if (orderInfo.status === 'closed' || orderInfo.status === 'filled') {
+                    log('SYNC', `Order ${missingOrder.id} filled while offline. Processing...`, 'success');
+                    handleOrderFill(missingOrder, orderInfo.price);
+                } else if (orderInfo.status === 'canceled') {
+                    log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`, 'info');
+                }
+            } catch (e) {
+                log('WARN', `Could not fetch status for missing order ${missingOrder.id}. Assuming canceled.`, 'warning');
+            }
+        }
+
+        // Now update the active list
         state.activeOrders = state.activeOrders.filter(o => openIds.has(o.id));
 
         // 2. Adopt orphan orders from exchange

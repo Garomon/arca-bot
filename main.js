@@ -708,7 +708,7 @@ function updateCountdowns() {
 
     // Debt due dates (UPDATED Dec 2025)
     const dueDates = {
-        'rappi-countdown': new Date('2025-12-06'),
+        'rappi-countdown': new Date('2025-12-26'),
         'nu-dic-countdown': new Date('2025-12-12'),
         'nu-ene-countdown': new Date('2026-01-12'),
         'kueski-countdown': new Date('2025-12-15')
@@ -1409,18 +1409,31 @@ function updateGoalsProgress() {
 }
 
 // ===== MONTHLY FLOW TRACKER =====
+// ===== MONTHLY FLOW TRACKER =====
 // ===== SMART FLOW MANAGER =====
-function updateMonthlyFlow() {
-    const incomeInput = document.getElementById('flow-income');
-    // Update input from data if empty (first load)
-    if (incomeInput && incomeInput.value == 0 && arcaData.flow?.income > 0) {
-        incomeInput.value = arcaData.flow.income;
-    }
-    const income = parseFloat(incomeInput?.value || 0);
 
+function migrateIncomeData() {
+    if (arcaData.flow && typeof arcaData.flow.income === 'number' && arcaData.flow.income > 0) {
+        if (!arcaData.flow.incomeItems) arcaData.flow.incomeItems = [];
+        // Only migrate if list is empty
+        if (arcaData.flow.incomeItems.length === 0) {
+            arcaData.flow.incomeItems.push({
+                name: 'Ingreso Base',
+                amount: arcaData.flow.income
+            });
+            console.log('Migrated old income to list item');
+        }
+        // delet old primitive to avoid confusion (optional, but good for cleanup)
+        // arcaData.flow.income = 0; 
+    }
+}
+
+function updateMonthlyFlow() {
     // Sum arrays
+    const incomeTotal = (arcaData.flow?.incomeItems || []).reduce((sum, item) => sum + item.amount, 0);
     const fixedTotal = (arcaData.flow?.fixedItems || []).reduce((sum, item) => sum + item.amount, 0);
     const variableTotal = (arcaData.flow?.variableItems || []).reduce((sum, item) => sum + item.amount, 0);
+    const income = incomeTotal;
 
     // Debts
     let debtPayments = 0;
@@ -1432,15 +1445,17 @@ function updateMonthlyFlow() {
     const totalExpenses = fixedTotal + variableTotal + debtPayments;
     const savings = income - totalExpenses;
 
-    // Update arcaData
+    // Update arcaData (derived total, but source of truth is the items array)
     arcaData.flow.income = income;
 
     // Update Totals UI
+    const incomeDisplay = document.getElementById('total-income');
     const fixedDisplay = document.getElementById('total-fixed-display');
     const variableDisplay = document.getElementById('total-variable-display');
     const debtDisplay = document.getElementById('flow-debts-display');
     const savingsDisplay = document.getElementById('flow-savings-display');
 
+    if (incomeDisplay) incomeDisplay.innerText = `$${incomeTotal.toLocaleString('es-MX')}`;
     if (fixedDisplay) fixedDisplay.innerText = `$${fixedTotal.toLocaleString('es-MX')}`;
     if (variableDisplay) variableDisplay.innerText = `$${variableTotal.toLocaleString('es-MX')}`;
     if (debtDisplay) debtDisplay.innerText = `$${debtPayments.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
@@ -1474,6 +1489,8 @@ function setBarWidth(id, pct) {
 }
 
 function renderFlowManager() {
+    migrateIncomeData(); // Ensure migration happens before render
+    renderFlowItems('income');
     renderFlowItems('fixed');
     renderFlowItems('variable');
     updateMonthlyFlow();
@@ -1528,10 +1545,9 @@ window.removeFlowItem = function (type, index) {
 function setupFlowManager() {
     document.getElementById('btn-add-fixed')?.addEventListener('click', () => addFlowItem('fixed'));
     document.getElementById('btn-add-variable')?.addEventListener('click', () => addFlowItem('variable'));
-    document.getElementById('flow-income')?.addEventListener('input', () => {
-        updateMonthlyFlow();
-        saveArcaData(arcaData);
-    });
+
+    // Removed flow-income listener as it is now a list
+
 
     // Initial Render
     renderFlowManager();

@@ -184,12 +184,20 @@
                             </div>
 
                             <!-- Income -->
-                            <div class="flow-section-group">
+                            <div class="flow-section-group income">
                                 <div class="group-header">
-                                    <span class="emoji">💰</span> <span class="group-title">Ingreso Mensual</span>
+                                    <span class="emoji">💰</span> <span class="group-title">Ingresos</span>
+                                    <span class="group-total" id="total-income">$0</span>
                                 </div>
-                                <input type="number" id="flow-income" class="modern-input" placeholder="$0.00"
-                                    value="0">
+                                <div id="list-income" class="flow-list"></div>
+                                <div class="add-flow-row">
+                                    <input type="text" id="new-income-name" placeholder="Ej. Nómina"
+                                        class="add-input-name">
+                                    <input type="number" id="new-income-amount" placeholder="$"
+                                        class="add-input-amount">
+                                    <button id="btn-add-income" class="btn-add-flow"
+                                        onclick="addFlowItem('income')">+</button>
+                                </div>
                             </div>
 
                             <!-- Fixed Expenses -->
