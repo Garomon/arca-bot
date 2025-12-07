@@ -911,15 +911,7 @@ function setupInputHandlers() {
         }
     });
 
-    // Save buttons (Backup manual save)
-    ['save-fintech', 'save-portfolio', 'save-doctrine'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) {
-            btn.addEventListener('click', () => {
-                saveArcaData(arcaData);
-            });
-        }
-    });
+
 }
 
 // ===== DOCTRINE INTEGRATION =====
