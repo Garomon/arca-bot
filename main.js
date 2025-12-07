@@ -30,6 +30,7 @@ const ui = {
     btcAmount: document.getElementById('btc-amount'),
     btcValue: document.getElementById('btc-value'),
     totalEquity: document.getElementById('total-equity'),
+    equityMXN: document.getElementById('equity-mxn'),
     profitTotal: document.getElementById('profit-total'),
     profitPercent: document.getElementById('profit-percent'),
     activeLoops: document.getElementById('active-loops'),
@@ -164,14 +165,15 @@ socket.on('financial_update', (data) => {
     // Show TOTAL BTC (free + locked), not just free
     if (ui.btcAmount) ui.btcAmount.innerText = (data.totalBTC || data.freeBTC).toFixed(6);
     if (ui.btcValue) ui.btcValue.innerText = data.btcValueUSDT.toFixed(2);
-
     // Calculate MXN equivalents
     const equityMXN = data.totalEquity * window.usdMxnRate;
-    const btcPriceMXN = (data.currentPrice || 0) * window.usdMxnRate;
 
     if (ui.totalEquity) {
-        ui.totalEquity.innerHTML = `$${data.totalEquity.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${equityMXN.toFixed(0)} MXN</small>`;
-        ui.totalEquity.style.color = data.totalEquity > 100 ? '#00ff9d' : '#fff';
+        ui.totalEquity.innerHTML = `$${data.totalEquity.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${equityMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })} MXN</small>`;
+        ui.totalEquity.style.color = data.totalEquity > 100 ? '#00ff9d' : 'inherit';
+    }
+    if (ui.equityMXN) {
+        ui.equityMXN.style.display = 'none'; // Hide the simplified bottom element
     }
 
     if (ui.profitTotal) {
