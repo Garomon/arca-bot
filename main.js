@@ -314,6 +314,20 @@ socket.on('analysis_update', (data) => {
             'linear-gradient(135deg, #ff3b3b, #bd00ff)';
     }
 
+    // GEO CONTEXT HANDLER
+    const geoBadge = document.getElementById('geo-badge');
+    const geoText = document.getElementById('geo-text');
+    if (geoBadge && geoText && data.geoContext) {
+        if (data.geoContext.status !== 'NORMAL') {
+            geoBadge.style.display = 'flex';
+            geoText.innerText = data.geoContext.status.replace('_', ' ');
+            // Make it pulse RED if in danger
+            geoBadge.style.animation = 'pulse-red 2s infinite';
+        } else {
+            geoBadge.style.display = 'none';
+        }
+    }
+
     // Tab 2: Multi-Timeframe Analysis
     if (data.multiTF) {
         if (ui.mtf1h) ui.mtf1h.innerText = data.multiTF.trend1h || '--';

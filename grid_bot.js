@@ -351,14 +351,35 @@ async function initializeGrid(forceReset = false) {
     if (analysis && analysis.atr) {
         const atrPercent = analysis.atr / price;
         // Multiplier: 1.5 for normal, 2.0 for high vol, 1.0 for low vol
-        const atrMultiplier = volatilityState === 'HIGH' ? 2.0 : (volatilityState === 'LOW' ? 1.0 : 1.5);
-        CONFIG.gridSpacing = Math.max(0.001, Math.min(0.02, atrPercent * atrMultiplier)); // Clamp between 0.1% and 2%
+        let atrMultiplier = volatilityState === 'HIGH' ? 2.0 : (volatilityState === 'LOW' ? 1.0 : 1.5);
+
+        // --- GEOPOLITICAL OVERRIDE ---
+        const geoContext = checkGeopoliticalContext();
+        if (geoContext.status === 'MIDTERM_RISK') {
+            atrMultiplier *= 1.5; // INCREASE SPACING by 50% in risk year to survive deeper drops
+            log('GEO', `Midterm Risk Detected. Expanding Grid Spacing (Defense Mode)`, 'warning');
+        }
+
+        CONFIG.gridSpacing = Math.max(0.001, Math.min(0.03, atrPercent * atrMultiplier)); // Allow up to 3% spacing
         log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${atrMultiplier})`, 'info');
     }
 
     // PHASE 3: Use allocateCapital for smarter distribution
     const multiTF = await analyzeMultipleTimeframes();
-    const allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
+    let allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
+
+    // --- GEOPOLITICAL RESERVE OVERRIDE ---
+    const geoContext = checkGeopoliticalContext(); // Re-check or reuse variable
+    if (geoContext.status === 'MIDTERM_RISK') {
+        const defensiveReserve = dynamicCapital * 0.25; // 25% Reserve
+        if (allocation.reserve < defensiveReserve) {
+            allocation.reserve = defensiveReserve;
+            allocation.grid = dynamicCapital - defensiveReserve;
+            allocation.reason += ' + MIDTERM DEFENSE';
+            log('GEO', `Midterm Risk: Boosting Reserve to 25% ($${defensiveReserve.toFixed(2)})`, 'warning');
+        }
+    }
+
     const safeCapital = allocation.grid;
 
     log('SYSTEM', `CAPITAL ALLOCATION: $${safeCapital.toFixed(2)} for grid | $${allocation.reserve.toFixed(2)} reserve (${allocation.reason})`);
@@ -640,6 +661,7 @@ function monitorOrders() {
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
                 pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' }, // Emit Pressure
+                geoContext: checkGeopoliticalContext(), // Emit Geo Context
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
                 signalScore: state.marketCondition.signalScore,
                 regime: state.marketRegime,
@@ -1076,6 +1098,66 @@ function checkMarketTiming() {
     };
 }
 
+// GEOPOLITICAL CONTEXT (Midterm Cycle 2026)
+function checkGeopoliticalContext() {
+    const now = new Date();
+    // Danger Zone: Nov 1, 2025 to Nov 5, 2026
+    const startDanger = new Date('2025-11-01');
+    const endDanger = new Date('2026-11-05');
+
+    if (now >= startDanger && now <= endDanger) {
+        return {
+            status: 'MIDTERM_RISK',
+            modifier: 'DEFENSIVE',
+            defenseLevel: 2 // Level 2 Defense (High Reserves)
+        };
+    }
+    return { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0 };
+}
+
+// ORDER BOOK PRESSURE (Binance Spot)
+async function fetchOrderBookPressure() {
+    // Initialize cache if missing
+    if (!externalDataCache.orderBook) {
+        externalDataCache.orderBook = { value: null, timestamp: 0 };
+    }
+
+    if (Date.now() - externalDataCache.orderBook.timestamp < 10000) { // 10s Cache
+        return externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL', bidVol: 0, askVol: 0 };
+    }
+
+    try {
+        // Fetch top 50 levels (Depth 50)
+        const orderBook = await binance.fetchOrderBook(CONFIG.pair, 50);
+        const bids = orderBook.bids;
+        const asks = orderBook.asks;
+
+        // Calculate volume sum
+        const bidVol = bids.reduce((acc, bid) => acc + bid[1], 0);
+        const askVol = asks.reduce((acc, ask) => acc + ask[1], 0);
+
+        const ratio = askVol > 0 ? bidVol / askVol : 1.0;
+        // Ratio > 1.0 = More Bids (Support) = BULLISH
+        // Ratio < 1.0 = More Asks (Resistance) = BEARISH
+
+        const pressure = {
+            bidVol,
+            askVol,
+            ratio,
+            signal: ratio > 1.5 ? 'BULLISH' : (ratio < 0.66 ? 'BEARISH' : 'NEUTRAL'),
+            timestamp: Date.now()
+        };
+
+        externalDataCache.orderBook = { value: pressure, timestamp: Date.now() };
+        log('INTEL', `Order Book Pressure: ${ratio.toFixed(2)}x (${pressure.signal}) | Bids: ${bidVol.toFixed(0)} vs Asks: ${askVol.toFixed(0)}`, 'info');
+        return pressure;
+
+    } catch (e) {
+        console.error('>> [ERROR] Order Book fetch failed:', e.message);
+        return { ratio: 1.0, signal: 'NEUTRAL', bidVol: 0, askVol: 0 };
+    }
+}
+
 // COMPOSITE SIGNAL SCORE - Combines ALL intelligence
 async function calculateCompositeSignal(analysis, regime, multiTF) {
     // Fetch all external data
@@ -1085,6 +1167,9 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
         fetchBTCDominance(),
         fetchOpenInterest()
     ]);
+
+    // Ensure pressure is updated
+    await fetchOrderBookPressure();
 
     const timing = checkMarketTiming();
 
@@ -1128,44 +1213,6 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
     } else if (multiTF.confidence === 'HIGH' && multiTF.direction === 'DOWN') {
         score -= 10;
         reasons.push('MTF aligned DOWN (-10)');
-    }
-
-    // ORDER BOOK PRESSURE (Binance Spot)
-    async function fetchOrderBookPressure() {
-        if (Date.now() - externalDataCache.orderBook.timestamp < 10000) { // 10s Cache
-            return externalDataCache.orderBook.value;
-        }
-
-        try {
-            // Fetch top 50 levels (Depth 50)
-            const orderBook = await binance.fetchOrderBook(CONFIG.pair, 50);
-            const bids = orderBook.bids;
-            const asks = orderBook.asks;
-
-            // Calculate volume sum
-            const bidVol = bids.reduce((acc, bid) => acc + bid[1], 0);
-            const askVol = asks.reduce((acc, ask) => acc + ask[1], 0);
-
-            const ratio = askVol > 0 ? bidVol / askVol : 1.0;
-            // Ratio > 1.0 = More Bids (Support) = BULLISH
-            // Ratio < 1.0 = More Asks (Resistance) = BEARISH
-
-            const pressure = {
-                bidVol,
-                askVol,
-                ratio,
-                signal: ratio > 1.5 ? 'BULLISH' : (ratio < 0.66 ? 'BEARISH' : 'NEUTRAL'),
-                timestamp: Date.now()
-            };
-
-            externalDataCache.orderBook = { value: pressure, timestamp: Date.now() };
-            log('INTEL', `Order Book Pressure: ${ratio.toFixed(2)}x (${pressure.signal}) | Bids: ${bidVol.toFixed(0)} vs Asks: ${askVol.toFixed(0)}`, 'info');
-            return pressure;
-
-        } catch (e) {
-            console.error('>> [ERROR] Order Book fetch failed:', e.message);
-            return { ratio: 1.0, signal: 'NEUTRAL', bidVol: 0, askVol: 0 };
-        }
     }
 
     // === SENTIMENT INDICATORS (30% weight) ===
