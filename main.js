@@ -18,8 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             const tabId = btn.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
+
+            // Show Log Feed & Expend Sidebar ONLY on Bot Tab
+            const logFeed = document.getElementById('log-feed');
+            const sidebar = document.querySelector('.sidebar');
+
+            if (tabId === 'bot') {
+                if (logFeed) logFeed.style.display = 'block';
+                if (sidebar) sidebar.classList.remove('collapsed');
+            } else {
+                if (logFeed) logFeed.style.display = 'none';
+                if (sidebar) sidebar.classList.add('collapsed');
+            }
         });
     });
+
+    // Initial check
+    const logFeed = document.getElementById('log-feed');
+    const sidebar = document.querySelector('.sidebar');
+    const activeTab = document.querySelector('.tab-btn.active')?.getAttribute('data-tab');
+
+    if (activeTab === 'bot') {
+        if (logFeed) logFeed.style.display = 'block';
+        if (sidebar) sidebar.classList.remove('collapsed');
+    } else {
+        if (logFeed) logFeed.style.display = 'none';
+        if (sidebar) sidebar.classList.add('collapsed');
+    }
 });
 
 // DOM Elements

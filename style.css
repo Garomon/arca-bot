@@ -110,6 +110,15 @@ body::before {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    padding: 0;
+    border-right: none;
+    opacity: 0;
 }
 
 .brand {
@@ -122,6 +131,7 @@ body::before {
     font-size: 1.8rem;
     font-weight: 800;
     background: var(--gradient-primary);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -200,6 +210,19 @@ body::before {
     overflow: hidden;
     padding: 24px 28px;
     gap: 20px;
+}
+
+/* === SPLIT LAYOUT === */
+.dashboard-split-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-split-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* === TABS NAVIGATION === */
@@ -1331,17 +1354,10 @@ body::before {
 .action-date {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    font-weight: 600;
     color: var(--neon-blue);
     min-width: 70px;
 }
 
-.action-text {
-    font-size: 0.85rem;
-    color: var(--text-primary);
-}
-
-/* ========== FINTECH TAB ========== */
 .fintech-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2739,6 +2755,7 @@ body::before {
     font-weight: 700;
     margin-bottom: 16px;
     background: var(--gradient-primary);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -3573,4 +3590,5 @@ body::before {
 
 .summary-val.negative {
     color: #ff3b5c;
+}
 }
