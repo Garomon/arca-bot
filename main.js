@@ -187,6 +187,10 @@ socket.on('log_message', (data) => {
 socket.on('financial_update', (data) => {
     if (ui.freeUSDT) ui.freeUSDT.innerText = `$${data.freeUSDT.toFixed(2)}`;
     if (ui.lockedUSDT) ui.lockedUSDT.innerText = `$${data.lockedUSDT.toFixed(2)}`;
+
+    // Store global equity for calculations
+    window.currentEquity = data.totalEquity;
+
     // Show TOTAL BTC (free + locked), not just free
     if (ui.btcAmount) ui.btcAmount.innerText = (data.totalBTC || data.freeBTC).toFixed(6);
     if (ui.btcValue) ui.btcValue.innerText = data.btcValueUSDT.toFixed(2);
@@ -466,6 +470,35 @@ function renderTradeHistory() {
             console.error('Error rendering row:', e);
         }
     });
+
+    // Update Daily Stats
+    updateDailyProfit();
+}
+
+// ===== DAILY PROFIT LOGIC =====
+function updateDailyProfit() {
+    if (!tradeHistory || tradeHistory.length === 0) return;
+
+    const todayDate = new Date().toDateString();
+
+    // Sum profit for trades that happened TODAY and are SELL orders (realized profit)
+    // Note: 'profit' field should be positive only on sells.
+    const todaysTrades = tradeHistory.filter(t =>
+        new Date(t.timestamp).toDateString() === todayDate &&
+        (t.side === 'sell' && t.profit > 0)
+    );
+
+    const dailyProfit = todaysTrades.reduce((sum, t) => sum + (parseFloat(t.profit) || 0), 0);
+
+    const profitDailyEl = document.getElementById('profit-daily');
+    if (profitDailyEl) {
+        // Calculate ROI based on current equity (approximate)
+        // If window.currentEquity is undefined, use fallback or 0
+        const equity = window.currentEquity || 100;
+        const dailyROI = (dailyProfit / equity) * 100;
+
+        profitDailyEl.innerHTML = `Hoy: <span style="color: ${dailyProfit > 0 ? '#00ff9d' : '#888'}">+$${dailyProfit.toFixed(2)}</span> (${dailyROI.toFixed(2)}%)`;
+    }
 }
 
 socket.on('debug_trades', (trades) => {

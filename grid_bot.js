@@ -19,17 +19,17 @@ const adaptiveHelpers = require('./adaptive_helpers');
 const CONFIG = {
     // Trading Pair
     pair: 'BTC/USDT',
-    tradingFee: 0.001,       // 0.1% Standard Fee (Set to 0.00075 if using BNB)
+    tradingFee: 0.001,       // 0.1% Standard Fee
 
-    // AGGRESSIVE Grid Settings
-    gridCount: 16,           // More orders = more profit opportunities
-    gridSpacing: 0.005,      // 0.5% spacing (tighter than before!)
+    // GRID SETTINGS (INITIAL - ADAPTIVE AI WILL OVERWRITE)
+    gridCount: 16,           // [INITIAL] Max open orders
+    gridSpacing: 0.003,      // [INITIAL] 0.3% (Adaptive Base)
     minOrderSize: 0.00001,
-    maxOpenOrders: 24,       // Allow more simultaneous orders
-    safetyMargin: 0.92,      // Use 92% of capital (more aggressive)
+    maxOpenOrders: 24,
+    safetyMargin: 0.92,
 
     // TIGHT Volatility Spacing
-    spacingNormal: 0.005,    // 0.5% - catches more price swings
+    spacingNormal: 0.005,
     spacingHigh: 0.007,      // 0.7% in high volatility
     spacingLow: 0.003,       // 0.3% in low vol - MAXIMUM trades
     bandwidthHigh: 0.04,     // Detect high vol faster
