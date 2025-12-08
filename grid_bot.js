@@ -180,6 +180,7 @@ let state = {
     filledOrders: [], // History
     totalProfit: 0,
     initialCapital: null, // Track starting capital for profit % calculation
+    firstTradeTime: null, // NEVER resets - for APY calculation
     isLive: true,
     startTime: Date.now(),
     marketCondition: null, // Stores RSI/EMA analysis
@@ -228,6 +229,18 @@ function loadState() {
                 });
                 state.totalProfit = fixedProfit; // Force Recalculation
                 state.feeCorrectionApplied = true;
+            }
+            // AUTO-DETECT firstTradeTime from earliest SELL with profit (for APY)
+            if (!state.firstTradeTime && state.filledOrders && state.filledOrders.length > 0) {
+                // Only count SELLs with profit - that's when we actually started making money
+                const profitableSells = state.filledOrders.filter(o => o.side === 'sell' && o.profit > 0);
+                if (profitableSells.length > 0) {
+                    const timestamps = profitableSells.map(o => o.timestamp).filter(t => t);
+                    if (timestamps.length > 0) {
+                        state.firstTradeTime = Math.min(...timestamps);
+                        console.log(`>> [APY] First profitable SELL: ${new Date(state.firstTradeTime).toISOString()}`);
+                    }
+                }
             }
 
             log('SYSTEM', 'STATE LOADED & SANITIZED');
@@ -323,6 +336,7 @@ async function getDetailedFinancials() {
             totalEquity,
             profit: state.totalProfit,
             profitPercent,
+            startTime: state.firstTradeTime || state.startTime,  // For APY calculation (uses earliest trade)
             activeOrders: {
                 buy: buyOrders.length,
                 sell: sellOrders.length,
@@ -564,7 +578,8 @@ async function placeOrder(level) {
             amount: amount,
             level: level.level,
             status: 'open',
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            spacing: CONFIG.gridSpacing // Phase 2 Audit: Track spacing per order
         });
         saveState();
 
@@ -1494,7 +1509,8 @@ async function handleOrderFill(order, fillPrice) {
     // FIX: Only SELL orders realize profit. BUY orders are just entries.
     let profit = 0;
     if (order.side === 'sell') {
-        const buyPrice = fillPrice / (1 + CONFIG.gridSpacing); // Estimate buy price based on spacing
+        const spacing = order.spacing || CONFIG.gridSpacing; // Phase 2 Audit: Use historical spacing
+        const buyPrice = fillPrice / (1 + spacing); // Estimate based on actual spacing
         const grossProfit = (fillPrice - buyPrice) * order.amount;
         const fees = (buyPrice * order.amount * CONFIG.tradingFee) + (fillPrice * order.amount * CONFIG.tradingFee);
         profit = grossProfit - fees;
@@ -1502,7 +1518,8 @@ async function handleOrderFill(order, fillPrice) {
 
     // Update State
     state.totalProfit += profit;
-    state.filledOrders.push({ ...order, fillPrice, profit, timestamp: Date.now() });
+    // CRITICAL FIX: Mark as Net Profit so loadState doesn't deduct fees again!
+    state.filledOrders.push({ ...order, fillPrice, profit, timestamp: Date.now(), isNetProfit: true });
     state.lastFillTime = Date.now();
 
     const profitMsg = profit > 0 ? `| Profit: $${profit.toFixed(4)}` : '';
@@ -1815,6 +1832,16 @@ server.listen(3000, async () => {
             saveState();
             log('SYSTEM', '🔓 EMERGENCY STOP CLEARED - Reinitializing grid...', 'success');
             await initializeGrid(true);
+        });
+
+        socket.on('update_initial_capital', (newCapital) => {
+            if (newCapital && !isNaN(newCapital) && newCapital > 0) {
+                const oldCapital = state.initialCapital;
+                state.initialCapital = parseFloat(newCapital);
+                saveState();
+                log('CONFIG', `Initial Capital updated: $${oldCapital.toFixed(2)} -> $${state.initialCapital.toFixed(2)}`, 'info');
+                socket.emit('hud_update', { status: 'CAPITAL UPDATED', detail: `$${state.initialCapital.toFixed(2)}` });
+            }
         });
     });
 

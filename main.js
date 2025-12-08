@@ -212,6 +212,16 @@ socket.on('financial_update', (data) => {
     }
     if (ui.profitPercent) ui.profitPercent.innerText = data.profitPercent.toFixed(2);
 
+    // Calculate and display APY for fintech comparison
+    const apyEl = document.getElementById('profit-apy');
+    if (apyEl && data.startTime && data.profitPercent) {
+        const daysRunning = Math.max(1, (Date.now() - data.startTime) / (1000 * 60 * 60 * 24));
+        const dailyROI = data.profitPercent / daysRunning;
+        const apy = dailyROI * 365;
+        const apyColor = apy >= 50 ? '#00ff9d' : apy >= 20 ? '#00d4ff' : '#ff9500';
+        apyEl.innerHTML = `<span style="color:${apyColor}">APY: ~${apy.toFixed(0)}%</span> <small style="color:#666">(${daysRunning.toFixed(1)}d)</small>`;
+    }
+
     if (ui.activeLoops) ui.activeLoops.innerText = data.activeOrders.total;
     if (ui.buyCount) ui.buyCount.innerText = data.activeOrders.buy;
     if (ui.sellCount) ui.sellCount.innerText = data.activeOrders.sell;
@@ -1732,10 +1742,208 @@ function setupFlowManager() {
 
     // Removed flow-income listener as it is now a list
 
-
     // Initial Render
     renderFlowManager();
+    renderFlowHistory(); // Render any existing history
 }
+
+// ===== MONTHLY HISTORY FUNCTIONS =====
+let isClosingMonth = false; // Prevent double-click
+
+function closeMonth() {
+    // Prevent double-click
+    if (isClosingMonth) {
+        alert('⏳ Ya se está procesando el cierre del mes...');
+        return;
+    }
+
+    if (!confirm('¿Cerrar el mes actual y guardarlo en el historial?\nEsto reiniciará tus gastos variables para el nuevo mes.')) {
+        return;
+    }
+
+    isClosingMonth = true;
+
+    // Check if this month already exists
+    const now = new Date();
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const currentLabel = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+
+    if (arcaData.flowHistory && arcaData.flowHistory.some(h => h.label === currentLabel)) {
+        if (!confirm(`⚠️ Ya existe un registro para ${currentLabel}.\n¿Deseas reemplazarlo?`)) {
+            isClosingMonth = false;
+            return;
+        }
+        // Remove existing entry for this month
+        arcaData.flowHistory = arcaData.flowHistory.filter(h => h.label !== currentLabel);
+    }
+
+    // Calculate totals
+    const incomeTotal = (arcaData.flow?.incomeItems || []).reduce((sum, item) => sum + item.amount, 0);
+    const fixedTotal = (arcaData.flow?.fixedItems || []).reduce((sum, item) => sum + item.amount, 0);
+    const variableTotal = (arcaData.flow?.variableItems || []).reduce((sum, item) => sum + item.amount, 0);
+
+    let debtPayments = 0;
+    if (arcaData.debts && !arcaData.debts.rappiPaid) debtPayments += arcaData.debts.rappiAmount || 0;
+    if (arcaData.debts && !arcaData.debts.nuDicPaid) debtPayments += arcaData.debts.nuDicAmount || 0;
+    if (arcaData.debts && !arcaData.debts.nuEnePaid) debtPayments += arcaData.debts.nuEneAmount || 0;
+    if (arcaData.debts && !arcaData.debts.kueskiPaid) debtPayments += arcaData.debts.kueskiAmount || 0;
+
+    const totalExpenses = fixedTotal + variableTotal + debtPayments;
+    const savings = incomeTotal - totalExpenses;
+
+    // Create snapshot (reuse currentLabel from above)
+    const snapshot = {
+        id: Date.now(),
+        label: currentLabel,
+        income: incomeTotal,
+        fixed: fixedTotal,
+        variable: variableTotal,
+        debt: debtPayments,
+        savings: savings,
+        savingsRate: incomeTotal > 0 ? ((savings / incomeTotal) * 100).toFixed(1) : 0
+    };
+
+    // Initialize history array if needed
+    if (!arcaData.flowHistory) arcaData.flowHistory = [];
+
+    // Add snapshot (keep last 12 months)
+    arcaData.flowHistory.push(snapshot);
+    if (arcaData.flowHistory.length > 12) {
+        arcaData.flowHistory.shift();
+    }
+
+    // Reset variable expenses for new month (keep fixed and income as they usually repeat)
+    arcaData.flow.variableItems = [];
+
+    // Save and re-render
+    saveArcaData(arcaData);
+    renderFlowItems('variable');
+    updateMonthlyFlow();
+    renderFlowHistory();
+
+    isClosingMonth = false;
+    alert(`✅ Mes cerrado: ${snapshot.label}\nAhorro: $${savings.toLocaleString('es-MX')} (${snapshot.savingsRate}%)`);
+}
+
+// Function to remove a history entry (for fixing duplicates)
+function removeHistoryEntry(label) {
+    if (!arcaData.flowHistory) return;
+    const before = arcaData.flowHistory.length;
+    arcaData.flowHistory = arcaData.flowHistory.filter(h => h.label !== label);
+    const after = arcaData.flowHistory.length;
+    if (before > after) {
+        saveArcaData(arcaData);
+        renderFlowHistory();
+        console.log(`Removed ${before - after} entries for "${label}"`);
+    }
+}
+
+// Expose to console for manual fixes
+window.removeHistoryEntry = removeHistoryEntry;
+window.viewFlowHistory = () => console.table(arcaData.flowHistory);
+
+
+function renderFlowHistory() {
+    const container = document.getElementById('flow-history-chart');
+    if (!container) return;
+
+    const history = arcaData.flowHistory || [];
+
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div class="no-history-container">
+                <div class="no-history-icon">📊</div>
+                <p class="no-history">Sin historial aún</p>
+                <p class="no-history-hint">Cierra tu primer mes para empezar a comparar tu progreso</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Find max value for scaling
+    const maxIncome = Math.max(...history.map(h => h.income), 1);
+
+    // Calculate trend
+    let trend = '→';
+    let trendClass = 'neutral';
+    if (history.length >= 2) {
+        const lastSavings = history[history.length - 1].savings;
+        const prevSavings = history[history.length - 2].savings;
+        if (lastSavings > prevSavings) {
+            trend = '📈';
+            trendClass = 'up';
+        } else if (lastSavings < prevSavings) {
+            trend = '📉';
+            trendClass = 'down';
+        }
+    }
+
+    // Stats summary
+    const avgSavingsRate = history.length > 0
+        ? (history.reduce((sum, h) => sum + parseFloat(h.savingsRate || 0), 0) / history.length).toFixed(1)
+        : 0;
+    const totalSaved = history.reduce((sum, h) => sum + (h.savings > 0 ? h.savings : 0), 0);
+
+    const barsHTML = history.map((h, index) => {
+        // Income bar: always show at good visible height (min 30%, scale to 100%)
+        const incomeHeight = Math.max(30, (h.income / maxIncome) * 100);
+
+        // Savings rate bar: scale so that 50% savings = 100% height, capped at 100%
+        // This makes even small savings rates visible
+        const savingsRateNum = Math.abs(parseFloat(h.savingsRate) || 0);
+        const savingsHeight = Math.min(100, Math.max(10, (savingsRateNum / 50) * 100));
+        const isNegative = h.savings < 0;
+        const isLatest = index === history.length - 1;
+
+        return `
+            <div class="history-month ${isLatest ? 'latest' : ''}" data-month="${h.label}">
+                <div class="month-bars">
+                    <div class="bar-container">
+                        <div class="bar income-bar" style="height: ${incomeHeight}%;">
+                            <span class="bar-value">$${(h.income / 1000).toFixed(1)}k</span>
+                        </div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar savings-bar ${isNegative ? 'negative' : ''}" style="height: ${savingsHeight}%;">
+                            <span class="bar-value">${h.savingsRate}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="month-label">${h.label}</div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="history-header">
+            <div class="history-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Tasa Promedio</span>
+                    <span class="stat-value ${parseFloat(avgSavingsRate) >= 20 ? 'excellent' : parseFloat(avgSavingsRate) >= 10 ? 'good' : 'warning'}">${avgSavingsRate}%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Ahorrado</span>
+                    <span class="stat-value">$${totalSaved.toLocaleString('es-MX')}</span>
+                </div>
+                <div class="stat-item trend-${trendClass}">
+                    <span class="stat-label">Tendencia</span>
+                    <span class="stat-value">${trend}</span>
+                </div>
+            </div>
+        </div>
+        <div class="history-chart-area">
+            ${barsHTML}
+        </div>
+        <div class="history-legend">
+            <span class="legend-item"><span class="legend-color income"></span>Ingreso</span>
+            <span class="legend-item"><span class="legend-color savings"></span>Tasa Ahorro %</span>
+        </div>
+    `;
+}
+
+
+// Expose to global scope for onclick
+window.closeMonth = closeMonth;
 
 // ===== EDITABLE CHECKLIST =====
 function setupEditableChecklist() {
@@ -1812,6 +2020,20 @@ function setupFlowHandlers() {
     });
 }
 
+// ===== BOT CONTROLS =====
+function setupBotControls() {
+    const editCapitalBtn = document.getElementById('btn-edit-capital');
+    if (editCapitalBtn) {
+        editCapitalBtn.addEventListener('click', () => {
+            const input = prompt("Ingrese el nuevo Capital Inicial (USDT):\n(Esto recalculará el ROI y APY)");
+            if (input && !isNaN(input)) {
+                socket.emit('update_initial_capital', parseFloat(input));
+                alert(`Capital actualizado a $${input}. El sistema se recalculará en breve.`);
+            }
+        });
+    }
+}
+
 // ===== AUTO-REFRESH SYSTEM =====
 async function autoRefresh() {
     // Fetch exchange rate and macro data
@@ -1841,6 +2063,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupDebtResetHandlers();
         setupEditableChecklist();
         setupFlowManager();
+        setupBotControls();
 
         // Initial data fetch
         await fetchExchangeRate();

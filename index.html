@@ -246,6 +246,21 @@
                         <div class="flow-summary" id="flow-summary">
                             Ingresa tus datos para calcular
                         </div>
+
+                        <!-- Close Month & History -->
+                        <div class="flow-history-section">
+                            <div class="close-month-row">
+                                <button id="btn-close-month" class="btn-close-month" onclick="closeMonth()">
+                                    📅 Cerrar Mes
+                                </button>
+                                <span class="close-month-hint">Guarda el mes actual y reinicia para el siguiente</span>
+                            </div>
+                            <div class="flow-history-chart" id="flow-history-chart">
+                                <!-- Populated dynamically by renderFlowHistory() -->
+                                <p class="no-history">Sin historial aún. Cierra tu primer mes para empezar a comparar.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -529,7 +544,13 @@
                                     <span class="profit-label">Profit</span>
                                     <span class="profit-value positive" id="profit-total">$0.00</span>
                                 </div>
-                                <div class="profit-pct"><span id="profit-percent">0.00</span>%</div>
+                                <div class="profit-pct"><span id="profit-percent">0.00</span>% <small
+                                        style="color:#666">(ROI)</small></div>
+                                <!-- APY FOR FINTECH COMPARISON -->
+                                <div id="profit-apy"
+                                    style="font-size: 0.8rem; color: #00d4ff; margin-top: 2px; text-align: center;">
+                                    APY: ~0% anual
+                                </div>
                                 <!-- DAILY PROFIT (NEW) -->
                                 <div id="profit-daily"
                                     style="font-size: 0.75rem; color: #888; margin-top: 4px; text-align: center;">
@@ -583,6 +604,10 @@
                         </div>
 
                         <div class="emergency-controls">
+                            <button id="btn-edit-capital" class="btn-config" title="Ajustar capital inicial"
+                                style="background: #333; color: #fff; border: 1px solid #555; margin-right: 10px;">
+                                💰 Capital
+                            </button>
                             <button id="reset-grid" class="btn-emergency" title="Cancelar todo y resetear profit">
                                 ⚠️ RESET
                             </button>
