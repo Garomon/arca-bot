@@ -552,20 +552,36 @@ async function cancelAllOrders() {
         log('ERROR', `Cancel Failed: ${e.message}`, 'error');
     }
 }
-
 // --- MONITORING LOOP ---
-let monitorInterval;
-function monitorOrders() {
-    if (monitorInterval) clearInterval(monitorInterval);
+let isMonitoring = false;
+let monitorTimeout;
+let monitorSessionId = 0; // Generation counter to kill zombies
 
-    log('SYSTEM', 'MONITORING ACTIVE');
-    monitorInterval = setInterval(async () => {
-        // PHASE 1: Stop-loss protection (check first)
+function monitorOrders() {
+    // Clear any existing timeout
+    if (monitorTimeout) clearTimeout(monitorTimeout);
+
+    // Start a new session
+    monitorSessionId++;
+    isMonitoring = true;
+
+    log('SYSTEM', `MONITORING ACTIVE (Session ${monitorSessionId})`);
+
+    // Start the recursive loop with the current ID
+    runMonitorLoop(monitorSessionId);
+}
+
+async function runMonitorLoop(myId) {
+    if (!isMonitoring || myId !== monitorSessionId) return;
+
+    try {
+        // PHASE 1: Stop-loss protection
         if (state.emergencyStop) {
             log('STOPPED', 'Bot halted due to emergency stop-loss', 'error');
             return;
         }
         await checkStopLoss();
+        if (myId !== monitorSessionId) return; // Zombie check
 
         let volatilityState = 'NORMAL';
 
@@ -574,11 +590,15 @@ function monitorOrders() {
         const multiTF = await analyzeMultipleTimeframes();
         state.marketRegime = regime.regime;
 
+        if (myId !== monitorSessionId) return; // Zombie check
+
         // Log market intelligence
         log('INTEL', `Regime: ${regime.regime} | MTF Confidence: ${multiTF.confidence} | Direction: ${multiTF.direction}`, 'info');
 
         // Analytical Brain
         const analysis = await getMarketAnalysis();
+        if (myId !== monitorSessionId) return; // Zombie check
+
         if (analysis) {
             const trend = analysis.price > analysis.ema ? 'BULLISH' : 'BEARISH';
             volatilityState = analysis.bandwidth > CONFIG.bandwidthHigh ? 'HIGH' :
@@ -595,7 +615,6 @@ function monitorOrders() {
                 isOversold: analysis.rsi < adaptiveRSI.oversold,
                 bandwidth: analysis.bandwidth,
                 adaptiveRSI,
-                // NEW: Advanced indicators for smarter decisions
                 signalScore: analysis.signalScore || 0,
                 recommendation: analysis.recommendation || 'HOLD',
                 macd: analysis.macd || { signal: 'NEUTRAL', crossing: 'NONE' },
@@ -603,7 +622,7 @@ function monitorOrders() {
                 volume: analysis.volume || { signal: 'NORMAL' }
             };
 
-            // ADAPTIVE VOLATILITY ENGINE (use already calculated volatilityState)
+            // ADAPTIVE VOLATILITY ENGINE
             let newSpacing = CONFIG.spacingNormal;
 
             if (analysis.bandwidth > CONFIG.bandwidthHigh) {
@@ -617,17 +636,20 @@ function monitorOrders() {
             // Check if we need to adapt (with 5-minute cooldown to prevent constant resets)
             const lastResetTime = state.lastRebalance?.timestamp || 0;
             const timeSinceReset = Date.now() - lastResetTime;
-            const cooldownMs = 5 * 60 * 1000; // 5 minutes cooldown
+            const cooldownMs = 5 * 60 * 1000;
 
             if (newSpacing !== CONFIG.gridSpacing && timeSinceReset > cooldownMs) {
                 log('AI', `VOLATILITY SHIFT DETECTED (${volatilityState}). ADAPTING GRID...`, 'warning');
                 CONFIG.gridSpacing = newSpacing;
                 state.lastRebalance = { timestamp: Date.now(), triggers: ['VOLATILITY'] };
-                await initializeGrid(true);
-            } else {
 
-                // --- AUTO-SYNC (Self-Healing) ---
-                // Every 5 minutes, ensure we are perfectly synced with exchange
+                // CRITICAL: Call initializeGrid via RECURSION STOP
+                // initializeGrid calls monitorOrders, which increments SessionID.
+                // This current loop (checking old ID) will die naturally at next check.
+                await initializeGrid(true);
+                return;
+            } else {
+                // Auto-Sync
                 const lastSync = state.lastSyncTime || 0;
                 if (Date.now() - lastSync > 5 * 60 * 1000) {
                     log('SYSTEM', 'AUTO-SYNC: Validating state with exchange...', 'info');
@@ -635,24 +657,15 @@ function monitorOrders() {
                     state.lastSyncTime = Date.now();
                 }
 
-                // PHASE 3: Intelligent Rebalancing - TEMPORARILY DISABLED
-                // ... (rest of code)
-
-                // const rebalanceTriggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF);
-                // if (rebalanceTriggers && rebalanceTriggers.length > 0) {
-                //     log('REBALANCE', `Triggers: ${rebalanceTriggers.join(', ')}`, 'warning');
-                //     await initializeGrid(true);
-                //     state.lastRebalance = {
-                //         timestamp: Date.now(),
-                //         triggers: rebalanceTriggers
-                //     };
-                // } else {
-                // Heartbeat Log (Show user we are thinking)
-                log('AI', `ANALYZING: Volatility [${volatilityState}] | RSI [${analysis.rsi.toFixed(1)}]`, 'info');
-                // }
+                // Heartbeat Log - ONLY IF still active
+                if (myId === monitorSessionId) {
+                    log('AI', `ANALYZING: Volatility [${volatilityState}] | RSI [${analysis.rsi.toFixed(1)}]`, 'info');
+                }
             }
 
-            // Emit to UI with COMPLETE data
+            if (myId !== monitorSessionId) return; // Zombie check
+
+            // Emit to UI
             io.emit('analysis_update', {
                 rsi: analysis.rsi,
                 ema: analysis.ema,
@@ -660,14 +673,12 @@ function monitorOrders() {
                 price: analysis.price,
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
-                pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' }, // Emit Pressure
-                geoContext: checkGeopoliticalContext(), // Emit Geo Context
+                pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
+                geoContext: checkGeopoliticalContext(),
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
                 signalScore: state.marketCondition.signalScore,
                 regime: state.marketRegime,
-                // Multi-timeframe data
                 multiTF: multiTF,
-                // Bollinger Bands data
                 bollingerBands: analysis.bb ? {
                     upper: analysis.bb.upper,
                     middle: analysis.bb.middle,
@@ -675,12 +686,11 @@ function monitorOrders() {
                 } : null
             });
 
-            // ====== ULTIMATE INTELLIGENCE: COMPOSITE SIGNAL ======
-            // Calculate and store composite signal for decision making
             const compositeSignal = await calculateCompositeSignal(analysis, regime, multiTF);
             state.compositeSignal = compositeSignal;
 
-            // Emit composite intelligence to UI
+            if (myId !== monitorSessionId) return; // Zombie check
+
             io.emit('composite_signal', {
                 score: compositeSignal.score,
                 recommendation: compositeSignal.recommendation,
@@ -693,7 +703,7 @@ function monitorOrders() {
             });
         }
 
-        // PHASE 3: Profit Taking Management
+        // Profit Taking
         if (state.initialCapital && state.totalProfit > 0) {
             const profitActions = adaptiveHelpers.manageProfitTaking(state.totalProfit, state.initialCapital, state);
             profitActions.forEach(action => {
@@ -705,28 +715,19 @@ function monitorOrders() {
             });
         }
 
-        // Emit detailed financials
         const financials = await getDetailedFinancials();
-        if (financials) {
-            // PHASE 4: Performance Analytics
+        if (financials && myId === monitorSessionId) {
             const metrics = adaptiveHelpers.calculatePerformanceMetrics(state, state.initialCapital || 100);
-
             io.emit('financial_update', { ...financials, metrics });
-
-            // Update HUD detail
             io.emit('hud_update', {
                 status: 'LIVE TRADING',
                 detail: `GRID ACTIVE | ${financials.activeOrders.total} ORDERS | $${state.currentPrice.toFixed(0)} | Win: ${metrics.winRate}%`
             });
-
-            // Emit grid state for visualization and orders table
             io.emit('grid_state', {
                 currentPrice: state.currentPrice,
                 orders: state.activeOrders,
                 filledOrders: state.filledOrders
             });
-
-            // Emit settings for Tab 4
             io.emit('settings_update', {
                 gridCount: state.activeOrders.length,
                 gridSpacing: (CONFIG.gridSpacing * 100).toFixed(2),
@@ -738,8 +739,19 @@ function monitorOrders() {
         }
 
         await checkLiveOrders();
-        await checkGridHealth(); // Autonomous Check
-    }, CONFIG.monitorInterval);
+        await checkGridHealth();
+
+    } catch (e) {
+        if (myId === monitorSessionId) {
+            console.error('>> [CRITICAL ERROR] Monitor Loop Failed:', e);
+            log('ERROR', `Monitor Loop Crashed: ${e.message}`, 'error');
+        }
+    } finally {
+        // Schedule NEXT iteration ONLY if we are still the active session
+        if (isMonitoring && !state.emergencyStop && myId === monitorSessionId) {
+            monitorTimeout = setTimeout(() => runMonitorLoop(myId), CONFIG.monitorInterval);
+        }
+    }
 }
 
 async function getMarketAnalysis() {
@@ -833,7 +845,7 @@ async function getMarketAnalysis() {
         else if (signalScore <= -20) recommendation = 'SELL';
 
         // Log the analysis
-        log('AI', `ANALYZING: Volatility [${volumeSignal}] | RSI [${currentRSI.toFixed(1)}]`);
+        // log('AI', `ANALYZING: Volatility [${volumeSignal}] | RSI [${currentRSI.toFixed(1)}]`);
 
         return {
             rsi: currentRSI,
