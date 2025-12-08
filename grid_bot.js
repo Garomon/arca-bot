@@ -19,6 +19,7 @@ const adaptiveHelpers = require('./adaptive_helpers');
 const CONFIG = {
     // Trading Pair
     pair: 'BTC/USDT',
+    tradingFee: 0.001,       // 0.1% Standard Fee (Set to 0.00075 if using BNB)
 
     // AGGRESSIVE Grid Settings
     gridCount: 16,           // More orders = more profit opportunities
@@ -192,14 +193,45 @@ let state = {
 };
 
 // Load State
+// Load State
 function loadState() {
     try {
         if (fs.existsSync(CONFIG.stateFile)) {
             const raw = fs.readFileSync(CONFIG.stateFile);
             const saved = JSON.parse(raw);
             state = { ...state, ...saved };
-            log('SYSTEM', 'STATE LOADED FROM DISK');
-            log('RESUME', `Active Orders: ${state.activeOrders.length} | Profit: ${state.totalProfit}`);
+
+            // AUTO-SANITIZER: Fix Historical Profit Logic (Buys = 0) & Retroactive Fee Deduction
+            let fixedProfit = 0;
+            if (state.filledOrders) {
+                // FIXED: Migration Logic - Run cleanly
+                console.log('>> [MIGRATION] Verifying Fee Deduction on Historical Orders...');
+                state.filledOrders.forEach(o => {
+                    // 1. Zero out Buy Profit
+                    if (o.side === 'buy' && o.profit > 0) {
+                        o.profit = 0;
+                    }
+
+                    // 2. Deduct Fees from Sell Profit (Net = Gross - 0.2%)
+                    if (o.side === 'sell' && o.profit > 0) {
+                        // Check if we already deducted fees (heuristic: is it weirdly precise?) 
+                        // Better: Just assume if it's high it's gross.
+                        // Or add a flag to the ORDER itself.
+                        if (!o.isNetProfit) {
+                            const estimatedFees = (o.price * o.amount) * (CONFIG.tradingFee * 2);
+                            o.profit = Math.max(0, o.profit - estimatedFees);
+                            o.isNetProfit = true; // Mark as processed
+                            console.log(`>> [FIX] Order ${o.id}: Deducted $${estimatedFees.toFixed(4)} fees. New Net: $${o.profit.toFixed(4)}`);
+                        }
+                    }
+                    fixedProfit += (o.profit || 0);
+                });
+                state.totalProfit = fixedProfit; // Force Recalculation
+                state.feeCorrectionApplied = true;
+            }
+
+            log('SYSTEM', 'STATE LOADED & SANITIZED');
+            log('RESUME', `Active Orders: ${state.activeOrders.length} | Real Profit: $${state.totalProfit.toFixed(4)}`);
         }
     } catch (e) {
         console.error('>> [ERROR] Failed to load state:', e.message);
@@ -633,12 +665,14 @@ async function runMonitorLoop(myId) {
                 volatilityState = 'LOW';
             }
 
-            // Check if we need to adapt (with 5-minute cooldown to prevent constant resets)
+            // Check if we need to adapt (with Smart Hysteresis)
             const lastResetTime = state.lastRebalance?.timestamp || 0;
             const timeSinceReset = Date.now() - lastResetTime;
-            const cooldownMs = 5 * 60 * 1000;
+            // Cooldown: 20 mins for optimization (Zen Mode), 0 for safety (Panic Mode)
+            const cooldownMs = 20 * 60 * 1000;
+            const isEmergency = volatilityState === 'HIGH';
 
-            if (newSpacing !== CONFIG.gridSpacing && timeSinceReset > cooldownMs) {
+            if (newSpacing !== CONFIG.gridSpacing && (timeSinceReset > cooldownMs || isEmergency)) {
                 log('AI', `VOLATILITY SHIFT DETECTED (${volatilityState}). ADAPTING GRID...`, 'warning');
                 CONFIG.gridSpacing = newSpacing;
                 state.lastRebalance = { timestamp: Date.now(), triggers: ['VOLATILITY'] };
@@ -1411,8 +1445,8 @@ async function checkStopLoss() {
 // PHASE 1: Fee-Aware Profit Calculation
 function calculateNetProfit(buyPrice, sellPrice, amount) {
     const grossProfit = (sellPrice - buyPrice) * amount;
-    const buyFee = buyPrice * amount * 0.001; // 0.1% Binance fee
-    const sellFee = sellPrice * amount * 0.001; // 0.1% Binance fee
+    const buyFee = buyPrice * amount * CONFIG.tradingFee;
+    const sellFee = sellPrice * amount * CONFIG.tradingFee;
     const netProfit = grossProfit - buyFee - sellFee;
 
     return {
@@ -1457,12 +1491,22 @@ async function checkLiveOrders() {
 }
 
 async function handleOrderFill(order, fillPrice) {
-    const profit = (order.amount * fillPrice) * CONFIG.gridSpacing;
+    // FIX: Only SELL orders realize profit. BUY orders are just entries.
+    let profit = 0;
+    if (order.side === 'sell') {
+        const buyPrice = fillPrice / (1 + CONFIG.gridSpacing); // Estimate buy price based on spacing
+        const grossProfit = (fillPrice - buyPrice) * order.amount;
+        const fees = (buyPrice * order.amount * CONFIG.tradingFee) + (fillPrice * order.amount * CONFIG.tradingFee);
+        profit = grossProfit - fees;
+    }
+
+    // Update State
     state.totalProfit += profit;
     state.filledOrders.push({ ...order, fillPrice, profit, timestamp: Date.now() });
     state.lastFillTime = Date.now();
 
-    log('EXECUTION', `💰 ${order.side.toUpperCase()} FILLED @ $${fillPrice.toFixed(2)} | Profit: $${profit.toFixed(4)}`, 'success');
+    const profitMsg = profit > 0 ? `| Profit: $${profit.toFixed(4)}` : '';
+    log('EXECUTION', `💰 ${order.side.toUpperCase()} FILLED @ $${fillPrice.toFixed(2)} ${profitMsg}`, 'success');
     io.emit('trade_success', { side: order.side, price: fillPrice, profit });
 
     // Re-place opposite order
@@ -1654,9 +1698,10 @@ async function syncHistoricalTrades() {
             saveState();
         }
 
-        // Emit updated history to UI (Debugging Payload)
+        // Emit updated history to UI (Debugging Payload) - SORTED
         if (state.filledOrders) {
-            io.emit('debug_trades', state.filledOrders);
+            const sortedHistory = [...state.filledOrders].sort((a, b) => b.timestamp - a.timestamp);
+            io.emit('debug_trades', sortedHistory);
         }
     } catch (e) {
         console.error('>> [WARN] History sync failed (API permission?):', e.message);

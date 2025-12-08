@@ -350,45 +350,130 @@ socket.on('analysis_update', (data) => {
 });
 
 // Listener for Debug Transaction Log
-socket.on('debug_trades', (trades) => {
-    console.log('Received debug_trades:', trades); // Debug: Check array content
+let tradeHistory = [];
+let sortState = {
+    column: 'timestamp', // Default sort by time
+    desc: true
+};
+
+// Map header index to data property
+const columnMap = {
+    1: 'timestamp', // Time
+    2: 'id',        // ID
+    3: 'side',      // Side
+    4: 'price',     // Price
+    5: 'amount',    // Amount
+    6: 'profit'     // Profit
+};
+
+// Setup Sort Listeners (Run once)
+const headers = document.querySelectorAll('.transaction-log-panel th');
+headers.forEach((th, index) => {
+    if (columnMap[index]) { // Only sort functionality for mapped columns
+        th.style.cursor = 'pointer';
+        th.title = "Click to Sort";
+        th.onclick = () => {
+            // If clicking same column, toggle order. If new, default to Descending.
+            if (sortState.column === columnMap[index]) {
+                sortState.desc = !sortState.desc;
+            } else {
+                sortState.column = columnMap[index];
+                sortState.desc = true;
+            }
+            renderTradeHistory();
+        };
+    }
+});
+
+function renderTradeHistory() {
     const tbody = document.getElementById('transaction-log-body');
     if (!tbody) return;
 
-    tbody.innerHTML = ''; // Clear previous
+    // Update Header Icons
+    headers.forEach((th, index) => {
+        const prop = columnMap[index];
+        if (!prop) return; // Skip # column
 
-    if (!trades || !Array.isArray(trades) || trades.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding: 10px;">No transaction history found (Array is empty)</td></tr>';
+        let label = th.innerText.replace(' ⬇️', '').replace(' ⬆️', ''); // Clean old arrow
+        if (prop === sortState.column) {
+            th.innerText = `${label} ${sortState.desc ? '⬇️' : '⬆️'}`;
+        } else {
+            th.innerText = label; // Remove arrow from inactive
+        }
+    });
+
+    tbody.innerHTML = ''; // Clear
+
+    if (!tradeHistory || tradeHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 10px;">No transaction history found</td></tr>';
         return;
     }
 
-    trades.forEach(t => {
+    // Generic Sort Logic
+    const sortedTrades = [...tradeHistory].sort((a, b) => {
+        let valA = a[sortState.column];
+        let valB = b[sortState.column];
+
+        // Handle Side (String) vs Numbers
+        if (sortState.column === 'side') {
+            valA = (valA || '').toString().toLowerCase();
+            valB = (valB || '').toString().toLowerCase();
+            if (valA < valB) return sortState.desc ? 1 : -1;
+            if (valA > valB) return sortState.desc ? -1 : 1;
+            return 0;
+        }
+
+        // Handle Numbers (default)
+        valA = parseFloat(valA || 0);
+        valB = parseFloat(valB || 0);
+        return sortState.desc ? (valB - valA) : (valA - valB);
+    });
+
+    sortedTrades.forEach((t, index) => {
         try {
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid rgba(255,255,255,0.02)';
 
             const isBuy = (t.side || '').toLowerCase() === 'buy';
             const profitClass = (t.profit && t.profit > 0) ? 'text-success' : 'text-muted';
-            const dateStr = t.timestamp ? new Date(t.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A';
+            const dateObj = new Date(t.timestamp);
+            const dateStr = t.timestamp ? dateObj.toLocaleString('es-MX', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'N/A';
             const shortId = t.id ? (t.id.toString().length > 6 ? '...' + t.id.toString().slice(-6) : t.id) : '?';
+
+            // Check if transaction is from today
+            const isToday = new Date().toDateString() === dateObj.toDateString();
+            if (isToday) {
+                row.classList.add('today-highlight');
+                row.style.background = 'linear-gradient(90deg, rgba(41, 121, 255, 0.1) 0%, transparent 100%)';
+                row.style.borderLeft = '3px solid #2979ff';
+            }
 
             const sideBadge = isBuy
                 ? '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="width:50px; font-weight:500;">BUY</span>'
                 : '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="width:50px; font-weight:500;">SELL</span>';
 
             row.innerHTML = `
-                <td class="ps-3 text-secondary" style="vertical-align: middle;">${dateStr}</td>
+                <td class="ps-3 text-muted" style="vertical-align: middle;">${index + 1}</td>
+                <td class="text-secondary" style="vertical-align: middle;">${dateStr}</td>
                 <td class="text-muted" title="${t.id}" style="vertical-align: middle; cursor: help;">${shortId}</td>
                 <td class="text-center" style="vertical-align: middle;">${sideBadge}</td>
                 <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${parseFloat(t.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
-                <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(t.profit || 0).toFixed(4)}</td>
+                <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(isBuy ? 0 : (t.profit || 0)).toFixed(4)}</td>
             `;
             tbody.appendChild(row);
         } catch (e) {
             console.error('Error rendering row:', e);
         }
     });
+}
+
+socket.on('debug_trades', (trades) => {
+    // console.log('Received debug_trades:', trades);
+    if (trades && Array.isArray(trades)) {
+        tradeHistory = trades;
+        renderTradeHistory();
+    }
 });
 
 // ULTIMATE INTELLIGENCE - Composite Signal Display
