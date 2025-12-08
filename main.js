@@ -183,6 +183,16 @@ socket.on('log_message', (data) => {
     log(data.type, data.msg, data.style);
 });
 
+// Init State (Populate Capital)
+socket.on('init_state', (state) => {
+    if (state.initialCapital) {
+        const capInput = document.getElementById('capital-input');
+        if (capInput) {
+            capInput.value = state.initialCapital.toFixed(2);
+        }
+    }
+});
+
 // Financial Update
 socket.on('financial_update', (data) => {
     if (ui.freeUSDT) ui.freeUSDT.innerText = `$${data.freeUSDT.toFixed(2)}`;
@@ -2021,14 +2031,37 @@ function setupFlowHandlers() {
 }
 
 // ===== BOT CONTROLS =====
+// ===== BOT CONTROLS =====
 function setupBotControls() {
-    const editCapitalBtn = document.getElementById('btn-edit-capital');
-    if (editCapitalBtn) {
-        editCapitalBtn.addEventListener('click', () => {
-            const input = prompt("Ingrese el nuevo Capital Inicial (USDT):\n(Esto recalculará el ROI y APY)");
-            if (input && !isNaN(input)) {
-                socket.emit('update_initial_capital', parseFloat(input));
-                alert(`Capital actualizado a $${input}. El sistema se recalculará en breve.`);
+    const updateBtn = document.getElementById('btn-update-capital');
+    const capInput = document.getElementById('capital-input');
+
+    if (updateBtn && capInput) {
+        updateBtn.addEventListener('click', () => {
+            const val = parseFloat(capInput.value);
+            if (val && !isNaN(val) && val > 0) {
+                socket.emit('update_initial_capital', val);
+
+                // Visual feedback
+                const originalText = updateBtn.innerHTML;
+                updateBtn.innerHTML = '✅';
+                updateBtn.style.color = '#00ff00';
+                updateBtn.style.borderColor = '#00ff00';
+
+                setTimeout(() => {
+                    updateBtn.innerHTML = originalText;
+                    updateBtn.style.color = '#00ff88';
+                    updateBtn.style.borderColor = '#444';
+                }, 1500);
+            } else {
+                alert('Por favor ingresa un monto válido (mayor a 0)');
+            }
+        });
+
+        // Also allow Enter key
+        capInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                updateBtn.click();
             }
         });
     }
