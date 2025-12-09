@@ -1,7 +1,7 @@
 /**
  * VANTAGE // QUANTUM GRID BOT
- * Version: 2.0 (Quantum Upgrade)
- * Features: Persistence, Precision Math, Circuit Breakers
+ * Version: 3.0 (Multi-Core Edition)
+ * Features: Multi-Pair, Persistence, Precision Math, Circuit Breakers
  */
 
 const express = require('express');
@@ -15,56 +15,105 @@ require('dotenv').config();
 const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
 
-// --- CONFIGURATION (HYBRID AGGRESSIVE MODE) ---
+// --- DYNAMIC CONFIGURATION (Multi-Pair Support) ---
+const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
+const BOT_PORT = parseInt(process.env.BOT_PORT) || 3000;
+const PAIR_ID = TRADING_PAIR.replace('/', ''); // e.g., 'BTCUSDT'
+
+// Pair-specific presets
+const PAIR_PRESETS = {
+    'BTC/USDT': {
+        minOrderSize: 0.00001,
+        gridSpacing: 0.003,      // 0.3% base
+        spacingNormal: 0.005,
+        spacingHigh: 0.007,
+        spacingLow: 0.003,
+        bandwidthHigh: 0.04,
+        bandwidthLow: 0.015
+    },
+    'SOL/USDT': {
+        minOrderSize: 0.01,      // SOL has larger min
+        gridSpacing: 0.008,      // 0.8% base (higher volatility)
+        spacingNormal: 0.010,    // 1.0%
+        spacingHigh: 0.015,      // 1.5% in high vol
+        spacingLow: 0.006,       // 0.6% in low vol
+        bandwidthHigh: 0.06,     // SOL swings harder
+        bandwidthLow: 0.02
+    },
+    'ETH/BTC': {
+        minOrderSize: 0.001,
+        gridSpacing: 0.004,      // 0.4% base
+        spacingNormal: 0.006,
+        spacingHigh: 0.010,
+        spacingLow: 0.004,
+        bandwidthHigh: 0.05,
+        bandwidthLow: 0.015
+    }
+};
+
+// Get preset for current pair (fallback to BTC defaults)
+const pairPreset = PAIR_PRESETS[TRADING_PAIR] || PAIR_PRESETS['BTC/USDT'];
+
 const CONFIG = {
-    // Trading Pair
-    pair: 'BTC/USDT',
+    // Trading Pair (Dynamic)
+    pair: TRADING_PAIR,
     tradingFee: 0.001,       // 0.1% Standard Fee
 
-    // GRID SETTINGS (INITIAL - ADAPTIVE AI WILL OVERWRITE)
-    gridCount: 16,           // [INITIAL] Max open orders
-    gridSpacing: 0.003,      // [INITIAL] 0.3% (Adaptive Base)
-    minOrderSize: 0.00001,
+    // GRID SETTINGS (PAIR-SPECIFIC)
+    gridCount: 16,
+    gridSpacing: pairPreset.gridSpacing,
+    minOrderSize: pairPreset.minOrderSize,
     maxOpenOrders: 24,
     safetyMargin: 0.92,
 
-    // TIGHT Volatility Spacing
-    spacingNormal: 0.005,
-    spacingHigh: 0.007,      // 0.7% in high volatility
-    spacingLow: 0.003,       // 0.3% in low vol - MAXIMUM trades
-    bandwidthHigh: 0.04,     // Detect high vol faster
-    bandwidthLow: 0.015,     // Detect low vol - tighten grid
+    // Volatility Spacing (PAIR-SPECIFIC)
+    spacingNormal: pairPreset.spacingNormal,
+    spacingHigh: pairPreset.spacingHigh,
+    spacingLow: pairPreset.spacingLow,
+    bandwidthHigh: pairPreset.bandwidthHigh,
+    bandwidthLow: pairPreset.bandwidthLow,
 
     // AGGRESSIVE RSI (enter earlier)
-    rsiOverbought: 65,       // Sell earlier (was 70)
-    rsiOversold: 35,         // Buy earlier (was 30)
+    rsiOverbought: 65,
+    rsiOversold: 35,
 
     // Technical Indicators
     indicators: {
-        rsiPeriod: 7,        // Faster RSI (was 14)
-        emaPeriod: 20,       // Faster EMA (was 50)
-        bbPeriod: 14,        // Faster BB (was 20)
+        rsiPeriod: 7,
+        emaPeriod: 20,
+        bbPeriod: 14,
         bbStdDev: 2
     },
 
     // PROFIT OPTIMIZATION
-    compoundProfits: true,   // Reinvest profits into grid
-    minProfitToCompound: 0.5, // Compound even small profits
+    compoundProfits: true,
+    minProfitToCompound: 0.5,
 
     // AGGRESSIVE DCA MODE
-    dcaEnabled: true,        // Buy dips automatically
-    dcaDropPercent: 0.02,    // DCA when price drops 2%
-    dcaMultiplier: 1.5,      // Buy 1.5x more on dips
+    dcaEnabled: true,
+    dcaDropPercent: 0.02,
+    dcaMultiplier: 1.5,
 
     // System Settings
-    monitorInterval: 3000,   // Check every 3 seconds (faster!)
-    orderDelay: 150,         // Faster order placement
+    monitorInterval: 3000,
+    orderDelay: 150,
     logBufferSize: 100,
-    healthCheckThreshold: 0.015,  // 1.5% drift triggers rebalance (tighter)
+    healthCheckThreshold: 0.015,
 
-    // State Persistence
-    stateFile: path.join(__dirname, 'grid_state.json')
+    // State Persistence (PAIR-SPECIFIC PATH)
+    stateFile: path.join(__dirname, 'data', 'sessions', `${PAIR_ID}_state.json`)
 };
+
+// Ensure state directory exists
+const stateDir = path.dirname(CONFIG.stateFile);
+if (!fs.existsSync(stateDir)) {
+    fs.mkdirSync(stateDir, { recursive: true });
+}
+
+console.log(`>> [CONFIG] Trading Pair: ${TRADING_PAIR}`);
+console.log(`>> [CONFIG] Port: ${BOT_PORT}`);
+console.log(`>> [CONFIG] State File: ${CONFIG.stateFile}`);
+console.log(`>> [CONFIG] Grid Spacing: ${(CONFIG.gridSpacing * 100).toFixed(2)}%`);
 
 // --- SERVER SETUP ---
 const app = express();
@@ -1811,8 +1860,9 @@ function sleep(ms) {
 }
 
 // --- STARTUP (FULLY AUTOMATED) ---
-server.listen(3000, async () => {
-    console.log('>> [SYSTEM] VANTAGE OS ONLINE @ http://localhost:3000');
+server.listen(BOT_PORT, async () => {
+    console.log(`>> [SYSTEM] VANTAGE OS ONLINE @ http://localhost:${BOT_PORT}`);
+    console.log(`>> [SYSTEM] Trading Pair: ${TRADING_PAIR}`);
     loadState();
 
     // AUTO-RECOVERY: SAFETY FIRST
@@ -1827,12 +1877,13 @@ server.listen(3000, async () => {
     if (!state.initialCapital) {
         try {
             const balance = await binance.fetchBalance();
-            const totalUSDT = balance.USDT?.total || 0;
-            const totalBTC = balance.BTC?.total || 0;
+            const [baseCurrency, quoteCurrency] = TRADING_PAIR.split('/');
+            const quoteTotal = balance[quoteCurrency]?.total || 0;
+            const baseTotal = balance[baseCurrency]?.total || 0;
             const price = await getCurrentPrice();
-            const btcValue = totalBTC * (price || 0);
-            state.initialCapital = totalUSDT + btcValue;
-            console.log(`>> [AUTO] Initial capital set: $${state.initialCapital.toFixed(2)}`);
+            const baseValue = baseTotal * (price || 0);
+            state.initialCapital = quoteTotal + baseValue;
+            console.log(`>> [AUTO] Initial capital set: ${quoteTotal.toFixed(2)} ${quoteCurrency} + ${baseTotal.toFixed(6)} ${baseCurrency} = $${state.initialCapital.toFixed(2)}`);
             saveState();
         } catch (e) {
             console.error('>> [ERROR] Could not set initial capital:', e.message);
