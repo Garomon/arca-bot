@@ -1887,17 +1887,28 @@ server.listen(BOT_PORT, async () => {
     if (!state.initialCapital) {
         try {
             const balance = await binance.fetchBalance();
-            const [baseCurrency, quoteCurrency] = TRADING_PAIR.split('/');
-            const quoteTotal = balance[quoteCurrency]?.total || 0;
-            const baseTotal = balance[baseCurrency]?.total || 0;
-            const price = await getCurrentPrice();
-            const baseValue = baseTotal * (price || 0);
-            const totalEquity = quoteTotal + baseValue;
+
+            // UNIVERSAL EQUITY: Always use USDT + BTC as the account base
+            // This ensures ALL pairs see the same total account value
+            const totalUSDT = balance.USDT?.total || 0;
+            const totalBTC = balance.BTC?.total || 0;
+
+            // Get BTC price for conversion (use BTC/USDT price)
+            let btcPrice = 0;
+            try {
+                const ticker = await binance.fetchTicker('BTC/USDT');
+                btcPrice = ticker.last || 0;
+            } catch (e) {
+                console.log('>> [WARN] Could not fetch BTC price, using 0');
+            }
+
+            const btcValue = totalBTC * btcPrice;
+            const totalEquity = totalUSDT + btcValue;
 
             // Apply CAPITAL_ALLOCATION - this bot's share of total
             state.initialCapital = totalEquity * CAPITAL_ALLOCATION;
 
-            console.log(`>> [AUTO] Total Equity: $${totalEquity.toFixed(2)}`);
+            console.log(`>> [AUTO] Universal Equity: $${totalUSDT.toFixed(2)} USDT + $${btcValue.toFixed(2)} BTC = $${totalEquity.toFixed(2)}`);
             console.log(`>> [AUTO] Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);
             console.log(`>> [AUTO] This Pair's Capital: $${state.initialCapital.toFixed(2)}`);
             saveState();
