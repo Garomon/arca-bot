@@ -723,7 +723,7 @@ async function runMonitorLoop(myId) {
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
                 pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
-                geoContext: checkGeopoliticalContext(),
+                geoContext: checkGeopoliticalContext(state.marketRegime),
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
                 signalScore: state.marketCondition.signalScore,
                 regime: state.marketRegime,
