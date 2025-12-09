@@ -1800,12 +1800,12 @@ server.listen(3000, async () => {
     console.log('>> [SYSTEM] VANTAGE OS ONLINE @ http://localhost:3000');
     loadState();
 
-    // AUTO-RECOVERY: Clear any stale emergency stop on fresh start
+    // AUTO-RECOVERY: SAFETY FIRST
+    // Do NOT clear emergency stop automatically. Force user to reset it.
     if (state.emergencyStop) {
-        console.log('>> [AUTO] Clearing stale emergency stop from previous session');
-        state.emergencyStop = false;
-        state.maxDrawdown = 0;
-        saveState();
+        console.log('>> [WARN] 🚨 EMERGENCY STOP IS ACTIVE FROM PREVIOUS SESSION.');
+        console.log('>> [WARN] The bot will remain paused until you manually clear it via the UI or by editing grid_state.json.');
+        // Don't auto-clear!
     }
 
     // AUTO-INIT: Set initial capital if not set

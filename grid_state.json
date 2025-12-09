@@ -3,7 +3,7 @@
     "usdt": 23.60618476,
     "btc": 0.00026871
   },
-  "currentPrice": 89896.71,
+  "currentPrice": 90100,
   "entryPrice": 89896.71,
   "activeOrders": [
     {
@@ -238,27 +238,27 @@
   "isLive": true,
   "startTime": 1765262657811,
   "marketCondition": {
-    "rsi": 42.26,
+    "rsi": 43.3,
     "trend": "BEARISH",
     "isOverbought": false,
     "isOversold": false,
-    "bandwidth": 0.01807467707233241,
+    "bandwidth": 0.018005753305151917,
     "adaptiveRSI": {
       "overbought": 72,
       "oversold": 28
     },
-    "signalScore": -6.129999999999999,
+    "signalScore": -6.649999999999999,
     "recommendation": "HOLD",
     "macd": {
-      "line": -187.801534252314,
+      "line": -185.03344308421947,
       "signal": "BEARISH",
       "crossing": "NONE"
     },
-    "stochRSI": 41.293833131801684,
+    "stochRSI": 44.437726723095516,
     "volume": {
-      "current": 264.71174,
-      "avg": 694.8773205,
-      "ratio": 0.3809474452404437,
+      "current": 271.37938,
+      "avg": 695.2107024999999,
+      "ratio": 0.39035558432013645,
       "signal": "LOW"
     }
   },
@@ -275,37 +275,37 @@
   "lastVolatility": null,
   "lastRegime": null,
   "compositeSignal": {
-    "score": 67,
-    "recommendation": "BUY",
-    "sizeMultiplier": 1.2,
+    "score": 87,
+    "recommendation": "STRONG_BUY",
+    "sizeMultiplier": 1.5,
     "reasons": [
       "RSI low-ish (+5)",
       "MTF aligned DOWN (-10)",
       "Extreme Fear 22 (+15)",
-      "Strong Sell Wall (0.1x) (-10)",
+      "Strong Buy Wall (3.4x) (+10)",
       "INSTITUTIONAL_ADOPTION (+15)"
     ],
     "components": {
       "fearGreed": {
         "value": 22,
         "classification": "Extreme Fear",
-        "timestamp": 1765262970406
+        "timestamp": 1765263041839
       },
       "funding": {
         "rate": 0.000852,
         "signal": "NEUTRAL",
-        "timestamp": 1765262970404
+        "timestamp": 1765263041823
       },
       "btcDominance": {
         "value": 56.94365913316795,
         "signal": "BTC_FLIGHT_TO_SAFETY",
-        "timestamp": 1765262970324
+        "timestamp": 1765263041746
       },
       "openInterest": {
-        "current": 87827.023,
-        "change": -0.031377984918028144,
+        "current": 87824.873,
+        "change": 0,
         "signal": "STABLE",
-        "timestamp": 1765262970404
+        "timestamp": 1765263041822
       },
       "timing": {
         "isWeekend": false,
@@ -320,9 +320,9 @@
         "scoreBias": 15
       },
       "technicals": {
-        "rsi": 42.26,
+        "rsi": 43.3,
         "macd": {
-          "line": -187.801534252314,
+          "line": -185.03344308421947,
           "signal": "BEARISH",
           "crossing": "NONE"
         },
@@ -335,7 +335,7 @@
         }
       }
     },
-    "timestamp": 1765262970777
+    "timestamp": 1765263042024
   },
   "lastSyncTime": 1765262970180,
   "feeCorrectionApplied": true

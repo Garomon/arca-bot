@@ -8005,3 +8005,6 @@
   Details: {"orderId":"53613106320","level":3,"worthCheck":{"worth":true,"gross":0.1107051838959391,"fees":0.014019433903663127,"net":0.09668574999227597,"profitPercent":"1.379"}}
 [2025-12-09T06:44:24.881Z] ORDER_PLACED_SELL: Price: $95575.70 | Amount: 0.000078 BTC | Composite Score: 67 | Regime: WEAK_BULL | Price: $89897 | Score: 67
   Details: {"orderId":"53613106347","level":4,"worthCheck":{"worth":true,"gross":0.1107051838959391,"fees":0.014019433903663127,"net":0.09668574999227597,"profitPercent":"1.379"}}
+
+
+========== BOT SESSION STARTED: 2025-12-09T06:50:37.939Z ==========
