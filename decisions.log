@@ -8160,3 +8160,22 @@
   Details: {"orderId":"53615171984","level":3,"worthCheck":{"worth":true,"gross":0.10227838028757301,"fees":0.01406821253775,"net":0.08821016774982302,"profitPercent":"1.254"}}
 [2025-12-09T08:04:30.042Z] ORDER_PLACED_SELL: Price: $95793.24 | Amount: 0.000078 BTC | Composite Score: 72 | Regime: BULL | Price: $90528 | Score: 72
   Details: {"orderId":"53615173108","level":4,"worthCheck":{"worth":true,"gross":0.10227838028757301,"fees":0.01406821253775,"net":0.08821016774982302,"profitPercent":"1.254"}}
+
+
+========== BOT SESSION STARTED: 2025-12-09T08:24:28.132Z ==========
+[2025-12-09T08:24:35.242Z] ORDER_PLACED_BUY: Price: $89223.55 | Amount: 0.000119 BTC | Composite Score: 67 | Regime: BULL | Price: $90552 | Score: 67
+  Details: {"orderId":"53615678202","level":-1,"worthCheck":{"worth":true,"gross":0.1585724421912155,"fees":0.02162299511658344,"net":0.13694944707463205,"profitPercent":"1.267"}}
+[2025-12-09T08:24:35.945Z] ORDER_PLACED_BUY: Price: $87895.42 | Amount: 0.000080 BTC | Composite Score: 67 | Regime: BULL | Price: $90552 | Score: 67
+  Details: {"orderId":"53615678371","level":-2,"worthCheck":{"worth":true,"gross":0.10630102245791742,"fees":0.014495245565579795,"net":0.09180577689233763,"profitPercent":"1.267"}}
+[2025-12-09T08:24:36.645Z] ORDER_PLACED_BUY: Price: $86567.30 | Amount: 0.000081 BTC | Composite Score: 67 | Regime: BULL | Price: $90552 | Score: 67
+  Details: {"orderId":"53615678517","level":-3,"worthCheck":{"worth":true,"gross":0.10793190202004732,"fees":0.01471763288786841,"net":0.09321426913217891,"profitPercent":"1.267"}}
+[2025-12-09T08:24:37.360Z] ORDER_PLACED_BUY: Price: $85239.18 | Amount: 0.000083 BTC | Composite Score: 67 | Regime: BULL | Price: $90552 | Score: 67
+  Details: {"orderId":"53615678614","level":-4,"worthCheck":{"worth":true,"gross":0.10961360348941053,"fees":0.014946950303663411,"net":0.09466665318574712,"profitPercent":"1.267"}}
+[2025-12-09T08:24:37.518Z] BLOCKED_BY_WALL: Buy Wall Ratio: 7.34x | Waiting for price rise | Price: $90552 | Score: 67
+  Details: {"level":{"side":"sell","price":"91879.793081837131734","amount":"0.00011764471175518302879","level":1}}
+[2025-12-09T08:24:37.674Z] BLOCKED_BY_WALL: Buy Wall Ratio: 7.34x | Waiting for price rise | Price: $90552 | Score: 67
+  Details: {"level":{"side":"sell","price":"93207.916163674263469","amount":"0.000077690679121368634063","level":2}}
+[2025-12-09T08:24:37.830Z] BLOCKED_BY_WALL: Buy Wall Ratio: 7.34x | Waiting for price rise | Price: $90552 | Score: 67
+  Details: {"level":{"side":"sell","price":"94536.039245511395203","amount":"0.000077690679121368634063","level":3}}
+[2025-12-09T08:24:37.986Z] BLOCKED_BY_WALL: Buy Wall Ratio: 7.34x | Waiting for price rise | Price: $90552 | Score: 67
+  Details: {"level":{"side":"sell","price":"95864.162327348526938","amount":"0.000077690679121368634063","level":4}}

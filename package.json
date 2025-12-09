@@ -1,10 +1,11 @@
 {
   "name": "vantage-quantum-bot",
-  "version": "2.1.0",
-  "description": "VANTAGE Quantum Grid Trading Bot for BTC/USDT (Remora Edition)",
+  "version": "3.0.0",
+  "description": "VANTAGE Quantum Grid Trading Bot - Multi-Core Edition",
   "main": "grid_bot.js",
   "scripts": {
     "start": "node grid_bot.js",
+    "multicore": "node orchestrator.js",
     "dev": "node --watch grid_bot.js"
   },
   "dependencies": {
