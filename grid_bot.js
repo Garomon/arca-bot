@@ -1892,8 +1892,14 @@ server.listen(BOT_PORT, async () => {
             const baseTotal = balance[baseCurrency]?.total || 0;
             const price = await getCurrentPrice();
             const baseValue = baseTotal * (price || 0);
-            state.initialCapital = quoteTotal + baseValue;
-            console.log(`>> [AUTO] Initial capital set: ${quoteTotal.toFixed(2)} ${quoteCurrency} + ${baseTotal.toFixed(6)} ${baseCurrency} = $${state.initialCapital.toFixed(2)}`);
+            const totalEquity = quoteTotal + baseValue;
+
+            // Apply CAPITAL_ALLOCATION - this bot's share of total
+            state.initialCapital = totalEquity * CAPITAL_ALLOCATION;
+
+            console.log(`>> [AUTO] Total Equity: $${totalEquity.toFixed(2)}`);
+            console.log(`>> [AUTO] Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);
+            console.log(`>> [AUTO] This Pair's Capital: $${state.initialCapital.toFixed(2)}`);
             saveState();
         } catch (e) {
             console.error('>> [ERROR] Could not set initial capital:', e.message);
