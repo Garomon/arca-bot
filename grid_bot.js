@@ -2093,5 +2093,103 @@ server.listen(BOT_PORT, async () => {
             await initializeGrid(true);
         }
     }, 60000); // Check every minute
+
+    // === DAILY PERFORMANCE REPORT ===
+    const REPORTS_DIR = path.join(__dirname, 'reports');
+    if (!fs.existsSync(REPORTS_DIR)) {
+        fs.mkdirSync(REPORTS_DIR, { recursive: true });
+    }
+
+    function generateDailyReport() {
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const reportFile = path.join(REPORTS_DIR, `daily_report_${dateStr}.txt`);
+
+        // Calculate today's metrics
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const todayTrades = (state.filledOrders || []).filter(o => o.timestamp >= todayStart);
+        const todaySells = todayTrades.filter(o => o.side === 'sell');
+        const todayProfit = todaySells.reduce((sum, o) => sum + (o.profit || 0), 0);
+        const todayWins = todaySells.filter(o => o.profit > 0).length;
+        const todayWinRate = todaySells.length > 0 ? (todayWins / todaySells.length * 100).toFixed(1) : 'N/A';
+
+        // Overall metrics
+        const totalProfit = state.totalProfit || 0;
+        const initialCapital = state.initialCapital || 100;
+        const totalROI = ((totalProfit / initialCapital) * 100).toFixed(2);
+        const activeOrders = state.activeOrders?.length || 0;
+        const inventoryLots = state.inventory?.length || 0;
+
+        // Anomaly detection
+        const anomalies = [];
+        if (todayTrades.length === 0) anomalies.push('⚠️ No trades today');
+        if (state.maxDrawdown > 5) anomalies.push(`⚠️ High drawdown: ${state.maxDrawdown.toFixed(2)}%`);
+        if (state.emergencyStop) anomalies.push('🚨 EMERGENCY STOP ACTIVE');
+        if (todayProfit < 0) anomalies.push(`⚠️ Negative profit today: $${todayProfit.toFixed(4)}`);
+
+        const report = `
+╔══════════════════════════════════════════════════════════════╗
+║           VANTAGE BOT - DAILY PERFORMANCE REPORT             ║
+║                    ${dateStr}                                ║
+╠══════════════════════════════════════════════════════════════╣
+║  TODAY'S PERFORMANCE                                         ║
+╠══════════════════════════════════════════════════════════════╣
+  Trades Executed:      ${todayTrades.length}
+  Sells (Profit Events): ${todaySells.length}
+  Today's Profit:       $${todayProfit.toFixed(4)}
+  Win Rate:             ${todayWinRate}%
+
+╠══════════════════════════════════════════════════════════════╣
+║  CUMULATIVE STATS                                            ║
+╠══════════════════════════════════════════════════════════════╣
+  Total Profit:         $${totalProfit.toFixed(4)}
+  Total ROI:            ${totalROI}%
+  Max Drawdown:         ${(state.maxDrawdown || 0).toFixed(2)}%
+  Initial Capital:      $${initialCapital.toFixed(2)}
+
+╠══════════════════════════════════════════════════════════════╣
+║  CURRENT STATE                                               ║
+╠══════════════════════════════════════════════════════════════╣
+  Active Orders:        ${activeOrders}
+  Inventory Lots:       ${inventoryLots}
+  Current Price:        $${(state.currentPrice || 0).toFixed(2)}
+  Market Regime:        ${state.marketRegime || 'UNKNOWN'}
+
+╠══════════════════════════════════════════════════════════════╣
+║  ALERTS & ANOMALIES                                          ║
+╠══════════════════════════════════════════════════════════════╣
+${anomalies.length > 0 ? anomalies.map(a => '  ' + a).join('\n') : '  ✅ All systems normal'}
+
+╚══════════════════════════════════════════════════════════════╝
+Generated: ${now.toISOString()}
+`;
+
+        fs.writeFileSync(reportFile, report);
+        console.log(`>> [REPORT] Daily report saved: ${reportFile}`);
+        log('REPORT', `📊 Daily report generated: ${dateStr}`, 'success');
+    }
+
+    // Schedule daily report at 11:59 PM
+    function scheduleDailyReport() {
+        const now = new Date();
+        const next1159 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0);
+
+        // If already past 11:59 today, schedule for tomorrow
+        if (now >= next1159) {
+            next1159.setDate(next1159.getDate() + 1);
+        }
+
+        const msUntil1159 = next1159.getTime() - now.getTime();
+        console.log(`>> [REPORT] Next daily report in ${(msUntil1159 / 1000 / 60 / 60).toFixed(1)} hours`);
+
+        setTimeout(() => {
+            generateDailyReport();
+            // Schedule next one (every 24 hours)
+            setInterval(generateDailyReport, 24 * 60 * 60 * 1000);
+        }, msUntil1159);
+    }
+
+    scheduleDailyReport();
+    console.log('>> [REPORT] Daily report scheduler initialized');
 });
 

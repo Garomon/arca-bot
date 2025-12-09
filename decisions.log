@@ -9125,3 +9125,21 @@
 
 
 ========== BOT SESSION STARTED: 2025-12-09T19:58:53.129Z ==========
+
+
+========== BOT SESSION STARTED: 2025-12-09T20:11:56.077Z ==========
+[2025-12-09T20:12:05.188Z] ORDER_PLACED_BUY: Price: $91634.50 | Amount: 0.000143 BTC | Composite Score: 67 | Regime: BULL | Price: $93806 | Score: 67
+  Details: {"orderId":"53653090015","level":-1,"worthCheck":{"worth":true,"gross":0.3099480884752398,"fees":0.02677533569897293,"net":0.28317275277626686,"profitPercent":"2.115"}}
+[2025-12-09T20:12:05.908Z] ORDER_PLACED_BUY: Price: $89462.72 | Amount: 0.000127 BTC | Composite Score: 67 | Regime: BULL | Price: $93806 | Score: 67
+  Details: {"orderId":"53653090324","level":-2,"worthCheck":{"worth":true,"gross":0.27590963336156615,"fees":0.02383487213029427,"net":0.25207476123127187,"profitPercent":"2.115"}}
+[2025-12-09T20:12:06.623Z] ORDER_PLACED_SELL: Price: $95978.06 | Amount: 0.000108 BTC | Composite Score: 67 | Regime: BULL | Price: $93806 | Score: 67
+  Details: {"orderId":"53653090556","level":1,"worthCheck":{"worth":true,"gross":0.29592114860708185,"fees":0.02556359722480828,"net":0.2703575513822736,"profitPercent":"2.115"}}
+
+
+========== BOT SESSION STARTED: 2025-12-09T20:48:02.418Z ==========
+
+
+========== BOT SESSION STARTED: 2025-12-09T21:16:11.653Z ==========
+
+
+========== BOT SESSION STARTED: 2025-12-09T21:17:50.034Z ==========
