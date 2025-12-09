@@ -359,6 +359,28 @@ async function initializeGrid(forceReset = false) {
     // Sync first to ensure we know about all orders
     await syncWithExchange();
 
+    // PHASE 5: SMART CAPITAL DETECTION
+    // Calculate current equity NOW to see if user added funds
+    const balance = await binance.fetchBalance();
+    const totalUSDT = balance.USDT?.total || 0;
+    const totalBTC = balance.BTC?.total || 0;
+    const btcValue = new Decimal(totalBTC).mul(price).toNumber();
+    const currentEquity = new Decimal(totalUSDT).plus(btcValue).toNumber();
+
+    // Check for "New Money" (Capital Injection > 10%)
+    if (state.initialCapital) {
+        const capitalGrowth = (currentEquity - state.initialCapital) / state.initialCapital;
+
+        // If capital grew by >10% (and it's not just profit, i.e., instantaneous jump vs previous partial state)
+        // heuristic: if we just started and capital is way higher than saved state
+        if (capitalGrowth > 0.10) {
+            log('MONEY', `💰 CAPITAL INJECTION DETECTED! ($${state.initialCapital.toFixed(2)} -> $${currentEquity.toFixed(2)})`, 'success');
+            log('SYSTEM', 'UPGRADING GRID TO MATCH NEW FIREPOWER...', 'info');
+            state.initialCapital = currentEquity; // Update baseline
+            forceReset = true; // FORCE THE RESET
+        }
+    }
+
     // If we have active orders and not forcing reset, resume monitoring
     if (state.activeOrders.length > 0 && !forceReset) {
         log('SYSTEM', 'RESUMING EXISTING GRID');
@@ -369,9 +391,6 @@ async function initializeGrid(forceReset = false) {
     if (forceReset) {
         log('SYSTEM', 'FORCING GRID RESET');
         await cancelAllOrders();
-        // Do NOT wipe profit/history on rebalance
-        // state.totalProfit = 0; 
-        // state.filledOrders = [];
         state.startTime = Date.now();
     }
 
@@ -379,12 +398,8 @@ async function initializeGrid(forceReset = false) {
     log('ENTRY', `$${price.toFixed(2)}`);
 
     // Calculate Grid
-    // DYNAMIC CAPITAL: Use actual available equity instead of hardcoded config
-    const balance = await binance.fetchBalance();
-    const totalUSDT = balance.USDT?.total || 0;
-    const totalBTC = balance.BTC?.total || 0;
-    const btcValue = new Decimal(totalBTC).mul(price).toNumber();
-    const dynamicCapital = new Decimal(totalUSDT).plus(btcValue).toNumber();
+    // DYNAMIC CAPITAL: Use actual available equity (calculated at start)
+    const dynamicCapital = currentEquity;
 
     // Get regime and volatility for adaptive calculations
     const regime = await detectMarketRegime();

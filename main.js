@@ -183,15 +183,8 @@ socket.on('log_message', (data) => {
     log(data.type, data.msg, data.style);
 });
 
-// Init State (Populate Capital)
-socket.on('init_state', (state) => {
-    if (state.initialCapital) {
-        const capInput = document.getElementById('capital-input');
-        if (capInput) {
-            capInput.value = state.initialCapital.toFixed(2);
-        }
-    }
-});
+// Init State (Populate Capital) - REMOVED (Smart Detection Active)
+// socket.on('init_state', (state) => {});
 
 // Financial Update
 socket.on('financial_update', (data) => {
@@ -2032,39 +2025,9 @@ function setupFlowHandlers() {
 
 // ===== BOT CONTROLS =====
 // ===== BOT CONTROLS =====
+// ===== BOT CONTROLS =====
 function setupBotControls() {
-    const updateBtn = document.getElementById('btn-update-capital');
-    const capInput = document.getElementById('capital-input');
-
-    if (updateBtn && capInput) {
-        updateBtn.addEventListener('click', () => {
-            const val = parseFloat(capInput.value);
-            if (val && !isNaN(val) && val > 0) {
-                socket.emit('update_initial_capital', val);
-
-                // Visual feedback
-                const originalText = updateBtn.innerHTML;
-                updateBtn.innerHTML = '✅';
-                updateBtn.style.color = '#00ff00';
-                updateBtn.style.borderColor = '#00ff00';
-
-                setTimeout(() => {
-                    updateBtn.innerHTML = originalText;
-                    updateBtn.style.color = '#00ff88';
-                    updateBtn.style.borderColor = '#444';
-                }, 1500);
-            } else {
-                alert('Por favor ingresa un monto válido (mayor a 0)');
-            }
-        });
-
-        // Also allow Enter key
-        capInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                updateBtn.click();
-            }
-        });
-    }
+    // Manual Capital Update removed (Smart Detection Active)
 }
 
 // ===== AUTO-REFRESH SYSTEM =====

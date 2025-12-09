@@ -11,14 +11,16 @@ function calculateOptimalGridCount(capital, volatility) {
     if (capital < 50) baseCount = 5;
     else if (capital < 150) baseCount = 8;
     else if (capital < 500) baseCount = 12;
-    else if (capital < 1000) baseCount = 16;
-    else baseCount = 20;
+    else if (capital < 1000) baseCount = 20;   // $50/order
+    else if (capital < 2500) baseCount = 30;   // ~$80/order
+    else if (capital < 5000) baseCount = 40;   // ~$125/order
+    else baseCount = 50;                       // Whale Tier
 
     // Adjust for volatility
     if (volatility === 'HIGH') {
         baseCount = Math.max(5, Math.floor(baseCount * 0.7)); // Fewer orders in high vol
     } else if (volatility === 'LOW') {
-        baseCount = Math.min(25, Math.floor(baseCount * 1.2)); // More orders in low vol
+        baseCount = Math.min(60, Math.floor(baseCount * 1.2)); // More orders in low vol
     }
 
     return baseCount;
