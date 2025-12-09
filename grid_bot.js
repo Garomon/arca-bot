@@ -421,16 +421,18 @@ async function initializeGrid(forceReset = false) {
     const btcValue = new Decimal(totalBTC).mul(price).toNumber();
     const currentEquity = new Decimal(totalUSDT).plus(btcValue).toNumber();
 
-    // Check for "New Money" (Capital Injection > 10%)
+    // Apply CAPITAL_ALLOCATION to get THIS PAIR's share
+    const allocatedEquity = currentEquity * CAPITAL_ALLOCATION;
+
+    // Check for "New Money" (Capital Injection > 10% of THIS PAIR's allocation)
     if (state.initialCapital) {
-        const capitalGrowth = (currentEquity - state.initialCapital) / state.initialCapital;
+        const capitalGrowth = (allocatedEquity - state.initialCapital) / state.initialCapital;
 
         // If capital grew by >10% (and it's not just profit, i.e., instantaneous jump vs previous partial state)
-        // heuristic: if we just started and capital is way higher than saved state
         if (capitalGrowth > 0.10) {
-            log('MONEY', `💰 CAPITAL INJECTION DETECTED! ($${state.initialCapital.toFixed(2)} -> $${currentEquity.toFixed(2)})`, 'success');
-            log('SYSTEM', 'UPGRADING GRID TO MATCH NEW FIREPOWER...', 'info');
-            state.initialCapital = currentEquity; // Update baseline
+            log('MONEY', `💰 CAPITAL INJECTION DETECTED! ($${state.initialCapital.toFixed(2)} -> $${allocatedEquity.toFixed(2)})`, 'success');
+            log('SYSTEM', `UPGRADING GRID (${(CAPITAL_ALLOCATION * 100).toFixed(0)}% of new total)...`, 'info');
+            state.initialCapital = allocatedEquity; // Update baseline with ALLOCATED amount
             forceReset = true; // FORCE THE RESET
         }
     }
