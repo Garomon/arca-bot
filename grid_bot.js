@@ -1159,21 +1159,35 @@ function checkMarketTiming() {
     };
 }
 
-// GEOPOLITICAL CONTEXT (Midterm Cycle 2026)
-function checkGeopoliticalContext() {
+// GEOPOLITICAL CONTEXT (Midterm Cycle 2026 + Institutional Adoption)
+function checkGeopoliticalContext(currentRegime = 'NEUTRAL') {
     const now = new Date();
     // Danger Zone: Nov 1, 2025 to Nov 5, 2026
     const startDanger = new Date('2025-11-01');
     const endDanger = new Date('2026-11-05');
 
-    if (now >= startDanger && now <= endDanger) {
+    const inDangerZone = now >= startDanger && now <= endDanger;
+
+    if (inDangerZone) {
+        // ADAPTIVE LOGIC: If Market is Bullish, ignore the "Calendar Fear"
+        // This reflects "Institutional Adoption" overriding typical cycles
+        if (currentRegime.includes('BULL')) {
+            return {
+                status: 'INSTITUTIONAL_ADOPTION',
+                modifier: 'AGGRESSIVE',
+                defenseLevel: 0,
+                scoreBias: 15 // Bonus points for defying the cycle
+            };
+        }
+
+        // Otherwise, respect the danger zone
         return {
             status: 'MIDTERM_RISK',
             modifier: 'DEFENSIVE',
             defenseLevel: 2 // Level 2 Defense (High Reserves)
         };
     }
-    return { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0 };
+    return { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0, scoreBias: 0 };
 }
 
 // ORDER BOOK PRESSURE (Binance Spot)
@@ -1342,6 +1356,13 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
         reasons.push('Sell Pressure (-5)');
     }
 
+    // === GEOPOLITICAL CONTEXT (Corrected \u0026 Adaptive) ===
+    const geo = checkGeopoliticalContext(regime.regime || 'NEUTRAL');
+    if (geo.scoreBias !== 0) {
+        score += geo.scoreBias;
+        reasons.push(`${geo.status} (${geo.scoreBias > 0 ? '+' : ''}${geo.scoreBias})`);
+    }
+
     // === TIMING ADJUSTMENTS (10% weight) ===
 
     if (timing.isWeekend) {
@@ -1395,6 +1416,7 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
             btcDominance: btcDom,
             openInterest,
             timing,
+            geo, // Added to output for UI
             technicals: {
                 rsi: analysis.rsi,
                 macd: analysis.macd,
