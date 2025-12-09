@@ -257,11 +257,13 @@ app.get('/', (req, res) => {
 // --- SPAWN BOT PROCESSES ---
 function spawnBot(pairConfig) {
     console.log(`>> [ORCHESTRATOR] Spawning bot for ${pairConfig.pair} on port ${pairConfig.port}...`);
+    console.log(`   Capital Allocation: ${pairConfig.capitalPercent}%`);
 
     const env = {
         ...process.env,
         TRADING_PAIR: pairConfig.pair,
-        BOT_PORT: pairConfig.port.toString()
+        BOT_PORT: pairConfig.port.toString(),
+        CAPITAL_ALLOCATION: (pairConfig.capitalPercent / 100).toString() // Convert % to decimal
     };
 
     const child = fork(path.join(__dirname, 'grid_bot.js'), [], {

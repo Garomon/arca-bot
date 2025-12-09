@@ -20,6 +20,10 @@ const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
 const BOT_PORT = parseInt(process.env.BOT_PORT) || 3000;
 const PAIR_ID = TRADING_PAIR.replace('/', ''); // e.g., 'BTCUSDT'
 
+// CAPITAL ALLOCATION: Each pair only uses its assigned slice of total capital
+// Value from 0 to 1.0 (e.g., 0.5 = 50% of total balance)
+const CAPITAL_ALLOCATION = parseFloat(process.env.CAPITAL_ALLOCATION) || 1.0;
+
 // Pair-specific presets
 const PAIR_PRESETS = {
     'BTC/USDT': {
@@ -112,6 +116,7 @@ if (!fs.existsSync(stateDir)) {
 
 console.log(`>> [CONFIG] Trading Pair: ${TRADING_PAIR}`);
 console.log(`>> [CONFIG] Port: ${BOT_PORT}`);
+console.log(`>> [CONFIG] Capital Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);
 console.log(`>> [CONFIG] State File: ${CONFIG.stateFile}`);
 console.log(`>> [CONFIG] Grid Spacing: ${(CONFIG.gridSpacing * 100).toFixed(2)}%`);
 
@@ -447,8 +452,11 @@ async function initializeGrid(forceReset = false) {
     log('ENTRY', `$${price.toFixed(2)}`);
 
     // Calculate Grid
-    // DYNAMIC CAPITAL: Use actual available equity (calculated at start)
-    const dynamicCapital = currentEquity;
+    // DYNAMIC CAPITAL: Apply CAPITAL_ALLOCATION to get this pair's slice
+    const totalEquity = currentEquity;
+    const dynamicCapital = totalEquity * CAPITAL_ALLOCATION;
+
+    log('CAPITAL', `Total Equity: $${totalEquity.toFixed(2)} | Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}% | This Pair: $${dynamicCapital.toFixed(2)}`, 'info');
 
     // Get regime and volatility for adaptive calculations
     const regime = await detectMarketRegime();
