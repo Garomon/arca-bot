@@ -449,8 +449,10 @@
             <div class="tab-content" id="bot">
                 <div class="terminal-header">
                     <div class="terminal-status">
-                        <span class="status-dot live"></span>
-                        <span class="status-label">LIVE</span>
+                        <span class="status-dot live" id="connection-dot"></span>
+                        <span class="status-label" id="connection-status">LIVE</span>
+                        <small id="last-update-time"
+                            style="color: #666; font-size: 0.7em; margin-left: 5px; opacity: 0; transition: opacity 0.5s;">(0s)</small>
                     </div>
                     <div class="terminal-pair">
                         <span class="pair-symbol">₿</span>
@@ -472,7 +474,7 @@
                     <div class="orderbook-panel">
                         <div class="price-ticker">
                             <div class="ticker-price" id="price-display">$93,440</div>
-                            <div class="ticker-mxn" id="price-mxn">≈ $1,912,512 MXN</div>
+                            <!-- MXN calculated dynamically in priceDisplay -->
                         </div>
 
                         <div class="orderbook">
@@ -535,8 +537,8 @@
 
                         <div class="metric-hero">
                             <div class="hero-label">EQUITY TOTAL</div>
-                            <div class="hero-value" id="total-equity">$108.74</div>
-                            <div class="hero-sub" id="equity-mxn">≈ $2,229 MXN</div>
+                            <div class="hero-value" id="total-equity">--</div>
+                            <div class="hero-sub" id="equity-mxn">Calculating...</div>
                         </div>
 
                         <div class="metric-group profit">
@@ -612,6 +614,41 @@
                                 ⚠️ RESET
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- INVENTORY PANEL (NEW - FIFO Warehouse Visual) -->
+                <div class="inventory-panel mt-3 p-3"
+                    style="background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(20,20,40,0.5)); border-radius: 12px; border: 1px solid rgba(100,100,200,0.15); box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-uppercase fw-bold mb-0"
+                            style="letter-spacing: 1px; font-size: 0.75rem; color: #7c7cff;">
+                            <i class="fas fa-warehouse me-2"></i>Inventory (FIFO)
+                        </h6>
+                        <span class="badge bg-dark text-muted border border-secondary" style="font-size: 0.65rem;"
+                            id="inventory-count">0 LOTS</span>
+                    </div>
+                    <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                        <table class="table table-sm table-borderless table-hover mb-0"
+                            style="font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.72rem; border-collapse: separate; border-spacing: 0 3px;">
+                            <thead>
+                                <tr class="text-secondary text-uppercase"
+                                    style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th class="ps-2" style="width: 30px;">#</th>
+                                    <th>Entry Price</th>
+                                    <th class="text-end">BTC Remaining</th>
+                                    <th class="text-end">Value (USDT)</th>
+                                    <th class="text-center pe-2">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-log-body">
+                                <!-- Populated by JS -->
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted" style="opacity: 0.5;">Waiting for
+                                        inventory data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

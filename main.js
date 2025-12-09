@@ -179,6 +179,77 @@ socket.on('log_history', (logs) => {
     });
 });
 
+// ===== HEARTBEAT WATCHDOG =====
+let lastHeartbeat = Date.now();
+const connectionDot = document.getElementById('connection-dot');
+const connectionStatus = document.getElementById('connection-status');
+const lastUpdateLabel = document.getElementById('last-update-time');
+
+// Update heartbeat on ANY message
+socket.onAny && socket.onAny(() => {
+    lastHeartbeat = Date.now();
+    if (connectionStatus && connectionStatus.innerText !== 'LIVE') {
+        updateConnectionStatus('LIVE');
+    }
+});
+
+// Fallback if socket.onAny not supported
+const originalOn = socket.on;
+socket.on = function (event, callback) {
+    originalOn.apply(this, [event, (data) => {
+        lastHeartbeat = Date.now();
+        if (connectionStatus && connectionStatus.innerText !== 'LIVE') {
+            updateConnectionStatus('LIVE');
+        }
+        callback(data);
+    }]);
+};
+
+function updateConnectionStatus(status) {
+    if (!connectionDot || !connectionStatus) return;
+
+    if (status === 'LIVE') {
+        connectionDot.className = 'status-dot live';
+        connectionStatus.innerText = 'LIVE';
+        connectionStatus.style.color = '#00ff9d';
+        if (lastUpdateLabel) lastUpdateLabel.style.opacity = 0;
+    } else if (status === 'STALLED') {
+        connectionDot.className = 'status-dot'; // Remove live pulse, gray/orange
+        connectionDot.style.background = '#ff9500';
+        connectionDot.style.boxShadow = '0 0 10px #ff9500';
+        connectionStatus.innerText = 'STALLED';
+        connectionStatus.style.color = '#ff9500';
+        if (lastUpdateLabel) lastUpdateLabel.style.opacity = 1;
+    } else {
+        connectionDot.className = 'status-dot';
+        connectionDot.style.background = '#ff3b3b';
+        connectionDot.style.boxShadow = '0 0 10px #ff3b3b';
+        connectionStatus.innerText = 'OFFLINE';
+        connectionStatus.style.color = '#ff3b3b';
+        if (lastUpdateLabel) lastUpdateLabel.style.opacity = 1;
+    }
+}
+
+// Watchdog Loop
+setInterval(() => {
+    const diff = Date.now() - lastHeartbeat;
+
+    // Update timer text
+    if (lastUpdateLabel && diff > 2000) {
+        lastUpdateLabel.innerText = `(${Math.floor(diff / 1000)}s ago)`;
+        lastUpdateLabel.style.opacity = 1;
+    } else if (lastUpdateLabel && diff < 2000) {
+        lastUpdateLabel.style.opacity = 0;
+    }
+
+    // Logic
+    if (diff > 45000) { // 45s without data = DEAD
+        updateConnectionStatus('OFFLINE');
+    } else if (diff > 10000) { // 10s without data = STALLED
+        updateConnectionStatus('STALLED');
+    }
+}, 1000); // Check every second
+
 socket.on('log_message', (data) => {
     log(data.type, data.msg, data.style);
 });
@@ -622,6 +693,42 @@ socket.on('grid_state', (data) => {
     }
 });
 
+// Inventory Update (FIFO Warehouse Panel)
+socket.on('inventory_update', (inventory) => {
+    const tbody = document.getElementById('inventory-log-body');
+    const countBadge = document.getElementById('inventory-count');
+
+    if (!tbody) return;
+
+    if (!inventory || inventory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
+        if (countBadge) countBadge.innerText = '0 LOTS';
+        return;
+    }
+
+    if (countBadge) countBadge.innerText = `${inventory.length} LOTS`;
+
+    const currentPrice = parseFloat(document.getElementById('current-price')?.innerText?.replace(/[^0-9.]/g, '')) || 0;
+
+    tbody.innerHTML = inventory.map((lot, idx) => {
+        const remaining = lot.remaining !== undefined ? lot.remaining : lot.amount;
+        const value = remaining * currentPrice;
+        const pnl = currentPrice - lot.price;
+        const pnlClass = pnl >= 0 ? 'color: #00ff9d' : 'color: #ff3b3b';
+        const statusIcon = remaining === lot.amount ? '🟢' : (remaining > 0 ? '🟡' : '⚫');
+
+        return `
+            <tr style="background: rgba(100,100,200,0.05);">
+                <td class="ps-2">${idx + 1}</td>
+                <td style="${pnlClass}">$${lot.price.toFixed(2)}</td>
+                <td class="text-end">${remaining.toFixed(6)}</td>
+                <td class="text-end">$${value.toFixed(2)}</td>
+                <td class="text-center pe-2">${statusIcon}</td>
+            </tr>
+        `;
+    }).join('');
+});
+
 // Settings Update (Tab 4)
 socket.on('settings_update', (data) => {
     if (ui.setGridCount) ui.setGridCount.innerText = data.gridCount;
@@ -660,13 +767,8 @@ setupControl('reset-grid', 'reset_grid', 'WARNING: This will cancel ALL orders a
 setupControl('reset-grid-btn-2', 'reset_grid', 'WARNING: This will cancel ALL orders and reset the grid. Continue?');
 setupControl('cancel-all-btn', 'cancel_all', 'WARNING: This will cancel ALL active orders. Continue?');
 
-// Update Regime Details
-socket.on('analysis_update', (data) => {
-    // ... existing code ...
-    if (ui.regimeDetails && data.regime) {
-        ui.regimeDetails.innerText = `Trend: ${data.trend} | Volatility: ${data.volatility}`;
-    }
-});
+// Update Regime Details (handled in main analysis_update handler at L359)
+// Duplicate handler removed during audit - see Pass 12
 
 // Initial draw
 drawTriangle({ price: 0, orders: [] });

@@ -36,22 +36,27 @@ function runAudit() {
     }
 
     // 3. Activity Check
-    const lastRebalance = new Date(state.lastRebalance.timestamp);
+    const lastRebalanceTime = state.lastRebalance?.timestamp;
     const now = new Date();
-    const diffMinutes = (now - lastRebalance) / 1000 / 60;
 
     console.log(`⏱️  TIMING:`);
-    console.log(`   - Last Rebalance: ${diffMinutes.toFixed(1)} minutes ago`);
-    if (diffMinutes < 5) {
-        console.log("   ℹ️   NOTE: Bot reset recently (likely manual user action or volatility trigger).");
+    if (lastRebalanceTime) {
+        const lastRebalance = new Date(lastRebalanceTime);
+        const diffMinutes = (now - lastRebalance) / 1000 / 60;
+        console.log(`   - Last Rebalance: ${diffMinutes.toFixed(1)} minutes ago`);
+        if (diffMinutes < 5) {
+            console.log("   ℹ️   NOTE: Bot reset recently (likely manual user action or volatility trigger).");
+        } else {
+            console.log("   ✅  Bot is stable (no recent resets).");
+        }
     } else {
-        console.log("   ✅  Bot is stable (no recent resets).");
+        console.log("   - No rebalance recorded yet.");
     }
 
     // 4. Intelligence
     console.log(`🧠 AI STATUS:`);
-    console.log(`   - Market Regime: ${state.marketRegime}`);
-    console.log(`   - Composite Score: ${state.compositeSignal.score} (${state.compositeSignal.recommendation})`);
+    console.log(`   - Market Regime: ${state.marketRegime || 'Unknown'}`);
+    console.log(`   - Composite Score: ${state.compositeSignal?.score ?? 'N/A'} (${state.compositeSignal?.recommendation ?? 'N/A'})`);
 
     console.log("\n✅ AUDIT COMPLETE. SYSTEM IS HEALTHY.");
 }

@@ -255,6 +255,8 @@ function loadState() {
             const raw = fs.readFileSync(CONFIG.stateFile);
             const saved = JSON.parse(raw);
             state = { ...state, ...saved };
+            // AUDIT FIX: Ensure inventory exists
+            if (!state.inventory) state.inventory = [];
 
             // AUTO-SANITIZER: Fix Historical Profit Logic (Buys = 0) & Retroactive Fee Deduction
             let fixedProfit = 0;
@@ -308,7 +310,9 @@ function loadState() {
 // Save State
 function saveState() {
     try {
-        fs.writeFileSync(CONFIG.stateFile, JSON.stringify(state, null, 2));
+        const tempFile = `${CONFIG.stateFile}.tmp`;
+        fs.writeFileSync(tempFile, JSON.stringify(state, null, 2));
+        fs.renameSync(tempFile, CONFIG.stateFile); // Atomic on most systems
     } catch (e) {
         console.error('>> [ERROR] Failed to save state:', e.message);
     }
@@ -376,9 +380,10 @@ async function getDetailedFinancials() {
         const baseCapital = state.initialCapital || totalEquity;
         const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
 
-        // Active order counts
-        const buyOrders = state.activeOrders.filter(o => o.side === 'buy' && o.status === 'open');
-        const sellOrders = state.activeOrders.filter(o => o.side === 'sell' && o.status === 'open');
+        // Active order counts - FIX: Filter TOTAL by 'open' status too
+        const activeOpenOrders = state.activeOrders.filter(o => o.status === 'open');
+        const buyOrders = activeOpenOrders.filter(o => o.side === 'buy');
+        const sellOrders = activeOpenOrders.filter(o => o.side === 'sell');
 
         return {
             freeUSDT,
@@ -394,7 +399,7 @@ async function getDetailedFinancials() {
             activeOrders: {
                 buy: buyOrders.length,
                 sell: sellOrders.length,
-                total: state.activeOrders.length
+                total: activeOpenOrders.length // FIX: Use filtered length
             },
             currentPrice: state.currentPrice
         };
@@ -489,7 +494,7 @@ async function initializeGrid(forceReset = false) {
     let allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
 
     // --- GEOPOLITICAL RESERVE OVERRIDE ---
-    const geoContext = checkGeopoliticalContext(); // Re-check or reuse variable
+    const geoContext = checkGeopoliticalContext(); // Re-check for reserve allocation
     if (geoContext.status === 'MIDTERM_RISK') {
         const defensiveReserve = dynamicCapital * 0.25; // 25% Reserve
         if (allocation.reserve < defensiveReserve) {
@@ -544,7 +549,7 @@ async function initializeGrid(forceReset = false) {
         const distanceFromPrice = Math.abs(levelPrice.toNumber() - price) / price;
         const sizeMultiplier = 1.5 - (distanceFromPrice * 30);
         const clampedMultiplier = Math.max(0.7, Math.min(1.5, sizeMultiplier));
-        const amount = orderAmountUSDT.mul(clampedMultiplier).div(price);
+        const amount = orderAmountUSDT.mul(clampedMultiplier).div(levelPrice);
 
         if (amount.toNumber() >= CONFIG.minOrderSize) {
             gridLevels.push({ side: 'sell', price: levelPrice, amount: amount, level: i });
@@ -554,7 +559,11 @@ async function initializeGrid(forceReset = false) {
     // Place Orders
     log('GRID', `PLACING ${gridLevels.length} ORDERS (PYRAMID STRATEGY)...`);
     for (const level of gridLevels) {
-        await placeOrder(level);
+        try {
+            await placeOrder(level);
+        } catch (e) {
+            log('ERROR', `Failed to place grid order: ${e.message}`, 'error');
+        }
         await sleep(CONFIG.orderDelay);
     }
 
@@ -571,7 +580,7 @@ async function placeOrder(level) {
     }
 
     const price = new Decimal(level.price).toNumber();
-    const amount = new Decimal(level.amount).toNumber();
+    let amount = new Decimal(level.amount).toNumber();
 
     // PHASE 4: Fee Optimization - Skip unprofitable orders
     const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, state.currentPrice);
@@ -583,9 +592,9 @@ async function placeOrder(level) {
     // PHASE 4.5: WALL PROTECTION (Order Book Intelligence)
     try {
         const pressure = await fetchOrderBookPressure();
-        // Don't BUY if there is a massive SELL WALL (Ratio < 0.3)
-        if (level.side === 'buy' && pressure.ratio < 0.3) {
-            log('SMART', `🧱 SELL WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
+        // Don't BUY if there is a massive SELL WALL (Ratio < 0.15) - Relaxed from 0.3
+        if (level.side === 'buy' && pressure.ratio < 0.15) {
+            log('SMART', `🧱 MASSIVE SELL WALL (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
             logDecision('BLOCKED_BY_WALL', [`Sell Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for resistance to clear'], { level });
             return;
         }
@@ -616,9 +625,43 @@ async function placeOrder(level) {
         const availableBTC = balance.BTC ? balance.BTC.free : 0;
 
         if (availableBTC < amount) {
-            log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBTC.toFixed(6)} BTC, Req: ${amount.toFixed(6)} BTC`, 'warning');
-            log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
-            return; // EXIT GRACEFULLY
+            // FIX: Sell Partial Amount if we have enough for a minimum order
+            const estimatedValue = availableBTC * price;
+            if (estimatedValue > 6) { // Min order usually $5, using $6 for safety
+                log('SMART', `Insufficient for full order, but selling available: ${availableBTC.toFixed(6)} BTC`, 'info');
+                amount = availableBTC * 0.99; // 99% of available to avoid rounding errors
+            } else {
+                log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBTC.toFixed(6)} BTC`, 'warning');
+                log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
+                return; // EXIT GRACEFULLY
+            }
+        }
+
+        // === PROFIT GUARD (Check Inventory Cost Basis) ===
+        if (state.inventory && state.inventory.length > 0) {
+            let remainingToSell = amount;
+            let totalCostBasis = 0;
+            let coveredAmount = 0;
+
+            // Simulate FIFO consumption
+            for (const lot of state.inventory) {
+                if (remainingToSell <= 0) break;
+                const take = Math.min(remainingToSell, lot.remaining || lot.amount); // Use remaining for partial lots
+                totalCostBasis += (take * lot.price);
+                coveredAmount += take;
+                remainingToSell -= take;
+            }
+
+            if (coveredAmount > 0) {
+                const avgEntryPrice = totalCostBasis / coveredAmount;
+                const breakEvenPrice = avgEntryPrice * (1 + (CONFIG.tradingFee * 2)); // Add fees for entry + exit
+
+                if (price < breakEvenPrice) {
+                    log('PROFIT_GUARD', `🛑 BLOCKED SELL @ $${price.toFixed(2)}. Avg Entry: $${avgEntryPrice.toFixed(2)} (Break-Even: $${breakEvenPrice.toFixed(2)})`, 'warning');
+                    logDecision('BLOCKED_BY_PROFIT_GUARD', [`Price below Break-Even ($${breakEvenPrice.toFixed(2)})`, 'Preserving Capital'], { level });
+                    return;
+                }
+            }
         }
     }
 
@@ -688,6 +731,14 @@ function monitorOrders() {
 
     log('SYSTEM', `MONITORING ACTIVE (Session ${monitorSessionId})`);
 
+    // DEDICATED HEARTBEAT LOOP (Independent of main processing)
+    if (global.heartbeatInterval) clearInterval(global.heartbeatInterval);
+    global.heartbeatInterval = setInterval(() => {
+        if (isMonitoring) {
+            io.emit('bot_heartbeat', { timestamp: Date.now() });
+        }
+    }, 2000); // 2 seconds
+
     // Start the recursive loop with the current ID
     runMonitorLoop(monitorSessionId);
 }
@@ -712,6 +763,9 @@ async function runMonitorLoop(myId) {
         state.marketRegime = regime.regime;
 
         if (myId !== monitorSessionId) return; // Zombie check
+
+        // HEARTBEAT for UI Watchdog
+        io.emit('bot_heartbeat', { timestamp: Date.now() });
 
         // Log market intelligence
         log('INTEL', `Regime: ${regime.regime} | MTF Confidence: ${multiTF.confidence} | Direction: ${multiTF.direction}`, 'info');
@@ -761,10 +815,15 @@ async function runMonitorLoop(myId) {
             const cooldownMs = 20 * 60 * 1000;
             const isEmergency = volatilityState === 'HIGH';
 
-            if (newSpacing !== CONFIG.gridSpacing && (timeSinceReset > cooldownMs || isEmergency)) {
-                log('AI', `VOLATILITY SHIFT DETECTED (${volatilityState}). ADAPTING GRID...`, 'warning');
+            // CRITICAL FIX: Only adapt if the Volatility REGIME changes, not just the spacing number
+            // (ATR calculation in initializeGrid makes the number dynamic, causing infinite loops otherwise)
+            const currentRegime = state.volatilityRegime || 'NORMAL';
+
+            if (volatilityState !== currentRegime && (timeSinceReset > cooldownMs || isEmergency)) {
+                log('AI', `VOLATILITY REGIME SHIFT (${currentRegime} -> ${volatilityState}). ADAPTING GRID...`, 'warning');
                 CONFIG.gridSpacing = newSpacing;
                 state.lastRebalance = { timestamp: Date.now(), triggers: ['VOLATILITY'] };
+                state.volatilityRegime = volatilityState; // Track the regime
 
                 // CRITICAL: Call initializeGrid via RECURSION STOP
                 // initializeGrid calls monitorOrders, which increments SessionID.
@@ -842,6 +901,7 @@ async function runMonitorLoop(myId) {
         if (financials && myId === monitorSessionId) {
             const metrics = adaptiveHelpers.calculatePerformanceMetrics(state, state.initialCapital || 100);
             io.emit('financial_update', { ...financials, metrics });
+            io.emit('inventory_update', state.inventory || []); // FIFO Warehouse Panel
             io.emit('hud_update', {
                 status: 'LIVE TRADING',
                 detail: `GRID ACTIVE | ${financials.activeOrders.total} ORDERS | $${state.currentPrice.toFixed(0)} | Win: ${metrics.winRate}%`
@@ -1582,7 +1642,9 @@ async function checkLiveOrders() {
             try {
                 const info = await binance.fetchOrder(order.id, CONFIG.pair);
                 if (info.status === 'closed') {
-                    handleOrderFill(order, info.price);
+                    // CRITICAL: Use average fill price for accuracy, fallback to limit price
+                    const realFillPrice = info.average || info.price;
+                    await handleOrderFill(order, realFillPrice);
                 }
             } catch (e) {
                 // Order might be gone, assume filled if not in openOrders? 
@@ -1604,12 +1666,72 @@ async function checkLiveOrders() {
 async function handleOrderFill(order, fillPrice) {
     // FIX: Only SELL orders realize profit. BUY orders are just entries.
     let profit = 0;
-    if (order.side === 'sell') {
-        const spacing = order.spacing || CONFIG.gridSpacing; // Phase 2 Audit: Use historical spacing
-        const buyPrice = fillPrice / (1 + spacing); // Estimate based on actual spacing
-        const grossProfit = (fillPrice - buyPrice) * order.amount;
-        const fees = (buyPrice * order.amount * CONFIG.tradingFee) + (fillPrice * order.amount * CONFIG.tradingFee);
-        profit = grossProfit - fees;
+
+    if (order.side === 'buy') {
+        // INVENTORY TRACKING: Add new lot
+        if (!state.inventory) state.inventory = [];
+        const fee = fillPrice * order.amount * CONFIG.tradingFee;
+        state.inventory.push({
+            id: order.id,
+            price: fillPrice,
+            amount: order.amount, // Track full amount
+            remaining: order.amount, // Amount available to sell
+            fee: fee,
+            timestamp: Date.now()
+        });
+        log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} BTC @ $${fillPrice.toFixed(2)}`, 'info');
+    }
+    else if (order.side === 'sell') {
+        // INVENTORY TRACKING: Consume lots (FIFO)
+        if (!state.inventory) state.inventory = [];
+
+        let remainingToSell = order.amount;
+        let costBasis = 0;
+        let entryFees = 0; // Track entry fees from consumed lots
+        let consumedLots = 0;
+
+        // Iterate mutable inventory
+        for (let i = 0; i < state.inventory.length; i++) {
+            if (remainingToSell <= 0.00000001) break; // Float epsilon
+
+            let lot = state.inventory[i];
+            // Normalize lot structure if migrating from old state
+            if (lot.remaining === undefined) lot.remaining = lot.amount;
+
+            if (lot.remaining > 0) {
+                const take = Math.min(remainingToSell, lot.remaining);
+                costBasis += (take * lot.price);
+                // Calculate proportional entry fee for the amount taken
+                if (lot.fee && lot.amount > 0) {
+                    entryFees += (take / lot.amount) * lot.fee;
+                }
+                lot.remaining -= take;
+                remainingToSell -= take;
+                consumedLots++;
+            }
+        }
+
+        // Prune fully consumed lots to keep array clean
+        state.inventory = state.inventory.filter(lot => lot.remaining > 0.00000001);
+
+        // Calculate REAL FIFO Profit
+        const sellRevenue = fillPrice * order.amount;
+        const sellFee = sellRevenue * CONFIG.tradingFee;
+
+        // If we didn't have enough inventory (e.g. from before tracking), assume recent buy price estimate
+        if (costBasis === 0) {
+            const spacing = order.spacing || CONFIG.gridSpacing;
+            const estimatedBuyPrice = fillPrice / (1 + spacing);
+            costBasis = estimatedBuyPrice * order.amount;
+            entryFees = costBasis * CONFIG.tradingFee; // Estimate entry fee too
+            log('WARN', 'Inventory empty/insufficient. Used estimated cost basis.', 'warning');
+        }
+
+        const grossProfit = sellRevenue - costBasis;
+        const totalFees = sellFee + entryFees; // Both entry and exit fees
+        profit = grossProfit - totalFees; // TRUE NET PROFIT
+
+        log('PROFIT', `FIFO Realized: Rev $${sellRevenue.toFixed(2)} - Cost $${costBasis.toFixed(2)} - Fees $${totalFees.toFixed(4)} (Entry: $${entryFees.toFixed(4)} + Exit: $${sellFee.toFixed(4)}) = $${profit.toFixed(4)}`, 'success');
     }
 
     // Update State
@@ -1783,7 +1905,8 @@ async function syncHistoricalTrades() {
                     amount: trade.amount,
                     timestamp: trade.timestamp,
                     profit: estimatedProfit,
-                    status: 'filled' // Mark as filled
+                    status: 'filled',
+                    isNetProfit: false // Estimated, not FIFO-calculated
                 });
                 knownIds.add(tradeId); // Prevent duplicates in this loop
                 addedCount++;
