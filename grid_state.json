@@ -5,38 +5,7 @@
   },
   "currentPrice": 93806.65,
   "entryPrice": 93740.79,
-  "activeOrders": [
-    {
-      "id": "53651924916",
-      "side": "buy",
-      "price": 91459.521002662,
-      "amount": 0.00013667350202678998,
-      "level": -1,
-      "status": "open",
-      "timestamp": 1765309519449,
-      "spacing": 0.024335926733047575
-    },
-    {
-      "id": "53651925627",
-      "side": "buy",
-      "price": 89178.252005324,
-      "amount": 0.0001274399195317936,
-      "level": -2,
-      "status": "open",
-      "timestamp": 1765309520451,
-      "spacing": 0.024335926733047575
-    },
-    {
-      "id": "53651926011",
-      "side": "sell",
-      "price": 96022.058997338,
-      "amount": 0.00010762289999999999,
-      "level": 1,
-      "status": "open",
-      "timestamp": 1765309521171,
-      "spacing": 0.024335926733047575
-    }
-  ],
+  "activeOrders": [],
   "filledOrders": [
     {
       "id": "53619934511",
@@ -223,7 +192,7 @@
     }
   ],
   "totalProfit": 0.6944158441530068,
-  "initialCapital": 108.74,
+  "initialCapital": 600.00,
   "firstTradeTime": 1765123045197,
   "isLive": true,
   "startTime": 1765309517722,
