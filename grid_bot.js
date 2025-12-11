@@ -434,9 +434,59 @@ async function reconcileInventoryWithExchange() {
 
         if (recovered > 0) {
             log('RECONCILE', `✅ Recovered ${recovered} missing lot(s) from exchange history!`, 'success');
-            saveState();
+        }
+
+        // 2. Sanity Check: Remove Zombie Lots (Inventory > Wallet)
+        // If state says we have 0.05 BTC but wallet says 0.03 BTC, we must remove 0.02 BTC from inventory.
+        // We assume FIFO: older lots were sold.
+        const balance = await binance.fetchBalance();
+        // Dynamic base asset (e.g. BTC for BTC/USDT)
+        const baseAsset = CONFIG.pair.split('/')[0];
+        const realBalance = parseFloat(balance[baseAsset]?.free || 0);
+
+        // Calculate total inventory amount
+        let inventoryTotal = state.inventory.reduce((sum, lot) => sum + lot.remaining, 0);
+
+        // Small tolerance for rounding errors (dust)
+        const TOLERANCE = 0.000001;
+
+        if (inventoryTotal > realBalance + TOLERANCE) {
+            log('RECONCILE', `⚠️ INVENTORY MISMATCH: Local ${inventoryTotal.toFixed(6)} > Wallet ${realBalance.toFixed(6)}`, 'warning');
+            log('RECONCILE', 'Cleaning up ZOMBIE lots (Sold while offline)...', 'info');
+
+            let removedCount = 0;
+            // Remove from START (FIFO - because we sell oldest first)
+            while (inventoryTotal > realBalance + TOLERANCE && state.inventory.length > 0) {
+                const zombie = state.inventory[0]; // Peek at oldest
+
+                if (inventoryTotal - zombie.remaining >= realBalance - TOLERANCE) {
+                    // Wipes out entire lot
+                    state.inventory.shift(); // Remove it
+                    inventoryTotal -= zombie.remaining;
+                    removedCount++;
+                    log('RECONCILE', `🗑️ REMOVED ZOMBIE: ${zombie.remaining.toFixed(6)} @ $${zombie.price} (ID: ${zombie.id})`, 'warning');
+                } else {
+                    // Partial removal needed
+                    const surplus = inventoryTotal - realBalance;
+                    // Cap surplus at lot remaining to be safe
+                    const reduceBy = Math.min(surplus, zombie.remaining);
+                    zombie.remaining -= reduceBy;
+                    inventoryTotal -= reduceBy;
+                    log('RECONCILE', `✂️ TRIMMED ZOMBIE: Reduced by ${reduceBy.toFixed(6)} to match wallet.`, 'warning');
+                    // We are now equal (or close enough), loop will exit
+                }
+            }
+            log('RECONCILE', `✅ Removed/Trimmed ${removedCount} zombie lots. Inventory now matches wallet.`, 'success');
         } else {
-            log('RECONCILE', '✅ Inventory is in sync with exchange.', 'info');
+            // Only log sync if didn't recover AND didn't remove zombies
+            if (recovered === 0) {
+                log('RECONCILE', '✅ Inventory is in sync with exchange.', 'info');
+            }
+        }
+
+        // Always save if we changed anything (recovered > 0 is handled above, but zombies need save too)
+        if (recovered > 0 || inventoryTotal !== state.inventory.reduce((sum, lot) => sum + lot.remaining, 0)) {
+            saveState();
         }
     } catch (e) {
         log('ERROR', `Reconciliation failed: ${e.message}`, 'error');
