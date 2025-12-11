@@ -1101,10 +1101,38 @@ async function runMonitorLoop(myId) {
     }
 }
 
-async function getMarketAnalysis() {
+// Cache for Candles to prevent Rate Limit Bans
+const candleCache = {
+    '1h': { data: null, timestamp: 0 },
+    '4h': { data: null, timestamp: 0 },
+    '1d': { data: null, timestamp: 0 }
+};
+
+async function getCachedCandles(timeframe, limit = 100) {
+    const now = Date.now();
+    // 1h = 1 min cache, 4h/1d = 5 min cache
+    const ttl = timeframe === '1h' ? 60 * 1000 : 5 * 60 * 1000;
+
+    if (candleCache[timeframe].data && (now - candleCache[timeframe].timestamp < ttl)) {
+        return candleCache[timeframe].data;
+    }
+
     try {
-        // Fetch last 100 candles (1h)
-        const candles = await binance.fetchOHLCV(CONFIG.pair, '1h', undefined, 100);
+        const candles = await binance.fetchOHLCV(CONFIG.pair, timeframe, undefined, limit);
+        candleCache[timeframe] = { data: candles, timestamp: now };
+        return candles;
+    } catch (e) {
+        console.error(`>> [WARN] Candle fetch failed for ${timeframe}: ${e.message}`);
+        return candleCache[timeframe].data || []; // Return stale data if available
+    }
+}
+
+async function getMarketAnalysis(timeframe = '1h') {
+    try {
+        // OPTIMIZED: Use Cached Candles
+        const candles = await getCachedCandles(timeframe, 100);
+        if (!candles || candles.length === 0) return null;
+
         const closes = candles.map(c => c[4]);
         const highs = candles.map(c => c[2]);
         const lows = candles.map(c => c[3]);
@@ -1131,7 +1159,8 @@ async function getMarketAnalysis() {
         // Calculate ATR (Average True Range) for Dynamic Spacing
         const atrInput = { high: highs, low: lows, close: closes, period: 14 };
         const atrValues = ATR.calculate(atrInput);
-        const currentATR = atrValues[atrValues.length - 1];
+        // ATR fallback if calculation fails
+        const currentATR = atrValues.length > 0 ? atrValues[atrValues.length - 1] : 0;
 
         // === NEW INDICATORS ===
 
@@ -1190,9 +1219,6 @@ async function getMarketAnalysis() {
         else if (signalScore >= 20) recommendation = 'BUY';
         else if (signalScore <= -40) recommendation = 'STRONG_SELL';
         else if (signalScore <= -20) recommendation = 'SELL';
-
-        // Log the analysis
-        // log('AI', `ANALYZING: Volatility [${volumeSignal}] | RSI [${currentRSI.toFixed(1)}]`);
 
         return {
             rsi: currentRSI,
@@ -1279,8 +1305,8 @@ async function analyzeMultipleTimeframes() {
     try {
         // Analyze 1h, 4h, and 1d timeframes
         const tf1h = await getMarketAnalysis('1h');
-        const tf4h = await binance.fetchOHLCV(CONFIG.pair, '4h', undefined, 100);
-        const tf1d = await binance.fetchOHLCV(CONFIG.pair, '1d', undefined, 100);
+        const tf4h = await getCachedCandles('4h', 100);
+        const tf1d = await getCachedCandles('1d', 100);
 
         // Simple trend detection for each TF
         const closes4h = tf4h.map(c => c[4]);
@@ -1457,35 +1483,23 @@ function checkMarketTiming() {
     };
 }
 
-// GEOPOLITICAL CONTEXT (Midterm Cycle 2026 + Institutional Adoption)
+// GEOPOLITICAL CONTEXT (Dynamic Adaptation)
 function checkGeopoliticalContext(currentRegime = 'NEUTRAL') {
-    const now = new Date();
-    // Danger Zone: Nov 1, 2025 to Nov 5, 2026
-    const startDanger = new Date('2025-11-01');
-    const endDanger = new Date('2026-11-05');
+    // FEAT: REMOVED HARDCODED DATES (Time Bomb)
+    // Now purely reactive to Market Structure.
 
-    const inDangerZone = now >= startDanger && now <= endDanger;
-
-    if (inDangerZone) {
-        // ADAPTIVE LOGIC: If Market is Bullish, ignore the "Calendar Fear"
-        // This reflects "Institutional Adoption" overriding typical cycles
-        if (currentRegime.includes('BULL')) {
-            return {
-                status: 'INSTITUTIONAL_ADOPTION',
-                modifier: 'AGGRESSIVE',
-                defenseLevel: 0,
-                scoreBias: 15 // Bonus points for defying the cycle
-            };
-        }
-
-        // Otherwise, respect the danger zone
+    // If Market is in STRONG BEAR trend, we assume "Fear/Risk" context.
+    // This allows the bot to auto-defend during any crash, not just predicted ones.
+    if (currentRegime === 'STRONG_BEAR' || currentRegime === 'BEAR') {
         return {
-            status: 'MIDTERM_RISK',
+            status: 'MARKET_FEAR',
             modifier: 'DEFENSIVE',
-            defenseLevel: 2, // Level 2 Defense (High Reserves)
-            scoreBias: -10 // Penalty for risk period
+            defenseLevel: 1,
+            scoreBias: -5 // Penalty for fighting the trend
         };
     }
+
+    // Normal Conditions
     return { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0, scoreBias: 0 };
 }
 
@@ -1930,6 +1944,12 @@ async function handleOrderFill(order, fillPrice) {
     state.totalProfit += profit;
     // CRITICAL FIX: Mark as Net Profit so loadState doesn't deduct fees again!
     state.filledOrders.push({ ...order, fillPrice, profit, timestamp: Date.now(), isNetProfit: true });
+
+    // MEMORY LEAK PROTECTION: Keep last 1000 orders only
+    if (state.filledOrders.length > 1000) {
+        state.filledOrders = state.filledOrders.slice(-1000);
+    }
+
     state.lastFillTime = Date.now();
 
     const profitMsg = profit > 0 ? `| Profit: $${profit.toFixed(4)}` : '';
