@@ -108,7 +108,6 @@ const CONFIG = {
     monitorInterval: 3000,
     orderDelay: 150,
     logBufferSize: 100,
-    healthCheckThreshold: 0.015,
 
     // State Persistence (PAIR-SPECIFIC PATH)
     stateFile: path.join(__dirname, 'data', 'sessions', `${PAIR_ID}_state.json`)
