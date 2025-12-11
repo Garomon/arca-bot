@@ -646,33 +646,36 @@ async function initializeGrid(forceReset = false) {
     const gridLevels = [];
     const halfGrid = Math.floor(dynamicGridCount / 2);
 
+    // 1. Generate Levels (Prices only)
+    const rawLevels = [];
+
     // Buys
     for (let i = 1; i <= halfGrid; i++) {
         const levelPrice = new Decimal(price).mul(new Decimal(1).minus(new Decimal(CONFIG.gridSpacing).mul(i)));
-
-        // PHASE 2: Pyramid sizing - bigger orders closer to price
-        const distanceFromPrice = Math.abs(levelPrice.toNumber() - price) / price;
-        const sizeMultiplier = 1.5 - (distanceFromPrice * 30); // Closer = bigger
-        const clampedMultiplier = Math.max(0.7, Math.min(1.5, sizeMultiplier));
-        const amount = orderAmountUSDT.mul(clampedMultiplier).div(levelPrice);
-
-        if (amount.toNumber() >= CONFIG.minOrderSize) {
-            gridLevels.push({ side: 'buy', price: levelPrice, amount: amount, level: -i });
-        }
+        rawLevels.push({ side: 'buy', price: levelPrice.toNumber(), level: -i });
     }
-
     // Sells
     for (let i = 1; i <= halfGrid; i++) {
         const levelPrice = new Decimal(price).mul(new Decimal(1).plus(new Decimal(CONFIG.gridSpacing).mul(i)));
+        rawLevels.push({ side: 'sell', price: levelPrice.toNumber(), level: i });
+    }
 
-        // PHASE 2: Pyramid sizing - bigger orders closer to price
-        const distanceFromPrice = Math.abs(levelPrice.toNumber() - price) / price;
-        const sizeMultiplier = 1.5 - (distanceFromPrice * 30);
-        const clampedMultiplier = Math.max(0.7, Math.min(1.5, sizeMultiplier));
-        const amount = orderAmountUSDT.mul(clampedMultiplier).div(levelPrice);
+    // PHASE 2: ADAPTIVE PYRAMID SIZING (Brain Activation)
+    const sizes = adaptiveHelpers.calculateOptimalOrderSizes(
+        safeCapital,
+        dynamicGridCount,
+        price,
+        rawLevels
+    );
 
-        if (amount.toNumber() >= CONFIG.minOrderSize) {
-            gridLevels.push({ side: 'sell', price: levelPrice, amount: amount, level: i });
+    // 2. Assign Sizes and Build Order List
+    for (let i = 0; i < rawLevels.length; i++) {
+        const amount = sizes[i];
+        if (amount >= CONFIG.minOrderSize) {
+            gridLevels.push({
+                ...rawLevels[i],
+                amount: new Decimal(amount)
+            });
         }
     }
 
@@ -1054,7 +1057,7 @@ async function runMonitorLoop(myId) {
         }
 
         await checkLiveOrders();
-        await checkGridHealth();
+        await checkGridHealth(analysis, regime, multiTF);
 
     } catch (e) {
         if (myId === monitorSessionId) {
@@ -1106,18 +1109,21 @@ async function getMarketAnalysis(timeframe = '1h') {
         const lows = candles.map(c => c[3]);
         const volumes = candles.map(c => c[5]);
 
+        // ADAPTIVE PERIODS (Brain Activation)
+        const periods = adaptiveHelpers.getAdaptiveIndicatorPeriods(state.volatilityRegime, state.marketRegime);
+
         // Calculate RSI
-        const rsiInput = { values: closes, period: CONFIG.indicators.rsiPeriod };
+        const rsiInput = { values: closes, period: periods.rsi };
         const rsiValues = RSI.calculate(rsiInput);
         const currentRSI = rsiValues[rsiValues.length - 1];
 
         // Calculate EMA
-        const emaInput = { values: closes, period: CONFIG.indicators.emaPeriod };
+        const emaInput = { values: closes, period: periods.ema };
         const emaValues = EMA.calculate(emaInput);
         const currentEMA = emaValues[emaValues.length - 1];
 
         // Calculate Bollinger Bands
-        const bbInput = { period: CONFIG.indicators.bbPeriod, values: closes, stdDev: CONFIG.indicators.bbStdDev };
+        const bbInput = { period: periods.bb, values: closes, stdDev: CONFIG.indicators.bbStdDev };
         const bbValues = BollingerBands.calculate(bbInput);
         const currentBB = bbValues[bbValues.length - 1];
 
@@ -2184,20 +2190,30 @@ async function syncHistoricalTrades() {
     }
 }
 
-async function checkGridHealth() {
+async function checkGridHealth(analysis, regime, multiTF) {
     if (state.activeOrders.length === 0) return;
 
     const currentPrice = state.currentPrice;
     if (!currentPrice) return;
 
-    // SMART FILTER CHECK
+    // PHASE 3: INTELLIGENT REBALANCE TRIGGER (Brain Activation)
+    if (analysis && regime && multiTF) {
+        const triggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF);
+        if (triggers && triggers.length > 0) {
+            log('ADAPTIVE', `Rebalance Triggered by: ${triggers.join(', ')}`, 'warning');
+            await initializeGrid(true);
+            return;
+        }
+    }
+
+    // SMART FILTER CHECK (Legacy/Fallback)
     if (state.marketCondition) {
         if (state.marketCondition.isOverbought) {
-            log('FILTER', 'RSI > 70 (OVERBOUGHT). PAUSING REBALANCE.');
+            log('FILTER', 'RSI > Overbought. PAUSING REBALANCE.');
             return;
         }
         if (state.marketCondition.isOversold) {
-            log('FILTER', 'RSI < 30 (OVERSOLD). PAUSING REBALANCE.');
+            log('FILTER', 'RSI < Oversold. PAUSING REBALANCE.');
             return;
         }
     }
