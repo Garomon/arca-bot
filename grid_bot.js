@@ -42,7 +42,7 @@ const PAIR_PRESETS = {
         spacingNormal: 0.010,    // 1.0%
         spacingHigh: 0.015,      // 1.5% in high vol
         spacingLow: 0.006,       // 0.6% in low vol
-        bandwidthHigh: 0.06,     // SOL swings harder
+        bandwidthHigh: 0.08,     // SOL swings harder (tuned to prevent flicker)
         bandwidthLow: 0.02
     },
     'ETH/BTC': {
@@ -833,9 +833,10 @@ async function runMonitorLoop(myId) {
             // Check if we need to adapt (with Smart Hysteresis)
             const lastResetTime = state.lastRebalance?.timestamp || 0;
             const timeSinceReset = Date.now() - lastResetTime;
-            // Cooldown: 20 mins for optimization (Zen Mode), 0 for safety (Panic Mode)
+            // Cooldown: 20 mins for optimization (Zen Mode), 5 mins for safety (Panic Mode - Anti-Flicker)
             const cooldownMs = 20 * 60 * 1000;
-            const isEmergency = volatilityState === 'HIGH';
+            const emergencyCooldownMs = 5 * 60 * 1000;
+            const isEmergency = volatilityState === 'HIGH' && timeSinceReset > emergencyCooldownMs;
 
             // CRITICAL FIX: Only adapt if the Volatility REGIME changes, not just the spacing number
             // (ATR calculation in initializeGrid makes the number dynamic, causing infinite loops otherwise)
