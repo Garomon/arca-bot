@@ -1718,7 +1718,7 @@ state.compositeSignal = null;
 
 // PHASE 1: Stop-Loss Protection (Fixed for accurate drawdown calculation)
 async function checkStopLoss() {
-    if (!state.initialCapital || state.emergencyStop) return;
+    if (!state.initialCapital || state.initialCapital <= 0 || state.emergencyStop) return;
 
     try {
         const balance = await binance.fetchBalance();
@@ -1825,6 +1825,8 @@ function calculateNetProfit(buyPrice, sellPrice, amount) {
 }
 
 
+// Race Condition Protection
+const processingOrders = new Set();
 async function checkLiveOrders() {
     try {
         const openOrders = await binance.fetchOpenOrders(CONFIG.pair);
@@ -1834,6 +1836,10 @@ async function checkLiveOrders() {
         const filled = state.activeOrders.filter(o => !openOrderIds.has(o.id));
 
         for (const order of filled) {
+            // SKIP if already being processed (Fix Race Condition)
+            if (processingOrders.has(order.id)) continue;
+            processingOrders.add(order.id);
+
             // Double check status
             try {
                 const info = await binance.fetchOrder(order.id, CONFIG.pair);
@@ -1846,6 +1852,8 @@ async function checkLiveOrders() {
             } catch (e) {
                 // Order might be gone, assume filled if not in openOrders? 
                 // Safer to ignore or check trades. For now, skip.
+            } finally {
+                processingOrders.delete(order.id);
             }
         }
 
