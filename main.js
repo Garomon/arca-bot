@@ -272,6 +272,16 @@ socket.on('financial_update', (data) => {
         if (label && label.innerText !== baseAsset) {
             label.innerText = baseAsset;
         }
+
+        // NEW: Update Main Terminal Header (e.g. "BTC/USDT")
+        const pairLabel = document.getElementById('trading-pair-label');
+        if (pairLabel) pairLabel.innerText = data.pair;
+
+        // NEW: Update Symbol (₿ or ◎)
+        const symbolLabel = document.getElementById('pair-symbol');
+        if (symbolLabel) {
+            symbolLabel.innerText = baseAsset === 'SOL' ? '◎' : '₿';
+        }
     }
 
     // Show TOTAL BTC (free + locked), not just free
