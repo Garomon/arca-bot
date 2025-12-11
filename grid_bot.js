@@ -363,39 +363,48 @@ async function getCurrentPrice() {
 async function getDetailedFinancials() {
     try {
         const balance = await binance.fetchBalance();
-        const freeUSDT = balance.USDT?.free || 0;
-        const freeBTC = balance.BTC?.free || 0;
+        const globalFreeUSDT = balance.USDT?.free || 0;
+        const freeBase = balance[BASE_ASSET]?.free || 0;
 
-        // CRITICAL: Use REAL Binance data for locked capital (not manual calculation)
-        const lockedUSDT = balance.USDT?.used || 0;  // This is the TRUE amount locked in orders
-        const lockedBTC = balance.BTC?.used || 0;    // BTC locked in SELL orders
+        // CRITICAL: Calculate Allocated Capital for UI Isolation
+        // 1. Free USDT: Display only the allocated slice (e.g. 50% of wallet)
+        const freeUSDT = globalFreeUSDT * CAPITAL_ALLOCATION;
 
-        // TOTAL holdings (not just free)
-        const totalBTC = freeBTC + lockedBTC;
+        // 2. Locked USDT: Sum of OUR active buy orders (ignore other bots)
+        // 2. Locked USDT: Sum of OUR active buy orders (ignore other bots)
+        const activeOpenOrders = state.activeOrders.filter(o => o.status === 'open');
+        const buyOrders = activeOpenOrders.filter(o => o.side === 'buy');
+        const sellOrders = activeOpenOrders.filter(o => o.side === 'sell');
+
+        const calculateLocked = (orders) => orders.reduce((sum, o) => sum + (o.side === 'buy' ? o.price * o.amount : 0), 0);
+        const lockedUSDT = calculateLocked(activeOpenOrders);
+
+        // 3. Base Asset Locked: Sum of OUR active sell orders
+        const lockedBase = activeOpenOrders.reduce((sum, o) => sum + (o.side === 'sell' ? o.amount : 0), 0);
+
+        // TOTAL holdings
+        const totalBase = freeBase + lockedBase;
         const totalUSDT = freeUSDT + lockedUSDT;
 
-        // BTC value in USDT (using TOTAL, not just free)
-        const btcValueUSDT = totalBTC * (state.currentPrice || 0);
+        // Base value in USDT
+        const baseValueUSDT = totalBase * (state.currentPrice || 0);
 
-        // Total equity = ALL USDT + ALL BTC valued at current price
-        const totalEquity = totalUSDT + btcValueUSDT;
+        // Total equity = Allocated USDT + Base Value
+        const totalEquity = totalUSDT + baseValueUSDT;
 
         // Profit calculations (use initial capital if available, otherwise current equity)
         const baseCapital = state.initialCapital || totalEquity;
         const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
 
-        // Active order counts - FIX: Filter TOTAL by 'open' status too
-        const activeOpenOrders = state.activeOrders.filter(o => o.status === 'open');
-        const buyOrders = activeOpenOrders.filter(o => o.side === 'buy');
-        const sellOrders = activeOpenOrders.filter(o => o.side === 'sell');
+        // Active order counts (Filtered above)
 
         return {
             freeUSDT,
             lockedUSDT,
-            freeBTC,
-            lockedBTC,     // NEW: locked BTC
-            totalBTC,      // NEW: total BTC
-            btcValueUSDT,
+            freeBTC: freeBase,  // Map to legacy frontend key
+            lockedBTC: lockedBase,
+            totalBTC: totalBase,
+            btcValueUSDT: baseValueUSDT,
             totalEquity,
             profit: state.totalProfit,
             profitPercent,
