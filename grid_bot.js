@@ -163,7 +163,7 @@ function log(type, msg, style = '') {
     const logLine = `[${timestamp}] [${type}] ${msg}`;
 
     // Console
-    console.log(`>> [${type}] ${msg}`);
+    console.log(`[${new Date().toISOString()}] >> [${type}] ${msg}`);
 
     // Persistent file (append)
     try {
