@@ -630,7 +630,9 @@ async function initializeGrid(forceReset = false) {
     log('SYSTEM', `CAPITAL ALLOCATION: $${safeCapital.toFixed(2)} for grid | $${allocation.reserve.toFixed(2)} reserve (${allocation.reason})`);
 
     // Log adaptive safety margin for transparency
-    const adaptiveSafetyMargin = allocation.allocation;
+    const adaptiveSafetyMargin = adaptiveHelpers.getAdaptiveSafetyMargin(volatilityState, regime.regime);
+    CONFIG.safetyMargin = adaptiveSafetyMargin; // Apply globally
+    log('ADAPTIVE', `Safety Margin: ${(adaptiveSafetyMargin * 100).toFixed(0)}% (Vol: ${volatilityState} | Regime: ${regime.regime})`, 'info');
 
     // Track initial capital for profit % (only set once on first run)
     if (!state.initialCapital) {

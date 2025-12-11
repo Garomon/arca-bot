@@ -39,7 +39,7 @@ function getAdaptiveRSI(marketRegime, volatility) {
         'UNKNOWN': { overbought: 70, oversold: 30 }
     };
 
-    const config = configs[marketRegime] || configs['UNKNOWN'];
+    const config = { ...(configs[marketRegime] || configs['UNKNOWN']) };
 
     // Wider bands in high volatility
     if (volatility === 'HIGH') {
