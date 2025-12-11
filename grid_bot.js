@@ -672,11 +672,17 @@ async function initializeGrid(forceReset = false) {
 
     // 2. Assign Sizes and Build Order List
     for (let i = 0; i < rawLevels.length; i++) {
-        const amount = sizes[i];
-        if (amount >= CONFIG.minOrderSize) {
+        const sizeInUSDT = sizes[i]; // This is USDT Value (e.g. $50)
+        const levelPrice = rawLevels[i].price; // Ensure we read price correctly
+
+        // CRITICAL FIX: Convert USDT Value to Asset Quantity (BTC)
+        // sizeInUSDT / price = BTC Quantity 
+        const amountInBTC = new Decimal(sizeInUSDT).div(levelPrice);
+
+        if (sizeInUSDT >= CONFIG.minOrderSize) {
             gridLevels.push({
                 ...rawLevels[i],
-                amount: new Decimal(amount)
+                amount: amountInBTC // Pass QUANTITY to placeOrder, NOT Value
             });
         }
     }
