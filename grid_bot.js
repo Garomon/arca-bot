@@ -1831,6 +1831,11 @@ async function checkFlashCrash() {
         state.priceBuffer.shift();
     }
 
+    // MEMORY PROTECTION: Cap buffer size to prevent memory leaks on high frequency ticks
+    if (state.priceBuffer.length > 200) {
+        state.priceBuffer = state.priceBuffer.slice(-200);
+    }
+
     // Check Drop Logic
     if (state.priceBuffer.length > 5) { // Need some data points
         const oldest = state.priceBuffer[0];
