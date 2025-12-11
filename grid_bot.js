@@ -1330,7 +1330,8 @@ function checkGeopoliticalContext(currentRegime = 'NEUTRAL') {
         return {
             status: 'MIDTERM_RISK',
             modifier: 'DEFENSIVE',
-            defenseLevel: 2 // Level 2 Defense (High Reserves)
+            defenseLevel: 2, // Level 2 Defense (High Reserves)
+            scoreBias: -10 // Penalty for risk period
         };
     }
     return { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0, scoreBias: 0 };
