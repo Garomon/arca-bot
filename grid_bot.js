@@ -36,29 +36,76 @@ const PAIR_PRESETS = {
         spacingLow: 0.003,
         bandwidthHigh: 0.04,
         bandwidthLow: 0.015,
-        healthCheckThreshold: 0.02 // 2% Drift Tolerance for BTC
+        toleranceMultiplier: 10  // 10x Grid Spacing (approx 3%)
     },
     'SOL/USDT': {
-        minOrderSize: 0.01,      // SOL has larger min
-        gridSpacing: 0.008,      // 0.8% base (higher volatility)
-        spacingNormal: 0.010,    // 1.0%
-        spacingHigh: 0.015,      // 1.5% in high vol
-        spacingLow: 0.006,       // 0.6% in low vol
-        bandwidthHigh: 0.08,     // SOL swings harder (tuned to prevent flicker)
+        minOrderSize: 0.01,
+        gridSpacing: 0.008,      // 0.8% base
+        spacingNormal: 0.010,
+        spacingHigh: 0.015,
+        spacingLow: 0.006,
+        bandwidthHigh: 0.08,
         bandwidthLow: 0.02,
-        healthCheckThreshold: 0.08 // 8% Tolerance for Volatility (Prevent Loop)
+        toleranceMultiplier: 10  // 10x Grid Spacing (approx 8%)
     },
     'ETH/BTC': {
         minOrderSize: 0.001,
-        gridSpacing: 0.004,      // 0.4% base
+        gridSpacing: 0.004,
         spacingNormal: 0.006,
         spacingHigh: 0.010,
         spacingLow: 0.004,
         bandwidthHigh: 0.05,
         bandwidthLow: 0.015,
-        healthCheckThreshold: 0.03
+        toleranceMultiplier: 10
     }
 };
+
+// ... (existing code) ...
+
+async function checkGridHealth() {
+    if (state.activeOrders.length === 0) return;
+
+    const currentPrice = state.currentPrice;
+    if (!currentPrice) return;
+
+    // SMART FILTER CHECK
+    if (state.marketCondition) {
+        if (state.marketCondition.isOverbought) {
+            log('FILTER', 'RSI > 70 (OVERBOUGHT). PAUSING REBALANCE.');
+            return;
+        }
+        if (state.marketCondition.isOversold) {
+            log('FILTER', 'RSI < 30 (OVERSOLD). PAUSING REBALANCE.');
+            return;
+        }
+    }
+
+    // Calculate Grid Range
+    const prices = state.activeOrders.map(o => o.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    // ANTI-LOOP: Don't check health if we have too few orders (likely partial init)
+    if (state.activeOrders.length < 3) {
+        return;
+    }
+
+    // DYNAMIC DRIFT TOLERANCE
+    // Logic: Tolerance scales with Volatility (Grid Spacing)
+    // Formula: Spacing * Multiplier (Default 10x)
+    const multiplier = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
+    const currentSpacing = CONFIG.gridSpacing; // This is dynamic from ATR
+    const driftTolerance = currentSpacing * multiplier;
+
+    const lowerBound = minPrice * (1 - driftTolerance);
+    const upperBound = maxPrice * (1 + driftTolerance);
+
+    if (currentPrice < lowerBound || currentPrice > upperBound) {
+        log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)} vs Range $${minPrice.toFixed(2)}-$${maxPrice.toFixed(2)}). REBALANCING...`, 'error');
+        log('DEBUG', `Bounds: Low ${lowerBound.toFixed(2)} | High ${upperBound.toFixed(2)} | Tol: ${(driftTolerance * 100).toFixed(2)}% (${multiplier}x Spacing)`);
+        await initializeGrid(true); // Force Reset
+    }
+}
 
 // Get preset for current pair (fallback to BTC defaults)
 const pairPreset = PAIR_PRESETS[TRADING_PAIR] || PAIR_PRESETS['BTC/USDT'];
