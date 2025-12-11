@@ -19,6 +19,7 @@ const adaptiveHelpers = require('./adaptive_helpers');
 const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
 const BOT_PORT = parseInt(process.env.BOT_PORT) || 3000;
 const PAIR_ID = TRADING_PAIR.replace('/', ''); // e.g., 'BTCUSDT'
+const [BASE_ASSET, QUOTE_ASSET] = TRADING_PAIR.split('/'); // e.g. ['BTC', 'USDT']
 
 // CAPITAL ALLOCATION: Each pair only uses its assigned slice of total capital
 // Value from 0 to 1.0 (e.g., 0.5 = 50% of total balance)
@@ -1595,11 +1596,11 @@ async function checkStopLoss() {
     try {
         const balance = await binance.fetchBalance();
         const totalUSDT = balance.USDT?.total || 0;
-        const totalBTC = balance.BTC?.total || 0;
+        const totalBase = balance[BASE_ASSET]?.total || 0;
 
         // Calculate REAL total equity based on current holdings
-        const btcValue = totalBTC * (state.currentPrice || 0);
-        const totalEquity = totalUSDT + btcValue;
+        const baseValue = totalBase * (state.currentPrice || 0);
+        const totalEquity = totalUSDT + baseValue;
 
         // Only calculate drawdown if we have meaningful data
         if (totalEquity <= 0) return;
