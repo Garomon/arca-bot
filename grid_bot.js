@@ -62,6 +62,10 @@ const PAIR_PRESETS = {
 
 // ... (existing code) ...
 
+// Last time we logged the tolerance (for periodic visibility)
+let lastToleranceLog = 0;
+const TOLERANCE_LOG_INTERVAL = 5 * 60 * 1000; // Log every 5 minutes
+
 async function checkGridHealth() {
     if (state.activeOrders.length === 0) return;
 
@@ -99,6 +103,13 @@ async function checkGridHealth() {
 
     const lowerBound = minPrice * (1 - driftTolerance);
     const upperBound = maxPrice * (1 + driftTolerance);
+
+    // PERIODIC TOLERANCE VISIBILITY (Log every 5 min for audit trail)
+    const now = Date.now();
+    if (now - lastToleranceLog > TOLERANCE_LOG_INTERVAL) {
+        log('TOLERANCE', `Grid: ${(currentSpacing * 100).toFixed(2)}% | Drift Tol: ${(driftTolerance * 100).toFixed(2)}% (${multiplier}x) | Range: $${lowerBound.toFixed(2)} - $${upperBound.toFixed(2)}`, 'info');
+        lastToleranceLog = now;
+    }
 
     if (currentPrice < lowerBound || currentPrice > upperBound) {
         log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)} vs Range $${minPrice.toFixed(2)}-$${maxPrice.toFixed(2)}). REBALANCING...`, 'error');
