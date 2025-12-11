@@ -46,7 +46,7 @@ const PAIR_PRESETS = {
         spacingLow: 0.006,       // 0.6% in low vol
         bandwidthHigh: 0.08,     // SOL swings harder (tuned to prevent flicker)
         bandwidthLow: 0.02,
-        healthCheckThreshold: 0.06 // 6% Drift Tolerance for SOL (Prevent Loop)
+        healthCheckThreshold: 0.08 // 8% Tolerance for Volatility (Prevent Loop)
     },
     'ETH/BTC': {
         minOrderSize: 0.001,
