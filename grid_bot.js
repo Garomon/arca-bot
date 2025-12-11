@@ -125,6 +125,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.static(__dirname));
+// Support strict subpath routing (if Nginx doesn't strip prefix)
+app.use('/sol', express.static(__dirname));
+app.use('/eth', express.static(__dirname));
 
 // --- BINANCE CONNECTION ---
 const binance = new ccxt.binance({
