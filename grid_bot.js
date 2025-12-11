@@ -587,21 +587,24 @@ async function initializeGrid(forceReset = false) {
         (analysis && analysis.bandwidth < CONFIG.bandwidthLow ? 'LOW' : 'NORMAL');
 
     // PHASE 2.5: ATR GRID SPACING (Dynamic Volatility Surfing)
-    // If ATR is available, use it to set grid spacing (e.g., 1.5x ATR)
     if (analysis && analysis.atr) {
-        const atrPercent = analysis.atr / price;
-        // Multiplier: 1.5 for normal, 2.0 for high vol, 1.0 for low vol
-        let atrMultiplier = volatilityState === 'HIGH' ? 2.0 : (volatilityState === 'LOW' ? 1.0 : 1.5);
-
-        // --- GEOPOLITICAL OVERRIDE ---
+        // --- GEOPOLITICAL CHECK ---
         const geoContext = checkGeopoliticalContext();
         if (geoContext.status === 'MIDTERM_RISK') {
-            atrMultiplier *= 1.5; // INCREASE SPACING by 50% in risk year to survive deeper drops
             log('GEO', `Midterm Risk Detected. Expanding Grid Spacing (Defense Mode)`, 'warning');
         }
 
-        CONFIG.gridSpacing = Math.max(0.001, Math.min(0.03, atrPercent * atrMultiplier)); // Allow up to 3% spacing
-        log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${atrMultiplier})`, 'info');
+        // CALL THE BRAIN
+        const spacingConfig = adaptiveHelpers.calculateOptimalGridSpacing(
+            analysis.atr,
+            price,
+            volatilityState,
+            geoContext.status
+        );
+
+        CONFIG.gridSpacing = spacingConfig.spacing;
+
+        log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${spacingConfig.multiplier})`, 'info');
 
         // IMMEDIATE TOLERANCE LOG (Visible on Startup)
         const tolMult = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
@@ -2205,38 +2208,25 @@ async function checkGridHealth(analysis, regime, multiTF) {
     if (!currentPrice) return;
 
     // PHASE 3: INTELLIGENT REBALANCE TRIGGER (Brain Activation)
-    if (analysis && regime && multiTF) {
-        const triggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF);
-        if (triggers && triggers.length > 0) {
-            log('ADAPTIVE', `Rebalance Triggered by: ${triggers.join(', ')}`, 'warning');
-            await initializeGrid(true);
-            return;
-        }
-    }
-
-    // SMART FILTER CHECK (Legacy/Fallback)
-    if (state.marketCondition) {
-        if (state.marketCondition.isOverbought) {
-            log('FILTER', 'RSI > Overbought. PAUSING REBALANCE.');
-            return;
-        }
-        if (state.marketCondition.isOversold) {
-            log('FILTER', 'RSI < Oversold. PAUSING REBALANCE.');
-            return;
-        }
-    }
-
-    // Calculate Grid Range
-    const prices = state.activeOrders.map(o => o.price);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-
     // DYNAMIC DRIFT TOLERANCE
     // Logic: Tolerance scales with Volatility (Grid Spacing)
     // Formula: Spacing * Multiplier (Default 10x)
     const multiplier = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
     const currentSpacing = CONFIG.gridSpacing; // This is dynamic from ATR
     const driftTolerance = currentSpacing * multiplier;
+
+    // PHASE 3: INTELLIGENT REBALANCE TRIGGER (Brain Activation)
+    if (analysis && regime && multiTF) {
+        // Pass dynamic drift configuration to the brain
+        const adaptiveConfig = { driftTolerance: driftTolerance };
+        const triggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF, adaptiveConfig);
+
+        if (triggers && triggers.length > 0) {
+            log('ADAPTIVE', `Rebalance Triggered by: ${triggers.join(', ')}`, 'warning');
+            await initializeGrid(true);
+            return;
+        }
+    }
 
     const lowerBound = minPrice * (1 - driftTolerance);
     const upperBound = maxPrice * (1 + driftTolerance);

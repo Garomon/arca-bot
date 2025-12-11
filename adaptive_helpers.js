@@ -92,17 +92,24 @@ function calculateOptimalOrderSizes(capital, gridCount, currentPrice, gridLevels
 }
 
 // PHASE 3: Intelligent Rebalancing Triggers
-function shouldRebalance(state, analysis, regime, multiTF) {
+// PHASE 3: Intelligent Rebalancing Triggers
+function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
     const triggers = [];
 
-    // 1. Price drift (>2%)
+    // 1. Price drift (Dynamic Tolerance)
+    // Default to 2% if not provided, but usually comes from grid_bot.js logic
+    const driftThreshold = config.driftTolerance || 0.02;
+
     if (state.activeOrders.length > 0) {
         const prices = state.activeOrders.map(o => o.price);
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
-        const drift = Math.abs(state.currentPrice - ((minPrice + maxPrice) / 2)) / state.currentPrice;
+        const centerPrice = (minPrice + maxPrice) / 2;
+        const drift = Math.abs(state.currentPrice - centerPrice) / state.currentPrice;
 
-        if (drift > 0.02) triggers.push('PRICE_DRIFT');
+        if (drift > driftThreshold) {
+            triggers.push(`PRICE_DRIFT (Drift: ${(drift * 100).toFixed(2)}% > Tol: ${(driftThreshold * 100).toFixed(2)}%)`);
+        }
     }
 
     // 2. Volatility regime change
@@ -118,16 +125,35 @@ function shouldRebalance(state, analysis, regime, multiTF) {
         }
     }
 
-    // 4. All orders filled on one side
+    // 4. Imbalance (Smart Inventory Check)
     const buyOrders = state.activeOrders.filter(o => o.side === 'buy');
     const sellOrders = state.activeOrders.filter(o => o.side === 'sell');
-    if (buyOrders.length === 0 || sellOrders.length === 0) {
-        triggers.push('IMBALANCE');
+
+    // Check if we effectively HAVE inventory/capital to support the missing side
+    // If we have < 0.0001 BTC (dust), we can't place sells anyway, so 0 sells is NOT an imbalance, it's reality.
+    const hasInventory = state.inventory && state.inventory.reduce((sum, lot) => sum + lot.remaining, 0) > 0.0001;
+
+    // Logic:
+    // If NO BUY orders: Imbalance ONLY if we have capital to buy (implied usually true for bot) AND price dropped below range
+    // If NO SELL orders: Imbalance ONLY if we HAVE inventory to sell AND price rose above range
+
+    if (buyOrders.length === 0) {
+        // If price is below all sells (we are holding bags), we need to rebalance to add buys below
+        // But if we just have NO orders at all, that's different.
+        if (sellOrders.length > 0 && state.currentPrice < Math.min(...sellOrders.map(o => o.price))) {
+            triggers.push('IMBALANCE_LOW_BUYS');
+        }
+    } else if (sellOrders.length === 0) {
+        // If we have inventory but no sell orders, something is wrong -> Rebalance
+        // UNLESS we are in "HODL Mode" (insufficient for min order size), which grid_bot handles.
+        // So we only trigger if we *could* sell but aren't.
+        if (hasInventory) {
+            triggers.push('IMBALANCE_NO_SELLS');
+        }
     }
 
-    // 5. Multi-timeframe divergence (low confidence)
+    // 5. Multi-timeframe divergence (low confidence) - Stale Grid Check
     if (multiTF.confidence === 'LOW') {
-        // Check if we've been stuck for a while
         const hoursSinceLastFill = (Date.now() - (state.lastFillTime || Date.now())) / (1000 * 60 * 60);
         if (hoursSinceLastFill > 24) {
             triggers.push('STALE_GRID');
@@ -148,6 +174,43 @@ function getAdaptiveIndicatorPeriods(volatility, marketRegime) {
 
     return configs[volatility] || configs['NORMAL'];
 }
+
+// PHASE 4: Dynamic Grid Spacing
+function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopoliticalStatus) {
+    if (!atr || !currentPrice) return { spacing: 0.01, multiplier: 1.0, rawAtrPercent: 0.01 }; // Default
+
+    const atrPercent = atr / currentPrice;
+    let atrMultiplier = 1.0;
+
+    // Adjust multiplier based on volatility
+    if (volatility === 'EXTREME') atrMultiplier = 2.0;       // Wide spacing
+    else if (volatility === 'HIGH') atrMultiplier = 1.5;
+    else if (volatility === 'LOW') atrMultiplier = 0.8;      // Tight spacing
+
+    // Geopolitical Override
+    if (geopoliticalStatus === 'MIDTERM_RISK') {
+        atrMultiplier *= 1.5; // INCREASE SPACING by 50%
+    }
+
+    // Calculate dynamic spacing
+    const spacing = Math.max(0.001, Math.min(0.03, atrPercent * atrMultiplier)); // Cap at 3%
+
+    return {
+        spacing,
+        multiplier: atrMultiplier,
+        rawAtrPercent: atrPercent
+    };
+}
+
+module.exports = {
+    calculateOptimalGridCount,
+    getAdaptiveRSI,
+    getAdaptiveSafetyMargin,
+    calculateOptimalOrderSizes,
+    shouldRebalance,
+    getAdaptiveIndicatorPeriods,
+    calculateOptimalGridSpacing
+};
 
 // PHASE 3: Profit-Taking Strategy
 function manageProfitTaking(totalProfit, initialCapital, state) {
