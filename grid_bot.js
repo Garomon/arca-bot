@@ -703,7 +703,7 @@ async function placeOrder(level) {
     let amount = new Decimal(level.amount).toNumber();
 
     // PHASE 4: Fee Optimization - Skip unprofitable orders
-    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, state.currentPrice);
+    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, state.currentPrice, CONFIG.tradingFee);
     if (!worthCheck.worth) {
         log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
         return;
@@ -1000,7 +1000,7 @@ async function runMonitorLoop(myId) {
                 } : null
             });
 
-            const compositeSignal = await calculateCompositeSignal(analysis, regime, multiTF);
+            const compositeSignal = await calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI);
             state.compositeSignal = compositeSignal;
 
             if (myId !== monitorSessionId) return; // Zombie check
@@ -1516,7 +1516,7 @@ async function fetchOrderBookPressure() {
 }
 
 // COMPOSITE SIGNAL SCORE - Combines ALL intelligence
-async function calculateCompositeSignal(analysis, regime, multiTF) {
+async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI = { overbought: 70, oversold: 30 }) {
     // Fetch all external data
     // Safe destructuring with defaults
     const [fearGreedRes, fundingRes, btcDomRes, openInterestRes] = await Promise.all([
@@ -1542,12 +1542,12 @@ async function calculateCompositeSignal(analysis, regime, multiTF) {
     // === TECHNICAL INDICATORS (40% weight) ===
 
     // RSI contribution (0-20 points)
-    if (analysis.rsi < 30) {
+    if (analysis.rsi < adaptiveRSI.oversold) {
         score += 15;
-        reasons.push('RSI oversold (+15)');
-    } else if (analysis.rsi > 70) {
+        reasons.push(`RSI oversold (<${adaptiveRSI.oversold}) (+15)`);
+    } else if (analysis.rsi > adaptiveRSI.overbought) {
         score -= 15;
-        reasons.push('RSI overbought (-15)');
+        reasons.push(`RSI overbought (>${adaptiveRSI.overbought}) (-15)`);
     } else if (analysis.rsi < 45) {
         score += 5;
         reasons.push('RSI low-ish (+5)');
