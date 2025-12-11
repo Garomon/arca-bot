@@ -376,14 +376,23 @@ function loadState() {
     }
 }
 
-// Save State
-function saveState() {
+// Save State (ASYNC & NON-BLOCKING)
+// OPTIMIZATION: Prevents I/O blocking the Event Loop
+let isSaving = false;
+async function saveState() {
+    if (isSaving) return; // Skip if already saving
+    isSaving = true;
+
     try {
         const tempFile = `${CONFIG.stateFile}.tmp`;
-        fs.writeFileSync(tempFile, JSON.stringify(state, null, 2));
-        fs.renameSync(tempFile, CONFIG.stateFile); // Atomic on most systems
+        // Use Async Write
+        await fs.promises.writeFile(tempFile, JSON.stringify(state, null, 2));
+        // Atomic Rename (Fast)
+        await fs.promises.rename(tempFile, CONFIG.stateFile);
     } catch (e) {
         console.error('>> [ERROR] Failed to save state:', e.message);
+    } finally {
+        isSaving = false;
     }
 }
 
@@ -916,6 +925,9 @@ async function runMonitorLoop(myId) {
             return;
         }
         await checkStopLoss();
+        // PHASE 2: FLASH CRASH PROTECTION
+        await checkFlashCrash();
+        if (state.isPaused) return; // Stop loop logic if paused
         if (myId !== monitorSessionId) return; // Zombie check
 
         let volatilityState = 'NORMAL';
@@ -1795,6 +1807,50 @@ async function checkStopLoss() {
         }
     } catch (e) {
         console.error('>> [ERROR] Stop-loss check failed:', e.message);
+    }
+}
+
+// PHASE 2: FLASH CRASH BREAKER (Volatility Kill Switch)
+// Protection against instant collapses (-5% in <1 min)
+async function checkFlashCrash() {
+    if (state.emergencyStop || state.isPaused) return;
+
+    const now = Date.now();
+    const currentPrice = state.currentPrice;
+    if (!currentPrice) return;
+
+    // Initialize history buffer
+    if (!state.priceBuffer) state.priceBuffer = [];
+
+    // Add current price point
+    state.priceBuffer.push({ price: currentPrice, time: now });
+
+    // Clean old data (> 60 seconds)
+    const ONE_MINUTE = 60 * 1000;
+    while (state.priceBuffer.length > 0 && (now - state.priceBuffer[0].time > ONE_MINUTE)) {
+        state.priceBuffer.shift();
+    }
+
+    // Check Drop Logic
+    if (state.priceBuffer.length > 5) { // Need some data points
+        const oldest = state.priceBuffer[0];
+        const newest = state.priceBuffer[state.priceBuffer.length - 1];
+
+        // Calculate % Drop explicitly
+        const percentChange = ((newest.price - oldest.price) / oldest.price) * 100;
+
+        // THRESHOLD: -5% drop in 1 minute
+        if (percentChange <= -5) {
+            log('CRITICAL', `⚡ FLASH CRASH DETECTED: ${percentChange.toFixed(2)}% drop in ${(now - oldest.time) / 1000}s.`, 'error');
+            log('CRITICAL', `PAUSING BUY ORDERS FOR 15 MINUTES.`, 'error');
+
+            state.isPaused = true;
+            state.pauseUntil = now + (15 * 60 * 1000); // 15 min pause
+            state.pauseReason = 'FLASH_CRASH_PROTECTION';
+
+            saveState(); // Async save
+            io.emit('flash_crash', { drop: percentChange, pauseUntil: state.pauseUntil });
+        }
     }
 }
 
