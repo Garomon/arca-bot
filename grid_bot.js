@@ -69,57 +69,7 @@ const PAIR_PRESETS = {
 let lastToleranceLog = 0;
 const TOLERANCE_LOG_INTERVAL = 5 * 60 * 1000; // Log every 5 minutes
 
-async function checkGridHealth() {
-    if (state.activeOrders.length === 0) return;
-
-    const currentPrice = state.currentPrice;
-    if (!currentPrice) return;
-
-    // SMART FILTER CHECK
-    if (state.marketCondition) {
-        if (state.marketCondition.isOverbought) {
-            log('FILTER', 'RSI > 70 (OVERBOUGHT). PAUSING REBALANCE.');
-            return;
-        }
-        if (state.marketCondition.isOversold) {
-            log('FILTER', 'RSI < 30 (OVERSOLD). PAUSING REBALANCE.');
-            return;
-        }
-    }
-
-    // Calculate Grid Range
-    const prices = state.activeOrders.map(o => o.price);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-
-    // ANTI-LOOP: Don't check health if we have too few orders (likely partial init)
-    if (state.activeOrders.length < 3) {
-        return;
-    }
-
-    // DYNAMIC DRIFT TOLERANCE
-    // Logic: Tolerance scales with Volatility (Grid Spacing)
-    // Formula: Spacing * Multiplier (Default 10x)
-    const multiplier = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
-    const currentSpacing = CONFIG.gridSpacing; // This is dynamic from ATR
-    const driftTolerance = currentSpacing * multiplier;
-
-    const lowerBound = minPrice * (1 - driftTolerance);
-    const upperBound = maxPrice * (1 + driftTolerance);
-
-    // PERIODIC TOLERANCE VISIBILITY (Log every 5 min for audit trail)
-    const now = Date.now();
-    if (now - lastToleranceLog > TOLERANCE_LOG_INTERVAL) {
-        log('TOLERANCE', `Grid: ${(currentSpacing * 100).toFixed(2)}% | Drift Tol: ${(driftTolerance * 100).toFixed(2)}% (${multiplier}x) | Range: $${lowerBound.toFixed(2)} - $${upperBound.toFixed(2)}`, 'info');
-        lastToleranceLog = now;
-    }
-
-    if (currentPrice < lowerBound || currentPrice > upperBound) {
-        log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)} vs Range $${minPrice.toFixed(2)}-$${maxPrice.toFixed(2)}). REBALANCING...`, 'error');
-        log('DEBUG', `Bounds: Low ${lowerBound.toFixed(2)} | High ${upperBound.toFixed(2)} | Tol: ${(driftTolerance * 100).toFixed(2)}% (${multiplier}x Spacing)`);
-        await initializeGrid(true); // Force Reset
-    }
-}
+// (Duplicate checkGridHealth removed)
 
 // Get preset for current pair (fallback to BTC defaults)
 const pairPreset = PAIR_PRESETS[TRADING_PAIR] || PAIR_PRESETS['BTC/USDT'];
@@ -2240,22 +2190,24 @@ async function checkGridHealth() {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // Thresholds: If price is outside grid by threshold %, reset
-    // Use Pair-Specific Threshold with fallback (Default 2% -> 0.02)
-    const driftTolerance = CONFIG.healthCheckThreshold || 0.02;
+    // DYNAMIC DRIFT TOLERANCE
+    // Logic: Tolerance scales with Volatility (Grid Spacing)
+    // Formula: Spacing * Multiplier (Default 10x)
+    const multiplier = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
+    const currentSpacing = CONFIG.gridSpacing; // This is dynamic from ATR
+    const driftTolerance = currentSpacing * multiplier;
+
     const lowerBound = minPrice * (1 - driftTolerance);
     const upperBound = maxPrice * (1 + driftTolerance);
 
     // ANTI-LOOP: Don't check health if we have too few orders (likely partial init)
     if (state.activeOrders.length < 3) {
-        // Just log debug, don't reset
-        // console.log(`[DEBUG] Skipping Health Check (Orders: ${state.activeOrders.length})`);
         return;
     }
 
     if (currentPrice < lowerBound || currentPrice > upperBound) {
         log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)} vs Range $${minPrice.toFixed(2)}-$${maxPrice.toFixed(2)}). REBALANCING...`, 'error');
-        log('DEBUG', `Bounds: Low ${lowerBound.toFixed(2)} | High ${upperBound.toFixed(2)} | Tol: ${(driftTolerance * 100).toFixed(1)}%`);
+        log('DEBUG', `Bounds: Low ${lowerBound.toFixed(2)} | High ${upperBound.toFixed(2)} | Tol: ${(driftTolerance * 100).toFixed(2)}% (${multiplier}x Spacing)`);
         await initializeGrid(true); // Force Reset
     }
 }
