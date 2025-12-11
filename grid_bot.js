@@ -31,26 +31,29 @@ const PAIR_PRESETS = {
     'BTC/USDT': {
         minOrderSize: 0.00001,
         gridSpacing: 0.003,      // 0.3% base
+        gridCount: 20,           // +/- 3% active range (tight)
         spacingNormal: 0.005,
         spacingHigh: 0.007,
         spacingLow: 0.003,
         bandwidthHigh: 0.04,
         bandwidthLow: 0.015,
-        toleranceMultiplier: 10  // 10x Grid Spacing (approx 3%)
+        toleranceMultiplier: 10
     },
     'SOL/USDT': {
         minOrderSize: 0.01,
         gridSpacing: 0.008,      // 0.8% base
+        gridCount: 40,           // +/- 16% active range (wide for volatility)
         spacingNormal: 0.010,
         spacingHigh: 0.015,
         spacingLow: 0.006,
         bandwidthHigh: 0.08,
         bandwidthLow: 0.02,
-        toleranceMultiplier: 10  // 10x Grid Spacing (approx 8%)
+        toleranceMultiplier: 15  // 15x Grid Spacing (approx 12-15% drift tolerance)
     },
     'ETH/BTC': {
         minOrderSize: 0.001,
         gridSpacing: 0.004,
+        gridCount: 20,
         spacingNormal: 0.006,
         spacingHigh: 0.010,
         spacingLow: 0.004,
@@ -127,7 +130,7 @@ const CONFIG = {
     tradingFee: 0.001,       // 0.1% Standard Fee
 
     // GRID SETTINGS (PAIR-SPECIFIC)
-    gridCount: 16,
+    gridCount: pairPreset.gridCount || 16, // Dynamic Grid Count (20 for BTC, 40 for SOL)
     gridSpacing: pairPreset.gridSpacing,
     minOrderSize: pairPreset.minOrderSize,
     maxOpenOrders: 24,
