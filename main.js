@@ -3,7 +3,24 @@
  * Version: 2.0 - All Features Working
  */
 
-const socket = io();
+// --- SOCKET CONNECTION (MULTI-BOT AWARE) ---
+// Detect if we are on a subpath (e.g., /sol/)
+const pathName = window.location.pathname;
+let socketOptions = {};
+
+// If on /sol/, tell Socket.IO to use the /sol/socket.io endpoint
+// which Nginx maps to localhost:3001
+if (pathName.startsWith('/sol')) {
+    socketOptions.path = '/sol/socket.io';
+    console.log('>> [SYSTEM] Connecting to SOLANA Bot via /sol/socket.io');
+} else if (pathName.startsWith('/eth')) {
+    socketOptions.path = '/eth/socket.io';
+    console.log('>> [SYSTEM] Connecting to ETH Bot via /eth/socket.io');
+} else {
+    console.log('>> [SYSTEM] Connecting to BTC Bot (Default)');
+}
+
+const socket = io(socketOptions);
 
 // ===== TAB SWITCHING =====
 document.addEventListener('DOMContentLoaded', () => {
