@@ -1382,12 +1382,18 @@ async function fetchOrderBookPressure() {
 // COMPOSITE SIGNAL SCORE - Combines ALL intelligence
 async function calculateCompositeSignal(analysis, regime, multiTF) {
     // Fetch all external data
-    const [fearGreed, funding, btcDom, openInterest] = await Promise.all([
-        fetchFearGreedIndex(),
-        fetchFundingRate(),
-        fetchBTCDominance(),
-        fetchOpenInterest()
+    // Safe destructuring with defaults
+    const [fearGreedRes, fundingRes, btcDomRes, openInterestRes] = await Promise.all([
+        fetchFearGreedIndex().catch(() => ({ value: 50, classification: 'Neutral' })),
+        fetchFundingRate().catch(() => ({ rate: 0, signal: 'NEUTRAL' })),
+        fetchBTCDominance().catch(() => ({ value: 50 })),
+        fetchOpenInterest().catch(() => ({ signal: 'NEUTRAL' }))
     ]);
+
+    const fearGreed = fearGreedRes || { value: 50, classification: 'Neutral' };
+    const funding = fundingRes || { rate: 0, signal: 'NEUTRAL' };
+    const btcDom = btcDomRes || { value: 50 };
+    const openInterest = openInterestRes || { signal: 'NEUTRAL' };
 
     // Ensure pressure is updated
     await fetchOrderBookPressure();
