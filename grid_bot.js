@@ -384,6 +384,65 @@ function saveState() {
     }
 }
 
+// ==================================================
+// FIFO RECONCILIATION - Sync Inventory with Exchange
+// Ensures no lots are ever lost due to state file issues
+// ==================================================
+async function reconcileInventoryWithExchange() {
+    log('RECONCILE', 'Syncing inventory with exchange history...', 'info');
+    try {
+        // Fetch last 100 trades (covers ~a week of activity)
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 100);
+        const buyTrades = trades.filter(t => t.side === 'buy');
+
+        if (!state.inventory) state.inventory = [];
+        const existingIds = new Set(state.inventory.map(lot => String(lot.id)));
+
+        // Also track IDs from filledOrders to know what was already consumed
+        const soldOrderIds = new Set();
+        if (state.filledOrders) {
+            state.filledOrders
+                .filter(fo => fo.side === 'sell')
+                .forEach(fo => {
+                    if (fo.costBasisOrderId) soldOrderIds.add(String(fo.costBasisOrderId));
+                });
+        }
+
+        let recovered = 0;
+        for (const trade of buyTrades) {
+            const tradeId = String(trade.id);
+
+            // Skip if already in inventory OR if it was already sold
+            if (existingIds.has(tradeId) || soldOrderIds.has(tradeId)) {
+                continue;
+            }
+
+            // This is a missing lot - recover it!
+            const fee = trade.fee?.cost || (trade.price * trade.amount * CONFIG.tradingFee);
+            state.inventory.push({
+                id: trade.id,
+                price: trade.price,
+                amount: trade.amount,
+                remaining: trade.amount, // Assume full amount available
+                fee: fee,
+                timestamp: trade.timestamp,
+                recovered: true // Flag for audit
+            });
+            recovered++;
+            log('RECONCILE', `♻️ RECOVERED: ${trade.amount.toFixed(6)} @ $${trade.price.toFixed(2)} (ID: ${trade.id})`, 'success');
+        }
+
+        if (recovered > 0) {
+            log('RECONCILE', `✅ Recovered ${recovered} missing lot(s) from exchange history!`, 'success');
+            saveState();
+        } else {
+            log('RECONCILE', '✅ Inventory is in sync with exchange.', 'info');
+        }
+    } catch (e) {
+        log('ERROR', `Reconciliation failed: ${e.message}`, 'error');
+    }
+}
+
 // --- CORE LOGIC ---
 
 async function updateBalance() {
@@ -2121,6 +2180,9 @@ server.listen(BOT_PORT, async () => {
     console.log(`>> [SYSTEM] Trading Pair: ${TRADING_PAIR}`);
     loadState();
 
+    // AUTO-RECONCILE: Sync inventory with exchange to recover any lost lots
+    await reconcileInventoryWithExchange();
+
     // AUTO-RECOVERY: SAFETY FIRST
     // Do NOT clear emergency stop automatically. Force user to reset it.
     if (state.emergencyStop) {
@@ -2203,6 +2265,12 @@ server.listen(BOT_PORT, async () => {
                 log('CONFIG', `Initial Capital updated: $${oldCapital.toFixed(2)} -> $${state.initialCapital.toFixed(2)}`, 'info');
                 socket.emit('hud_update', { status: 'CAPITAL UPDATED', detail: `$${state.initialCapital.toFixed(2)}` });
             }
+        });
+
+        // Manual FIFO Reconciliation Trigger
+        socket.on('reconcile_inventory', async () => {
+            console.log('>> [CMD] MANUAL INVENTORY RECONCILIATION TRIGGERED');
+            await reconcileInventoryWithExchange();
         });
     });
 
