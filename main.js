@@ -265,6 +265,15 @@ socket.on('financial_update', (data) => {
     // Store global equity for calculations
     window.currentEquity = data.totalEquity;
 
+    // DYNAMIC UI: Update Base Asset Label (e.g. "BTC" or "SOL")
+    if (data.pair) {
+        const baseAsset = data.pair.split('/')[0]; // "BTC/USDT" -> "BTC"
+        const label = document.getElementById('base-asset-label');
+        if (label && label.innerText !== baseAsset) {
+            label.innerText = baseAsset;
+        }
+    }
+
     // Show TOTAL BTC (free + locked), not just free
     if (ui.btcAmount) ui.btcAmount.innerText = (data.totalBTC || data.freeBTC).toFixed(6);
     if (ui.btcValue) ui.btcValue.innerText = data.btcValueUSDT.toFixed(2);

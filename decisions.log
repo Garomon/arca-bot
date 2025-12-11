@@ -9376,3 +9376,6 @@
   Details: {"orderId":"53742144012","level":1,"worthCheck":{"worth":true,"gross":1.039277362939866,"fees":0.07972255646999508,"net":0.9595548064698709,"profitPercent":"2.407"}}
 [2025-12-11T03:47:42.600Z] BLOCKED_BY_WALL: Buy Wall Ratio: 5.43x | Waiting for price rise | Price: $89876 | Score: 90
   Details: {"level":{"side":"sell","price":"99249.148734350595792","amount":"0.00040186411795044989258","level":4}}
+
+
+========== BOT SESSION STARTED: 2025-12-11T13:36:43.739Z ==========

@@ -395,6 +395,7 @@ async function getDetailedFinancials() {
             totalEquity,
             profit: state.totalProfit,
             profitPercent,
+            pair: CONFIG.pair, // NEW: Send Pair Info (e.g. "SOL/USDT")
             startTime: state.firstTradeTime || state.startTime,  // For APY calculation (uses earliest trade)
             activeOrders: {
                 buy: buyOrders.length,
