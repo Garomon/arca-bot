@@ -1,7 +1,9 @@
-
 // ============================================
 // BLACK BOX RECORDER (Crash Handler)
 // ============================================
+const fs = require('fs');
+const path = require('path');
+
 const CRASH_LOG = path.join(__dirname, 'crash_report.log');
 
 process.on('uncaughtException', (err) => {
