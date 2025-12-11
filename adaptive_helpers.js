@@ -263,10 +263,10 @@ async function resilientAPICall(fn, maxRetries = 3, context = '') {
 
 // PHASE 4: Fee Optimization (Skip Unprofitable Orders)
 // Now uses PERCENTAGE-BASED minimum, works with ANY capital
-function isOrderWorthPlacing(orderSize, gridSpacing, currentPrice) {
+function isOrderWorthPlacing(orderSize, gridSpacing, currentPrice, tradingFee) {
     const orderValue = orderSize * currentPrice;
     const expectedGross = orderValue * gridSpacing;
-    const fees = orderValue * 0.002; // 0.1% x 2 (buy + sell)
+    const fees = orderValue * (tradingFee * 2); // buy + sell cycles
     const expectedNet = expectedGross - fees;
 
     // Minimum profit = 0.05% of order value OR net must be positive
