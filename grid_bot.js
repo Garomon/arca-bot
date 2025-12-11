@@ -1910,8 +1910,10 @@ async function handleOrderFill(order, fillPrice) {
                 if (lot.fee && lot.amount > 0) {
                     entryFees += (take / lot.amount) * lot.fee;
                 }
-                lot.remaining -= take;
-                remainingToSell -= take;
+
+                // MATH FIX: Prevent floating point dust
+                lot.remaining = Number((lot.remaining - take).toFixed(8)); // BTC/SOL precision
+                remainingToSell = Number((remainingToSell - take).toFixed(8));
                 consumedLots++;
             }
         }
