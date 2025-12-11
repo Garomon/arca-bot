@@ -1492,7 +1492,8 @@ async function fetchOrderBookPressure() {
         const bidVol = bids.reduce((acc, bid) => acc + bid[1], 0);
         const askVol = asks.reduce((acc, ask) => acc + ask[1], 0);
 
-        const ratio = askVol > 0 ? bidVol / askVol : 1.0;
+        // PREVENT INFINITY: If askVol is 0 (unlikely w/ depth 50 but possible), use 1.0
+        const ratio = (askVol > 0) ? bidVol / askVol : 1.0;
         // Ratio > 1.0 = More Bids (Support) = BULLISH
         // Ratio < 1.0 = More Asks (Resistance) = BEARISH
 
