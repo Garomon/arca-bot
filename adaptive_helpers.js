@@ -193,7 +193,8 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopolitical
     }
 
     // Calculate dynamic spacing
-    const spacing = Math.max(0.001, Math.min(0.03, atrPercent * atrMultiplier)); // Cap at 3%
+    // Cap at 0.1% min and 5% max (increased from 3% for SOL volatility)
+    const spacing = Math.max(0.001, Math.min(0.05, atrPercent * atrMultiplier));
 
     return {
         spacing,

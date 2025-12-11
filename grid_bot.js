@@ -266,6 +266,15 @@ let state = {
     lastRegime: null       // PHASE 3: Previous market regime
 };
 
+// Cache for external data (avoid rate limits) - HOISTED TO TOP
+const externalDataCache = {
+    fearGreed: { value: null, timestamp: 0 },
+    fundingRate: { value: null, timestamp: 0 },
+    btcDominance: { value: null, timestamp: 0 },
+    openInterest: { value: null, timestamp: 0 },
+    orderBook: { value: null, timestamp: 0 }
+};
+
 // Load State
 // Load State
 function loadState() {
@@ -1328,14 +1337,6 @@ async function analyzeMultipleTimeframes() {
 // All external data sources for best decisions
 // ============================================
 
-// Cache for external data (avoid rate limits)
-const externalDataCache = {
-    fearGreed: { value: null, timestamp: 0 },
-    fundingRate: { value: null, timestamp: 0 },
-    btcDominance: { value: null, timestamp: 0 },
-    openInterest: { value: null, timestamp: 0 },
-    orderBook: { value: null, timestamp: 0 }
-};
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 // FEAR & GREED INDEX (Alternative.me)
@@ -2364,6 +2365,12 @@ server.listen(BOT_PORT, async () => {
     });
 
     // Start Main Loop (AUTOMATED)
+    try {
+        log('SYSTEM', 'Loading Exchange Markets...');
+        await binance.loadMarkets(); // Ensure time offsets and precision are ready
+    } catch (e) {
+        log('WARN', `Market sync warning: ${e.message}`, 'warning');
+    }
     await initializeGrid();
 
     // AUTO-HEALTH CHECK: Ensure grid always has orders
