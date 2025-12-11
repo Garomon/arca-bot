@@ -391,102 +391,63 @@ function saveState() {
 async function reconcileInventoryWithExchange() {
     log('RECONCILE', 'Syncing inventory with exchange history...', 'info');
     try {
-        // 1. Get Truth (Wallet Balance)
         const balance = await binance.fetchBalance();
         const baseAsset = CONFIG.pair.split('/')[0];
         const realBalance = parseFloat(balance[baseAsset]?.free || 0);
 
-        if (!state.inventory) state.inventory = [];
+        // 1. Fetch History (Newest First)
+        // We only fetch enough to verify the balance. 100 trades is safe.
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 100);
+        const buyTrades = trades.filter(t => t.side === 'buy').sort((a, b) => b.timestamp - a.timestamp); // DESC
 
-        let inventoryTotal = state.inventory.reduce((sum, lot) => sum + lot.remaining, 0);
+        // 2. Rebuild Ideal Inventory (Strict FIFO)
+        // Principle: "My holdings are the sum of my most recent buys."
+        const newInventory = [];
+        let remainingBalanceToFill = realBalance;
         const TOLERANCE = 0.000001;
 
-        // CASE A: Inventory > Balance -> REMOVE ZOMBIES (Oldest First)
-        if (inventoryTotal > realBalance + TOLERANCE) {
-            log('RECONCILE', `⚠️ OVER-REPORTING: Local ${inventoryTotal.toFixed(6)} > Wallet ${realBalance.toFixed(6)}`, 'warning');
-            log('RECONCILE', 'Cleaning up ZOMBIE lots (Sold while offline)...', 'info');
+        for (const trade of buyTrades) {
+            if (remainingBalanceToFill <= TOLERANCE) break;
 
-            let removedCount = 0;
+            const amountToTake = Math.min(remainingBalanceToFill, trade.amount);
+            // Pro-rate fee
+            const originalFee = trade.fee?.cost || (trade.price * trade.amount * CONFIG.tradingFee);
+            const fee = originalFee * (amountToTake / trade.amount);
 
-            // Remove from START (FIFO - because we sell oldest first)
-            while (inventoryTotal > realBalance + TOLERANCE && state.inventory.length > 0) {
-                const zombie = state.inventory[0]; // Oldest
+            newInventory.push({
+                id: trade.id,
+                price: trade.price,
+                amount: trade.amount,
+                remaining: amountToTake,
+                fee: fee,
+                timestamp: trade.timestamp,
+                recovered: true
+            });
 
-                if (inventoryTotal - zombie.remaining >= realBalance - TOLERANCE) {
-                    // Wipes out entire lot
-                    state.inventory.shift();
-                    inventoryTotal -= zombie.remaining;
-                    removedCount++;
-                    log('RECONCILE', `🗑️ ZOMBIE REMOVED: ${zombie.remaining.toFixed(6)} @ $${zombie.price} (ID: ${zombie.id})`, 'warning');
-                } else {
-                    // Partial removal
-                    const surplus = inventoryTotal - realBalance;
-                    const reduceBy = Math.min(surplus, zombie.remaining);
-                    zombie.remaining -= reduceBy;
-                    inventoryTotal -= reduceBy;
-                    log('RECONCILE', `✂️ ZOMBIE TRIMMED: -${reduceBy.toFixed(6)} to match wallet.`, 'warning');
-                }
-            }
+            remainingBalanceToFill -= amountToTake;
+        }
+
+        // 3. Compare & Commit
+        // Sort inventory Oldest -> Newest (Standard FIFO array order for selling)
+        newInventory.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Check if anything changed
+        const oldIds = (state.inventory || []).map(i => i.id).sort().join(',');
+        const newIds = newInventory.map(i => i.id).sort().join(',');
+
+        // Check totals
+        const currentTotal = state.inventory ? state.inventory.reduce((sum, lot) => sum + lot.remaining, 0) : 0;
+        const newTotal = newInventory.reduce((sum, lot) => sum + lot.remaining, 0);
+
+        if (Math.abs(currentTotal - newTotal) > TOLERANCE || oldIds !== newIds) {
+            state.inventory = newInventory;
             saveState();
-            log('RECONCILE', `✅ Removed/Trimmed ${removedCount} zombie lots. Inventory now matches wallet.`, 'success');
-        }
-
-        // CASE B: Inventory < Balance -> RECOVER MISSING (Newest First)
-        else if (inventoryTotal < realBalance - TOLERANCE) {
-            const shortage = realBalance - inventoryTotal;
-            log('RECONCILE', `⚠️ UNDER-REPORTING: Local ${inventoryTotal.toFixed(6)} < Wallet ${realBalance.toFixed(6)} (Missing: ${shortage.toFixed(6)})`, 'warning');
-
-            // Fetch trades, filter BUYs, sort NEWEST -> OLDEST
-            // We reverse because fetchMyTrades usually returns oldest first (or we ensure checking timestamps)
-            const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 100);
-            // Sort Newest -> Oldest
-            const buyTrades = trades.filter(t => t.side === 'buy').sort((a, b) => b.timestamp - a.timestamp);
-
-            const existingIds = new Set(state.inventory.map(lot => String(lot.id)));
-            let recovered = 0;
-
-            for (const trade of buyTrades) {
-                // Stop if we filled the hole
-                if (inventoryTotal >= realBalance - TOLERANCE) break;
-
-                if (!existingIds.has(String(trade.id))) {
-                    // How much space do we have left to fill?
-                    const spaceAvailable = realBalance - inventoryTotal;
-                    // We can take up to 'spaceAvailable', but not more than trade amount
-                    const amountToRecover = Math.min(spaceAvailable, trade.amount);
-
-                    // Fee logic (approximate)
-                    const originalFee = trade.fee?.cost || (trade.price * trade.amount * CONFIG.tradingFee);
-                    const fee = originalFee * (amountToRecover / trade.amount);
-
-                    state.inventory.push({
-                        id: trade.id,
-                        price: trade.price,
-                        amount: trade.amount, // Original size
-                        remaining: amountToRecover, // What we actually hold
-                        fee: fee,
-                        timestamp: trade.timestamp,
-                        recovered: true
-                    });
-
-                    inventoryTotal += amountToRecover;
-                    recovered++;
-                    log('RECONCILE', `♻️ RECOVERED: ${amountToRecover.toFixed(6)} @ $${trade.price} (ID: ${trade.id})`, 'success');
-                }
+            log('RECONCILE', `✅ Inventory Rebuilt (Strict FIFO). Holdings: ${newTotal.toFixed(6)} ${baseAsset} (from ${newInventory.length} newest lots).`, 'success');
+            if (oldIds !== newIds) {
+                log('RECONCILE', `🔍 Fixed Composition: Old Lots replaced with Newest Lots.`, 'warning');
             }
-
-            // Resort inventory by timestamp to maintain correct FIFO order (Oldest -> Newest) for selling
-            state.inventory.sort((a, b) => a.timestamp - b.timestamp);
-
-            if (recovered > 0) {
-                log('RECONCILE', `✅ Recovered ${recovered} missing lots. Inventory now matches wallet.`, 'success');
-                saveState();
-            } else {
-                log('RECONCILE', `⚠️ Could not fully recover mismatch. Manual check recommended.`, 'warning');
-            }
-        }
-        else {
-            log('RECONCILE', '✅ Inventory is in sync with exchange.', 'info');
+        } else {
+            log('RECONCILE', '✅ Inventory is in sync (Strict FIFO verified).', 'info');
         }
 
     } catch (e) {
