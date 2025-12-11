@@ -438,19 +438,19 @@ async function updateBalance() {
     try {
         const balance = await binance.fetchBalance();
         state.balance.usdt = balance.USDT?.free || 0;
-        state.balance.btc = balance.BTC?.free || 0;
+        state.balance.btc = balance[BASE_ASSET]?.free || 0;
 
         // Calculate Total Equity (USDT + BTC Value + Locked in Orders)
         const totalUSDT = balance.USDT?.total || 0;
-        const totalBTC = balance.BTC?.total || 0;
+        const totalBase = balance[BASE_ASSET]?.total || 0;
 
-        // We use current price to value the BTC
-        const btcValue = new Decimal(totalBTC).mul(state.currentPrice || 0).toNumber();
-        const totalEquity = new Decimal(totalUSDT).plus(btcValue).toNumber();
+        // We use current price to value the Base Asset
+        const baseValue = new Decimal(totalBase).mul(state.currentPrice || 0).toNumber();
+        const totalEquity = new Decimal(totalUSDT).plus(baseValue).toNumber();
 
         io.emit('balance_update', {
             usdt: state.balance.usdt, // Free USDT
-            btc: state.balance.btc,   // Free BTC
+            btc: state.balance.btc,   // Free Base Asset (Legacy key 'btc' kept for UI compat)
             equity: totalEquity,      // Total Account Value
             isDemo: !state.isLive
         });
@@ -473,60 +473,81 @@ async function getCurrentPrice() {
 async function getDetailedFinancials() {
     try {
         const balance = await binance.fetchBalance();
+
+        // --- 1. GLOBAL ACCOUNT STATE ---
         const globalFreeUSDT = balance.USDT?.free || 0;
-        const freeBase = balance[BASE_ASSET]?.free || 0;
+        const globalTotalUSDT = balance.USDT?.total || 0; // Free + Locked
 
-        // CRITICAL: Calculate Allocated Capital for UI Isolation
-        // 1. Free USDT: Display only the allocated slice (e.g. 50% of wallet)
-        const freeUSDT = globalFreeUSDT * CAPITAL_ALLOCATION;
+        const globalFreeBase = balance[BASE_ASSET]?.free || 0;
+        const globalTotalBase = balance[BASE_ASSET]?.total || 0;
 
-        // 2. Locked USDT: Sum of OUR active buy orders (ignore other bots)
-        // 2. Locked USDT: Sum of OUR active buy orders (ignore other bots)
+        // Calculate Global Equity (The "Pie")
+        const currentPrice = state.currentPrice || 0;
+        const globalBaseValue = globalTotalBase * currentPrice;
+        const globalTotalEquity = globalTotalUSDT + globalBaseValue;
+
+        // --- 2. THIS BOT'S SHARE (THE "SLICE") ---
+        // We own a percentage of the total account equity
+        const myAllocatedEquity = globalTotalEquity * CAPITAL_ALLOCATION;
+
+        // --- 3. THIS BOT'S USAGE (THE "FILLING") ---
+        // What do we currently have satisfying that equity?
+
+        // A. Locked Funds (Active Orders)
         const activeOpenOrders = state.activeOrders.filter(o => o.status === 'open');
         const buyOrders = activeOpenOrders.filter(o => o.side === 'buy');
         const sellOrders = activeOpenOrders.filter(o => o.side === 'sell');
 
-        const calculateLocked = (orders) => orders.reduce((sum, o) => sum + (o.side === 'buy' ? o.price * o.amount : 0), 0);
-        const lockedUSDT = calculateLocked(activeOpenOrders);
+        // Locked USDT in OUR buy orders
+        const myLockedUSDT = activeOpenOrders.reduce((sum, o) => sum + (o.side === 'buy' ? o.price * o.amount : 0), 0);
 
-        // 3. Base Asset Locked: Sum of OUR active sell orders
-        const lockedBase = activeOpenOrders.reduce((sum, o) => sum + (o.side === 'sell' ? o.amount : 0), 0);
+        // Locked Base in OUR sell orders
+        const myLockedBase = activeOpenOrders.reduce((sum, o) => sum + (o.side === 'sell' ? o.amount : 0), 0);
 
-        // TOTAL holdings
-        const totalBase = freeBase + lockedBase;
-        const totalUSDT = freeUSDT + lockedUSDT;
+        // B. Base Asset Holdings (Inventory)
+        // Heuristic: If we track inventory, use it. If not, assume all base asset in account 'belongs' to this bot 
+        // IF we are a single-pair bot. For multi-pair, we MUST derive this or assumptions break.
+        // BETTER APPROACH for "Free USDT" calculation:
+        // Free USDT = Allocated Equity - (My Base Asset Value) - (My Locked USDT)
 
-        // Base value in USDT
-        const baseValueUSDT = totalBase * (state.currentPrice || 0);
+        // For now, let's approximate "My Base Asset" as "Total Base Asset" 
+        // assuming NO OTHER BOT TRADES THIS PAIR.
+        // TODO: For strictly isolating ETH vs BTC holdings, this is fine. 
+        // If two bots trade BTC/USDT, they will conflict here without a database.
+        const myTotalBase = globalTotalBase;
+        const myBaseValue = myTotalBase * currentPrice;
 
-        // Total equity = Allocated USDT + Base Value
-        const totalEquity = totalUSDT + baseValueUSDT;
+        // --- 4. THE RESULT: ISOLATED FREE USDT ---
+        // "How much USDT do I have left to deploy?"
+        let myFreeUSDT = myAllocatedEquity - myBaseValue - myLockedUSDT;
 
-        // Profit calculations (use initial capital if available, otherwise current equity)
-        const baseCapital = state.initialCapital || totalEquity;
+        // Safety Clamp: Can't be negative, can't exceed Global Free
+        myFreeUSDT = Math.max(0, myFreeUSDT);
+        myFreeUSDT = Math.min(myFreeUSDT, globalFreeUSDT); // Can't spend what doesn't exist
+
+        // Profit calculations
         const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
 
-        // Active order counts (Filtered above)
-
         return {
-            freeUSDT,
-            lockedUSDT,
-            freeBTC: freeBase,  // Map to legacy frontend key
-            lockedBTC: lockedBase,
-            totalBTC: totalBase,
-            btcValueUSDT: baseValueUSDT,
-            totalEquity,
+            freeUSDT: myFreeUSDT,       // CORRECTED: Isolated available capital
+            lockedUSDT: myLockedUSDT,   // CORRECTED: Only MY orders
+            freeBTC: globalFreeBase,    // Display base asset (Legacy key)
+            lockedBTC: myLockedBase,
+            totalBTC: myTotalBase,
+            btcValueUSDT: myBaseValue,
+            totalEquity: myAllocatedEquity, // Show the user THEIR slice size
             profit: state.totalProfit,
             profitPercent,
-            pair: CONFIG.pair, // NEW: Send Pair Info (e.g. "SOL/USDT")
-            startTime: state.firstTradeTime || state.startTime,  // For APY calculation (uses earliest trade)
+            pair: CONFIG.pair,
+            startTime: state.firstTradeTime || state.startTime,
             activeOrders: {
                 buy: buyOrders.length,
                 sell: sellOrders.length,
-                total: activeOpenOrders.length // FIX: Use filtered length
+                total: activeOpenOrders.length
             },
             currentPrice: state.currentPrice
         };
+
     } catch (e) {
         console.error('>> [ERROR] Financial calculation failed:', e.message);
         return null;
@@ -546,9 +567,9 @@ async function initializeGrid(forceReset = false) {
     // Calculate current equity NOW to see if user added funds
     const balance = await binance.fetchBalance();
     const totalUSDT = balance.USDT?.total || 0;
-    const totalBTC = balance.BTC?.total || 0;
-    const btcValue = new Decimal(totalBTC).mul(price).toNumber();
-    const currentEquity = new Decimal(totalUSDT).plus(btcValue).toNumber();
+    const totalBase = balance[BASE_ASSET]?.total || 0;
+    const baseValue = new Decimal(totalBase).mul(price).toNumber();
+    const currentEquity = new Decimal(totalUSDT).plus(baseValue).toNumber();
 
     // Apply CAPITAL_ALLOCATION to get THIS PAIR's share
     const allocatedEquity = currentEquity * CAPITAL_ALLOCATION;
