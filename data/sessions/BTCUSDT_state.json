@@ -260,11 +260,11 @@
   "isLive": true,
   "startTime": 1765424858739,
   "marketCondition": {
-    "rsi": 19.99,
+    "rsi": 18.77,
     "trend": "BEARISH",
     "isOverbought": false,
     "isOversold": true,
-    "bandwidth": 0.044815966772582025,
+    "bandwidth": 0.04500094486226238,
     "adaptiveRSI": {
       "overbought": 77,
       "oversold": 23
@@ -272,15 +272,15 @@
     "signalScore": 25,
     "recommendation": "BUY",
     "macd": {
-      "line": -476.6726729145885,
+      "line": -479.5532427151629,
       "signal": "BEARISH",
       "crossing": "NONE"
     },
-    "stochRSI": 8.535688005886682,
+    "stochRSI": 6.291390728476822,
     "volume": {
-      "current": 242.45308,
-      "avg": 981.9787804999999,
-      "ratio": 0.24690256532483193,
+      "current": 305.64254,
+      "avg": 985.1382534999999,
+      "ratio": 0.310253448096359,
       "signal": "LOW"
     }
   },
@@ -297,37 +297,37 @@
   "lastVolatility": null,
   "lastRegime": null,
   "compositeSignal": {
-    "score": 90,
+    "score": 85,
     "recommendation": "STRONG_BUY",
     "sizeMultiplier": 1.5,
     "reasons": [
       "RSI oversold (+15)",
       "MTF aligned DOWN (-10)",
       "Fear 29 (+8)",
-      "Strong Buy Wall (3.3x) (+10)",
+      "Buy Pressure (+5)",
       "INSTITUTIONAL_ADOPTION (+15)"
     ],
     "components": {
       "fearGreed": {
         "value": 29,
         "classification": "Fear",
-        "timestamp": 1765426202202
+        "timestamp": 1765426502568
       },
       "funding": {
         "rate": 0.00259,
         "signal": "NEUTRAL",
-        "timestamp": 1765426201950
+        "timestamp": 1765426502557
       },
       "btcDominance": {
-        "value": 56.8289281461792,
+        "value": 56.841714361924254,
         "signal": "BTC_FLIGHT_TO_SAFETY",
-        "timestamp": 1765426201847
+        "timestamp": 1765426502464
       },
       "openInterest": {
-        "current": 86248.982,
-        "change": 0.036831386377115395,
+        "current": 86333.946,
+        "change": 0.09851014821252345,
         "signal": "STABLE",
-        "timestamp": 1765426201942
+        "timestamp": 1765426502567
       },
       "timing": {
         "isWeekend": false,
@@ -342,9 +342,9 @@
         "scoreBias": 15
       },
       "technicals": {
-        "rsi": 19.99,
+        "rsi": 18.77,
         "macd": {
-          "line": -476.6726729145885,
+          "line": -479.5532427151629,
           "signal": "BEARISH",
           "crossing": "NONE"
         },
@@ -357,9 +357,9 @@
         }
       }
     },
-    "timestamp": 1765426421982
+    "timestamp": 1765426559361
   },
-  "lastSyncTime": 1765426201697,
+  "lastSyncTime": 1765426502321,
   "feeCorrectionApplied": true,
   "inventory": [
     {
