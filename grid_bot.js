@@ -362,6 +362,12 @@ async function reconcileInventoryWithExchange() {
         const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 100);
         const buyTrades = trades.filter(t => t.side === 'buy').sort((a, b) => b.timestamp - a.timestamp); // DESC
 
+        // PROTECTION: If API returns empty history but we have balance, ABORT to prevent wiping state.
+        if (realBalance > 0.0001 && buyTrades.length === 0) {
+            log('WARN', `Reconcile Protection: Exchange has balance (${realBalance}) but returned 0 trades. API Issue? Skipping sync.`, 'warning');
+            return;
+        }
+
         // 2. Rebuild Ideal Inventory (Strict FIFO)
         // Principle: "My holdings are the sum of my most recent buys."
         const newInventory = [];
