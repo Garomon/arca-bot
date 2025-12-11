@@ -2024,13 +2024,21 @@ async function checkGridHealth() {
     const maxPrice = Math.max(...prices);
 
     // Thresholds: If price is outside grid by threshold %, reset
-    // Use Pair-Specific Threshold with fallback
+    // Use Pair-Specific Threshold with fallback (Default 2% -> 0.02)
     const driftTolerance = CONFIG.healthCheckThreshold || 0.02;
     const lowerBound = minPrice * (1 - driftTolerance);
     const upperBound = maxPrice * (1 + driftTolerance);
 
+    // ANTI-LOOP: Don't check health if we have too few orders (likely partial init)
+    if (state.activeOrders.length < 3) {
+        // Just log debug, don't reset
+        // console.log(`[DEBUG] Skipping Health Check (Orders: ${state.activeOrders.length})`);
+        return;
+    }
+
     if (currentPrice < lowerBound || currentPrice > upperBound) {
         log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)} vs Range $${minPrice.toFixed(2)}-$${maxPrice.toFixed(2)}). REBALANCING...`, 'error');
+        log('DEBUG', `Bounds: Low ${lowerBound.toFixed(2)} | High ${upperBound.toFixed(2)} | Tol: ${(driftTolerance * 100).toFixed(1)}%`);
         await initializeGrid(true); // Force Reset
     }
 }
