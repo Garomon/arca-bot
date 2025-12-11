@@ -592,21 +592,29 @@ async function placeOrder(level) {
     // PHASE 4.5: WALL PROTECTION (Order Book Intelligence)
     try {
         const pressure = await fetchOrderBookPressure();
-        // Don't BUY if there is a massive SELL WALL (Ratio < 0.15) - Relaxed from 0.3
+        // Don't BUY if there is a massive SELL WALL (Ratio < 0.15)
         if (level.side === 'buy' && pressure.ratio < 0.15) {
             log('SMART', `🧱 MASSIVE SELL WALL (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
             logDecision('BLOCKED_BY_WALL', [`Sell Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for resistance to clear'], { level });
             return;
         }
-        // Don't SELL if there is a massive BUY WALL (Ratio > 3.0) - Wait for price to go up
+        // Don't SELL if there is a massive BUY WALL (Ratio > 3.0)
         if (level.side === 'sell' && pressure.ratio > 3.0) {
             log('SMART', `🚀 BUY WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying SELL (Price might rise).`, 'warning');
             logDecision('BLOCKED_BY_WALL', [`Buy Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for price rise'], { level });
             return;
         }
     } catch (e) {
-        // Ignore error and proceed if order book fails
         console.log('Wall check skipped');
+    }
+
+    // PRECISION ENFORCEMENT
+    try {
+        amount = binance.amountToPrecision(CONFIG.pair, amount);
+        // Ensure it's a number for math later
+        amount = parseFloat(amount);
+    } catch (e) {
+        console.warn('>> [WARN] Could not enforce precision:', e.message);
     }
 
     // PHASE 5: SMART BALANCE CHECK (New Intelligence)
@@ -1641,7 +1649,8 @@ async function checkLiveOrders() {
             // Double check status
             try {
                 const info = await binance.fetchOrder(order.id, CONFIG.pair);
-                if (info.status === 'closed') {
+                // FIX: CCXT/Binance returns 'filled' for completed orders. 'closed' is generic.
+                if (info.status === 'closed' || info.status === 'filled') {
                     // CRITICAL: Use average fill price for accuracy, fallback to limit price
                     const realFillPrice = info.average || info.price;
                     await handleOrderFill(order, realFillPrice);
@@ -1718,18 +1727,38 @@ async function handleOrderFill(order, fillPrice) {
         const sellRevenue = fillPrice * order.amount;
         const sellFee = sellRevenue * CONFIG.tradingFee;
 
-        // If we didn't have enough inventory (e.g. from before tracking), assume recent buy price estimate
-        if (costBasis === 0) {
+        // VALIDATION: Check for "Phantom Inventory" (Absurdly low cost basis)
+        // If average cost per unit is < 50% of sell price, something is wrong.
+        // (Grid bots don't hold through 50% drops usually, and definitely not 90% drops like the bug)
+        const avgCostPerUnit = (costBasis > 0 && order.amount > 0) ? (costBasis / order.amount) : 0;
+        const priceDeviation = avgCostPerUnit / fillPrice; // e.g. 90000 / 92000 = 0.97 (Normal) vs 1.07 / 93000 = 0.00001 (Bug)
+
+        if (costBasis === 0 || priceDeviation < 0.5) {
+            log('WARN', `⚠️ Suspicious Cost Basis Detected! (Avg Cost: $${avgCostPerUnit.toFixed(2)} vs Sell: $${fillPrice.toFixed(2)}). Using estimate.`, 'warning');
             const spacing = order.spacing || CONFIG.gridSpacing;
             const estimatedBuyPrice = fillPrice / (1 + spacing);
             costBasis = estimatedBuyPrice * order.amount;
             entryFees = costBasis * CONFIG.tradingFee; // Estimate entry fee too
-            log('WARN', 'Inventory empty/insufficient. Used estimated cost basis.', 'warning');
         }
 
         const grossProfit = sellRevenue - costBasis;
         const totalFees = sellFee + entryFees; // Both entry and exit fees
         profit = grossProfit - totalFees; // TRUE NET PROFIT
+
+        // === SANITY CHECK: Prevent impossible profits ===
+        // Grid trading typically yields 0.5%-3% per trade. 
+        // If profit > 10% of sale, something is wrong (phantom inventory).
+        const maxRealisticProfit = sellRevenue * 0.10; // 10% cap
+        if (profit > maxRealisticProfit) {
+            log('WARN', `🚨 PROFIT ANOMALY DETECTED: $${profit.toFixed(4)} exceeds 10% cap. Using estimate.`, 'error');
+            // Fallback to estimated profit using grid spacing
+            const spacing = order.spacing || CONFIG.gridSpacing;
+            const estimatedBuyPrice = fillPrice / (1 + spacing);
+            const estimatedCostBasis = estimatedBuyPrice * order.amount;
+            const estimatedGross = sellRevenue - estimatedCostBasis;
+            profit = estimatedGross - totalFees;
+            log('WARN', `🔧 Corrected profit: $${profit.toFixed(4)}`, 'warning');
+        }
 
         log('PROFIT', `FIFO Realized: Rev $${sellRevenue.toFixed(2)} - Cost $${costBasis.toFixed(2)} - Fees $${totalFees.toFixed(4)} (Entry: $${entryFees.toFixed(4)} + Exit: $${sellFee.toFixed(4)}) = $${profit.toFixed(4)}`, 'success');
     }

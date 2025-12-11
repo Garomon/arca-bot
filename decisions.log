@@ -9280,3 +9280,99 @@
   Details: {"orderId":"53672222128","level":-6,"worthCheck":{"worth":true,"gross":0.4649761673018169,"fees":0.058788479556783055,"net":0.40618768774503383,"profitPercent":"1.382"}}
 [2025-12-10T04:23:47.031Z] ORDER_PLACED_SELL: Price: $93946.53 | Amount: 0.000108 BTC | Composite Score: 91 | Regime: BULL | Price: $92484 | Score: 91
   Details: {"orderId":"53672222212","level":1,"worthCheck":{"worth":true,"gross":0.606901694260378,"fees":0.07673259481887387,"net":0.5301690994415041,"profitPercent":"1.382"}}
+
+
+========== BOT SESSION STARTED: 2025-12-11T02:26:38.468Z ==========
+
+
+========== BOT SESSION STARTED: 2025-12-11T02:27:58.278Z ==========
+
+
+========== BOT SESSION STARTED: 2025-12-11T02:36:54.902Z ==========
+
+
+========== BOT SESSION STARTED: 2025-12-11T02:39:07.031Z ==========
+[2025-12-11T03:03:00.945Z] ORDER_PLACED_BUY: Price: $87602.95 | Amount: 0.000488 BTC | Composite Score: 70 | Regime: WEAK_BULL | Price: $89848 | Score: 70
+  Details: {"orderId":"53739188813","level":-1,"worthCheck":{"worth":true,"gross":1.0956975560884321,"fees":0.08770042031472933,"net":1.0079971357737028,"profitPercent":"2.299"}}
+[2025-12-11T03:03:01.659Z] ORDER_PLACED_BUY: Price: $85357.89 | Amount: 0.000467 BTC | Composite Score: 70 | Regime: WEAK_BULL | Price: $89848 | Score: 70
+  Details: {"orderId":"53739190362","level":-2,"worthCheck":{"worth":true,"gross":1.0490148458513775,"fees":0.08396390261742238,"net":0.9650509432339551,"profitPercent":"2.299"}}
+[2025-12-11T03:03:02.365Z] ORDER_PLACED_BUY: Price: $83112.84 | Amount: 0.000480 BTC | Composite Score: 70 | Regime: WEAK_BULL | Price: $89848 | Score: 70
+  Details: {"orderId":"53739191198","level":-3,"worthCheck":{"worth":true,"gross":1.0773510062367009,"fees":0.08623194927143707,"net":0.9911190569652638,"profitPercent":"2.299"}}
+[2025-12-11T03:03:03.087Z] ORDER_PLACED_BUY: Price: $80867.78 | Amount: 0.000493 BTC | Composite Score: 70 | Regime: WEAK_BULL | Price: $89848 | Score: 70
+  Details: {"orderId":"53739193033","level":-4,"worthCheck":{"worth":true,"gross":1.107260507962088,"fees":0.08862592729771357,"net":1.0186345806643744,"profitPercent":"2.299"}}
+[2025-12-11T03:03:03.432Z] BLOCKED_BY_WALL: Buy Wall Ratio: 9.38x | Waiting for price rise | Price: $89848 | Score: 70
+  Details: {"level":{"side":"sell","price":"92093.067540730506725","amount":"0.00046425332267672247177","level":1}}
+[2025-12-11T03:03:03.588Z] BLOCKED_BY_WALL: Buy Wall Ratio: 9.38x | Waiting for price rise | Price: $89848 | Score: 70
+  Details: {"level":{"side":"sell","price":"94338.12508146101345","amount":"0.00042277628034867825961","level":2}}
+[2025-12-11T03:03:03.744Z] BLOCKED_BY_WALL: Buy Wall Ratio: 9.38x | Waiting for price rise | Price: $89848 | Score: 70
+  Details: {"level":{"side":"sell","price":"96583.182622191520175","amount":"0.00041294892686467005135","level":3}}
+[2025-12-11T03:03:03.900Z] BLOCKED_BY_WALL: Buy Wall Ratio: 9.38x | Waiting for price rise | Price: $89848 | Score: 70
+  Details: {"level":{"side":"sell","price":"98828.2401629220269","amount":"0.00040356806466712662709","level":4}}
+[2025-12-11T03:23:02.227Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.05x | Waiting for resistance to clear | Price: $89923 | Score: 90
+  Details: {"level":{"side":"buy","price":"88165.250237309263544","amount":"0.0003936636947020189907","level":-1}}
+[2025-12-11T03:23:02.389Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.05x | Waiting for resistance to clear | Price: $89923 | Score: 90
+  Details: {"level":{"side":"buy","price":"86407.790474618527089","amount":"0.00030773398905461098719","level":-2}}
+[2025-12-11T03:23:02.548Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.05x | Waiting for resistance to clear | Price: $89923 | Score: 90
+  Details: {"level":{"side":"buy","price":"84650.330711927790633","amount":"0.00031412297890057249602","level":-3}}
+[2025-12-11T03:23:02.702Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.05x | Waiting for resistance to clear | Price: $89923 | Score: 90
+  Details: {"level":{"side":"buy","price":"82892.870949237054177","amount":"0.00032078288209408576761","level":-4}}
+[2025-12-11T03:23:02.857Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.05x | Waiting for resistance to clear | Price: $89923 | Score: 90
+  Details: {"level":{"side":"buy","price":"81135.411186546317721","amount":"0.00032773130325317892959","level":-5}}
+[2025-12-11T03:23:03.015Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.05x | Waiting for resistance to clear | Price: $89923 | Score: 90
+  Details: {"level":{"side":"buy","price":"79377.951423855581266","amount":"0.00033498740608916820753","level":-6}}
+[2025-12-11T03:23:03.974Z] ORDER_PLACED_SELL: Price: $91680.17 | Amount: 0.000379 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89923 | Score: 90
+  Details: {"orderId":"53740804726","level":1,"worthCheck":{"worth":true,"gross":0.6653233881068668,"fees":0.06808426952928108,"net":0.5972391185775857,"profitPercent":"1.754"}}
+[2025-12-11T03:24:52.212Z] ORDER_PLACED_BUY: Price: $88117.33 | Amount: 0.000394 BTC | Composite Score: 80 | Regime: WEAK_BULL | Price: $89875 | Score: 80
+  Details: {"orderId":"53740932044","level":-1,"worthCheck":{"worth":true,"gross":0.6919652432145375,"fees":0.07077286460998677,"net":0.6211923786045507,"profitPercent":"1.755"}}
+[2025-12-11T03:24:52.919Z] ORDER_PLACED_BUY: Price: $86359.87 | Amount: 0.000308 BTC | Composite Score: 80 | Regime: WEAK_BULL | Price: $89875 | Score: 80
+  Details: {"orderId":"53740932344","level":-2,"worthCheck":{"worth":true,"gross":0.5411128015263817,"fees":0.05534396910349427,"net":0.4857688324228875,"profitPercent":"1.755"}}
+[2025-12-11T03:24:53.850Z] ORDER_PLACED_BUY: Price: $84602.41 | Amount: 0.000314 BTC | Composite Score: 80 | Regime: WEAK_BULL | Price: $89875 | Score: 80
+  Details: {"orderId":"53740932550","level":-3,"worthCheck":{"worth":true,"gross":0.5523534265600771,"fees":0.05649363845674921,"net":0.4958597881033279,"profitPercent":"1.755"}}
+[2025-12-11T03:24:54.571Z] ORDER_PLACED_BUY: Price: $82844.95 | Amount: 0.000321 BTC | Composite Score: 80 | Regime: WEAK_BULL | Price: $89875 | Score: 80
+  Details: {"orderId":"53740932947","level":-4,"worthCheck":{"worth":true,"gross":0.5640709652976944,"fees":0.057692085619770295,"net":0.506378879677924,"profitPercent":"1.755"}}
+[2025-12-11T03:24:55.298Z] ORDER_PLACED_BUY: Price: $81087.49 | Amount: 0.000328 BTC | Composite Score: 80 | Regime: WEAK_BULL | Price: $89875 | Score: 80
+  Details: {"orderId":"53740933124","level":-5,"worthCheck":{"worth":true,"gross":0.5762964270835599,"fees":0.05894248216822434,"net":0.5173539449153355,"profitPercent":"1.755"}}
+[2025-12-11T03:24:55.998Z] ORDER_PLACED_BUY: Price: $79330.03 | Amount: 0.000335 BTC | Composite Score: 80 | Regime: WEAK_BULL | Price: $89875 | Score: 80
+  Details: {"orderId":"53740933249","level":-6,"worthCheck":{"worth":true,"gross":0.5890635691582978,"fees":0.060248280727288314,"net":0.5288152884310096,"profitPercent":"1.755"}}
+[2025-12-11T03:24:56.154Z] BLOCKED_BY_WALL: Buy Wall Ratio: 6.81x | Waiting for price rise | Price: $89875 | Score: 80
+  Details: {"level":{"side":"sell","price":"91632.249762690736388","amount":"0.00037862725352297273669","level":1}}
+[2025-12-11T03:24:56.309Z] BLOCKED_BY_WALL: Buy Wall Ratio: 6.81x | Waiting for price rise | Price: $89875 | Score: 80
+  Details: {"level":{"side":"sell","price":"93389.709525381472775","amount":"0.0002847182958789244591","level":2}}
+[2025-12-11T03:24:56.462Z] BLOCKED_BY_WALL: Buy Wall Ratio: 6.81x | Waiting for price rise | Price: $89875 | Score: 80
+  Details: {"level":{"side":"sell","price":"95147.169288072209163","amount":"0.00027945927501205970048","level":3}}
+[2025-12-11T03:24:56.618Z] BLOCKED_BY_WALL: Buy Wall Ratio: 6.81x | Waiting for price rise | Price: $89875 | Score: 80
+  Details: {"level":{"side":"sell","price":"96904.629050762945551","amount":"0.00027439100906898344588","level":4}}
+[2025-12-11T03:24:56.773Z] BLOCKED_BY_WALL: Buy Wall Ratio: 6.81x | Waiting for price rise | Price: $89875 | Score: 80
+  Details: {"level":{"side":"sell","price":"98662.088813453681939","amount":"0.00026950330434387235824","level":5}}
+[2025-12-11T03:24:56.926Z] BLOCKED_BY_WALL: Buy Wall Ratio: 6.81x | Waiting for price rise | Price: $89875 | Score: 80
+  Details: {"level":{"side":"sell","price":"100419.54857614441833","amount":"0.00026478668073808700999","level":6}}
+[2025-12-11T03:47:29.619Z] ORDER_PLACED_BUY: Price: $88127.54 | Amount: 0.000394 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89885 | Score: 90
+  Details: {"orderId":"53742136198","level":-1,"worthCheck":{"worth":true,"gross":0.6919402942297195,"fees":0.07077835255996459,"net":0.6211619416697549,"profitPercent":"1.755"}}
+[2025-12-11T03:47:30.344Z] ORDER_PLACED_BUY: Price: $86370.08 | Amount: 0.000308 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89885 | Score: 90
+  Details: {"orderId":"53742137194","level":-2,"worthCheck":{"worth":true,"gross":0.541052542588055,"fees":0.05534409244860222,"net":0.4857084501394528,"profitPercent":"1.755"}}
+[2025-12-11T03:47:31.076Z] ORDER_PLACED_BUY: Price: $84612.62 | Amount: 0.000314 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89885 | Score: 90
+  Details: {"orderId":"53742137699","level":-3,"worthCheck":{"worth":true,"gross":0.552290559624986,"fees":0.05649362563599991,"net":0.49579693398898605,"profitPercent":"1.755"}}
+[2025-12-11T03:47:31.790Z] ORDER_PLACED_BUY: Price: $82855.16 | Amount: 0.000321 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89885 | Score: 90
+  Details: {"orderId":"53742138654","level":-4,"worthCheck":{"worth":true,"gross":0.5640053209595217,"fees":0.057691924845926175,"net":0.5063133961135955,"profitPercent":"1.755"}}
+[2025-12-11T03:47:32.119Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.04x | Waiting for resistance to clear | Price: $89885 | Score: 90
+  Details: {"level":{"side":"buy","price":"81097.701186546316496","amount":"0.00032787539905676305221","level":-5}}
+[2025-12-11T03:47:32.279Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.04x | Waiting for resistance to clear | Price: $89885 | Score: 90
+  Details: {"level":{"side":"buy","price":"79340.241423855579795","amount":"0.00033513814253570049383","level":-6}}
+[2025-12-11T03:47:32.651Z] BLOCKED_BY_PROFIT_GUARD: Price below Break-Even ($91679.74) | Preserving Capital | Price: $89885 | Score: 90
+  Details: {"level":{"side":"sell","price":"91642.459762690736701","amount":"0.00037861528461372043625","level":1}}
+[2025-12-11T03:47:33.563Z] ORDER_PLACED_SELL: Price: $93399.92 | Amount: 0.000285 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89885 | Score: 90
+  Details: {"orderId":"53742139819","level":2,"worthCheck":{"worth":true,"gross":0.5003296778176364,"fees":0.05117856356697946,"net":0.4491511142506569,"profitPercent":"1.755"}}
+[2025-12-11T03:47:34.278Z] ORDER_PLACED_SELL: Price: $95157.38 | Amount: 0.000127 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89885 | Score: 90
+  Details: {"orderId":"53742140000","level":3,"worthCheck":{"worth":true,"gross":0.4910890988586199,"fees":0.05023334768509829,"net":0.4408557511735216,"profitPercent":"1.755"}}
+[2025-12-11T03:47:40.010Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.04x | Waiting for resistance to clear | Price: $89876 | Score: 90
+  Details: {"level":{"side":"buy","price":"87532.750316412351052","amount":"0.00046726003067526799157","level":-1}}
+[2025-12-11T03:47:40.166Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.04x | Waiting for resistance to clear | Price: $89876 | Score: 90
+  Details: {"level":{"side":"buy","price":"85189.470632824702104","amount":"0.0004681878090940347637","level":-2}}
+[2025-12-11T03:47:40.321Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.04x | Waiting for resistance to clear | Price: $89876 | Score: 90
+  Details: {"level":{"side":"buy","price":"82846.190949237053156","amount":"0.00048143036096736947536","level":-3}}
+[2025-12-11T03:47:40.478Z] BLOCKED_BY_WALL: Sell Wall Ratio: 0.04x | Waiting for resistance to clear | Price: $89876 | Score: 90
+  Details: {"level":{"side":"buy","price":"80502.911265649404208","amount":"0.00049544384155062978","level":-4}}
+[2025-12-11T03:47:41.195Z] ORDER_PLACED_SELL: Price: $92219.31 | Amount: 0.000404 BTC | Composite Score: 90 | Regime: WEAK_BULL | Price: $89876 | Score: 90
+  Details: {"orderId":"53742144012","level":1,"worthCheck":{"worth":true,"gross":1.039277362939866,"fees":0.07972255646999508,"net":0.9595548064698709,"profitPercent":"2.407"}}
+[2025-12-11T03:47:42.600Z] BLOCKED_BY_WALL: Buy Wall Ratio: 5.43x | Waiting for price rise | Price: $89876 | Score: 90
+  Details: {"level":{"side":"sell","price":"99249.148734350595792","amount":"0.00040186411795044989258","level":4}}

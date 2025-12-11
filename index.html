@@ -624,6 +624,8 @@
                         <h6 class="text-uppercase fw-bold mb-0"
                             style="letter-spacing: 1px; font-size: 0.75rem; color: #7c7cff;">
                             <i class="fas fa-warehouse me-2"></i>Inventory (FIFO)
+                            <i class="fas fa-info-circle ms-1 text-muted" style="cursor: help; opacity: 0.7;"
+                                title="First-In, First-Out: Oldest inventory is sold first."></i>
                         </h6>
                         <span class="badge bg-dark text-muted border border-secondary" style="font-size: 0.65rem;"
                             id="inventory-count">0 LOTS</span>
@@ -634,11 +636,11 @@
                             <thead>
                                 <tr class="text-secondary text-uppercase"
                                     style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <th class="ps-2" style="width: 30px;">#</th>
-                                    <th>Entry Price</th>
-                                    <th class="text-end">BTC Remaining</th>
-                                    <th class="text-end">Value (USDT)</th>
-                                    <th class="text-center pe-2">Status</th>
+                                    <th class="text-center" style="width: 40px; min-width: 40px;">#</th>
+                                    <th class="text-end" style="min-width: 100px;">Entry Price</th>
+                                    <th class="text-end" style="min-width: 120px;">BTC Remaining</th>
+                                    <th class="text-end" style="min-width: 100px;">Value (USDT)</th>
+                                    <th class="text-center" style="min-width: 60px;">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="inventory-log-body">

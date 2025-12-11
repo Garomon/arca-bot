@@ -708,7 +708,7 @@ socket.on('inventory_update', (inventory) => {
 
     if (countBadge) countBadge.innerText = `${inventory.length} LOTS`;
 
-    const currentPrice = parseFloat(document.getElementById('current-price')?.innerText?.replace(/[^0-9.]/g, '')) || 0;
+    const currentPrice = parseFloat(document.getElementById('price-display')?.innerText?.replace(/[^0-9.]/g, '')) || 0;
 
     tbody.innerHTML = inventory.map((lot, idx) => {
         const remaining = lot.remaining !== undefined ? lot.remaining : lot.amount;
@@ -719,11 +719,11 @@ socket.on('inventory_update', (inventory) => {
 
         return `
             <tr style="background: rgba(100,100,200,0.05);">
-                <td class="ps-2">${idx + 1}</td>
-                <td style="${pnlClass}">$${lot.price.toFixed(2)}</td>
+                <td class="text-center">${idx + 1}</td>
+                <td class="text-end" style="${pnlClass}">$${lot.price.toFixed(2)}</td>
                 <td class="text-end">${remaining.toFixed(6)}</td>
                 <td class="text-end">$${value.toFixed(2)}</td>
-                <td class="text-center pe-2">${statusIcon}</td>
+                <td class="text-center">${statusIcon}</td>
             </tr>
         `;
     }).join('');
