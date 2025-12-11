@@ -371,6 +371,7 @@ module.exports = {
     allocateCapital,
 
     // Phase 4
+    calculateOptimalGridSpacing,
     calculatePerformanceMetrics,
     resilientAPICall,
     isOrderWorthPlacing

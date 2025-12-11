@@ -2228,6 +2228,11 @@ async function checkGridHealth(analysis, regime, multiTF) {
         }
     }
 
+    // Calculate Grid Range
+    const prices = state.activeOrders.map(o => o.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
     const lowerBound = minPrice * (1 - driftTolerance);
     const upperBound = maxPrice * (1 + driftTolerance);
 
