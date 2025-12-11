@@ -14,6 +14,7 @@ const path = require('path');
 require('dotenv').config();
 const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
+require('./crash_handler'); // Black Box Recorder
 
 // --- DYNAMIC CONFIGURATION (Multi-Pair Support) ---
 const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
@@ -34,7 +35,8 @@ const PAIR_PRESETS = {
         spacingHigh: 0.007,
         spacingLow: 0.003,
         bandwidthHigh: 0.04,
-        bandwidthLow: 0.015
+        bandwidthLow: 0.015,
+        healthCheckThreshold: 0.02 // 2% Drift Tolerance for BTC
     },
     'SOL/USDT': {
         minOrderSize: 0.01,      // SOL has larger min
@@ -43,7 +45,8 @@ const PAIR_PRESETS = {
         spacingHigh: 0.015,      // 1.5% in high vol
         spacingLow: 0.006,       // 0.6% in low vol
         bandwidthHigh: 0.08,     // SOL swings harder (tuned to prevent flicker)
-        bandwidthLow: 0.02
+        bandwidthLow: 0.02,
+        healthCheckThreshold: 0.06 // 6% Drift Tolerance for SOL (Prevent Loop)
     },
     'ETH/BTC': {
         minOrderSize: 0.001,
@@ -52,7 +55,8 @@ const PAIR_PRESETS = {
         spacingHigh: 0.010,
         spacingLow: 0.004,
         bandwidthHigh: 0.05,
-        bandwidthLow: 0.015
+        bandwidthLow: 0.015,
+        healthCheckThreshold: 0.03
     }
 };
 
@@ -77,6 +81,7 @@ const CONFIG = {
     spacingLow: pairPreset.spacingLow,
     bandwidthHigh: pairPreset.bandwidthHigh,
     bandwidthLow: pairPreset.bandwidthLow,
+    healthCheckThreshold: pairPreset.healthCheckThreshold || 0.02, // Default 2%
 
     // AGGRESSIVE RSI (enter earlier)
     rsiOverbought: 65,
@@ -644,16 +649,16 @@ async function placeOrder(level) {
         }
     } else if (level.side === 'sell') {
         const balance = await binance.fetchBalance();
-        const availableBTC = balance.BTC ? balance.BTC.free : 0;
+        const availableBase = balance[BASE_ASSET] ? balance[BASE_ASSET].free : 0;
 
-        if (availableBTC < amount) {
+        if (availableBase < amount) {
             // FIX: Sell Partial Amount if we have enough for a minimum order
-            const estimatedValue = availableBTC * price;
+            const estimatedValue = availableBase * price;
             if (estimatedValue > 6) { // Min order usually $5, using $6 for safety
-                log('SMART', `Insufficient for full order, but selling available: ${availableBTC.toFixed(6)} BTC`, 'info');
-                amount = availableBTC * 0.99; // 99% of available to avoid rounding errors
+                log('SMART', `Insufficient for full order, but selling available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'info');
+                amount = availableBase * 0.99; // 99% of available to avoid rounding errors
             } else {
-                log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBTC.toFixed(6)} BTC`, 'warning');
+                log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'warning');
                 log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
                 return; // EXIT GRACEFULLY
             }
@@ -703,7 +708,7 @@ async function placeOrder(level) {
             `ORDER_PLACED_${level.side.toUpperCase()}`,
             [
                 `Price: $${price.toFixed(2)}`,
-                `Amount: ${amount.toFixed(6)} BTC`,
+                `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
                 `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
                 `Regime: ${state.marketRegime || 'Unknown'}`
             ],
@@ -2019,11 +2024,13 @@ async function checkGridHealth() {
     const maxPrice = Math.max(...prices);
 
     // Thresholds: If price is outside grid by threshold %, reset
-    const lowerBound = minPrice * (1 - CONFIG.healthCheckThreshold);
-    const upperBound = maxPrice * (1 + CONFIG.healthCheckThreshold);
+    // Use Pair-Specific Threshold with fallback
+    const driftTolerance = CONFIG.healthCheckThreshold || 0.02;
+    const lowerBound = minPrice * (1 - driftTolerance);
+    const upperBound = maxPrice * (1 + driftTolerance);
 
     if (currentPrice < lowerBound || currentPrice > upperBound) {
-        log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)}). REBALANCING...`, 'error');
+        log('WARN', `PRICE DRIFT DETECTED ($${currentPrice.toFixed(2)} vs Range $${minPrice.toFixed(2)}-$${maxPrice.toFixed(2)}). REBALANCING...`, 'error');
         await initializeGrid(true); // Force Reset
     }
 }
