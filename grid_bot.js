@@ -672,6 +672,11 @@ async function initializeGrid(forceReset = false) {
 
         CONFIG.gridSpacing = Math.max(0.001, Math.min(0.03, atrPercent * atrMultiplier)); // Allow up to 3% spacing
         log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${atrMultiplier})`, 'info');
+
+        // IMMEDIATE TOLERANCE LOG (Visible on Startup)
+        const tolMult = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
+        const driftTol = CONFIG.gridSpacing * tolMult;
+        log('TOLERANCE', `Grid: ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Drift Tol: ${(driftTol * 100).toFixed(2)}% (${tolMult}x) | Status: ACTIVE`, 'success');
     }
 
     // PHASE 3: Use allocateCapital for smarter distribution
