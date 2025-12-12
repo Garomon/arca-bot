@@ -1,7 +1,91 @@
 /**
- * ADAPTIVE HELPERS - Phases 2, 3, 4
+ * ADAPTIVE HELPERS - Phases 2, 3, 4 & GEO-MACRO
  * Helper functions for fully adaptive bot intelligence
  */
+
+// --- GEOPOLITICAL & MACRO CONTEXT (Dec 2025) ---
+const GEOPOLITICAL_EVENTS = [
+    {
+        name: 'BoJ Policy Meeting',
+        date: '2025-12-19',
+        impact: 'HIGH',
+        type: 'LIQUIDITY_SHOCK',
+        sentiment: 'BEARISH',
+        description: 'Bank of Japan potentially hiking rates. Market risk: Capital repatriation (Yen carry trade unwind).'
+    }
+];
+
+const MACRO_PRICE_ZONES = {
+    'BTC/USDT': {
+        buyDip: { min: 70000, max: 75000, sentiment: 'STRONG_BUY_DIP' },
+        fairValue: { min: 90000, max: 98000, sentiment: 'NEUTRAL' },
+        overextended: { min: 105000, max: 999999, sentiment: 'TAKE_PROFIT' }
+    }
+    // Add other pairs if needed
+};
+
+// HELPER: Check for upcoming high-impact events
+function evaluateGeopoliticalRisk(currentDate = new Date()) {
+    const now = new Date(currentDate);
+    let riskLevel = { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0, scoreBias: 0, activeEvent: null };
+
+    // Check specific scheduled events
+    for (const event of GEOPOLITICAL_EVENTS) {
+        const eventDate = new Date(event.date);
+        const timeDiff = eventDate.getTime() - now.getTime();
+        const daysToEvent = timeDiff / (1000 * 60 * 60 * 24);
+
+        // 1. Pre-Event Anxiety (3 days before)
+        if (daysToEvent > 0 && daysToEvent <= 3) {
+            riskLevel = {
+                status: 'MARKET_ANXIETY',
+                modifier: 'DEFENSIVE',
+                defenseLevel: 1, // Mild caution (wider stops, small reserve)
+                scoreBias: -5,
+                activeEvent: `${event.name} in ${daysToEvent.toFixed(1)} days`
+            };
+        }
+        // 2. The "Eye of the Storm" (Event Day +/- 12 hours)
+        else if (Math.abs(daysToEvent) < 0.5) {
+            riskLevel = {
+                status: 'HIGH_VOLATILITY_EVENT',
+                modifier: 'PROTECTIVE',
+                defenseLevel: 2, // Maximum defense (halt buys, tight stops)
+                scoreBias: -15,
+                activeEvent: `${event.name} TODAY`
+            };
+        }
+    }
+
+    return riskLevel;
+}
+
+// HELPER: Check if we are in a specific macro accumulation/distribution zone
+function evaluateMacroSentiment(pair, currentPrice) {
+    if (!MACRO_PRICE_ZONES[pair]) return null;
+
+    const zones = MACRO_PRICE_ZONES[pair];
+
+    if (currentPrice >= zones.buyDip.min && currentPrice <= zones.buyDip.max) {
+        return {
+            zone: 'BUY_DIP',
+            sentiment: 'STRONG_BUY',
+            scoreBonus: 20, // Significant boost to buy signals
+            advice: 'Accumulate aggressively (Institutional Zone)'
+        };
+    }
+
+    if (currentPrice >= zones.overextended.min) {
+        return {
+            zone: 'OVEREXTENDED',
+            sentiment: 'SELL',
+            scoreBonus: -10,
+            advice: 'Take profits, reduced exposure'
+        };
+    }
+
+    return { zone: 'NEUTRAL', sentiment: 'NEUTRAL', scoreBonus: 0, advice: 'Trade ranges' };
+}
 
 // PHASE 2: Dynamic Grid Count
 function calculateOptimalGridCount(capital, volatility) {
@@ -375,5 +459,9 @@ module.exports = {
     calculateOptimalGridSpacing,
     calculatePerformanceMetrics,
     resilientAPICall,
-    isOrderWorthPlacing
+    isOrderWorthPlacing,
+
+    // Geo & Macro
+    evaluateGeopoliticalRisk,
+    evaluateMacroSentiment
 };

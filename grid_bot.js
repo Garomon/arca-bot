@@ -619,7 +619,7 @@ async function initializeGrid(forceReset = false) {
     // PHASE 2.5: ATR GRID SPACING (Dynamic Volatility Surfing)
     if (analysis && analysis.atr) {
         // --- GEOPOLITICAL CHECK ---
-        const geoContext = checkGeopoliticalContext();
+        const geoContext = checkGeopoliticalContext(regime.regime, price);
         if (geoContext.status === 'MIDTERM_RISK') {
             log('GEO', `Midterm Risk Detected. Expanding Grid Spacing (Defense Mode)`, 'warning');
         }
@@ -647,7 +647,7 @@ async function initializeGrid(forceReset = false) {
     let allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
 
     // --- GEOPOLITICAL RESERVE OVERRIDE ---
-    const geoContext = checkGeopoliticalContext(); // Re-check for reserve allocation
+    const geoContext = checkGeopoliticalContext(regime.regime, price); // Re-check for reserve allocation
     if (geoContext.status === 'MIDTERM_RISK') {
         const defensiveReserve = dynamicCapital * 0.25; // 25% Reserve
         if (allocation.reserve < defensiveReserve) {
@@ -1032,7 +1032,8 @@ async function runMonitorLoop(myId) {
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
                 pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
-                geoContext: checkGeopoliticalContext(state.marketRegime),
+                pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
+                geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price),
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
                 signalScore: state.marketCondition.signalScore,
                 regime: state.marketRegime,
@@ -1490,24 +1491,47 @@ function checkMarketTiming() {
     };
 }
 
-// GEOPOLITICAL CONTEXT (Dynamic Adaptation)
-function checkGeopoliticalContext(currentRegime = 'NEUTRAL') {
-    // FEAT: REMOVED HARDCODED DATES (Time Bomb)
-    // Now purely reactive to Market Structure.
+// GEOPOLITICAL & MACRO CONTEXT (Dynamic Adaptation)
+function checkGeopoliticalContext(currentRegime = 'NEUTRAL', currentPrice = 0) {
+    // 1. Check Specific Scheduled Events (e.g. BoJ Dec 19)
+    const eventRisk = adaptiveHelpers.evaluateGeopoliticalRisk(new Date());
 
-    // If Market is in STRONG BEAR trend, we assume "Fear/Risk" context.
-    // This allows the bot to auto-defend during any crash, not just predicted ones.
+    // 2. Check Macro Price Zones (e.g. BTC Buy Dip)
+    // pass CONFIG.pair to helper
+    const macroSentiment = adaptiveHelpers.evaluateMacroSentiment(CONFIG.pair, currentPrice);
+
+    // 3. Market Structure Override (The "Trend is King" Rule)
+    // If Market is in STRONG BEAR trend, we assume "Fear/Risk" context regardless of news.
+    let structureRisk = { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0 };
     if (currentRegime === 'STRONG_BEAR' || currentRegime === 'BEAR') {
-        return {
+        structureRisk = {
             status: 'MARKET_FEAR',
             modifier: 'DEFENSIVE',
-            defenseLevel: 1,
-            scoreBias: -5 // Penalty for fighting the trend
+            defenseLevel: 1
         };
     }
 
-    // Normal Conditions
-    return { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0, scoreBias: 0 };
+    // Combine Risks (Max Defense Wins)
+    const defenseLevel = Math.max(eventRisk.defenseLevel, structureRisk.defenseLevel);
+    let finalStatus = structureRisk.status;
+    let finalModifier = structureRisk.modifier;
+    let activeMessage = null;
+
+    if (eventRisk.defenseLevel > structureRisk.defenseLevel) {
+        finalStatus = eventRisk.status;
+        finalModifier = eventRisk.modifier;
+        activeMessage = eventRisk.activeEvent;
+    }
+
+    return {
+        status: finalStatus,
+        modifier: finalModifier,
+        defenseLevel: defenseLevel,
+        scoreBias: (eventRisk.scoreBias || 0) + (macroSentiment?.scoreBonus || 0), // Combine event fear (-) and macro value (+)
+        activeEvent: activeMessage,
+        macroZone: macroSentiment?.zone || 'NEUTRAL',
+        macroAdvice: macroSentiment?.advice || null
+    };
 }
 
 // ORDER BOOK PRESSURE (Binance Spot)
@@ -1683,8 +1707,8 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
         reasons.push('Sell Pressure (-5)');
     }
 
-    // === GEOPOLITICAL CONTEXT (Corrected \u0026 Adaptive) ===
-    const geo = checkGeopoliticalContext(regime.regime || 'NEUTRAL');
+    // === GEOPOLITICAL CONTEXT (Corrected & Adaptive) ===
+    const geo = checkGeopoliticalContext(regime.regime || 'NEUTRAL', analysis.price);
     if (geo.scoreBias !== 0) {
         score += geo.scoreBias;
         reasons.push(`${geo.status} (${geo.scoreBias > 0 ? '+' : ''}${geo.scoreBias})`);
