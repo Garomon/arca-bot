@@ -229,17 +229,36 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
         }
     } else if (sellOrders.length === 0) {
         // If we have inventory but no sell orders, something is wrong -> Rebalance
-        // UNLESS we are in "HODL Mode" (insufficient for min order size), which grid_bot handles.
-        // So we only trigger if we *could* sell but aren't.
-        if (hasInventory) {
+        // UNLESS we are in "HODL Mode" (Propfit Guard blocking sells)
+
+        // Calculate Average Entry Price
+        let avgEntryPrice = 0;
+        if (state.inventory && state.inventory.length > 0) {
+            const totalCost = state.inventory.reduce((sum, lot) => sum + (lot.price * lot.remaining), 0);
+            const totalAmount = state.inventory.reduce((sum, lot) => sum + lot.remaining, 0);
+            if (totalAmount > 0) avgEntryPrice = totalCost / totalAmount;
+        }
+
+        // INTELLIGENT EXCEPTION: If Current Price < Avg Entry, we EXPECT no sells (Profit Guard).
+        // Only trigger imbalance if price is ABOVE entry but we still have no sells.
+        const isHostingBag = avgEntryPrice > 0 && state.currentPrice < avgEntryPrice;
+
+        if (hasInventory && !isHostingBag) {
             triggers.push('IMBALANCE_NO_SELLS');
         }
     }
 
     // 5. Multi-timeframe divergence (low confidence) - Stale Grid Check
     if (multiTF.confidence === 'LOW') {
-        const hoursSinceLastFill = (Date.now() - (state.lastFillTime || Date.now())) / (1000 * 60 * 60);
-        if (hoursSinceLastFill > 24) {
+        const lastFillTime = state.lastFillTime || Date.now();
+        const lastRebalanceTime = state.lastRebalance?.timestamp || 0;
+
+        // Use the LATEST activity (Fill OR Reset)
+        const lastActivityTime = Math.max(lastFillTime, lastRebalanceTime);
+        const hoursSinceActivity = (Date.now() - lastActivityTime) / (1000 * 60 * 60);
+
+        // Only trigger if truly stale (> 24h since ANY activity)
+        if (hoursSinceActivity > 24) {
             triggers.push('STALE_GRID');
         }
     }
