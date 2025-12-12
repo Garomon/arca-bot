@@ -364,7 +364,10 @@ async function reconcileInventoryWithExchange() {
     try {
         const balance = await binance.fetchBalance();
         const baseAsset = CONFIG.pair.split('/')[0];
-        const realBalance = parseFloat(balance[baseAsset]?.free || 0);
+        // CRITICAL FIX: Use TOTAL balance (Free + Used/Locked). 
+        // Logic: Inventory includes lots currently sitting in open Sell Orders.
+        // Using .free caused inventory to vanish when orders were active!
+        const realBalance = parseFloat(balance[baseAsset]?.total || 0);
 
         // 1. Fetch History (Newest First)
         // We only fetch enough to verify the balance. 100 trades is safe.
