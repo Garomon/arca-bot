@@ -6,12 +6,22 @@
 // --- GEOPOLITICAL & MACRO CONTEXT (Dec 2025) ---
 const GEOPOLITICAL_EVENTS = [
     {
+        name: 'MANUAL_INTEL: Tech Dump & Vzla Tension',
+        date: '2025-12-13',
+        duration: 2, // 48 Hours of Caution
+        impact: 'HIGH',
+        type: 'MANUAL_INJECTION',
+        sentiment: 'BEARISH',
+        description: 'Oracle/Broadcom Crash + Venezuela "War" Rhetoric. Risk-Off sentiment.'
+    },
+    {
         name: 'BoJ Policy Meeting',
         date: '2025-12-19',
+        duration: 1,
         impact: 'HIGH',
         type: 'LIQUIDITY_SHOCK',
         sentiment: 'BEARISH',
-        description: 'Bank of Japan potentially hiking rates. Market risk: Capital repatriation (Yen carry trade unwind).'
+        description: 'Bank of Japan potentially hiking rates. Market risk: Capital repatriation.'
     }
 ];
 
@@ -32,11 +42,17 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
     // Check specific scheduled events
     for (const event of GEOPOLITICAL_EVENTS) {
         const eventDate = new Date(event.date);
+        const eventEnd = new Date(eventDate);
+        eventEnd.setDate(eventDate.getDate() + (event.duration || 1)); // Default 1 day
+
         const timeDiff = eventDate.getTime() - now.getTime();
         const daysToEvent = timeDiff / (1000 * 60 * 60 * 24);
 
+        // Check if we are literally INSIDE the event window (Start <= Now <= End)
+        const isDuringEvent = now >= eventDate && now <= eventEnd;
+
         // 1. Pre-Event Anxiety (3 days before)
-        if (daysToEvent > 0 && daysToEvent <= 3) {
+        if (!isDuringEvent && daysToEvent > 0 && daysToEvent <= 3) {
             riskLevel = {
                 status: 'MARKET_ANXIETY',
                 modifier: 'DEFENSIVE',
@@ -45,14 +61,14 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
                 activeEvent: `${event.name} in ${daysToEvent.toFixed(1)} days`
             };
         }
-        // 2. The "Eye of the Storm" (Event Day +/- 12 hours)
-        else if (Math.abs(daysToEvent) < 0.5) {
+        // 2. ACTIVE EVENT (During the window)
+        else if (isDuringEvent) {
             riskLevel = {
                 status: 'HIGH_VOLATILITY_EVENT',
                 modifier: 'PROTECTIVE',
                 defenseLevel: 2, // Maximum defense (halt buys, tight stops)
                 scoreBias: -15,
-                activeEvent: `${event.name} TODAY`
+                activeEvent: `${event.name} ACTIVE NOW`
             };
         }
     }
