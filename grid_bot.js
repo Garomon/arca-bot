@@ -1875,7 +1875,7 @@ async function checkStopLoss() {
         // Emergency stop at -10% (only if truly in significant loss)
         if (drawdown > 10 && allocatedEquity < state.initialCapital * 0.9) {
             log('EMERGENCY', '🚨 STOP-LOSS TRIGGERED @ -10% DRAWDOWN', 'error');
-            log('EMERGENCY', `Initial: $${state.initialCapital.toFixed(2)} | Current: $${totalEquity.toFixed(2)}`, 'error');
+            log('EMERGENCY', `Initial: $${state.initialCapital.toFixed(2)} | Current: $${allocatedEquity.toFixed(2)}`, 'error');
 
             // Cancel all orders
             await cancelAllOrders();
