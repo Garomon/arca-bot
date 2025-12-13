@@ -892,7 +892,8 @@ async function initializeGrid(forceReset = false) {
                     const avgEntryPrice = totalCostBasis / coveredAmount;
                     const breakEvenPrice = avgEntryPrice * (1 + (CONFIG.tradingFee * 2)); // Add fees for entry + exit
 
-                    if (price < breakEvenPrice) {
+                    // PROFIT GUARD: DISABLED for Grid Cycling (Allow local winners even if below avg entry)
+                    if (false && price < breakEvenPrice) {
                         log('PROFIT_GUARD', `🛑 BLOCKED SELL @ $${price.toFixed(2)}. Avg Entry: $${avgEntryPrice.toFixed(2)} (Break-Even: $${breakEvenPrice.toFixed(2)})`, 'warning');
                         logDecision('BLOCKED_BY_PROFIT_GUARD', [`Price below Break-Even ($${breakEvenPrice.toFixed(2)})`, 'Preserving Capital'], { level });
                         return;

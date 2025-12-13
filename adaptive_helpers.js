@@ -222,8 +222,16 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
     // 2. Volatility regime change
     // FIX: use state.volatilityRegime, as 'analysis' does not contain discrete volatility label
     const currentVol = state.volatilityRegime || 'NORMAL';
+
+    // COOLDOWN CHECK: Don't trigger if we just rebalanced due to volatility
+    const lastRebalanceTime = state.lastRebalance && state.lastRebalance.timestamp ? state.lastRebalance.timestamp : 0;
+    const cooldownMs = 20 * 60 * 1000; // 20 min cooldown (matches grid_bot.js)
+    const timeSinceReset = Date.now() - lastRebalanceTime;
+
     if (state.lastVolatility && state.lastVolatility !== currentVol) {
-        triggers.push(`VOLATILITY_SHIFT (${state.lastVolatility} -> ${currentVol})`);
+        if (timeSinceReset > cooldownMs) {
+            triggers.push(`VOLATILITY_SHIFT (${state.lastVolatility} -> ${currentVol})`);
+        }
     }
 
     // 3. Market regime change
