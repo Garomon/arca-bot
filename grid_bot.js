@@ -800,149 +800,151 @@ async function initializeGrid(forceReset = false) {
         monitorOrders();
     }
 
-    async function placeOrder(level) {
-        // Circuit Breaker
-        if (state.activeOrders.length >= CONFIG.maxOpenOrders) {
-            console.warn('>> [WARN] MAX ORDERS REACHED. SKIPPING.');
+    // [ মু placeOrder MOVED TO GLOBAL SCOPE ]
+} // End of initializeGrid loop
+
+async function placeOrder(level) {
+    // Circuit Breaker
+    if (state.activeOrders.length >= CONFIG.maxOpenOrders) {
+        console.warn('>> [WARN] MAX ORDERS REACHED. SKIPPING.');
+        return;
+    }
+
+    const price = new Decimal(level.price).toNumber();
+    let amount = new Decimal(level.amount).toNumber();
+
+    // PHASE 4: Fee Optimization - Skip unprofitable orders
+    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, state.currentPrice, CONFIG.tradingFee);
+    if (!worthCheck.worth) {
+        log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
+        return;
+    }
+
+    // PHASE 4.5: WALL PROTECTION (Order Book Intelligence)
+    try {
+        const pressure = await fetchOrderBookPressure();
+        // Don't BUY if there is a massive SELL WALL (Ratio < 0.15)
+        if (level.side === 'buy' && pressure.ratio < 0.15) {
+            log('SMART', `🧱 MASSIVE SELL WALL (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
+            logDecision('BLOCKED_BY_WALL', [`Sell Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for resistance to clear'], { level });
             return;
         }
-
-        const price = new Decimal(level.price).toNumber();
-        let amount = new Decimal(level.amount).toNumber();
-
-        // PHASE 4: Fee Optimization - Skip unprofitable orders
-        const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, state.currentPrice, CONFIG.tradingFee);
-        if (!worthCheck.worth) {
-            log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
+        // Don't SELL if there is a massive BUY WALL (Ratio > 3.0)
+        if (level.side === 'sell' && pressure.ratio > 3.0) {
+            log('SMART', `🚀 BUY WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying SELL (Price might rise).`, 'warning');
+            logDecision('BLOCKED_BY_WALL', [`Buy Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for price rise'], { level });
             return;
         }
+    } catch (e) {
+        console.log('Wall check skipped');
+    }
 
-        // PHASE 4.5: WALL PROTECTION (Order Book Intelligence)
-        try {
-            const pressure = await fetchOrderBookPressure();
-            // Don't BUY if there is a massive SELL WALL (Ratio < 0.15)
-            if (level.side === 'buy' && pressure.ratio < 0.15) {
-                log('SMART', `🧱 MASSIVE SELL WALL (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
-                logDecision('BLOCKED_BY_WALL', [`Sell Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for resistance to clear'], { level });
-                return;
-            }
-            // Don't SELL if there is a massive BUY WALL (Ratio > 3.0)
-            if (level.side === 'sell' && pressure.ratio > 3.0) {
-                log('SMART', `🚀 BUY WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying SELL (Price might rise).`, 'warning');
-                logDecision('BLOCKED_BY_WALL', [`Buy Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for price rise'], { level });
-                return;
-            }
-        } catch (e) {
-            console.log('Wall check skipped');
+    // PRECISION ENFORCEMENT
+    try {
+        amount = binance.amountToPrecision(CONFIG.pair, amount);
+        // Ensure it's a number for math later
+        amount = parseFloat(amount);
+    } catch (e) {
+        console.warn('>> [WARN] Could not enforce precision:', e.message);
+    }
+
+    // PHASE 5: SMART BALANCE CHECK (New Intelligence)
+    if (level.side === 'buy') {
+        const balance = await binance.fetchBalance();
+        const availableUSDT = balance.USDT ? balance.USDT.free : 0;
+        const requiredUSDT = amount * price;
+
+        if (availableUSDT < requiredUSDT) {
+            log('SMART', `INSUFFICIENT FUNDS for BUY. Available: $${availableUSDT.toFixed(2)}, Req: $${requiredUSDT.toFixed(2)}`, 'warning');
+            log('DECISION', 'HOLDING (Waiting for liquidity or sells)', 'info');
+            return; // EXIT GRACEFULLY - DO NOT ERROR
         }
+    } else if (level.side === 'sell') {
+        const balance = await binance.fetchBalance();
+        const availableBase = balance[BASE_ASSET] ? balance[BASE_ASSET].free : 0;
 
-        // PRECISION ENFORCEMENT
-        try {
-            amount = binance.amountToPrecision(CONFIG.pair, amount);
-            // Ensure it's a number for math later
-            amount = parseFloat(amount);
-        } catch (e) {
-            console.warn('>> [WARN] Could not enforce precision:', e.message);
-        }
-
-        // PHASE 5: SMART BALANCE CHECK (New Intelligence)
-        if (level.side === 'buy') {
-            const balance = await binance.fetchBalance();
-            const availableUSDT = balance.USDT ? balance.USDT.free : 0;
-            const requiredUSDT = amount * price;
-
-            if (availableUSDT < requiredUSDT) {
-                log('SMART', `INSUFFICIENT FUNDS for BUY. Available: $${availableUSDT.toFixed(2)}, Req: $${requiredUSDT.toFixed(2)}`, 'warning');
-                log('DECISION', 'HOLDING (Waiting for liquidity or sells)', 'info');
-                return; // EXIT GRACEFULLY - DO NOT ERROR
-            }
-        } else if (level.side === 'sell') {
-            const balance = await binance.fetchBalance();
-            const availableBase = balance[BASE_ASSET] ? balance[BASE_ASSET].free : 0;
-
-            if (availableBase < amount) {
-                // FIX: Sell Partial Amount if we have enough for a minimum order
-                const estimatedValue = availableBase * price;
-                if (estimatedValue > 6) { // Min order usually $5, using $6 for safety
-                    log('SMART', `Insufficient for full order, but selling available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'info');
-                    amount = availableBase * 0.99; // 99% of available to avoid rounding errors
-                } else {
-                    log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'warning');
-                    log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
-                    return; // EXIT GRACEFULLY
-                }
-            }
-
-            // === PROFIT GUARD (Check Inventory Cost Basis) ===
-            if (state.inventory && state.inventory.length > 0) {
-                let remainingToSell = amount;
-                let totalCostBasis = 0;
-                let coveredAmount = 0;
-
-                // Simulate FIFO consumption
-                for (const lot of state.inventory) {
-                    if (remainingToSell <= 0) break;
-                    const take = Math.min(remainingToSell, lot.remaining || lot.amount); // Use remaining for partial lots
-                    totalCostBasis += (take * lot.price);
-                    coveredAmount += take;
-                    remainingToSell -= take;
-                }
-
-                if (coveredAmount > 0) {
-                    const avgEntryPrice = totalCostBasis / coveredAmount;
-                    const breakEvenPrice = avgEntryPrice * (1 + (CONFIG.tradingFee * 2)); // Add fees for entry + exit
-
-                    // PROFIT GUARD: DISABLED for Grid Cycling (Allow local winners even if below avg entry)
-                    if (false && price < breakEvenPrice) {
-                        log('PROFIT_GUARD', `🛑 BLOCKED SELL @ $${price.toFixed(2)}. Avg Entry: $${avgEntryPrice.toFixed(2)} (Break-Even: $${breakEvenPrice.toFixed(2)})`, 'warning');
-                        logDecision('BLOCKED_BY_PROFIT_GUARD', [`Price below Break-Even ($${breakEvenPrice.toFixed(2)})`, 'Preserving Capital'], { level });
-                        return;
-                    }
-                }
+        if (availableBase < amount) {
+            // FIX: Sell Partial Amount if we have enough for a minimum order
+            const estimatedValue = availableBase * price;
+            if (estimatedValue > 6) { // Min order usually $5, using $6 for safety
+                log('SMART', `Insufficient for full order, but selling available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'info');
+                amount = availableBase * 0.99; // 99% of available to avoid rounding errors
+            } else {
+                log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'warning');
+                log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
+                return; // EXIT GRACEFULLY
             }
         }
 
-        try {
-            let order;
-            // LIVE - Using resilient API call with retries
-            order = await adaptiveHelpers.resilientAPICall(
-                () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price),
-                3,
-                `Place ${level.side} order`
-            );
+        // === PROFIT GUARD (Check Inventory Cost Basis) ===
+        if (state.inventory && state.inventory.length > 0) {
+            let remainingToSell = amount;
+            let totalCostBasis = 0;
+            let coveredAmount = 0;
 
-            // Log with full transparency
-            log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} @ $${price.toFixed(2)}`, 'success');
-            logActivity('PLACING_ORDER');
-            logDecision(
-                `ORDER_PLACED_${level.side.toUpperCase()}`,
-                [
-                    `Price: $${price.toFixed(2)}`,
-                    `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
-                    `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
-                    `Regime: ${state.marketRegime || 'Unknown'}`
-                ],
-                { orderId: order.id, level: level.level, worthCheck: worthCheck }
-            );
+            // Simulate FIFO consumption
+            for (const lot of state.inventory) {
+                if (remainingToSell <= 0) break;
+                const take = Math.min(remainingToSell, lot.remaining || lot.amount); // Use remaining for partial lots
+                totalCostBasis += (take * lot.price);
+                coveredAmount += take;
+                remainingToSell -= take;
+            }
 
-            state.activeOrders.push({
-                id: order.id,
-                side: level.side,
-                price: price,
-                amount: amount,
-                level: level.level,
-                status: 'open',
-                timestamp: Date.now(),
-                spacing: CONFIG.gridSpacing // Phase 2 Audit: Track spacing per order
-            });
-            saveState();
+            if (coveredAmount > 0) {
+                const avgEntryPrice = totalCostBasis / coveredAmount;
+                const breakEvenPrice = avgEntryPrice * (1 + (CONFIG.tradingFee * 2)); // Add fees for entry + exit
 
-        } catch (e) {
-            log('ERROR', `Order Placement Failed: ${e.message}`, 'error');
-            logDecision('ORDER_FAILED', [e.message], { level });
+                // PROFIT GUARD: DISABLED for Grid Cycling (Allow local winners even if below avg entry)
+                if (false && price < breakEvenPrice) {
+                    log('PROFIT_GUARD', `🛑 BLOCKED SELL @ $${price.toFixed(2)}. Avg Entry: $${avgEntryPrice.toFixed(2)} (Break-Even: $${breakEvenPrice.toFixed(2)})`, 'warning');
+                    logDecision('BLOCKED_BY_PROFIT_GUARD', [`Price below Break-Even ($${breakEvenPrice.toFixed(2)})`, 'Preserving Capital'], { level });
+                    return;
+                }
+            }
         }
     }
-} // End of initializeGrid loop
+
+    try {
+        let order;
+        // LIVE - Using resilient API call with retries
+        order = await adaptiveHelpers.resilientAPICall(
+            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price),
+            3,
+            `Place ${level.side} order`
+        );
+
+        // Log with full transparency
+        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} @ $${price.toFixed(2)}`, 'success');
+        logActivity('PLACING_ORDER');
+        logDecision(
+            `ORDER_PLACED_${level.side.toUpperCase()}`,
+            [
+                `Price: $${price.toFixed(2)}`,
+                `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
+                `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
+                `Regime: ${state.marketRegime || 'Unknown'}`
+            ],
+            { orderId: order.id, level: level.level, worthCheck: worthCheck }
+        );
+
+        state.activeOrders.push({
+            id: order.id,
+            side: level.side,
+            price: price,
+            amount: amount,
+            level: level.level,
+            status: 'open',
+            timestamp: Date.now(),
+            spacing: CONFIG.gridSpacing // Phase 2 Audit: Track spacing per order
+        });
+        saveState();
+
+    } catch (e) {
+        log('ERROR', `Order Placement Failed: ${e.message}`, 'error');
+        logDecision('ORDER_FAILED', [e.message], { level });
+    }
+}
 
 
 async function cancelAllOrders() {
@@ -1332,7 +1334,7 @@ async function getMarketAnalysis(timeframe = '1h') {
 async function detectMarketRegime() {
     try {
         // Get multiple EMAs for trend analysis
-        const candles = await binance.fetchOHLCV(CONFIG.pair, '1h', undefined, 200);
+        const candles = await getCachedCandles('1h', 200);
         const closes = candles.map(c => c[4]);
 
         // EMA 50 and EMA 200
@@ -1476,7 +1478,9 @@ async function fetchFundingRate() {
     }
 
     try {
-        const response = await fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1');
+        // FIX: Use dynamic pair ID (remove slash)
+        const symbol = CONFIG.pair.replace('/', '');
+        const response = await fetch(`https://fapi.binance.com/fapi/v1/fundingRate?symbol=${symbol}&limit=1`);
         if (response.ok) {
             const data = await response.json();
             const rate = parseFloat(data[0].fundingRate) * 100; // Convert to percentage

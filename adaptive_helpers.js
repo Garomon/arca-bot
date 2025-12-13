@@ -339,16 +339,6 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopolitical
     };
 }
 
-module.exports = {
-    calculateOptimalGridCount,
-    getAdaptiveRSI,
-    getAdaptiveSafetyMargin,
-    calculateOptimalOrderSizes,
-    shouldRebalance,
-    getAdaptiveIndicatorPeriods,
-    calculateOptimalGridSpacing
-};
-
 // PHASE 3: Profit-Taking Strategy
 function manageProfitTaking(totalProfit, initialCapital, state) {
     const profitPercent = (totalProfit / initialCapital) * 100;
