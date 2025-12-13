@@ -1630,21 +1630,19 @@ async function fetchOpenInterest() {
             return { current: 0, change: 0, signal: 'STABLE', timestamp: Date.now() };
         }
 
-        const data = await response.json(); {
-            const data = await response.json();
-            const currentOI = parseFloat(data.openInterest);
-            const previousOI = externalDataCache.openInterest.value?.current || currentOI;
-            const change = ((currentOI - previousOI) / previousOI) * 100;
+        const data = await response.json();
+        const currentOI = parseFloat(data.openInterest);
+        const previousOI = externalDataCache.openInterest.value?.current || currentOI;
+        const change = ((currentOI - previousOI) / previousOI) * 100;
 
-            const oi = {
-                current: currentOI,
-                change: change,
-                signal: change > 5 ? 'OI_INCREASING' : (change < -5 ? 'OI_DECREASING' : 'STABLE'),
-                timestamp: Date.now()
-            };
-            externalDataCache.openInterest = { value: oi, timestamp: Date.now() };
-            return oi;
-        }
+        const oi = {
+            current: currentOI,
+            change: change,
+            signal: change > 5 ? 'OI_INCREASING' : (change < -5 ? 'OI_DECREASING' : 'STABLE'),
+            timestamp: Date.now()
+        };
+        externalDataCache.openInterest = { value: oi, timestamp: Date.now() };
+        return oi;
     } catch (e) {
         console.error('>> [ERROR] Open Interest fetch failed:', e.message);
     }
