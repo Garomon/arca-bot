@@ -1513,13 +1513,13 @@ async function fetchFearGreedIndex() {
 }
 
 // FUNDING RATE (Binance Futures)
+// FUNDING RATE (Binance Futures)
 async function fetchFundingRate() {
     if (Date.now() - externalDataCache.fundingRate.timestamp < CACHE_TTL) {
         return externalDataCache.fundingRate.value;
     }
 
     try {
-        // FIX: Use dynamic pair ID (remove slash)
         const symbol = CONFIG.pair.replace('/', '');
         const response = await fetch(`https://fapi.binance.com/fapi/v1/fundingRate?symbol=${symbol}&limit=1`);
         if (response.ok) {
@@ -1538,6 +1538,52 @@ async function fetchFundingRate() {
         console.error('>> [ERROR] Funding rate fetch failed:', e.message);
     }
     return { rate: 0, signal: 'NEUTRAL', timestamp: Date.now() };
+}
+
+// OPEN INTEREST CHANGE (Binance Futures)
+async function fetchOpenInterest() {
+    // Cache check (1 minute)
+    if (externalDataCache.openInterest.value && (Date.now() - externalDataCache.openInterest.timestamp < 60000)) {
+        return externalDataCache.openInterest.value;
+    }
+
+    try {
+        const symbol = CONFIG.pair.replace('/', '');
+        // Safety: Only fetch for pairs likely to have futures (BTC, ETH, SOL, etc)
+        const response = await fetch(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${symbol}`);
+
+        if (!response.ok) {
+            // If pair not found on futures, return stable neutral signal
+            return { current: 0, change: 0, signal: 'STABLE', timestamp: Date.now() };
+        }
+
+        const data = await response.json();
+        const currentOI = parseFloat(data.openInterest);
+        const previousOI = externalDataCache.openInterest.value?.current || currentOI;
+
+        // Calculate % change
+        const change = ((currentOI - previousOI) / previousOI) * 100;
+
+        let signal = 'STABLE';
+        if (change > 5) signal = 'RISING_INTEREST'; // Increasing leverage/bets
+        else if (change < -5) signal = 'FALLING_INTEREST'; // Liquidations or closing
+
+        const oiData = {
+            current: currentOI,
+            change: change,
+            signal: signal,
+            timestamp: Date.now()
+        };
+
+        externalDataCache.openInterest = { value: oiData, timestamp: Date.now() };
+        log('INTEL', `Open Interest: ${currentOI.toFixed(2)} (${change > 0 ? '+' : ''}${change.toFixed(2)}%)`, 'info');
+        return oiData;
+
+    } catch (e) {
+        // Silent fail for non-futures pairs
+        // console.error('>> [ERROR] Open Interest fetch failed:', e.message);
+    }
+    return { current: 0, change: 0, signal: 'STABLE', timestamp: Date.now() };
 }
 
 // BTC DOMINANCE (CoinGecko)
@@ -1960,12 +2006,12 @@ async function checkStopLoss() {
         if (drawdown > 10 && allocatedEquity < state.initialCapital * 0.9) {
             log('EMERGENCY', '🚨 STOP-LOSS TRIGGERED @ -10% DRAWDOWN', 'error');
             log('EMERGENCY', `Initial: $${state.initialCapital.toFixed(2)} | Current: $${allocatedEquity.toFixed(2)}`, 'error');
-
+ 
             // Cancel all orders
             await cancelAllOrders();
             state.emergencyStop = true;
             saveState();
-
+ 
             io.emit('emergency_stop', {
                 drawdown,
                 initialCapital: state.initialCapital,
