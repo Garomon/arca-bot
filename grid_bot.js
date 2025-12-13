@@ -140,11 +140,6 @@ console.log(`>> [CONFIG] Grid Spacing: ${(CONFIG.gridSpacing * 100).toFixed(2)}%
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-app.use(express.static(__dirname));
-// Support strict subpath routing (if Nginx doesn't strip prefix)
-app.use('/sol', express.static(__dirname));
-app.use('/eth', express.static(__dirname));
-
 // --- BINANCE CONNECTION ---
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,
@@ -1342,6 +1337,9 @@ async function detectMarketRegime() {
         const ema200 = EMA.calculate({ values: closes, period: 200 });
 
         const currentPrice = closes[closes.length - 1];
+        // CRITICAL FIX: Ensure global state is fresh immediately
+        if (currentPrice) state.currentPrice = currentPrice;
+
         const currentEMA50 = ema50[ema50.length - 1];
         const currentEMA200 = ema200[ema200.length - 1];
 
@@ -2214,7 +2212,7 @@ async function syncWithExchange() {
                 const orderInfo = await binance.fetchOrder(missingOrder.id, CONFIG.pair);
                 if (orderInfo.status === 'closed' || orderInfo.status === 'filled') {
                     log('SYNC', `Order ${missingOrder.id} filled while offline. Processing...`, 'success');
-                    handleOrderFill(missingOrder, orderInfo.price);
+                    await handleOrderFill(missingOrder, orderInfo.price);
                 } else if (orderInfo.status === 'canceled') {
                     log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`, 'info');
                 }
