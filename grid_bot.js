@@ -1908,7 +1908,7 @@ async function checkStopLoss() {
             io.emit('emergency_stop', {
                 drawdown,
                 initialCapital: state.initialCapital,
-                currentEquity: totalEquity
+                currentEquity: allocatedEquity
             });
         }
     } catch (e) {
