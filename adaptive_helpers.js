@@ -324,7 +324,7 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopolitical
     else if (volatility === 'LOW') atrMultiplier = 0.8;      // Tight spacing
 
     // Geopolitical Override
-    if (geopoliticalStatus === 'MIDTERM_RISK') {
+    if (geopoliticalStatus === 'MARKET_ANXIETY' || geopoliticalStatus === 'HIGH_VOLATILITY_EVENT') {
         atrMultiplier *= 1.5; // INCREASE SPACING by 50%
     }
 

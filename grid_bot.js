@@ -546,20 +546,18 @@ async function getDetailedFinancials() {
         const myLockedBase = activeOpenOrders.reduce((sum, o) => sum + (o.side === 'sell' ? o.amount : 0), 0);
 
         // B. Base Asset Holdings (Inventory)
-        // Heuristic: If we track inventory, use it. If not, assume all base asset in account 'belongs' to this bot 
-        // IF we are a single-pair bot. For multi-pair, we MUST derive this or assumptions break.
-        // BETTER APPROACH for "Free USDT" calculation:
-        // Free USDT = Allocated Equity - (My Base Asset Value) - (My Locked USDT)
+        // CRITICAL FIX: Use ACTUAL INVENTORY for this specific pair, not global balance.
+        // This isolates BTC bot funds from SOL bot funds.
+        const myTotalBase = (state.inventory || []).reduce((sum, lot) => {
+            // Handle both 'remaining' (new format) and 'amount' (legacy)
+            return sum + (lot.remaining !== undefined ? lot.remaining : lot.amount);
+        }, 0);
 
-        // For now, let's approximate "My Base Asset" as "Total Base Asset" 
-        // assuming NO OTHER BOT TRADES THIS PAIR.
-        // TODO: For strictly isolating ETH vs BTC holdings, this is fine. 
-        // If two bots trade BTC/USDT, they will conflict here without a database.
-        const myTotalBase = globalTotalBase;
         const myBaseValue = myTotalBase * currentPrice;
 
         // --- 4. THE RESULT: ISOLATED FREE USDT ---
         // "How much USDT do I have left to deploy?"
+        // My Budget (Allocated Equity) - My Assets (Base) - My Locked Orders (USDT)
         let myFreeUSDT = myAllocatedEquity - myBaseValue - myLockedUSDT;
 
         // Safety Clamp: Can't be negative, can't exceed Global Free
@@ -670,24 +668,33 @@ async function initializeGrid(forceReset = false) {
     if (analysis && analysis.atr) {
         // --- GEOPOLITICAL CHECK ---
         const geoContext = checkGeopoliticalContext(regime.regime, price);
-        // FIX: Check defenseLevel, not exact string match (allows for multiple risk types)
-        if (geoContext.defenseLevel >= 1) {
-            const spacingConfig = adaptiveHelpers.calculateOptimalGridSpacing(
-                analysis.atr,
-                price,
-                volatilityState,
-                geoContext.status // Still pass status for logging/helper awareness
-            );
 
-            CONFIG.gridSpacing = spacingConfig.spacing;
+        // FIX: Always calculate ATR spacing, regardless of geo status
+        const spacingConfig = adaptiveHelpers.calculateOptimalGridSpacing(
+            analysis.atr,
+            price,
+            volatilityState,
+            geoContext.status // Still pass status for logging/helper awareness
+        );
 
-            log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${spacingConfig.multiplier})`, 'info');
+        CONFIG.gridSpacing = spacingConfig.spacing;
 
-            // IMMEDIATE TOLERANCE LOG (Visible on Startup)
-            const tolMult = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
-            const driftTol = CONFIG.gridSpacing * tolMult;
-            log('TOLERANCE', `Grid: ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Drift Tol: ${(driftTol * 100).toFixed(2)}% (${tolMult}x) | Status: ACTIVE`, 'success');
+        // Apply Geopolitical Modifier if needed (Widen grid for safety)
+        if (geoContext.defenseLevel >= 2) {
+            CONFIG.gridSpacing *= 1.25; // +25% wider
+            log('GEO', `Defense Level 2: Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}%`, 'warning');
+        } else if (geoContext.defenseLevel >= 1) {
+            CONFIG.gridSpacing *= 1.10; // +10% wider
         }
+
+        log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${spacingConfig.multiplier})`, 'info');
+
+        // IMMEDIATE TOLERANCE LOG (Visible on Startup)
+        const tolMult = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
+        const driftTol = CONFIG.gridSpacing * tolMult;
+        log('TOLERANCE', `Grid: ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Drift Tol: ${(driftTol * 100).toFixed(2)}% (${tolMult}x) | Status: ACTIVE`, 'success');
+
+        // (End of ATR Block) - Previously this only ran if defenseLevel >= 1
 
         // PHASE 3: Use allocateCapital for smarter distribution
         const multiTF = await analyzeMultipleTimeframes();
@@ -983,6 +990,28 @@ function monitorOrders() {
 }
 
 async function runMonitorLoop(myId) {
+    // 1. Unpause Logic (Auto-Resume)
+    if (state.isPaused) {
+        const until = state.pauseUntil || 0;
+        // Check if pause window has expired
+        if (until && Date.now() >= until) {
+            state.isPaused = false;
+            state.pauseUntil = null;
+            state.pauseReason = null;
+            saveState();
+            log('RECOVERY', '⏯️ Pause window ended. Resuming trading.', 'success');
+        } else {
+            // Still paused
+            if (myId === monitorSessionId) {
+                // Throttle logs slightly to avoid spam
+                if (Math.random() < 0.05) io.emit('hud_update', { status: 'PAUSED', detail: state.pauseReason || 'PAUSED' });
+            }
+            // Check again in 1s (don't exit loop entirely, just skip this tick)
+            setTimeout(() => runMonitorLoop(myId), 1000);
+            return;
+        }
+    }
+
     if (!isMonitoring || myId !== monitorSessionId) return;
 
     try {
@@ -1228,11 +1257,17 @@ async function getMarketAnalysis(timeframe = '1h') {
         // Calculate RSI
         const rsiInput = { values: closes, period: periods.rsi };
         const rsiValues = RSI.calculate(rsiInput);
-        const currentRSI = rsiValues[rsiValues.length - 1];
 
         // Calculate EMA
         const emaInput = { values: closes, period: periods.ema };
         const emaValues = EMA.calculate(emaInput);
+
+        // Data integrity guards
+        if (!closes || closes.length < 30) return null;
+        if (rsiValues.length < 15 || emaValues.length < 5) return null;
+
+        // Get latest values
+        const currentRSI = rsiValues[rsiValues.length - 1];
         const currentEMA = emaValues[emaValues.length - 1];
 
         // Calculate Bollinger Bands
@@ -1286,10 +1321,15 @@ async function getMarketAnalysis(timeframe = '1h') {
         else if (stochRSI > 80) signalScore -= 20;  // Strong overbought
 
         // MACD component (-25 to +25)
-        if (macdCrossing === 'BUY_CROSS') signalScore += 25;
-        else if (macdCrossing === 'SELL_CROSS') signalScore -= 25;
-        else if (macdSignal === 'BULLISH') signalScore += 10;
-        else signalScore -= 10;
+        if (macdCrossing === 'BUY_CROSS') {
+            signalScore += 25;
+        } else if (macdCrossing === 'SELL_CROSS') {
+            signalScore -= 25;
+        } else if (macdSignal === 'BULLISH') {
+            signalScore += 10;
+        } else if (macdSignal === 'BEARISH') {
+            signalScore -= 10;
+        }
 
         // EMA trend component (-15 to +15)
         const price = closes[closes.length - 1];
@@ -1528,13 +1568,23 @@ async function fetchBTCDominance() {
 
 // OPEN INTEREST CHANGE (Binance Futures)
 async function fetchOpenInterest() {
-    if (Date.now() - externalDataCache.openInterest.timestamp < CACHE_TTL) {
+    // Cache check (1 minute)
+    if (externalDataCache.openInterest.value && (Date.now() - externalDataCache.openInterest.timestamp < 60000)) {
         return externalDataCache.openInterest.value;
     }
 
     try {
-        const response = await fetch('https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT');
-        if (response.ok) {
+        const symbol = CONFIG.pair.replace('/', '');
+        // Safety: Only fetch for pairs likely to have futures (BTC, ETH, SOL, etc)
+        // This prevents 400 errors on random altcoins
+        const response = await fetch(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${symbol}`);
+
+        if (!response.ok) {
+            // If pair not found on futures, return stable neutral signal
+            return { current: 0, change: 0, signal: 'STABLE', timestamp: Date.now() };
+        }
+
+        const data = await response.json(); {
             const data = await response.json();
             const currentOI = parseFloat(data.openInterest);
             const previousOI = externalDataCache.openInterest.value?.current || currentOI;
