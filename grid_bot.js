@@ -1869,9 +1869,11 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
 // Store latest composite signal in state
 state.compositeSignal = null;
 
-// PHASE 1: Stop-Loss Protection (Fixed for accurate drawdown calculation)
+// PHASE 1: Stop-Loss Protection (DISABLED - User believes in long-term crypto upside)
 async function checkStopLoss() {
-    if (!state.initialCapital || state.initialCapital <= 0 || state.emergencyStop) return;
+    // DISABLED: User wants to hold through dips, believes crypto is at 20% of potential
+    // To re-enable, remove this return statement
+    return;
 
     try {
         const balance = await binance.fetchBalance();
@@ -1895,7 +1897,11 @@ async function checkStopLoss() {
             state.maxDrawdown = drawdown;
         }
 
-        // Emergency stop at -10% (only if truly in significant loss)
+        // DOCTRINE OVERRIDE: Grid bots should BUY dips, not stop during them.
+        // Emergency stop disabled per user request (2024-12-13).
+        // Drawdown is tracked for UI display only. Flash Crash protection still active.
+        // The bot will keep trading through -10%, -20%, etc. and buy cheaper.
+        /*
         if (drawdown > 10 && allocatedEquity < state.initialCapital * 0.9) {
             log('EMERGENCY', '🚨 STOP-LOSS TRIGGERED @ -10% DRAWDOWN', 'error');
             log('EMERGENCY', `Initial: $${state.initialCapital.toFixed(2)} | Current: $${allocatedEquity.toFixed(2)}`, 'error');
@@ -1911,6 +1917,7 @@ async function checkStopLoss() {
                 currentEquity: allocatedEquity
             });
         }
+        */
     } catch (e) {
         console.error('>> [ERROR] Stop-loss check failed:', e.message);
     }
