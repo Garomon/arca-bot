@@ -282,6 +282,35 @@ function loadState() {
         if (fs.existsSync(CONFIG.stateFile)) {
             const raw = fs.readFileSync(CONFIG.stateFile);
             const saved = JSON.parse(raw);
+
+            // PHASE 4: AUTO-RECOVERY & PROFIT PRESERVATION
+            // If bot died from Stop Loss, we Reincarnate it automatically
+            if (saved.emergencyStop) {
+                log('RECOVERY', '🚨 PREVIOUS STOP-LOSS DETECTED. INITIATING AUTO-RECOVERY...', 'warning');
+
+                // 1. Archive the Crash State
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const archiveName = CONFIG.stateFile.replace('.json', `_CRASH_${timestamp}.json`);
+                try { fs.copyFileSync(CONFIG.stateFile, archiveName); } catch (e) { console.error('Archive failed', e); }
+
+                // 2. Salvage the Profit
+                const oldSessionProfit = saved.totalProfit || 0;
+                const oldAccumulated = saved.accumulatedProfit || 0;
+                const legacyProfit = oldSessionProfit + oldAccumulated;
+
+                // 3. Reset State (Don't merge saved data)
+                // 'state' is currently fresh defaults. We just inject the history.
+                state.accumulatedProfit = legacyProfit;
+                state.emergencyStop = false;
+
+                // 4. Force Save immediately (clean slate)
+                saveState();
+
+                log('RECOVERY', `✅ BOT REBORN! Profit History Preserved: $${legacyProfit.toFixed(2)}`, 'success');
+                // Return early so we don't load the bad state
+                return;
+            }
+
             state = { ...state, ...saved };
             // AUDIT FIX: Ensure inventory exists
             if (!state.inventory) state.inventory = [];
@@ -539,7 +568,8 @@ async function getDetailedFinancials() {
             totalBTC: myTotalBase,
             btcValueUSDT: myBaseValue,
             totalEquity: myAllocatedEquity, // Show the user THEIR slice size
-            profit: state.totalProfit,
+            totalEquity: myAllocatedEquity, // Show the user THEIR slice size
+            profit: state.totalProfit + (state.accumulatedProfit || 0), // Lifetime Profit
             profitPercent,
             pair: CONFIG.pair,
             startTime: state.firstTradeTime || state.startTime,
