@@ -14,7 +14,7 @@ const path = require('path');
 require('dotenv').config();
 const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
-require('./crash_handler'); // Black Box Recorder
+// require('./crash_handler'); // MOVED TO _OLD default handler invalid
 
 // --- DYNAMIC CONFIGURATION (Multi-Pair Support) ---
 const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
