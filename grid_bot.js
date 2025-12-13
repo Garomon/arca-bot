@@ -579,7 +579,6 @@ async function getDetailedFinancials() {
             totalBTC: myTotalBase,
             btcValueUSDT: myBaseValue,
             totalEquity: myAllocatedEquity, // Show the user THEIR slice size
-            totalEquity: myAllocatedEquity, // Show the user THEIR slice size
             profit: state.totalProfit + (state.accumulatedProfit || 0), // Lifetime Profit
             profitPercent,
             pair: CONFIG.pair,
@@ -1052,6 +1051,12 @@ async function runMonitorLoop(myId) {
                 volatilityState = 'LOW';
             }
 
+            // FIX: Always update Volatility State (Stale State Bug Fix)
+            // Save previous purely for change detection in helpers
+            const prevVol = state.volatilityRegime || 'NORMAL';
+            state.volatilityRegime = volatilityState;
+            state.lastVolatility = prevVol;
+
             // Check if we need to adapt (with Smart Hysteresis)
             const lastResetTime = state.lastRebalance?.timestamp || 0;
             const timeSinceReset = Date.now() - lastResetTime;
@@ -1060,15 +1065,12 @@ async function runMonitorLoop(myId) {
             const emergencyCooldownMs = 5 * 60 * 1000;
             const isEmergency = volatilityState === 'HIGH' && timeSinceReset > emergencyCooldownMs;
 
-            // CRITICAL FIX: Only adapt if the Volatility REGIME changes, not just the spacing number
-            // (ATR calculation in initializeGrid makes the number dynamic, causing infinite loops otherwise)
-            const currentRegime = state.volatilityRegime || 'NORMAL';
-
-            if (volatilityState !== currentRegime && (timeSinceReset > cooldownMs || isEmergency)) {
-                log('AI', `VOLATILITY REGIME SHIFT (${currentRegime} -> ${volatilityState}). ADAPTING GRID...`, 'warning');
+            // Use tracked state for change detection
+            if (volatilityState !== prevVol && (timeSinceReset > cooldownMs || isEmergency)) {
+                log('AI', `VOLATILITY REGIME SHIFT (${prevVol} -> ${volatilityState}). ADAPTING GRID...`, 'warning');
                 CONFIG.gridSpacing = newSpacing;
                 state.lastRebalance = { timestamp: Date.now(), triggers: ['VOLATILITY'] };
-                state.volatilityRegime = volatilityState; // Track the regime
+                // state.volatilityRegime already updated above
 
                 // CRITICAL: Call initializeGrid via RECURSION STOP
                 // initializeGrid calls monitorOrders, which increments SessionID.
@@ -1100,7 +1102,6 @@ async function runMonitorLoop(myId) {
                 price: analysis.price,
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
-                pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
                 pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
                 geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price),
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
@@ -1390,15 +1391,27 @@ async function analyzeMultipleTimeframes() {
     try {
         // Analyze 1h, 4h, and 1d timeframes
         const tf1h = await getMarketAnalysis('1h');
-        const tf4h = await getCachedCandles('4h', 100);
-        const tf1d = await getCachedCandles('1d', 100);
+        const candles4h = await getCachedCandles('4h', 100);
+        const candles1d = await getCachedCandles('1d', 100);
 
         // Simple trend detection for each TF
-        const closes4h = tf4h.map(c => c[4]);
-        const closes1d = tf1d.map(c => c[4]);
+        if (!candles4h || candles4h.length < 55) {
+            console.warn('>> [WARN] Insufficient 4h candles for MTF analysis');
+            return { confidence: 'LOW', direction: 'UNCERTAIN' };
+        }
+        if (!candles1d || candles1d.length < 55) {
+            console.warn('>> [WARN] Insufficient 1d candles for MTF analysis');
+            return { confidence: 'LOW', direction: 'UNCERTAIN' };
+        }
+
+        const closes4h = candles4h.map(k => parseFloat(k[4]));
+        const closes1d = candles1d.map(k => parseFloat(k[4]));
 
         const ema504h = EMA.calculate({ values: closes4h, period: 50 });
         const ema501d = EMA.calculate({ values: closes1d, period: 50 });
+
+        // Safety: Ensure calculation returned valid array
+        if (!ema504h?.length || !ema501d?.length) return { confidence: 'LOW', direction: 'UNCERTAIN' };
 
         const price4h = closes4h[closes4h.length - 1];
         const price1d = closes1d[closes1d.length - 1];

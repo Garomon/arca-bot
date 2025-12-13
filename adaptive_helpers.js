@@ -41,6 +41,8 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
 
     // Check specific scheduled events
     for (const event of GEOPOLITICAL_EVENTS) {
+        let candidateRisk = null;
+
         const eventDate = new Date(event.date);
         const eventEnd = new Date(eventDate);
         eventEnd.setDate(eventDate.getDate() + (event.duration || 1)); // Default 1 day
@@ -53,23 +55,28 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
 
         // 1. Pre-Event Anxiety (3 days before)
         if (!isDuringEvent && daysToEvent > 0 && daysToEvent <= 3) {
-            riskLevel = {
+            candidateRisk = {
                 status: 'MARKET_ANXIETY',
                 modifier: 'DEFENSIVE',
-                defenseLevel: 1, // Mild caution (wider stops, small reserve)
+                defenseLevel: 1, // Mild caution
                 scoreBias: -5,
                 activeEvent: `${event.name} in ${daysToEvent.toFixed(1)} days`
             };
         }
         // 2. ACTIVE EVENT (During the window)
         else if (isDuringEvent) {
-            riskLevel = {
+            candidateRisk = {
                 status: 'HIGH_VOLATILITY_EVENT',
                 modifier: 'PROTECTIVE',
-                defenseLevel: 2, // Maximum defense (halt buys, tight stops)
+                defenseLevel: 2, // Maximum defense
                 scoreBias: -15,
                 activeEvent: `${event.name} ACTIVE NOW`
             };
+        }
+
+        // FIX: Prioritization Logic - Only upgrade risk, never downgrade
+        if (candidateRisk && candidateRisk.defenseLevel > riskLevel.defenseLevel) {
+            riskLevel = candidateRisk;
         }
     }
 
