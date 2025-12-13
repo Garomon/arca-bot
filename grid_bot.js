@@ -140,6 +140,9 @@ console.log(`>> [CONFIG] Grid Spacing: ${(CONFIG.gridSpacing * 100).toFixed(2)}%
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
+// SECURITY UPDATE: Serve only the public folder
+app.use(express.static(path.join(__dirname, 'public')));
 // --- BINANCE CONNECTION ---
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,
