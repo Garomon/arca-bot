@@ -618,6 +618,15 @@ async function initializeGrid(forceReset = false) {
     // Apply CAPITAL_ALLOCATION to get THIS PAIR's share
     const allocatedEquity = currentEquity * CAPITAL_ALLOCATION;
 
+    // FIX: Detect if initialCapital was set to GLOBAL equity (Legacy Bug)
+    // If stored Initial Capital is close to GLOBAL Equity (within 10%) but we are using an Allocation (< 90%),
+    // then it was set incorrectly in the past. We must scale it down to prevent false Stop-Loss triggers.
+    if (state.initialCapital && Math.abs(state.initialCapital - currentEquity) < currentEquity * 0.1 && CAPITAL_ALLOCATION < 0.9) {
+        log('MIGRATION', `🔧 Fixing Legacy Initial Capital (Was Global $${state.initialCapital.toFixed(2)} -> Now Allocated $${allocatedEquity.toFixed(2)})`, 'warning');
+        state.initialCapital = allocatedEquity;
+        saveState();
+    }
+
     // Check for "New Money" (Capital Injection > 10% of THIS PAIR's allocation)
     if (state.initialCapital) {
         const capitalGrowth = (allocatedEquity - state.initialCapital) / state.initialCapital;
