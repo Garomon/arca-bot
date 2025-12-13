@@ -213,8 +213,10 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
     }
 
     // 2. Volatility regime change
-    if (state.lastVolatility && state.lastVolatility !== analysis.volatility) {
-        triggers.push('VOLATILITY_SHIFT');
+    // FIX: use state.volatilityRegime, as 'analysis' does not contain discrete volatility label
+    const currentVol = state.volatilityRegime || 'NORMAL';
+    if (state.lastVolatility && state.lastVolatility !== currentVol) {
+        triggers.push(`VOLATILITY_SHIFT (${state.lastVolatility} -> ${currentVol})`);
     }
 
     // 3. Market regime change

@@ -366,9 +366,16 @@ function loadState() {
 
 // Save State (ASYNC & NON-BLOCKING)
 // OPTIMIZATION: Prevents I/O blocking the Event Loop
+// Save State (ASYNC & NON-BLOCKING)
+// OPTIMIZATION: Prevents I/O blocking the Event Loop
 let isSaving = false;
+let pendingSave = false;
+
 async function saveState() {
-    if (isSaving) return; // Skip if already saving
+    if (isSaving) {
+        pendingSave = true;
+        return;
+    }
     isSaving = true;
 
     try {
@@ -381,6 +388,10 @@ async function saveState() {
         console.error('>> [ERROR] Failed to save state:', e.message);
     } finally {
         isSaving = false;
+        if (pendingSave) {
+            pendingSave = false;
+            saveState(); // Process the queued save
+        }
     }
 }
 
@@ -426,7 +437,7 @@ async function reconcileInventoryWithExchange() {
             newInventory.push({
                 id: trade.id,
                 price: trade.price,
-                amount: trade.amount,
+                amount: amountToTake, // FIX: Use the VIRTUAL amount (the slice we own), so calculations use this as denominator
                 remaining: amountToTake,
                 fee: fee,
                 timestamp: trade.timestamp,
@@ -653,8 +664,9 @@ async function initializeGrid(forceReset = false) {
     if (analysis && analysis.atr) {
         // --- GEOPOLITICAL CHECK ---
         const geoContext = checkGeopoliticalContext(regime.regime, price);
-        if (geoContext.status === 'MIDTERM_RISK') {
-            log('GEO', `Midterm Risk Detected. Expanding Grid Spacing (Defense Mode)`, 'warning');
+        // FIX: Check defenseLevel, not exact string match (allows for multiple risk types)
+        if (geoContext.defenseLevel >= 1) {
+            log('GEO', `Geopolitical Risk Detected (Level ${geoContext.defenseLevel}). Expanding Grid Spacing (Defense Mode)`, 'warning');
         }
 
         // CALL THE BRAIN
@@ -662,7 +674,7 @@ async function initializeGrid(forceReset = false) {
             analysis.atr,
             price,
             volatilityState,
-            geoContext.status
+            geoContext.status // Still pass status for logging/helper awareness
         );
 
         CONFIG.gridSpacing = spacingConfig.spacing;
@@ -681,13 +693,16 @@ async function initializeGrid(forceReset = false) {
 
     // --- GEOPOLITICAL RESERVE OVERRIDE ---
     const geoContext = checkGeopoliticalContext(regime.regime, price); // Re-check for reserve allocation
-    if (geoContext.status === 'MIDTERM_RISK') {
-        const defensiveReserve = dynamicCapital * 0.25; // 25% Reserve
+    if (geoContext.defenseLevel >= 1) {
+        // Level 1: 25% Reserve. Level 2 (Extreme): 50% Reserve.
+        const targetReserve = geoContext.defenseLevel >= 2 ? 0.50 : 0.25;
+        const defensiveReserve = dynamicCapital * targetReserve;
+
         if (allocation.reserve < defensiveReserve) {
             allocation.reserve = defensiveReserve;
             allocation.grid = dynamicCapital - defensiveReserve;
-            allocation.reason += ' + MIDTERM DEFENSE';
-            log('GEO', `Midterm Risk: Boosting Reserve to 25% ($${defensiveReserve.toFixed(2)})`, 'warning');
+            allocation.reason += ` + GEO DEFENSE LVL ${geoContext.defenseLevel}`;
+            log('GEO', `Geopolitical Defense: Boosting Reserve to ${(targetReserve * 100).toFixed(0)}% ($${defensiveReserve.toFixed(2)})`, 'warning');
         }
     }
 
@@ -745,12 +760,24 @@ async function initializeGrid(forceReset = false) {
         // sizeInUSDT / price = BTC Quantity 
         const amountInBTC = new Decimal(sizeInUSDT).div(levelPrice);
 
-        if (sizeInUSDT >= CONFIG.minOrderSize) {
+        // FIX 1: Check against Exchange Limits (Amount) AND Min USDT Value
+        const market = binance.markets?.[CONFIG.pair];
+        const minAmount = market?.limits?.amount?.min || CONFIG.minOrderSize; // Fallback to preset
+        const minCost = market?.limits?.cost?.min || 5; // Usually 5 USDT
+
+        if (amountInBTC.toNumber() >= minAmount && sizeInUSDT >= minCost) {
             gridLevels.push({
                 ...rawLevels[i],
                 amount: amountInBTC // Pass QUANTITY to placeOrder, NOT Value
             });
         }
+    }
+
+    // FIX 2: Dynamic Max Open Orders
+    // Ensure we can place the full calculated grid
+    if (gridLevels.length > CONFIG.maxOpenOrders) {
+        log('CONFIG', `Upgrading Max Orders from ${CONFIG.maxOpenOrders} to ${gridLevels.length} to fit grid.`, 'info');
+        CONFIG.maxOpenOrders = gridLevels.length + 5; // Buffer
     }
 
     // Place Orders
@@ -1830,12 +1857,15 @@ async function checkStopLoss() {
 
         // Calculate REAL total equity based on current holdings
         const baseValue = totalBase * (state.currentPrice || 0);
-        const totalEquity = totalUSDT + baseValue;
+        const globalEquity = totalUSDT + baseValue;
+
+        // FIX: Compare ALLOCATED Initial Capital against ALLOCATED Current Equity
+        const allocatedEquity = globalEquity * CAPITAL_ALLOCATION;
 
         // Only calculate drawdown if we have meaningful data
-        if (totalEquity <= 0) return;
+        if (allocatedEquity <= 0) return;
 
-        const drawdown = ((state.initialCapital - totalEquity) / state.initialCapital) * 100;
+        const drawdown = ((state.initialCapital - allocatedEquity) / state.initialCapital) * 100;
 
         // Update max drawdown (only if positive, meaning we're down)
         if (drawdown > 0 && drawdown > state.maxDrawdown) {
@@ -1843,7 +1873,7 @@ async function checkStopLoss() {
         }
 
         // Emergency stop at -10% (only if truly in significant loss)
-        if (drawdown > 10 && totalEquity < state.initialCapital * 0.9) {
+        if (drawdown > 10 && allocatedEquity < state.initialCapital * 0.9) {
             log('EMERGENCY', '🚨 STOP-LOSS TRIGGERED @ -10% DRAWDOWN', 'error');
             log('EMERGENCY', `Initial: $${state.initialCapital.toFixed(2)} | Current: $${totalEquity.toFixed(2)}`, 'error');
 
