@@ -30,9 +30,11 @@ if (process.env.TRADING_PAIR && !process.env.TRADING_PAIR.endsWith('/USDT')) {
 }
 
 // --- DYNAMIC CONFIGURATION (Multi-Pair Support) ---
+// CRITICAL P0: Bot Isolation & Pair ID
+const BOT_ID = process.env.BOT_ID || "VANTAGE01";
 const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
 const BOT_PORT = parseInt(process.env.BOT_PORT) || 3000;
-const PAIR_ID = TRADING_PAIR.replace('/', ''); // e.g., 'BTCUSDT'
+const PAIR_ID = TRADING_PAIR.replace('/', '').toUpperCase(); // e.g., 'BTCUSDT'
 const [BASE_ASSET, QUOTE_ASSET] = TRADING_PAIR.split('/'); // e.g. ['BTC', 'USDT']
 
 // CAPITAL ALLOCATION: Each pair only uses its assigned slice of total capital
@@ -155,10 +157,10 @@ const binance = new ccxt.binance({
     enableRateLimit: true,
     options: { 'adjustForTimeDifference': true }
 });
+});
 
-// CRITICAL P0: Bot Isolation
-const BOT_ID = process.env.BOT_ID || "VANTAGE01";
-// PAIR_ID already defined above
+// BOT_ID and PAIR_ID defined at top of file
+// (Removed duplicate definition)
 
 
 // ============================================
