@@ -451,37 +451,35 @@ async function resilientAPICall(fn, maxRetries = 3, context = '') {
     }
 }
 
-// PHASE 4: Fee Optimization (Skip Unprofitable Orders)
-// Now uses PERCENTAGE-BASED minimum, works with ANY capital
-// RENAMED: baseAmount to clarify it expects BTC/SOL units, not USDT
-function isOrderWorthPlacing(baseAmount, gridSpacing, currentPrice, tradingFee) {
-    const orderValue = baseAmount * currentPrice;
-    const expectedGross = orderValue * gridSpacing;
-    const fees = orderValue * (tradingFee * 2); // buy + sell cycles
-    const expectedNet = expectedGross - fees;
+/**
+ * Checks if a grid order is worth placing given fees and spacing.
+ * HOTFIX (Phase 9): Input is now `orderValueUSDT` (Price * Amount), NOT raw amount.
+ * Prevents double-multiplication bug.
+ */
+function isOrderWorthPlacing(orderValueUSDT, gridSpacing, currentPrice, tradingFee = 0.001) {
+    if (!orderValueUSDT || orderValueUSDT <= 0) return false;
 
-    // Minimum profit = 0.05% of order value OR net must be positive
-    // This scales with capital - $100 order needs $0.05 profit, $1000 needs $0.50
-    const minimumProfit = Math.max(0.01, orderValue * 0.0005); // 0.05% of order, min $0.01
+    // 1. Calculate Expected profit per grid (Gross)
+    // If spacing is 1% (0.01), a $50 order makes $0.50 gross
+    const expectedGrossProfit = orderValueUSDT * gridSpacing;
 
-    // Only skip if we would LOSE money (net < 0)
-    // Small profits are OK - they compound over time
-    if (expectedNet < 0) {
-        return {
-            worth: false,
-            reason: `Would lose money: fees $${fees.toFixed(3)} > gross $${expectedGross.toFixed(3)}`,
-            gross: expectedGross,
-            fees,
-            net: expectedNet
-        };
-    }
+    // 2. Calculate Round-trip fees
+    // Buy Fee + Sell Fee (approx 2x)
+    const roundTripFees = orderValueUSDT * (tradingFee * 2);
+
+    // 3. Net Profit
+    const expectedNet = expectedGrossProfit - roundTripFees;
+
+    // 4. Threshold: Must make at least positive net profit
+    // AND must cover fees by at least 1.5x to be worth the risk
+    const isProfitable = expectedNet > 0 && (expectedGrossProfit > roundTripFees * 1.5);
 
     return {
-        worth: true,
-        gross: expectedGross,
-        fees,
-        net: expectedNet,
-        profitPercent: (expectedNet / orderValue * 100).toFixed(3)
+        worth: isProfitable,
+        reason: isProfitable ? 'Profitable' : `Net Profit too low: $${expectedNet.toFixed(4)}`,
+        gross: expectedGrossProfit,
+        fees: roundTripFees,
+        net: expectedNet
     };
 }
 
