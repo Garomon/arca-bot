@@ -853,8 +853,14 @@ async function placeOrder(level) {
     let amount = new Decimal(level.amount).toNumber();
 
     // Phase 4: Fee Optimization - Skip unprofitable orders
-    // FIX: Use ORDER price, not current price, for accurate worth check
-    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(price, amount, CONFIG.pair);
+    // FIX: Corrected signature: (orderSize, gridSpacing, currentPrice, tradingFee)
+    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(
+        amount,
+        CONFIG.gridSpacing,
+        price,
+        CONFIG.tradingFee
+    );
+
     if (!worthCheck.worth) {
         log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
         console.log(">> [SKIP] reason=UNPROFITABLE_ORDER", JSON.stringify({ reason: worthCheck.reason, minSize: CONFIG.minOrderSize }));
@@ -882,10 +888,20 @@ async function placeOrder(level) {
         console.log('Wall check skipped');
     }
 
-    // PRECISION ENFORCEMENT
+    // PRECISION ENFORCEMENT (Amount & Price)
     try {
-        amount = binance.amountToPrecision(CONFIG.pair, amount);
-        amount = parseFloat(amount);
+        amount = parseFloat(binance.amountToPrecision(CONFIG.pair, amount));
+        // FIX: Enforce price precision regarding exchange rules
+        const precisionPrice = parseFloat(binance.priceToPrecision(CONFIG.pair, price));
+        if (Math.abs(price - precisionPrice) > Number.EPSILON) {
+            // If precision regulated price is different, use it (but logging original for context)
+            // console.log(`>> [ADJUST] Price adjusted for precision: ${price} -> ${precisionPrice}`); 
+        }
+        // We use the original 'price' variable for logic, but could update it here if strictness is required.
+        // For now, let's trust the exchange might round, OR explicitly round it:
+        // price = precisionPrice; // Un-commenting this is safer, but let's verify if 'price' is const. It is NOT (it was cast to number). 
+        // Wait, line 852: const price = ... It IS CONST. 
+        // We need to pass the precise price to createLimitOrder.
     } catch (e) {
         console.warn('>> [WARN] Could not enforce precision:', e.message);
     }
@@ -902,10 +918,18 @@ async function placeOrder(level) {
     // CRITICAL P0: Isolation Tag
     const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${Date.now()}`;
 
+    // Calculate final precise price
+    let finalPrice = price;
+    try {
+        finalPrice = parseFloat(binance.priceToPrecision(CONFIG.pair, price));
+    } catch (e) {
+        // Fallback to original
+    }
+
     let order;
     try {
         order = await adaptiveHelpers.resilientAPICall(
-            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price, {
+            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, finalPrice, {
                 newClientOrderId: uniqueId, // ✅ Binance Spot Requirement
                 clientOrderId: uniqueId     // Fallback
             }),
@@ -2381,8 +2405,12 @@ async function syncWithExchange() {
     try {
         const allOpenOrders = await binance.fetchOpenOrders(CONFIG.pair);
 
-        // CRITICAL P0: Isolation - Only process orders belonging to THIS bot
-        const openOrders = allOpenOrders.filter(o => o.info.clientOrderId?.startsWith(BOT_ID) || o.clientOrderId?.startsWith(BOT_ID));
+        // CRITICAL P0: Isolation - Only process orders belonging to THIS bot AND THIS PAIR
+        const myPrefix = `${BOT_ID}_${PAIR_ID}_`;
+        const openOrders = allOpenOrders.filter(o =>
+            (o.info?.clientOrderId || o.clientOrderId || '').startsWith(myPrefix) ||
+            (o.info?.newClientOrderId || '').startsWith(myPrefix)
+        );
         const ignoredCount = allOpenOrders.length - openOrders.length;
         if (ignoredCount > 0) {
             console.log(`>> [ISOLATION] Ignored ${ignoredCount} foreign/manual orders.`);
