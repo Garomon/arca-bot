@@ -198,6 +198,22 @@ function initializeLogs() {
     const header = `\n\n========== BOT SESSION STARTED: ${new Date().toISOString()} ==========\n`;
 
     // Create non-blocking streams
+    // P1 FIX: Log Rotation (Rename if exists)
+    if (fs.existsSync(LOG_FILE)) {
+        try {
+            const stats = fs.statSync(LOG_FILE);
+            if (stats.size > 0) { // Rotate if not empty
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                fs.renameSync(LOG_FILE, LOG_FILE.replace('.log', `_${timestamp}.log`));
+                if (fs.existsSync(DECISION_LOG)) {
+                    fs.renameSync(DECISION_LOG, DECISION_LOG.replace('.log', `_${timestamp}.log`));
+                }
+            }
+        } catch (e) {
+            console.error('Log rotation failed:', e);
+        }
+    }
+
     logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
     decisionStream = fs.createWriteStream(DECISION_LOG, { flags: 'a' });
 
@@ -520,7 +536,8 @@ async function reconcileInventoryWithExchange() {
 
             const amountToTake = Math.min(remainingBalanceToFill, trade.amount);
             // Pro-rate fee
-            const originalFee = trade.fee?.cost || (trade.price * trade.amount * CONFIG.tradingFee);
+            // P0 FIX: Normalize Fee to USDT (Ignore mixed currency from Trade)
+            const originalFee = estimateFeeUSDT(trade.price, trade.amount);
             const fee = originalFee * (amountToTake / trade.amount);
 
             newInventory.push({
@@ -569,6 +586,56 @@ async function reconcileInventoryWithExchange() {
 }
 
 // --- CORE LOGIC ---
+
+// --- HELPER FUNCTIONS ---
+// P0 FIX: Fee Normalization (FIFO) - Always estimate in USDT
+function estimateFeeUSDT(fillPrice, amount) {
+    return fillPrice * amount * CONFIG.tradingFee;
+}
+
+// P0 FIX: Rate Limit Protection (Cache Financials)
+const finCache = { v: null, ts: 0 };
+async function getDetailedFinancialsCached(ttlMs = 2000) {
+    if (finCache.v && Date.now() - finCache.ts < ttlMs) return finCache.v;
+    finCache.v = await getDetailedFinancials();
+    finCache.ts = Date.now();
+    return finCache.v;
+}
+
+// P0 FIX: Detailed Financials (Equity & Limits)
+async function getDetailedFinancials() {
+    try {
+        const balance = await binance.fetchBalance();
+        // P0 FIX: Dynamic Equity (Include Base Asset)
+        const tickers = await binance.fetchTickers([...new Set(['BTC/USDT', 'ETH/USDT', 'SOL/USDT', CONFIG.pair])]);
+
+        let totalEquityUSDT = 0;
+        const assets = new Set(['BTC', 'ETH', 'SOL', BASE_ASSET]); // P0 FIX: Include Base Asset explicitly
+
+        for (const asset of assets) {
+            const total = balance[asset]?.total || 0;
+            if (total > 0) {
+                const price = (asset === 'USDT') ? 1 : (tickers[`${asset}/USDT`]?.last || 0);
+                totalEquityUSDT += total * price;
+            }
+        }
+
+        // Add USDT
+        totalEquityUSDT += (balance.USDT?.total || 0);
+
+        return {
+            freeUSDT: balance.USDT?.free || 0,
+            totalUSDT: balance.USDT?.total || 0,
+            totalBTC: balance[BASE_ASSET]?.total || 0,
+            lockedBTC: balance[BASE_ASSET]?.used || 0,
+            equity: totalEquityUSDT
+        };
+
+    } catch (e) {
+        console.error("Financials fetch failed", e);
+        throw e;
+    }
+}
 
 async function updateBalance() {
     try {
@@ -945,7 +1012,8 @@ async function placeOrder(level) {
     }
 
     // P0 FIX: Allocation Enforcement (Real Budget Check)
-    const fin = await getDetailedFinancials().catch(() => null);
+    // P0 FIX: Use Cached Financials for Rate Limit Protection
+    const fin = await getDetailedFinancialsCached().catch(() => null);
     const finalNotionalUSDT = amount * finalPrice;
 
     if (fin) {
@@ -2401,7 +2469,8 @@ async function handleOrderFill(order, fillPrice) {
     if (order.side === 'buy') {
         // INVENTORY TRACKING: Add new lot
         if (!state.inventory) state.inventory = [];
-        const fee = fillPrice * order.amount * CONFIG.tradingFee;
+        // P0 FIX: Normalize Fee to USDT for valid FIFO
+        const fee = estimateFeeUSDT(fillPrice, order.amount);
         state.inventory.push({
             id: order.id,
             price: fillPrice,
