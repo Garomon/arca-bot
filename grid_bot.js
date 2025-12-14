@@ -607,6 +607,11 @@ async function getDetailedFinancialsCached(ttlMs = 2000) {
     return finCache.v;
 }
 
+// P0 FIX: Restore Alias for Legacy Calls (Engineer FB Phase 28)
+async function getDetailedFinancials() {
+    return getDetailedFinancialsCached(2000);
+}
+
 // P0 FIX: Detailed Financials (Equity & Limits)
 // RENAMED to avoid conflict with legacy function name (Engineer FB Phase 27)
 async function computeBotFinancials() {
@@ -828,6 +833,7 @@ async function initializeGrid(forceReset = false) {
 
         if (forceReset) {
             log('SYSTEM', 'FORCING GRID RESET');
+            lastToleranceLog = Date.now(); // P1 FIX: Init Log Timer (Engineer FB Phase 28)
             await cancelAllOrders();
             state.startTime = Date.now();
         }
@@ -2704,10 +2710,16 @@ async function syncWithExchange() {
 
         // 2. Rebuild active list while PRESERVING METADATA (P0 Fix)
         // We must keep 'level', 'spacing', and other internal flags that API doesn't return
+        // P0 FIX: Re-fetch open orders to include any created by handleOrderFill
+        const allOpenOrders2 = await binance.fetchOpenOrders(CONFIG.pair);
+        const openOrders2 = allOpenOrders2.filter(o => getClientId(o).startsWith(myPrefix));
+
+        // 2. Rebuild active list while PRESERVING METADATA (P0 Fix)
+        // We must keep 'level', 'spacing', and other internal flags that API doesn't return
         const prevOrders = new Map((state.activeOrders || []).map(o => [o.id, o]));
         let adoptedCount = 0;
 
-        state.activeOrders = openOrders.map(o => {
+        state.activeOrders = openOrders2.map(o => {
             const old = prevOrders.get(o.id) || {};
 
             // Logic Check: If it's NEW (not in prev), it's an adopted orphan
