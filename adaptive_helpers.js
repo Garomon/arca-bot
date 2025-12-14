@@ -453,8 +453,9 @@ async function resilientAPICall(fn, maxRetries = 3, context = '') {
 
 // PHASE 4: Fee Optimization (Skip Unprofitable Orders)
 // Now uses PERCENTAGE-BASED minimum, works with ANY capital
-function isOrderWorthPlacing(orderSize, gridSpacing, currentPrice, tradingFee) {
-    const orderValue = orderSize * currentPrice;
+// RENAMED: baseAmount to clarify it expects BTC/SOL units, not USDT
+function isOrderWorthPlacing(baseAmount, gridSpacing, currentPrice, tradingFee) {
+    const orderValue = baseAmount * currentPrice;
     const expectedGross = orderValue * gridSpacing;
     const fees = orderValue * (tradingFee * 2); // buy + sell cycles
     const expectedNet = expectedGross - fees;

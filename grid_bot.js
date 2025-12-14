@@ -2113,7 +2113,28 @@ async function checkStopLoss() {
         const totalBase = balance[BASE_ASSET]?.total || 0;
 
         // Calculate REAL total equity based on current holdings
-        const baseValue = totalBase * (state.currentPrice || 0);
+        // P0 FIX: Dynamic Asset Valuation (Sum all known assets)
+        // This prevents underestimating equity when running multiple bots (BTC + SOL)
+        let baseValue = 0;
+        const KNOWN_ASSETS = ['BTC', 'SOL', 'ETH']; // Add others as needed
+
+        for (const asset of KNOWN_ASSETS) {
+            const qty = balance[asset]?.total || 0;
+            if (qty > 0) {
+                // Determine price: Use local price if it's OUR pair, else fetch ticker
+                let price = 0;
+                if (asset === BASE_ASSET) {
+                    price = state.currentPrice || 0;
+                } else {
+                    try {
+                        const ticker = await binance.fetchTicker(`${asset}/USDT`);
+                        price = ticker.last || 0;
+                    } catch (e) { console.warn(`Failed to valuate ${asset}:`, e.message); }
+                }
+                baseValue += (qty * price);
+            }
+        }
+
         const globalEquity = totalUSDT + baseValue;
 
         // FIX: Compare ALLOCATED Initial Capital against ALLOCATED Current Equity
@@ -2475,14 +2496,18 @@ async function syncWithExchange() {
                     // It was filled! Handle it.
                     log('SYNC', `Order ${missingOrder.id} filled while offline. Processing...`, 'success');
 
-                    // P0 FIX: Ensure fillPrice is defined
+                    // P0 FIX: Ensure fillPrice is defined AND use ACTUAL filled amount
                     const fillPrice = order.average || order.price || missingOrder.price;
+                    // P0 FIX: Use filled amount to preserve FIFO accuracy (vs using order.amount which is requested)
+                    const filledAmount = order.filled || order.amount || missingOrder.amount;
 
                     await handleOrderFill({
-                        ...order,
+                        ...missingOrder, // Preserve local metadata (level, spacing)
+                        side: order.side,
+                        amount: filledAmount,
                         status: 'open',
-                        timestamp: order.timestamp
-                    }, fillPrice); // Pass fillPrice explicitly
+                        timestamp: order.timestamp || Date.now()
+                    }, fillPrice);
 
                 } else if (order.status === 'canceled') {
                     log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`);
