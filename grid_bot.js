@@ -1021,7 +1021,8 @@ async function placeOrder(level) {
     let order;
     try {
         order = await adaptiveHelpers.resilientAPICall(
-            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, finalPrice, {
+            // P0 FIX: Use Standard CCXT createOrder
+            () => binance.createOrder(CONFIG.pair, 'limit', level.side, amount, finalPrice, {
                 newClientOrderId: uniqueId, // ✅ Binance Spot Requirement
                 clientOrderId: uniqueId     // Fallback
             }),
@@ -2479,8 +2480,8 @@ async function handleOrderFill(order, fillPrice) {
     // Re-place opposite order
     const newSide = order.side === 'buy' ? 'sell' : 'buy';
     const newPrice = order.side === 'buy'
-        ? fillPrice * (1 + CONFIG.gridSpacing)
-        : fillPrice * (1 - CONFIG.gridSpacing);
+        ? fillPrice * (1 + (order.spacing || CONFIG.gridSpacing)) // P1 FIX: Respect Persistence
+        : fillPrice * (1 - (order.spacing || CONFIG.gridSpacing));
 
     // === SMART FILTERS USING ALL INDICATORS ===
     const signalScore = state.marketCondition?.signalScore || 0;
@@ -2607,7 +2608,12 @@ async function syncWithExchange() {
                 amount: o.amount,
                 status: 'open',
                 timestamp: o.timestamp,
-                clientOrderId: o.clientOrderId // Persist the tag
+                side: o.side,
+                price: o.price,
+                amount: o.amount,
+                status: 'open',
+                timestamp: o.timestamp,
+                clientOrderId: getClientId(o) // P0 FIX: Robust ID Persistence
             };
         });
 
