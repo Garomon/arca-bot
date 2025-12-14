@@ -318,6 +318,11 @@ let state = {
     activeOrders: [], // { id, side, price, amount, level, status, timestamp }
     filledOrders: [], // History
     totalProfit: 0,
+    // P0 FIX: State Defaults (Engineer FB Phase 27)
+    volatilityRegime: 'NORMAL',
+    isPaused: false,
+    pauseUntil: null,
+    pauseReason: null,
     initialCapital: null, // Track starting capital for profit % calculation
     firstTradeTime: null, // NEVER resets - for APY calculation
     isLive: true,
@@ -597,13 +602,14 @@ function estimateFeeUSDT(fillPrice, amount) {
 const finCache = { v: null, ts: 0 };
 async function getDetailedFinancialsCached(ttlMs = 2000) {
     if (finCache.v && Date.now() - finCache.ts < ttlMs) return finCache.v;
-    finCache.v = await getDetailedFinancials();
+    finCache.v = await computeBotFinancials();
     finCache.ts = Date.now();
     return finCache.v;
 }
 
 // P0 FIX: Detailed Financials (Equity & Limits)
-async function getDetailedFinancials() {
+// RENAMED to avoid conflict with legacy function name (Engineer FB Phase 27)
+async function computeBotFinancials() {
     try {
         const balance = await binance.fetchBalance();
         // P0 FIX: Dynamic Equity (Include Base Asset)
@@ -681,7 +687,9 @@ async function getCurrentPrice() {
     }
 }
 
-async function getDetailedFinancials() {
+// P0 FIX: Detailed Financials (Equity & Limits)
+// RENAMED to avoid conflict with legacy function name (Engineer FB Phase 27)
+async function computeBotFinancials() {
     try {
         const balance = await binance.fetchBalance();
 
@@ -1241,6 +1249,14 @@ async function runMonitorLoop(myId) {
     if (!isMonitoring || myId !== monitorSessionId) return;
 
     try {
+        // P1 FIX: Tolerance Log (Engineer FB Phase 27)
+        if (lastToleranceLog && Date.now() - lastToleranceLog > TOLERANCE_LOG_INTERVAL) {
+            lastToleranceLog = Date.now();
+            const tolMult = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
+            const driftTol = CONFIG.gridSpacing * tolMult;
+            log('TOLERANCE', `Grid ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Drift ${(driftTol * 100).toFixed(2)}%`, 'info');
+        }
+
         // PHASE 1: Stop-loss protection
         if (state.emergencyStop) {
             log('STOPPED', '🛑 Bot halted due to emergency stop-loss. Killing loops.', 'error');
@@ -1756,35 +1772,23 @@ async function getGlobalEquity() {
         // Calculate Total USDT + crypto value
         let total = balance.USDT?.total || 0;
 
-        // Add BTC value
-        if (balance.BTC && balance.BTC.total > 0) {
-            const btcPrice = await adaptiveHelpers.resilientAPICall(
-                () => binance.fetchTicker('BTC/USDT').then(t => t.last),
+        // P0 FIX: Universal Equity (Dynamic Asset Verification)
+        const assetsToValue = new Set(['BTC', 'ETH', 'SOL', BASE_ASSET]);
+
+        for (const asset of assetsToValue) {
+            if (asset === 'USDT') continue;
+            const qty = balance[asset]?.total || 0;
+            if (!qty) continue;
+
+            const px = await adaptiveHelpers.resilientAPICall(
+                () => binance.fetchTicker(`${asset}/USDT`).then(t => t.last || 0),
                 3,
-                'Fetch BTC Price'
+                `Fetch ${asset} Price`
             );
-            total += (balance.BTC.total * btcPrice);
+            total += qty * px;
         }
 
-        // Add SOL value
-        if (balance.SOL && balance.SOL.total > 0) {
-            const solPrice = await adaptiveHelpers.resilientAPICall(
-                () => binance.fetchTicker('SOL/USDT').then(t => t.last),
-                3,
-                'Fetch SOL Price'
-            );
-            total += (balance.SOL.total * solPrice);
-        }
 
-        // P1 FIX: Add ETH value (Round out the Big 3)
-        if (balance.ETH && balance.ETH.total > 0) {
-            const ethPrice = await adaptiveHelpers.resilientAPICall(
-                () => binance.fetchTicker('ETH/USDT').then(t => t.last),
-                3,
-                'Fetch ETH Price'
-            );
-            total += (balance.ETH.total * ethPrice);
-        }
 
         // Update Cache
         equityCache.value = total;
