@@ -189,6 +189,12 @@ let decisionStream;
 
 // Initialize log files
 function initializeLogs() {
+    const logsDir = path.join(__dirname, 'logs');
+    // P0 FIX: Create logs directory if missing
+    if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+    }
+
     const header = `\n\n========== BOT SESSION STARTED: ${new Date().toISOString()} ==========\n`;
 
     // Create non-blocking streams
@@ -1008,7 +1014,8 @@ async function placeOrder(level) {
     // CRITICAL P0: Isolation Tag
     // P0 FIX: Use UUID to prevent collision
     const simpleId = crypto.randomUUID().split('-')[0]; // Short unique
-    const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${simpleId}`;
+    const uniqueIdRaw = `${BOT_ID}_${PAIR_ID}_${level.side}_${simpleId}`;
+    const uniqueId = uniqueIdRaw.slice(0, 32); // P0 FIX: Truncate to safe length (Binance Limit)
 
     // P0 FIX: Race Condition Mitigation - Fresh Balance Check
     // Prevents "Insufficient Funds" spam when multi-bot races occur
@@ -1043,8 +1050,8 @@ async function placeOrder(level) {
 
         // Log with full transparency
         // P0 FIX: Audit Logging Consistency (Use Final Price)
-        // P0 FIX: Audit Logging Consistency (Use Final Price) and Correct Units
-        log('LIVE', `${level.side.toUpperCase()} $${notionalUSDT.toFixed(2)} (~${amount.toFixed(6)} ${BASE_ASSET}) @ $${finalPrice.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
+        // P0 FIX: Variable Name Crash Fix (notionalUSDT -> finalNotionalUSDT)
+        log('LIVE', `${level.side.toUpperCase()} $${finalNotionalUSDT.toFixed(2)} (~${amount.toFixed(6)} ${BASE_ASSET}) @ $${finalPrice.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
         logActivity('PLACING_ORDER');
 
         // Audit the Decision (Traceability)
@@ -2345,8 +2352,9 @@ async function checkLiveOrders() {
                 // FIX: CCXT/Binance returns 'filled' for completed orders. 'closed' is generic.
                 if (info.status === 'closed' || info.status === 'filled') {
                     // CRITICAL: Use average fill price and ACTUAL filled amount
-                    const realFillPrice = info.average || info.price;
-                    const filledAmount = info.filled || order.amount; // P0 FIX: Partial Fills
+                    // P0 FIX: Type Safety (Strings to Floats)
+                    const realFillPrice = parseFloat(info.average || info.price);
+                    const filledAmount = parseFloat(info.filled || order.amount);
 
                     // Merge new data with order metadata
                     await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice);
@@ -2375,6 +2383,21 @@ async function checkLiveOrders() {
 }
 
 async function handleOrderFill(order, fillPrice) {
+    if (!order) return;
+
+    // P0 FIX: Strict Type Safety (Prevent NaN pollution)
+    const amt = parseFloat(order.amount);
+    const px = parseFloat(fillPrice);
+
+    if (!Number.isFinite(amt) || !Number.isFinite(px)) {
+        log('ERROR', `Bad fill data: amount=${order.amount} price=${fillPrice}`, 'error');
+        return;
+    }
+
+    // Assign sanitized values
+    order.amount = amt;
+    fillPrice = px;
+
     // FIX: Only SELL orders realize profit. BUY orders are just entries.
     let profit = 0;
 
