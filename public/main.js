@@ -887,6 +887,31 @@ async function loadArcaData() {
         if (!data.flow.fixedItems) data.flow.fixedItems = [];
         if (!data.flow.variableItems) data.flow.variableItems = [];
 
+        // Ensure new fields exist (migration)
+        if (!data.goals) data.goals = getDefaultGoals();
+        if (!data.flow) data.flow = getDefaultFlow();
+
+        // Ensure core fields exist (Missing in old saves)
+        if (!data.fintech) data.fintech = { didi: 0, nu: 0, mp: 0 };
+        if (!data.debts) data.debts = {
+            rappiPaid: false, nuDicPaid: false, nuEnePaid: false, kueskiPaid: false,
+            rappiAmount: 0, nuDicAmount: 0, nuEneAmount: 0, kueskiAmount: 0
+        };
+        if (!data.portfolio) data.portfolio = { vt: 0, qqq: 0, gold: 0, vwo: 0, crypto: 0, monthlyContribution: 15000 };
+        if (!data.checklist) data.checklist = {};
+
+        // Flow Manager Migration
+        if (typeof data.flow.fixedExpenses === 'number') {
+            data.flow.fixedItems = [{ name: 'General', amount: data.flow.fixedExpenses }];
+            delete data.flow.fixedExpenses;
+        }
+        if (typeof data.flow.variableExpenses === 'number') {
+            data.flow.variableItems = [{ name: 'General', amount: data.flow.variableExpenses }];
+            delete data.flow.variableExpenses;
+        }
+        if (!data.flow.fixedItems) data.flow.fixedItems = [];
+        if (!data.flow.variableItems) data.flow.variableItems = [];
+
         // Migration: Rename GBM goal if exists
         if (data.goals) {
             const gbmGoal = data.goals.find(g => g.id === 'firstinvest');
