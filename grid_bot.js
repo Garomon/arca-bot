@@ -2787,6 +2787,9 @@ Generated: ${now.toISOString()}
         log('REPORT', `📊 Daily report generated: ${dateStr}`, 'success');
     }
 
+    // Local timer variable (Do not persist to state)
+    let reportTimer;
+
     // Schedule daily report at 11:59 PM
     function scheduleDailyReport() {
         const now = new Date();
@@ -2801,9 +2804,9 @@ Generated: ${now.toISOString()}
         console.log(`>> [REPORT] Next daily report in ${hoursUntil.toFixed(1)} hours`);
 
         // Clear any existing timer
-        if (state.reportTimer) clearTimeout(state.reportTimer);
+        if (reportTimer) clearTimeout(reportTimer);
 
-        state.reportTimer = setTimeout(() => {
+        reportTimer = setTimeout(() => {
             generateDailyReport();
             scheduleDailyReport(); // Reschedule for next day
         }, next1159 - now);
