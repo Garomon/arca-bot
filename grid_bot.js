@@ -20,7 +20,7 @@ if (!global.fetch) {
     console.error(">> [CRITICAL] Node.js version is too old (No global fetch). Updating to Node 18+ is required.");
     process.exit(1);
 }
-const fetchFn = global.fetch; // Explicit reference for clarity
+const fetch = global.fetch; // Standardize for consistency
 
 // --- ENGINEER FIX 2: Safety Guard for Non-USDT Pairs ---
 if (process.env.TRADING_PAIR && !process.env.TRADING_PAIR.endsWith('/USDT')) {
@@ -61,19 +61,10 @@ const PAIR_PRESETS = {
         spacingLow: 0.006,
         bandwidthHigh: 0.08,
         bandwidthLow: 0.02,
-        toleranceMultiplier: 15  // 15x Grid Spacing (approx 12-15% drift tolerance)
-    },
-    'ETH/BTC': {
-        minOrderSize: 0.001,
-        gridSpacing: 0.004,
-        gridCount: 20,
-        spacingNormal: 0.006,
-        spacingHigh: 0.010,
-        spacingLow: 0.004,
-        bandwidthHigh: 0.05,
-        bandwidthLow: 0.015,
-        toleranceMultiplier: 10
+        toleranceMultiplier: 15
     }
+    // ETH/BTC Removed temporarily (requires non-USDT safety guard bypass)
+    // 'ETH/BTC': { ... }
 };
 
 // ... (existing code) ...
@@ -285,6 +276,42 @@ const externalDataCache = {
     openInterest: { value: null, timestamp: 0 },
     orderBook: { value: null, timestamp: 0 }
 };
+
+// --- HELPER: Universal Equity Source of Truth (USDT + BTC + SOL) ---
+async function getGlobalEquity() {
+    try {
+        const balance = await binance.fetchBalance();
+        const usdt = balance.USDT?.total || 0;
+
+        // Fetch prices for major assets in the swarm
+        // process.env.TRADING_PAIR might be SOL/USDT, so we need to fetch BTC price too
+        let btcValue = 0;
+        const btcQty = balance.BTC?.total || 0;
+        if (btcQty > 0) {
+            // Optimistic fetch - might fail if API is down, but robust enough
+            try {
+                const ticker = await binance.fetchTicker('BTC/USDT');
+                btcValue = btcQty * ticker.last;
+            } catch (e) { }
+        }
+
+        let solValue = 0;
+        const solQty = balance.SOL?.total || 0;
+        if (solQty > 0) {
+            try {
+                const ticker = await binance.fetchTicker('SOL/USDT');
+                solValue = solQty * ticker.last;
+            } catch (e) { }
+        }
+
+        // Add other assets here if expanding the swarm (e.g. ETH)
+
+        return usdt + btcValue + solValue;
+    } catch (e) {
+        console.error('>> [ERROR] Failed to calculate Global Equity:', e.message);
+        return 0;
+    }
+}
 
 // Load State
 // Load State
@@ -537,8 +564,8 @@ async function getDetailedFinancials() {
 
         // Calculate Global Equity (The "Pie")
         const currentPrice = state.currentPrice || 0;
-        const globalBaseValue = globalTotalBase * currentPrice;
-        const globalTotalEquity = globalTotalUSDT + globalBaseValue;
+        // FIX: Universal (USDT+BTC+SOL)
+        const globalTotalEquity = await getGlobalEquity();
 
         // --- 2. THIS BOT'S SHARE (THE "SLICE") ---
         // We own a percentage of the total account equity
@@ -617,19 +644,15 @@ async function initializeGrid(forceReset = false) {
 
     // PHASE 5: SMART CAPITAL DETECTION
     // Calculate current equity NOW to see if user added funds
-    const balance = await binance.fetchBalance();
-    const totalUSDT = balance.USDT?.total || 0;
-    const totalBase = balance[BASE_ASSET]?.total || 0;
-    const baseValue = new Decimal(totalBase).mul(price).toNumber();
-    const currentEquity = new Decimal(totalUSDT).plus(baseValue).toNumber();
+    const totalEquity = await getGlobalEquity();
 
     // Apply CAPITAL_ALLOCATION to get THIS PAIR's share
-    const allocatedEquity = currentEquity * CAPITAL_ALLOCATION;
+    const allocatedEquity = totalEquity * CAPITAL_ALLOCATION;
 
     // FIX: Detect if initialCapital was set to GLOBAL equity (Legacy Bug)
     // If stored Initial Capital is close to GLOBAL Equity (within 10%) but we are using an Allocation (< 90%),
     // then it was set incorrectly in the past. We must scale it down to prevent false Stop-Loss triggers.
-    if (state.initialCapital && Math.abs(state.initialCapital - currentEquity) < currentEquity * 0.1 && CAPITAL_ALLOCATION < 0.9) {
+    if (state.initialCapital && Math.abs(state.initialCapital - totalEquity) < totalEquity * 0.1 && CAPITAL_ALLOCATION < 0.9) {
         log('MIGRATION', `🔧 Fixing Legacy Initial Capital (Was Global $${state.initialCapital.toFixed(2)} -> Now Allocated $${allocatedEquity.toFixed(2)})`, 'warning');
         state.initialCapital = allocatedEquity;
         saveState();
@@ -665,9 +688,8 @@ async function initializeGrid(forceReset = false) {
     log('ENTRY', `$${price.toFixed(2)}`);
 
     // Calculate Grid
-    // DYNAMIC CAPITAL: Apply CAPITAL_ALLOCATION to get this pair's slice
-    const totalEquity = currentEquity;
-    const dynamicCapital = totalEquity * CAPITAL_ALLOCATION;
+    // DYNAMIC CAPITAL: Use the allocated equity for this pair
+    const dynamicCapital = allocatedEquity;
 
     log('CAPITAL', `Total Equity: $${totalEquity.toFixed(2)} | Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}% | This Pair: $${dynamicCapital.toFixed(2)}`, 'info');
 
@@ -1115,15 +1137,26 @@ async function runMonitorLoop(myId) {
             };
 
             // ADAPTIVE VOLATILITY ENGINE
-            let newSpacing = CONFIG.spacingNormal;
+            // FIX: Don't overwrite ATR base spacing, use it as the foundation
+            let spacingMultiplier = 1.0;
 
             if (analysis.bandwidth > CONFIG.bandwidthHigh) {
-                newSpacing = CONFIG.spacingHigh;
+                spacingMultiplier = 1.5; // Widen by 50%
                 volatilityState = 'HIGH';
             } else if (analysis.bandwidth < CONFIG.bandwidthLow) {
-                newSpacing = CONFIG.spacingLow;
+                spacingMultiplier = 0.8; // Tighten by 20%
                 volatilityState = 'LOW';
             }
+
+            // Calculate effective spacing (ATR-based or manual base * multiplier)
+            // If ATR is valid (non-zero), use it. Else fall back to config.
+            let baseSpacing = CONFIG.gridSpacing; // Start with current or configured
+            if (analysis.atr > 0 && analysis.price > 0) {
+                // ATR-based Grid Spacing (e.g. 1.2 * ATR)
+                baseSpacing = (analysis.atr / analysis.price) * 1.2;
+            }
+
+            const newSpacing = baseSpacing * spacingMultiplier;
 
             // FIX: Always update Volatility State (Stale State Bug Fix)
             // Save previous purely for change detection in helpers
@@ -2338,7 +2371,9 @@ async function syncWithExchange() {
                 const orderInfo = await binance.fetchOrder(missingOrder.id, CONFIG.pair);
                 if (orderInfo.status === 'closed' || orderInfo.status === 'filled') {
                     log('SYNC', `Order ${missingOrder.id} filled while offline. Processing...`, 'success');
-                    await handleOrderFill(missingOrder, orderInfo.price);
+                    // FIX: Use average price (real fill) if available, otherwise limit price
+                    const realFillPrice = orderInfo.average || orderInfo.price;
+                    await handleOrderFill(missingOrder, realFillPrice);
                 } else if (orderInfo.status === 'canceled') {
                     log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`, 'info');
                 }
@@ -2550,32 +2585,17 @@ server.listen(BOT_PORT, async () => {
     // AUTO-INIT: Set initial capital if not set
     if (!state.initialCapital) {
         try {
-            const balance = await binance.fetchBalance();
+            const totalEquity = await getGlobalEquity();
 
-            // UNIVERSAL EQUITY: Always use USDT + BTC as the account base
-            // This ensures ALL pairs see the same total account value
-            const totalUSDT = balance.USDT?.total || 0;
-            const totalBTC = balance.BTC?.total || 0;
+            if (totalEquity > 0) {
+                // Apply CAPITAL_ALLOCATION - this bot's share of total
+                state.initialCapital = totalEquity * CAPITAL_ALLOCATION;
 
-            // Get BTC price for conversion (use BTC/USDT price)
-            let btcPrice = 0;
-            try {
-                const ticker = await binance.fetchTicker('BTC/USDT');
-                btcPrice = ticker.last || 0;
-            } catch (e) {
-                console.log('>> [WARN] Could not fetch BTC price, using 0');
+                console.log(`>> [AUTO] Universal Equity (USDT+BTC+SOL): $${totalEquity.toFixed(2)}`);
+                console.log(`>> [AUTO] Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);
+                console.log(`>> [AUTO] This Pair's Capital: $${state.initialCapital.toFixed(2)}`);
+                saveState();
             }
-
-            const btcValue = totalBTC * btcPrice;
-            const totalEquity = totalUSDT + btcValue;
-
-            // Apply CAPITAL_ALLOCATION - this bot's share of total
-            state.initialCapital = totalEquity * CAPITAL_ALLOCATION;
-
-            console.log(`>> [AUTO] Universal Equity: $${totalUSDT.toFixed(2)} USDT + $${btcValue.toFixed(2)} BTC = $${totalEquity.toFixed(2)}`);
-            console.log(`>> [AUTO] Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);
-            console.log(`>> [AUTO] This Pair's Capital: $${state.initialCapital.toFixed(2)}`);
-            saveState();
         } catch (e) {
             console.error('>> [ERROR] Could not set initial capital:', e.message);
         }

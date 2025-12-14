@@ -43,7 +43,7 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
     for (const event of GEOPOLITICAL_EVENTS) {
         let candidateRisk = null;
 
-        const eventDate = new Date(event.date);
+        const eventDate = new Date(event.date + 'T00:00:00Z'); // Fix: Force UTC to prevent local timezone shifts
         const eventEnd = new Date(eventDate);
         eventEnd.setDate(eventDate.getDate() + (event.duration || 1)); // Default 1 day
 
