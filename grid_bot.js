@@ -226,6 +226,19 @@ function logDecision(action, reasons, data = {}) {
     return decision;
 }
 
+// ENGINEER REQUEST: Explicit Decision Gate Logging
+function logDecisionGate(action, details) {
+    if (process.env.DEBUG_GATES === 'true' || true) { // Always on for now
+        // Format for readability: >> [DECISION] {"action":"HOLD", ...}
+        console.log(">> [DECISION]", JSON.stringify({
+            pair: CONFIG.pair,
+            ts: new Date().toISOString(),
+            action: action, // HOLD, BUY, SELL
+            ...details
+        }));
+    }
+}
+
 // Activity summary - what the bot is doing right now
 function logActivity(activity) {
     const activities = {
@@ -847,6 +860,7 @@ async function placeOrder(level) {
     // Circuit Breaker
     if (state.activeOrders.length >= CONFIG.maxOpenOrders) {
         console.warn('>> [WARN] MAX ORDERS REACHED. SKIPPING.');
+        console.log(">> [SKIP] reason=MAX_OPEN_ORDERS_REACHED", JSON.stringify({ max: CONFIG.maxOpenOrders, current: state.activeOrders.length }));
         return;
     }
 
@@ -858,6 +872,7 @@ async function placeOrder(level) {
     const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, price, CONFIG.tradingFee);
     if (!worthCheck.worth) {
         log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
+        console.log(">> [SKIP] reason=UNPROFITABLE_ORDER", JSON.stringify({ reason: worthCheck.reason, minSize: CONFIG.minOrderSize }));
         return;
     }
 
@@ -868,12 +883,14 @@ async function placeOrder(level) {
         if (level.side === 'buy' && pressure.ratio < 0.15) {
             log('SMART', `🧱 MASSIVE SELL WALL (Ratio ${pressure.ratio.toFixed(2)}x). Delaying BUY.`, 'warning');
             logDecision('BLOCKED_BY_WALL', [`Sell Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for resistance to clear'], { level });
+            console.log(">> [SKIP] reason=BLOCKED_BY_SELL_WALL", JSON.stringify({ ratio: pressure.ratio }));
             return;
         }
         // Don't SELL if there is a massive BUY WALL (Ratio > 3.0)
         if (level.side === 'sell' && pressure.ratio > 3.0) {
             log('SMART', `🚀 BUY WALL DETECTED (Ratio ${pressure.ratio.toFixed(2)}x). Delaying SELL (Price might rise).`, 'warning');
             logDecision('BLOCKED_BY_WALL', [`Buy Wall Ratio: ${pressure.ratio.toFixed(2)}x`, 'Waiting for price rise'], { level });
+            console.log(">> [SKIP] reason=BLOCKED_BY_BUY_WALL", JSON.stringify({ ratio: pressure.ratio }));
             return;
         }
     } catch (e) {
@@ -920,6 +937,7 @@ async function placeOrder(level) {
         if (effectiveAvailable < requiredUSDT) {
             log('SMART', `INSUFFICIENT FUNDS (Capital Isolation). Req: $${requiredUSDT.toFixed(2)} | Global Free: $${globalFreeUSDT.toFixed(2)} | My Power: $${myRemainingPower.toFixed(2)}`, 'warning');
             log('DECISION', 'HOLDING (Capital Limit Reached)', 'info');
+            console.log(">> [SKIP] reason=INSUFFICIENT_FUNDS_ALLOCATION", JSON.stringify({ required: requiredUSDT, available: effectiveAvailable, globalFree: globalFreeUSDT }));
             return; // EXIT GRACEFULLY - DO NOT ERROR
         }
     } else if (level.side === 'sell') {
@@ -935,6 +953,7 @@ async function placeOrder(level) {
             } else {
                 log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'warning');
                 log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
+                console.log(">> [SKIP] reason=INSUFFICIENT_ASSETS", JSON.stringify({ required: amount, available: availableBase }));
                 return; // EXIT GRACEFULLY
             }
         }
@@ -962,11 +981,23 @@ async function placeOrder(level) {
                 if (false && price < breakEvenPrice) {
                     log('PROFIT_GUARD', `🛑 BLOCKED SELL @ $${price.toFixed(2)}. Avg Entry: $${avgEntryPrice.toFixed(2)} (Break-Even: $${breakEvenPrice.toFixed(2)})`, 'warning');
                     logDecision('BLOCKED_BY_PROFIT_GUARD', [`Price below Break-Even ($${breakEvenPrice.toFixed(2)})`, 'Preserving Capital'], { level });
+                    console.log(">> [SKIP] reason=PROFIT_GUARD", JSON.stringify({ price, breakEven: breakEvenPrice }));
                     return;
                 }
             }
         }
     }
+
+    // ENGINEER REQUEST: Visbility Upgrade
+    logDecisionGate('GATES_PASSED', {
+        step: 'PRE_SUBMISSION',
+        gate_status: {
+            circuit_breaker: 'OK',
+            profitability: 'OK',
+            wall_check: 'OK',
+            balance_check: 'OK'
+        }
+    });
 
     try {
         let order;
@@ -1957,6 +1988,17 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
         reasons.push('NY session: expect volatility');
     }
 
+    // === FINAL SCORE LOGGING ===
+
+    // ENGINEER REQUEST: Visibility Upgrade - Score Breakdown
+    console.log(">> [SCORE_BREAKDOWN]", JSON.stringify({
+        total: score.toFixed(1),
+        rsi: analysis.rsi.toFixed(1),
+        regime: regime.regime,
+        obRatio: pressure.ratio.toFixed(2),
+        reasons: reasons
+    }));
+
     // Clamp to 0-100
     score = Math.max(0, Math.min(100, score));
 
@@ -1974,10 +2016,10 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
         recommendation = 'WEAK_BUY';
         sizeMultiplier = 1.0;
     } else if (score >= 45) {
-        recommendation = 'HOLD';
+        recommendation = 'HOLD'; // SPOT-ONLY LOGIC: 45-55 is No Man's Land
         sizeMultiplier = 0.8;
     } else if (score >= 35) {
-        recommendation = 'WEAK_SELL';
+        recommendation = 'WEAK_SELL'; // Bearish bias, but in Spot this means "Don't Buy"
         sizeMultiplier = 0.6;
     } else if (score >= 20) {
         recommendation = 'SELL';
@@ -2008,7 +2050,7 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
         timestamp: Date.now()
     };
 
-    log('COMPOSITE', `Score: ${score} | ${recommendation} | Size: ${sizeMultiplier}x`,
+    log('COMPOSITE', `Score: ${score.toFixed(1)} | ${recommendation} | Size: ${sizeMultiplier}x`,
         score >= 60 ? 'success' : (score <= 40 ? 'warning' : 'info'));
 
     return result;
