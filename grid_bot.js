@@ -157,7 +157,6 @@ const binance = new ccxt.binance({
     enableRateLimit: true,
     options: { 'adjustForTimeDifference': true }
 });
-});
 
 // BOT_ID and PAIR_ID defined at top of file
 // (Removed duplicate definition)
