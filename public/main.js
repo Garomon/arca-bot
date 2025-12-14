@@ -959,12 +959,54 @@ function getDefaultFlow() {
 
 
 
-// Initialize Arca data
-// Initialize Arca data (Synchronous!)
-let arcaData = loadLocalData();
+// Initialize Arca data (Synchronous Default)
+let arcaData = {
+    fintech: { didi: 0, nu: 0, mp: 0 },
+    debts: {
+        rappiPaid: false, nuDicPaid: false, nuEnePaid: false, kueskiPaid: false,
+        rappiAmount: 0, nuDicAmount: 0, nuEneAmount: 0, kueskiAmount: 0
+    },
+    portfolio: { vt: 0, qqq: 0, gold: 0, vwo: 0, crypto: 0, monthlyContribution: 15000 },
+    checklist: {},
+    customChecklist: [],
+    goals: getDefaultGoals(),
+    flow: getDefaultFlow(),
+    botEquity: 0
+};
 
-// Trigger background cloud sync after 1s
-setTimeout(syncWithCloud, 1000);
+// Async Load from Cloud
+loadArcaData().then(data => {
+    if (data) {
+        arcaData = data;
+        console.log('>> [INIT] Cloud data loaded, refreshing UI...');
+        // Refresh UI calculations with new data
+        if (typeof calculateFintechYields === 'function') calculateFintechYields();
+        if (typeof calculateDebts === 'function') calculateDebts();
+        if (typeof calculatePortfolio === 'function') calculatePortfolio();
+        if (typeof calculateNetWorth === 'function') calculateNetWorth();
+        if (typeof setupChecklistHandlers === 'function') setupChecklistHandlers();
+
+        // Re-bind inputs to new data if needed, or just let existing listeners work on the global arcaData object
+        // (Listeners usually reference the global arcaData variable, so updating the reference might break listeners 
+        // IF they closed over the *original* object, but usually they read the global variable. 
+        // OPTIMIZATION: It's better to modify the *contents* of arcaData rather than replacing the object reference, 
+        // to be safe with any closures. But let's check input handlers. 
+        // setupInputHandlers reads from DOM and writes to arcaData. It doesn't seem to close over it. 
+        // However, checklist handlers might. Let's assume replacing reference is risky if not careful.
+        // SAFE APPROACH: Object.assign)
+
+        /* 
+           Wait, if I do `let arcaData = ...` and then `arcaData = data`, 
+           any function closing over the initial `arcaData` *value* will be stale?
+           `loadLocalData` returned an object. `arcaData` is a global variable (let). 
+           Functions accessing `arcaData` directly will see the new object.
+           Only functions passing `arcaData` as an argument would be affected.
+        */
+
+        // Update UI elements that depend on arcaData values directly
+        updateCountdowns();
+    }
+});
 
 // ===== FINTECH CALCULATIONS =====
 function calculateFintechYields() {
