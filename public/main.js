@@ -360,14 +360,15 @@ socket.on('financial_update', (data) => {
 
     // ===== SYNC BOT TO ARCA DATA (Portfolio Crypto) =====
     if (typeof arcaData !== 'undefined') {
-        const botValueMXN = data.totalEquity * window.usdMxnRate;
-        arcaData.botEquity = data.totalEquity;
-        arcaData.portfolio.crypto = botValueMXN; // Bot counts as crypto
+        // FIX: Use globalEquity (Total Binance Balance) for Portfolio, not just allocated
+        const globalValueMXN = (data.globalEquity || data.accountEquity || data.totalEquity) * window.usdMxnRate;
+        arcaData.botEquity = data.totalEquity; // Bot's slice stays as-is
+        arcaData.portfolio.crypto = globalValueMXN; // Portfolio shows TOTAL account value
 
         // Update crypto display if exists
         const cryptoValueInput = document.getElementById('crypto-value');
         if (cryptoValueInput) {
-            cryptoValueInput.value = botValueMXN.toFixed(0);
+            cryptoValueInput.value = globalValueMXN.toFixed(0);
         }
 
         // Update goals progress
