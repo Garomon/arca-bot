@@ -814,10 +814,78 @@ drawTriangle({ price: 0, orders: [] });
 // ARCA FINANCIERA GAROSSA - CALCULATIONS
 // ==========================================
 
-// Load saved data from localStorage
-function loadArcaData() {
+// --- SUPABASE CONFIGURATION ---
+const SUPABASE_URL = 'https://lllyejsabiwwzcumemgt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsbHllanNhYml3d3pjdW1lbWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODEwMjYsImV4cCI6MjA4MTA1NzAyNn0.SWkEeEFr90p5IY0Dfj1NgoG6S6UiB86wyuhbOBj7ZTE';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+// Ensure Debounce for Cloud Saving
+let saveTimeout = null;
+
+async function saveArcaData(data) {
+    if (!supabase) {
+        console.warn('Supabase not loaded, falling back to localStorage');
+        localStorage.setItem('arcaFinanciera', JSON.stringify(data));
+        return;
+    }
+
+    // Local save immediate (UI responsiveness)
+    localStorage.setItem('arcaFinanciera', JSON.stringify(data));
+
+    // Cloud save debounced (2s)
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        try {
+            const { error } = await supabase
+                .from('arca_dashboard')
+                .upsert({ id: 'default', data: data, updated_at: new Date().toISOString() });
+
+            if (error) throw error;
+            console.log('>> [CLOUD] Data synced to Supabase');
+            log("CLOUD", "Datos guardados en nube", "success");
+        } catch (e) {
+            console.error('Cloud save failed:', e);
+            log("CLOUD", "Error guardando en nube", "error");
+        }
+    }, 2000);
+}
+
+// Load saved data from Supabase (fallback to LocalStorage)
+async function loadArcaData() {
+    let data = null;
+
+    // 1. Try LocalStorage first (Instant Load)
     try {
         const saved = localStorage.getItem('arcaFinanciera');
+        if (saved) data = JSON.parse(saved);
+    } catch (e) {
+        console.error('Local load error:', e);
+    }
+
+    // 2. Fetch from Cloud (Background Sync)
+    if (supabase) {
+        try {
+            const { data: cloudData, error } = await supabase
+                .from('arca_dashboard')
+                .select('data')
+                .eq('id', 'default')
+                .single();
+
+            if (cloudData && cloudData.data) {
+                console.log('>> [CLOUD] Data loaded from Supabase');
+                // Optional: Check timestamps to solve conflicts? For now, Cloud wins if simpler.
+                // Or merge? Let's assume Cloud is truth source for multi-device.
+                data = cloudData.data;
+
+                // Update LocalStorage with fresh Cloud data
+                localStorage.setItem('arcaFinanciera', JSON.stringify(data));
+            }
+        } catch (e) {
+            console.error('Cloud load failed:', e);
+        }
+    }
+
+    if (data) {
         if (saved) {
             const data = JSON.parse(saved);
             // Ensure new fields exist (migration)
