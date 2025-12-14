@@ -411,6 +411,11 @@ let pendingSave = false;
 
 // Safe JSON Replacer to prevent Circular Errors
 const safeReplacer = (key, value) => {
+    // P0 FIX: State Sanitation - Exclude runtime noise
+    if (key === 'priceBuffer') return undefined; // Dont persist high-freq data
+    if (key === 'marketCondition') return undefined; // Derived state
+    if (key === 'compositeSignal') return undefined; // Derived state
+
     // 1. Remove Circular References related to Timers
     if (key === '_idleNext' || key === '_idlePrev') return undefined;
     // 2. Filter out non-serializable objects
@@ -464,6 +469,12 @@ async function saveState() {
 // Ensures no lots are ever lost due to state file issues
 // ==================================================
 async function reconcileInventoryWithExchange() {
+    // P0 FIX: Reconcile Guard (Env Var + Allocation)
+    if (process.env.DISABLE_RECONCILE === 'true') {
+        log('RECONCILE', 'Disabled by env DISABLE_RECONCILE=true', 'warning');
+        return;
+    }
+
     // P0 GUARD: CROSS-BOT ISOLATION
     // If we only own 50% of the account, we CANNOT assume all trades/balance are ours.
     if (CAPITAL_ALLOCATION < 1.0 && process.env.ALLOW_GLOBAL_RECONCILE !== 'true') {
@@ -555,8 +566,15 @@ async function reconcileInventoryWithExchange() {
 async function updateBalance() {
     try {
         const balance = await binance.fetchBalance();
-        state.balance.usdt = balance.USDT?.free || 0;
-        state.balance.btc = balance[BASE_ASSET]?.free || 0;
+        // P0 FIX: Balance Normalization & Legacy Compat
+        state.balance = {
+            total: balance.USDT?.total || 0,
+            usdt: balance.USDT?.free || 0,
+            base: balance[BASE_ASSET]?.free || 0,
+            // Backwards compatibility for UI:
+            btc: balance[BASE_ASSET]?.free || 0,
+            locked: balance.USDT?.used || 0
+        };
 
         // Calculate Total Equity (USDT + BTC Value + Locked in Orders)
         const totalUSDT = balance.USDT?.total || 0;
@@ -1008,7 +1026,8 @@ async function placeOrder(level) {
         );
 
         // Log with full transparency
-        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} ${BASE_ASSET} @ $${price.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
+        // P0 FIX: Audit Logging Consistency (Use Final Price)
+        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} ${BASE_ASSET} @ $${finalPrice.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
         logActivity('PLACING_ORDER');
 
         // Audit the Decision (Traceability)
@@ -1059,8 +1078,12 @@ async function cancelAllOrders() {
         );
 
         if (mine.length === 0) {
-            log('SYSTEM', 'No active orders found to cancel.', 'info');
-            state.activeOrders = [];
+            log('SYSTEM', 'No active bot orders found to cancel.', 'info');
+
+            // P0 FIX: Safe Cancel - Clean ONLY my prefix from local state
+            state.activeOrders = (state.activeOrders || []).filter(o =>
+                !((o.clientOrderId || '').startsWith(myPrefix))
+            );
             saveState();
             return;
         }
@@ -1137,7 +1160,9 @@ async function runMonitorLoop(myId) {
     try {
         // PHASE 1: Stop-loss protection
         if (state.emergencyStop) {
-            log('STOPPED', 'Bot halted due to emergency stop-loss', 'error');
+            log('STOPPED', '🛑 Bot halted due to emergency stop-loss. Killing loops.', 'error');
+            isMonitoring = false; // Kill heartbeat
+            if (global.heartbeatInterval) clearInterval(global.heartbeatInterval);
             return;
         }
 
