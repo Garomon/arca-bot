@@ -493,8 +493,12 @@ async function reconcileInventoryWithExchange() {
 
         if (Math.abs(currentTotal - newTotal) > TOLERANCE || oldIds !== newIds) {
             state.inventory = newInventory;
+            // Mark state as estimated until true sequence is established
+            state.inventoryStatus = 'ESTIMATED';
             saveState();
-            log('RECONCILE', `✅ Inventory Rebuilt (Strict FIFO). Holdings: ${newTotal.toFixed(6)} ${baseAsset} (from ${newInventory.length} newest lots).`, 'success');
+            log('RECONCILE', `✅ Inventory Rebuilt (Strict FIFO). Holdings: ${newTotal.toFixed(6)} ${baseAsset}.`, 'success');
+            log('RECONCILE', `⚠️ Note: Cost Basis is ESTIMATED from recent buys. Profit accuracy will improve as new trades occur.`, 'warning');
+
             if (oldIds !== newIds) {
                 log('RECONCILE', `🔍 Fixed Composition: Old Lots replaced with Newest Lots.`, 'warning');
             }
@@ -980,59 +984,91 @@ async function placeOrder(level) {
         }
     });
 
-    try {
-        let order;
-        // LIVE - Using resilient API call with retries
-        // CRITICAL P0: Isolation Tag
-        const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${Date.now()}`;
+    // LIVE - Using resilient API call with retries
+    // CRITICAL P0: Isolation Tag
+    const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${Date.now()}`;
 
-        order = await adaptiveHelpers.resilientAPICall(
-            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price, {
-                clientOrderId: uniqueId
-            }),
-            3,
-            `Place ${level.side} order`
-        );
+    order = await adaptiveHelpers.resilientAPICall(
+        () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price, {
+            newClientOrderId: uniqueId, // ✅ Binance Spot Requirement
+            clientOrderId: uniqueId     // Fallback
+        }),
+        3,
+        `Place ${level.side} order`
+    );
 
-        // Log with full transparency
-        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} @ $${price.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
-        logActivity('PLACING_ORDER');
-        logDecision(
-            `ORDER_PLACED_${level.side.toUpperCase()}`,
-            [
-                `Price: $${price.toFixed(2)}`,
-                `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
-                `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
-                `Regime: ${state.marketRegime || 'Unknown'}`
-            ],
-            { orderId: order.id, level: level.level, worthCheck: worthCheck }
-        );
+    // Log with full transparency
+    log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} ${BASE_ASSET} @ $${price.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
+    logActivity('PLACING_ORDER');
 
-        state.activeOrders.push({
-            id: order.id,
-            side: level.side,
-            price: price,
-            amount: amount,
-            level: level.level,
-            status: 'open',
-            timestamp: Date.now(),
-            spacing: CONFIG.gridSpacing // Phase 2 Audit: Track spacing per order
-        });
-        saveState();
+    // Audit the Decision (Traceability)
+    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(price, amount, CONFIG.pair);
 
-    } catch (e) {
-        log('ERROR', `Order Placement Failed: ${e.message}`, 'error');
-        logDecision('ORDER_FAILED', [e.message], { level });
-    }
+    logDecision(
+        `ORDER_PLACED_${level.side.toUpperCase()}`,
+        [
+            `Price: $${price.toFixed(2)}`,
+            `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
+            `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
+            `Regime: ${state.marketRegime || 'Unknown'}`
+        ],
+        { orderId: order.id, level: level.level, worthCheck: worthCheck }
+    );
+
+    state.activeOrders.push({
+        id: order.id,
+        side: level.side,
+        price: price,
+        amount: amount,
+        level: level.level,
+        status: 'open',
+        timestamp: Date.now(),
+        clientOrderId: uniqueId, // Persist ID
+        spacing: CONFIG.gridSpacing // Phase 2 Audit: Track spacing per order
+    });
+    saveState();
+
+} catch (e) {
+    log('ERROR', `Order Placement Failed: ${e.message}`, 'error');
+    logDecision('ORDER_FAILED', [e.message], { level });
+}
 }
 
 
+// CRITICAL P0: Isolation - Cancel ONLY this bot's orders
 async function cancelAllOrders() {
     try {
-        await binance.cancelAllOrders(CONFIG.pair);
-        state.activeOrders = [];
+        const myPrefix = `${BOT_ID}_${PAIR_ID}_`;
+        log('SYSTEM', `CANCELLING ORDERS (Filter: ${myPrefix}*)...`, 'warning');
+
+        const all = await binance.fetchOpenOrders(CONFIG.pair);
+
+        // Filter carefully
+        const mine = all.filter(o =>
+            (o.info?.clientOrderId || o.clientOrderId || '').startsWith(myPrefix) ||
+            (o.info?.newClientOrderId || '').startsWith(myPrefix)
+        );
+
+        if (mine.length === 0) {
+            log('SYSTEM', 'No active orders found to cancel.', 'info');
+            state.activeOrders = [];
+            saveState();
+            return;
+        }
+
+        for (const o of mine) {
+            await binance.cancelOrder(o.id, CONFIG.pair);
+            // Small delay to be nice to API
+            await new Promise(r => setTimeout(r, 80));
+        }
+
+        // Rebuild local state (Keep only what we couldn't cancel? Or just clear?)
+        // Safer to clear what we found
+        const mineIds = new Set(mine.map(o => o.id));
+        state.activeOrders = (state.activeOrders || []).filter(o => !mineIds.has(o.id));
+
         saveState();
-        log('SYSTEM', 'ALL ORDERS CANCELLED');
+        log('SYSTEM', `CANCELLED ${mine.length} BOT ORDERS.`);
     } catch (e) {
         log('ERROR', `Cancel Failed: ${e.message}`, 'error');
     }
@@ -2271,7 +2307,7 @@ async function handleOrderFill(order, fillPrice) {
             fee: fee,
             timestamp: Date.now()
         });
-        log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} BTC @ $${fillPrice.toFixed(2)}`, 'info');
+        log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} ${BASE_ASSET} @ $${fillPrice.toFixed(2)}`, 'info');
     }
     else if (order.side === 'sell') {
         // INVENTORY TRACKING: Consume lots (FIFO)
@@ -2846,16 +2882,38 @@ Generated: ${now.toISOString()}
             next1159.setDate(next1159.getDate() + 1);
         }
 
-        const msUntil1159 = next1159.getTime() - now.getTime();
-        console.log(`>> [REPORT] Next daily report in ${(msUntil1159 / 1000 / 60 / 60).toFixed(1)} hours`);
+        const hoursUntil = (next1159 - now) / (1000 * 60 * 60);
+        console.log(`>> [REPORT] Next daily report in ${hoursUntil.toFixed(1)} hours`);
 
-        setTimeout(() => {
+        // Clear any existing timer
+        if (state.reportTimer) clearTimeout(state.reportTimer);
+
+        state.reportTimer = setTimeout(() => {
             generateDailyReport();
-            // Schedule next one (every 24 hours)
-            setInterval(generateDailyReport, 24 * 60 * 60 * 1000);
-        }, msUntil1159);
+            scheduleDailyReport(); // Reschedule for next day
+        }, next1159 - now);
+
+        log('REPORT', 'Daily report scheduler initialized');
     }
 
+    // Call it
     scheduleDailyReport();
-    console.log('>> [REPORT] Daily report scheduler initialized');
-});
+}
+
+// FIX: Graceful Shutdown (Close Streams)
+function shutdown() {
+        log('SYSTEM', '🛑 Graceful Shutdown Initiated...');
+        try {
+            if (logStream) logStream.end();
+            if (decisionStream) decisionStream.end();
+        } catch (e) {
+            console.error('Error closing logs:', e);
+        }
+        process.exit(0);
+    }
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+// START THE BOT
+startBot().catch(console.error);
