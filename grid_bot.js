@@ -304,40 +304,8 @@ const externalDataCache = {
 };
 
 // --- HELPER: Universal Equity Source of Truth (USDT + BTC + SOL) ---
-async function getGlobalEquity() {
-    try {
-        const balance = await binance.fetchBalance();
-        const usdt = balance.USDT?.total || 0;
+// (Moved to line ~1600 to be near Cache definitions)
 
-        // Fetch prices for major assets in the swarm
-        // process.env.TRADING_PAIR might be SOL/USDT, so we need to fetch BTC price too
-        let btcValue = 0;
-        const btcQty = balance.BTC?.total || 0;
-        if (btcQty > 0) {
-            // Optimistic fetch - might fail if API is down, but robust enough
-            try {
-                const ticker = await binance.fetchTicker('BTC/USDT');
-                btcValue = btcQty * ticker.last;
-            } catch (e) { }
-        }
-
-        let solValue = 0;
-        const solQty = balance.SOL?.total || 0;
-        if (solQty > 0) {
-            try {
-                const ticker = await binance.fetchTicker('SOL/USDT');
-                solValue = solQty * ticker.last;
-            } catch (e) { }
-        }
-
-        // Add other assets here if expanding the swarm (e.g. ETH)
-
-        return usdt + btcValue + solValue;
-    } catch (e) {
-        console.error('>> [ERROR] Failed to calculate Global Equity:', e.message);
-        return 0;
-    }
-}
 
 // Load State
 // Load State
@@ -1621,6 +1589,50 @@ async function analyzeMultipleTimeframes() {
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// FIX: Rate Limit Protection (Cache 15s)
+const equityCache = { value: 0, ts: 0 };
+
+async function getGlobalEquity() {
+    // Return cached if fresh (15s TTL)
+    if (Date.now() - equityCache.ts < 15000 && equityCache.value > 0) {
+        return equityCache.value;
+    }
+
+    try {
+        const balance = await binance.fetchBalance();
+        // Calculate Total USDT + crypto value
+        let total = balance.USDT?.total || 0;
+
+        // Add BTC value
+        if (balance.BTC && balance.BTC.total > 0) {
+            const btcPrice = await adaptiveHelpers.resilientAPICall(
+                () => binance.fetchTicker('BTC/USDT').then(t => t.last),
+                3,
+                'Fetch BTC Price'
+            );
+            total += (balance.BTC.total * btcPrice);
+        }
+
+        // Add SOL value
+        if (balance.SOL && balance.SOL.total > 0) {
+            const solPrice = await adaptiveHelpers.resilientAPICall(
+                () => binance.fetchTicker('SOL/USDT').then(t => t.last),
+                3,
+                'Fetch SOL Price'
+            );
+            total += (balance.SOL.total * solPrice);
+        }
+
+        // Update Cache
+        equityCache.value = total;
+        equityCache.ts = Date.now();
+        return total;
+    } catch (e) {
+        console.error('>> [ERROR] Global Equity Fetch Failed:', e.message);
+        return equityCache.value > 0 ? equityCache.value : 1000; // Fallback
+    }
+}
+
 // FEAR & GREED INDEX (Alternative.me)
 async function fetchFearGreedIndex() {
     if (Date.now() - externalDataCache.fearGreed.timestamp < CACHE_TTL) {
@@ -2428,7 +2440,7 @@ async function syncWithExchange() {
         const openIds = new Set(openOrders.map(o => o.id));
 
         // 1. Remove local orders that are no longer open on exchange
-        // CRITICAL FIX: Check if they were filled while offline, don't just delete them!
+        // CRITICAL P0 FIXED: Check fillPrice to prevent NaN in profit calculation
         const missingOrders = state.activeOrders.filter(o => !openIds.has(o.id));
 
         for (const missingOrder of missingOrders) {
@@ -2443,11 +2455,16 @@ async function syncWithExchange() {
                 if (order.status === 'closed' || order.status === 'filled') {
                     // It was filled! Handle it.
                     log('SYNC', `Order ${missingOrder.id} filled while offline. Processing...`, 'success');
+
+                    // P0 FIX: Ensure fillPrice is defined
+                    const fillPrice = order.average || order.price || missingOrder.price;
+
                     await handleOrderFill({
                         ...order,
-                        status: 'open', // Hack to force handleOrderFill to process it
+                        status: 'open',
                         timestamp: order.timestamp
-                    });
+                    }, fillPrice); // Pass fillPrice explicitly
+
                 } else if (order.status === 'canceled') {
                     log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`);
                 }
@@ -2456,39 +2473,33 @@ async function syncWithExchange() {
             }
         }
 
-        // Update active orders list
-        state.activeOrders = openOrders.map(o => ({
-            id: o.id,
-            side: o.side,
-            price: o.price,
-            amount: o.amount,
-            timestamp: o.timestamp
-        }));
-
-        // 2. Adopt ONLY tagged orphan orders (Isolation)
-        const localIds = new Set(state.activeOrders.map(o => o.id)); // Updated list
+        // 2. Rebuild active list while PRESERVING METADATA (P0 Fix)
+        // We must keep 'level', 'spacing', and other internal flags that API doesn't return
+        const prevOrders = new Map((state.activeOrders || []).map(o => [o.id, o]));
         let adoptedCount = 0;
 
-        // Since we already filtered 'openOrders' by BOT_ID, anything left that is NOT in local state is a valid orphan to adopt.
-        for (const order of openOrders) {
-            if (!localIds.has(order.id)) {
-                // Double check tag just in case
-                if (!order.clientOrderId?.startsWith(BOT_ID)) continue;
+        state.activeOrders = openOrders.map(o => {
+            const old = prevOrders.get(o.id) || {};
 
-                state.activeOrders.push({
-                    id: order.id,
-                    side: order.side,
-                    price: order.price,
-                    amount: order.amount,
-                    status: 'open',
-                    timestamp: order.timestamp
-                });
-                adoptedCount++;
+            // Logic Check: If it's NEW (not in prev), it's an adopted orphan
+            if (!prevOrders.has(o.id)) {
+                adoptedCount++; // P0 Fix: Count orphans correctly during map
             }
-        }
+
+            return {
+                ...old, // Keep internal state (level, strategy details)
+                id: o.id,
+                side: o.side,
+                price: o.price,
+                amount: o.amount,
+                status: 'open',
+                timestamp: o.timestamp,
+                clientOrderId: o.clientOrderId // Persist the tag
+            };
+        });
 
         if (adoptedCount > 0) {
-            log('SYNC', `ADOPTED ${adoptedCount} ORPHAN ORDERS`);
+            log('SYNC', `ADOPTED ${adoptedCount} ORPHAN ORDERS (Restored metadata where possible)`);
             saveState();
             emitGridState();
         } else {
@@ -2496,8 +2507,6 @@ async function syncWithExchange() {
         }
 
         // 3. Sync recent history (for UI completeness)
-        // Note: fetchMyTrades doesn't easily support clientOrderId filtering without fetching all. 
-        // We'll leave history logic as is for now, as it's just for display.
         await syncHistoricalTrades();
 
     } catch (e) {
