@@ -14,7 +14,20 @@ const path = require('path');
 require('dotenv').config();
 const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
-// require('./crash_handler'); // MOVED TO _OLD default handler invalid
+
+// --- ENGINEER FIX 1: Robust Fetch Environment Check ---
+if (!global.fetch) {
+    console.error(">> [CRITICAL] Node.js version is too old (No global fetch). Updating to Node 18+ is required.");
+    process.exit(1);
+}
+const fetchFn = global.fetch; // Explicit reference for clarity
+
+// --- ENGINEER FIX 2: Safety Guard for Non-USDT Pairs ---
+if (process.env.TRADING_PAIR && !process.env.TRADING_PAIR.endsWith('/USDT')) {
+    console.error(`>> [CRITICAL] Safety Guard: Only */USDT pairs are currently supported. Got: ${process.env.TRADING_PAIR}`);
+    console.error(">> To support ETH/BTC, a full refactor of 'balance.USDT' checks is required.");
+    process.exit(1);
+}
 
 // --- DYNAMIC CONFIGURATION (Multi-Pair Support) ---
 const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
@@ -869,10 +882,13 @@ async function placeOrder(level) {
         // 2. Calculate My Allocation
         const myAllocatedCapital = globalEquity * CAPITAL_ALLOCATION;
 
-        // 3. Calculate My Current Exposure (Inventory + Active Buys)
-        const inventoryValue = (state.inventory || []).reduce((sum, lot) => sum + (lot.price * (lot.remaining || lot.amount)), 0);
-        const activeBuyLocked = state.activeOrders.filter(o => o.side === 'buy').reduce((sum, o) => sum + (o.price * o.amount), 0);
-        const currentExposure = inventoryValue + activeBuyLocked;
+        // 3. Calculate My Current Exposure (Mark-to-Market)
+        // ENGINEER FIX 5: Use Current Price, not Cost Basis (Better Buying Power calculation)
+        const inventoryBaseAmount = (state.inventory || []).reduce((sum, lot) => sum + (lot.remaining ?? lot.amount), 0);
+        const activeBuyLockedValue = state.activeOrders.filter(o => o.side === 'buy').reduce((sum, o) => sum + (o.price * o.amount), 0);
+
+        // Current Value of Holdings + Locked USDT in buys
+        const currentExposure = (inventoryBaseAmount * price) + activeBuyLockedValue;
 
         // 4. Determine Remaining Buying Power
         const myRemainingPower = Math.max(0, myAllocatedCapital - currentExposure);
@@ -1408,6 +1424,12 @@ async function detectMarketRegime() {
         // EMA 50 and EMA 200
         const ema50 = EMA.calculate({ values: closes, period: 50 });
         const ema200 = EMA.calculate({ values: closes, period: 200 });
+
+        // ENGINEER FIX 4: Safety Guards for Empty/Insufficient Data (Prevents Crash)
+        if (!ema50 || ema50.length < 2 || !ema200 || ema200.length < 2) {
+            console.warn('>> [WARN] EMA calculation failed (insufficient data). Defaulting to NEUTRAL.');
+            return { regime: 'UNKNOWN', confidence: 0, reason: 'Inductor Error' };
+        }
 
         const currentPrice = closes[closes.length - 1];
         // CRITICAL FIX: Ensure global state is fresh immediately
@@ -2213,9 +2235,15 @@ async function handleOrderFill(order, fillPrice) {
             const spacing = order.spacing || CONFIG.gridSpacing;
             const estimatedBuyPrice = fillPrice / (1 + spacing);
             const estimatedCostBasis = estimatedBuyPrice * order.amount;
+
+            // ENGINEER FIX 3: Recalculate Fees with Estimated Cost Basis (Avoids using stale/zero entry fees)
+            const estimatedEntryFees = estimatedCostBasis * CONFIG.tradingFee;
+            const estimatedTotalFees = sellFee + estimatedEntryFees;
+
             const estimatedGross = sellRevenue - estimatedCostBasis;
-            profit = estimatedGross - totalFees;
-            log('WARN', `🔧 Corrected profit: $${profit.toFixed(4)}`, 'warning');
+            profit = estimatedGross - estimatedTotalFees;
+
+            log('WARN', `🔧 Corrected Anomaly: Gross $${estimatedGross.toFixed(4)} - Fees $${estimatedTotalFees.toFixed(4)} = Net $${profit.toFixed(4)}`, 'warning');
         }
 
         log('PROFIT', `FIFO Realized: Rev $${sellRevenue.toFixed(2)} - Cost $${costBasis.toFixed(2)} - Fees $${totalFees.toFixed(4)} (Entry: $${entryFees.toFixed(4)} + Exit: $${sellFee.toFixed(4)}) = $${profit.toFixed(4)}`, 'success');
