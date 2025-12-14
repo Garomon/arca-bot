@@ -299,14 +299,14 @@ function loadState() {
                 // 3. Reset State (Don't merge saved data)
                 // 'state' is currently fresh defaults. We just inject the history.
                 state.accumulatedProfit = legacyProfit;
-                state.emergencyStop = false;
+                // state.emergencyStop = false; // AUTOCLEAR DISABLED per User Doctrine
 
                 // 4. Force Save immediately (clean slate)
                 saveState();
 
                 log('RECOVERY', `✅ BOT REBORN! Profit History Preserved: $${legacyProfit.toFixed(2)}`, 'success');
                 // Return early so we don't load the bad state
-                return;
+                // return; // RETURN DISABLED: Continue to load state to preserve flags if needed
             }
 
             state = { ...state, ...saved };
@@ -665,9 +665,12 @@ async function initializeGrid(forceReset = false) {
         (analysis && analysis.bandwidth < CONFIG.bandwidthLow ? 'LOW' : 'NORMAL');
 
     // PHASE 2.5: ATR GRID SPACING (Dynamic Volatility Surfing)
+    // FIX: Initialize geoContext with safe default before potential override
+    let geoContext = { status: 'NORMAL', defenseLevel: 0 };
+
     if (analysis && analysis.atr) {
         // --- GEOPOLITICAL CHECK ---
-        const geoContext = checkGeopoliticalContext(regime.regime, price);
+        geoContext = checkGeopoliticalContext(regime.regime, price);
 
         // FIX: Always calculate ATR spacing, regardless of geo status
         const spacingConfig = adaptiveHelpers.calculateOptimalGridSpacing(
@@ -693,120 +696,117 @@ async function initializeGrid(forceReset = false) {
         const tolMult = PAIR_PRESETS[CONFIG.pair]?.toleranceMultiplier || 10;
         const driftTol = CONFIG.gridSpacing * tolMult;
         log('TOLERANCE', `Grid: ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Drift Tol: ${(driftTol * 100).toFixed(2)}% (${tolMult}x) | Status: ACTIVE`, 'success');
+    }
+    // (End of ATR Block) - LOGIC MOVED OUTSIDE FOR SAFETY
 
-        // (End of ATR Block) - Previously this only ran if defenseLevel >= 1
+    // PHASE 3: Use allocateCapital for smarter distribution
+    const multiTF = await analyzeMultipleTimeframes();
+    let allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
 
-        // PHASE 3: Use allocateCapital for smarter distribution
-        const multiTF = await analyzeMultipleTimeframes();
-        let allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
+    // --- GEOPOLITICAL RESERVE OVERRIDE ---
+    // geoContext defined above safely now
+    if (geoContext.defenseLevel >= 1) {
+        // Level 1: 25% Reserve. Level 2 (Extreme): 50% Reserve.
+        const targetReserve = geoContext.defenseLevel >= 2 ? 0.50 : 0.25;
+        const defensiveReserve = dynamicCapital * targetReserve;
 
-        // --- GEOPOLITICAL RESERVE OVERRIDE ---
-        // geoContext already defined above
-        if (geoContext.defenseLevel >= 1) {
-            // Level 1: 25% Reserve. Level 2 (Extreme): 50% Reserve.
-            const targetReserve = geoContext.defenseLevel >= 2 ? 0.50 : 0.25;
-            const defensiveReserve = dynamicCapital * targetReserve;
-
-            if (allocation.reserve < defensiveReserve) {
-                allocation.reserve = defensiveReserve;
-                allocation.grid = dynamicCapital - defensiveReserve;
-                allocation.reason += ` + GEO DEFENSE LVL ${geoContext.defenseLevel}`;
-                log('GEO', `Geopolitical Defense: Boosting Reserve to ${(targetReserve * 100).toFixed(0)}% ($${defensiveReserve.toFixed(2)})`, 'warning');
-            }
+        if (allocation.reserve < defensiveReserve) {
+            allocation.reserve = defensiveReserve;
+            allocation.grid = dynamicCapital - defensiveReserve;
+            allocation.reason += ` + GEO DEFENSE LVL ${geoContext.defenseLevel}`;
+            log('GEO', `Geopolitical Defense: Boosting Reserve to ${(targetReserve * 100).toFixed(0)}% ($${defensiveReserve.toFixed(2)})`, 'warning');
         }
-
-        const safeCapital = allocation.grid;
-
-        log('SYSTEM', `CAPITAL ALLOCATION: $${safeCapital.toFixed(2)} for grid | $${allocation.reserve.toFixed(2)} reserve (${allocation.reason})`);
-
-        // Log adaptive safety margin for transparency
-        const adaptiveSafetyMargin = adaptiveHelpers.getAdaptiveSafetyMargin(volatilityState, regime.regime);
-        CONFIG.safetyMargin = adaptiveSafetyMargin; // Apply globally
-        log('ADAPTIVE', `Safety Margin: ${(adaptiveSafetyMargin * 100).toFixed(0)}% (Vol: ${volatilityState} | Regime: ${regime.regime})`, 'info');
-
-        // Track initial capital for profit % (only set once on first run)
-        if (!state.initialCapital) {
-            state.initialCapital = dynamicCapital;
-            log('CAPITAL', `Initial Capital Set: $${state.initialCapital.toFixed(2)}`, 'info');
-        }
-
-        // PHASE 2: Dynamic Grid Count (adapt to capital and volatility)
-        const dynamicGridCount = adaptiveHelpers.calculateOptimalGridCount(safeCapital, volatilityState);
-        log('ADAPTIVE', `Grid Count: ${dynamicGridCount} (Capital: $${safeCapital.toFixed(0)} | Vol: ${volatilityState})`, 'info');
-
-        const orderAmountUSDT = new Decimal(safeCapital).div(dynamicGridCount);
-        const gridLevels = [];
-        const halfGrid = Math.floor(dynamicGridCount / 2);
-
-        // 1. Generate Levels (Prices only)
-        const rawLevels = [];
-
-        // Buys
-        for (let i = 1; i <= halfGrid; i++) {
-            const levelPrice = new Decimal(price).mul(new Decimal(1).minus(new Decimal(CONFIG.gridSpacing).mul(i)));
-            rawLevels.push({ side: 'buy', price: levelPrice.toNumber(), level: -i });
-        }
-        // Sells
-        for (let i = 1; i <= halfGrid; i++) {
-            const levelPrice = new Decimal(price).mul(new Decimal(1).plus(new Decimal(CONFIG.gridSpacing).mul(i)));
-            rawLevels.push({ side: 'sell', price: levelPrice.toNumber(), level: i });
-        }
-
-        // PHASE 2: ADAPTIVE PYRAMID SIZING (Brain Activation)
-        const sizes = adaptiveHelpers.calculateOptimalOrderSizes(
-            safeCapital,
-            dynamicGridCount,
-            price,
-            rawLevels
-        );
-
-        // 2. Assign Sizes and Build Order List
-        for (let i = 0; i < rawLevels.length; i++) {
-            const sizeInUSDT = sizes[i]; // This is USDT Value (e.g. $50)
-            const levelPrice = rawLevels[i].price; // Ensure we read price correctly
-
-            // CRITICAL FIX: Convert USDT Value to Asset Quantity (BTC)
-            // sizeInUSDT / price = BTC Quantity 
-            const amountInBTC = new Decimal(sizeInUSDT).div(levelPrice);
-
-            // FIX 1: Check against Exchange Limits (Amount) AND Min USDT Value
-            const market = binance.markets?.[CONFIG.pair];
-            const minAmount = market?.limits?.amount?.min || CONFIG.minOrderSize; // Fallback to preset
-            const minCost = market?.limits?.cost?.min || 5; // Usually 5 USDT
-
-            if (amountInBTC.toNumber() >= minAmount && sizeInUSDT >= minCost) {
-                gridLevels.push({
-                    ...rawLevels[i],
-                    amount: amountInBTC // Pass QUANTITY to placeOrder, NOT Value
-                });
-            }
-        }
-
-        // FIX 2: Dynamic Max Open Orders
-        // Ensure we can place the full calculated grid
-        if (gridLevels.length > CONFIG.maxOpenOrders) {
-            log('CONFIG', `Upgrading Max Orders from ${CONFIG.maxOpenOrders} to ${gridLevels.length} to fit grid.`, 'info');
-            CONFIG.maxOpenOrders = gridLevels.length + 5; // Buffer
-        }
-
-        // Place Orders
-        log('GRID', `PLACING ${gridLevels.length} ORDERS (PYRAMID STRATEGY)...`);
-        for (const level of gridLevels) {
-            try {
-                await placeOrder(level);
-            } catch (e) {
-                log('ERROR', `Failed to place grid order: ${e.message}`, 'error');
-            }
-            await sleep(CONFIG.orderDelay);
-        }
-
-        saveState();
-        emitGridState();
-        monitorOrders();
     }
 
-    // [ মু placeOrder MOVED TO GLOBAL SCOPE ]
-} // End of initializeGrid loop
+    const safeCapital = allocation.grid;
+
+    log('SYSTEM', `CAPITAL ALLOCATION: $${safeCapital.toFixed(2)} for grid | $${allocation.reserve.toFixed(2)} reserve (${allocation.reason})`);
+
+    // Log adaptive safety margin for transparency
+    const adaptiveSafetyMargin = adaptiveHelpers.getAdaptiveSafetyMargin(volatilityState, regime.regime);
+    CONFIG.safetyMargin = adaptiveSafetyMargin; // Apply globally
+    log('ADAPTIVE', `Safety Margin: ${(adaptiveSafetyMargin * 100).toFixed(0)}% (Vol: ${volatilityState} | Regime: ${regime.regime})`, 'info');
+
+    // Track initial capital for profit % (only set once on first run)
+    if (!state.initialCapital) {
+        state.initialCapital = dynamicCapital;
+        log('CAPITAL', `Initial Capital Set: $${state.initialCapital.toFixed(2)}`, 'info');
+    }
+
+    // PHASE 2: Dynamic Grid Count (adapt to capital and volatility)
+    const dynamicGridCount = adaptiveHelpers.calculateOptimalGridCount(safeCapital, volatilityState);
+    log('ADAPTIVE', `Grid Count: ${dynamicGridCount} (Capital: $${safeCapital.toFixed(0)} | Vol: ${volatilityState})`, 'info');
+
+    const orderAmountUSDT = new Decimal(safeCapital).div(dynamicGridCount);
+    const gridLevels = [];
+    const halfGrid = Math.floor(dynamicGridCount / 2);
+
+    // 1. Generate Levels (Prices only)
+    const rawLevels = [];
+
+    // Buys
+    for (let i = 1; i <= halfGrid; i++) {
+        const levelPrice = new Decimal(price).mul(new Decimal(1).minus(new Decimal(CONFIG.gridSpacing).mul(i)));
+        rawLevels.push({ side: 'buy', price: levelPrice.toNumber(), level: -i });
+    }
+    // Sells
+    for (let i = 1; i <= halfGrid; i++) {
+        const levelPrice = new Decimal(price).mul(new Decimal(1).plus(new Decimal(CONFIG.gridSpacing).mul(i)));
+        rawLevels.push({ side: 'sell', price: levelPrice.toNumber(), level: i });
+    }
+
+    // PHASE 2: ADAPTIVE PYRAMID SIZING (Brain Activation)
+    const sizes = adaptiveHelpers.calculateOptimalOrderSizes(
+        safeCapital,
+        dynamicGridCount,
+        price,
+        rawLevels
+    );
+
+    // 2. Assign Sizes and Build Order List
+    for (let i = 0; i < rawLevels.length; i++) {
+        const sizeInUSDT = sizes[i]; // This is USDT Value (e.g. $50)
+        const levelPrice = rawLevels[i].price; // Ensure we read price correctly
+
+        // CRITICAL FIX: Convert USDT Value to Asset Quantity (BTC)
+        // sizeInUSDT / price = BTC Quantity 
+        const amountInBTC = new Decimal(sizeInUSDT).div(levelPrice);
+
+        // FIX 1: Check against Exchange Limits (Amount) AND Min USDT Value
+        const market = binance.markets?.[CONFIG.pair];
+        const minAmount = market?.limits?.amount?.min || CONFIG.minOrderSize; // Fallback to preset
+        const minCost = market?.limits?.cost?.min || 5; // Usually 5 USDT
+
+        if (amountInBTC.toNumber() >= minAmount && sizeInUSDT >= minCost) {
+            gridLevels.push({
+                ...rawLevels[i],
+                amount: amountInBTC // Pass QUANTITY to placeOrder, NOT Value
+            });
+        }
+    }
+
+    // FIX 2: Dynamic Max Open Orders
+    // Ensure we can place the full calculated grid
+    if (gridLevels.length > CONFIG.maxOpenOrders) {
+        log('CONFIG', `Upgrading Max Orders from ${CONFIG.maxOpenOrders} to ${gridLevels.length} to fit grid.`, 'info');
+        CONFIG.maxOpenOrders = gridLevels.length + 5; // Buffer
+    }
+
+    // Place Orders
+    log('GRID', `PLACING ${gridLevels.length} ORDERS (PYRAMID STRATEGY)...`);
+    for (const level of gridLevels) {
+        try {
+            await placeOrder(level);
+        } catch (e) {
+            log('ERROR', `Failed to place grid order: ${e.message}`, 'error');
+        }
+        await sleep(CONFIG.orderDelay);
+    }
+
+    emitGridState();
+    monitorOrders();
+    // } // End of initializeGrid loop - REMOVED IF BLOCK
+} // End of initializeGrid function
 
 async function placeOrder(level) {
     // Circuit Breaker
@@ -819,7 +819,8 @@ async function placeOrder(level) {
     let amount = new Decimal(level.amount).toNumber();
 
     // PHASE 4: Fee Optimization - Skip unprofitable orders
-    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, state.currentPrice, CONFIG.tradingFee);
+    // FIX: Use ORDER price, not current price, for accurate worth check
+    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, price, CONFIG.tradingFee);
     if (!worthCheck.worth) {
         log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
         return;
@@ -1020,6 +1021,10 @@ async function runMonitorLoop(myId) {
             log('STOPPED', 'Bot halted due to emergency stop-loss', 'error');
             return;
         }
+
+        // FIX: Ensure Price is LIVE for Flash Crash & Health Checks
+        await getCurrentPrice();
+
         await checkStopLoss();
         // PHASE 2: FLASH CRASH PROTECTION
         await checkFlashCrash();
@@ -1031,6 +1036,9 @@ async function runMonitorLoop(myId) {
         // PHASE 1: Market Intelligence
         const regime = await detectMarketRegime();
         const multiTF = await analyzeMultipleTimeframes();
+
+        // FIX: Track regime change properly
+        state.lastRegime = state.marketRegime;
         state.marketRegime = regime.regime;
 
         if (myId !== monitorSessionId) return; // Zombie check
@@ -1612,42 +1620,6 @@ async function fetchBTCDominance() {
     return { value: 50, signal: 'BALANCED', timestamp: Date.now() };
 }
 
-// OPEN INTEREST CHANGE (Binance Futures)
-async function fetchOpenInterest() {
-    // Cache check (1 minute)
-    if (externalDataCache.openInterest.value && (Date.now() - externalDataCache.openInterest.timestamp < 60000)) {
-        return externalDataCache.openInterest.value;
-    }
-
-    try {
-        const symbol = CONFIG.pair.replace('/', '');
-        // Safety: Only fetch for pairs likely to have futures (BTC, ETH, SOL, etc)
-        // This prevents 400 errors on random altcoins
-        const response = await fetch(`https://fapi.binance.com/fapi/v1/openInterest?symbol=${symbol}`);
-
-        if (!response.ok) {
-            // If pair not found on futures, return stable neutral signal
-            return { current: 0, change: 0, signal: 'STABLE', timestamp: Date.now() };
-        }
-
-        const data = await response.json();
-        const currentOI = parseFloat(data.openInterest);
-        const previousOI = externalDataCache.openInterest.value?.current || currentOI;
-        const change = ((currentOI - previousOI) / previousOI) * 100;
-
-        const oi = {
-            current: currentOI,
-            change: change,
-            signal: change > 5 ? 'OI_INCREASING' : (change < -5 ? 'OI_DECREASING' : 'STABLE'),
-            timestamp: Date.now()
-        };
-        externalDataCache.openInterest = { value: oi, timestamp: Date.now() };
-        return oi;
-    } catch (e) {
-        console.error('>> [ERROR] Open Interest fetch failed:', e.message);
-    }
-    return { current: 0, change: 0, signal: 'STABLE', timestamp: Date.now() };
-}
 
 // TIME-BASED MARKET CHECK
 function checkMarketTiming() {
@@ -2389,7 +2361,7 @@ async function syncHistoricalTrades() {
                     // DEBUG: Log calculation details
                     log('DEBUG', `Calc Profit: ${trade.amount} * ${trade.price} * ${CONFIG.gridSpacing}`);
                     estimatedProfit = (trade.amount * trade.price) * CONFIG.gridSpacing;
-                    state.totalProfit += estimatedProfit; // Add to global counter
+                    // state.totalProfit += estimatedProfit; // FIX: Disabled Double Counting
                 }
 
                 // Add to history
@@ -2411,7 +2383,7 @@ async function syncHistoricalTrades() {
                 if (existingOrder && existingOrder.side === 'sell' && existingOrder.profit === 0) {
                     const estimatedProfit = (trade.amount * trade.price) * CONFIG.gridSpacing;
                     existingOrder.profit = estimatedProfit;
-                    state.totalProfit += estimatedProfit;
+                    // state.totalProfit += estimatedProfit; // FIX: Disabled Double Counting
                     log('SYNC', `REPAIRED history for Sell ${trade.orderId}: +$${estimatedProfit.toFixed(4)}`, 'success');
                     addedCount++; // Count as an update so we save state
                 }
