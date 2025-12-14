@@ -55,6 +55,12 @@ const [BASE_ASSET, QUOTE_ASSET] = TRADING_PAIR.split('/'); // e.g. ['BTC', 'USDT
 // Value from 0 to 1.0 (e.g., 0.5 = 50% of total balance)
 const CAPITAL_ALLOCATION = parseFloat(process.env.CAPITAL_ALLOCATION) || 1.0;
 
+// Phase 31: PRODUCTION SAFETY GUARDRAILS
+// Prevents account ruin by limiting exposure
+const USDT_FLOOR_PERCENT = 0.15;      // Min 15% of equity must stay in USDT (pauses BUYs)
+const INVENTORY_CAP_PERCENT = 0.70;   // Max 70% of equity can be in BASE_ASSET (pauses BUYs)
+
+
 // Pair-specific presets
 const PAIR_PRESETS = {
     'BTC/USDT': {
@@ -612,41 +618,7 @@ async function getDetailedFinancials() {
     return getDetailedFinancialsCached(2000);
 }
 
-// P0 FIX: Detailed Financials (Equity & Limits)
-// RENAMED to avoid conflict with legacy function name (Engineer FB Phase 27)
-async function computeBotFinancials() {
-    try {
-        const balance = await binance.fetchBalance();
-        // P0 FIX: Dynamic Equity (Include Base Asset)
-        const tickers = await binance.fetchTickers([...new Set(['BTC/USDT', 'ETH/USDT', 'SOL/USDT', CONFIG.pair])]);
 
-        let totalEquityUSDT = 0;
-        const assets = new Set(['BTC', 'ETH', 'SOL', BASE_ASSET]); // P0 FIX: Include Base Asset explicitly
-
-        for (const asset of assets) {
-            const total = balance[asset]?.total || 0;
-            if (total > 0) {
-                const price = (asset === 'USDT') ? 1 : (tickers[`${asset}/USDT`]?.last || 0);
-                totalEquityUSDT += total * price;
-            }
-        }
-
-        // Add USDT
-        totalEquityUSDT += (balance.USDT?.total || 0);
-
-        return {
-            freeUSDT: balance.USDT?.free || 0,
-            totalUSDT: balance.USDT?.total || 0,
-            totalBTC: balance[BASE_ASSET]?.total || 0,
-            lockedBTC: balance[BASE_ASSET]?.used || 0,
-            equity: totalEquityUSDT
-        };
-
-    } catch (e) {
-        console.error("Financials fetch failed", e);
-        throw e;
-    }
-}
 
 async function updateBalance() {
     try {
@@ -2386,6 +2358,41 @@ async function checkFlashCrash() {
     }
 }
 
+// Phase 31: PRODUCTION SAFETY GUARDRAILS
+// Prevents over-exposure by limiting BUY orders when USDT is low or inventory is high
+async function shouldPauseBuys() {
+    try {
+        const balance = await binance.fetchBalance();
+        const equity = await getGlobalEquity();
+        const currentPrice = state.currentPrice || 0;
+
+        const freeUSDT = balance.USDT?.free || 0;
+        const totalBase = balance[BASE_ASSET]?.total || 0;
+        const baseValueUSDT = totalBase * currentPrice;
+
+        // Guard 1: USDT Floor - Keep minimum liquidity
+        if (freeUSDT < equity * USDT_FLOOR_PERCENT) {
+            return {
+                pause: true,
+                reason: `USDT_FLOOR (Free: $${freeUSDT.toFixed(2)} < ${(USDT_FLOOR_PERCENT * 100).toFixed(0)}% of $${equity.toFixed(2)})`
+            };
+        }
+
+        // Guard 2: Inventory Cap - Limit exposure to BASE_ASSET
+        if (baseValueUSDT > equity * INVENTORY_CAP_PERCENT) {
+            return {
+                pause: true,
+                reason: `INVENTORY_CAP (${((baseValueUSDT / equity) * 100).toFixed(1)}% > ${(INVENTORY_CAP_PERCENT * 100).toFixed(0)}%)`
+            };
+        }
+
+        return { pause: false };
+    } catch (e) {
+        console.error('>> [ERROR] shouldPauseBuys check failed:', e.message);
+        return { pause: false }; // Fail open to not block trading
+    }
+}
+
 // PHASE 1: Fee-Aware Profit Calculation
 function calculateNetProfit(buyPrice, sellPrice, amount) {
     const grossProfit = (sellPrice - buyPrice) * amount;
@@ -2612,6 +2619,13 @@ async function handleOrderFill(order, fillPrice) {
 
     // BUY FILTER: Don't buy when signals say SELL
     if (newSide === 'buy') {
+        // Phase 31: PRODUCTION GUARDRAILS - Check USDT Floor & Inventory Cap
+        const guard = await shouldPauseBuys();
+        if (guard.pause) {
+            log('GUARD', `🛡️ BUY BLOCKED: ${guard.reason}`, 'warning');
+            return;
+        }
+
         if (state.marketCondition?.isOverbought) {
             log('FILTER', `🛑 RSI OVERBOUGHT. SKIPPING BUY.`, 'error');
             return;
