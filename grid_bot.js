@@ -180,8 +180,8 @@ const binance = new ccxt.binance({
 // ENHANCED LOGGING SYSTEM - Full Transparency
 // ============================================
 const logBuffer = []; // Re-added as it's used by addToBuffer, which is not in the diff but implied.
-const LOG_FILE = path.join(__dirname, 'bot_activity.log');
-const DECISION_LOG = path.join(__dirname, 'decisions.log');
+const LOG_FILE = path.join(__dirname, 'logs', `${BOT_ID}_${PAIR_ID}_activity.log`);
+const DECISION_LOG = path.join(__dirname, 'logs', `${BOT_ID}_${PAIR_ID}_decisions.log`);
 
 // ENGINEER FIX: Async Logging Strings (Performance P0)
 let logStream;
@@ -836,7 +836,9 @@ async function initializeGrid(forceReset = false) {
         }
 
         // PHASE 2: Dynamic Grid Count (adapt to capital and volatility)
-        const dynamicGridCount = adaptiveHelpers.calculateOptimalGridCount(safeCapital, volatilityState);
+        let dynamicGridCount = adaptiveHelpers.calculateOptimalGridCount(safeCapital, volatilityState);
+        // P0 FIX: Force Even Grid Count (Symmetry)
+        if (dynamicGridCount % 2 !== 0) dynamicGridCount += 1;
         log('ADAPTIVE', `Grid Count: ${dynamicGridCount} (Capital: $${safeCapital.toFixed(0)} | Vol: ${volatilityState})`, 'info');
 
         const orderAmountUSDT = new Decimal(safeCapital).div(dynamicGridCount);
@@ -926,22 +928,52 @@ async function placeOrder(level) {
     const price = new Decimal(level.price).toNumber();
     let amount = new Decimal(level.amount).toNumber();
 
+    // PRECISION ENFORCEMENT (Amount & Price)
+    // MOVED UP for accuracy (P0 Fix)
+    let finalPrice = price;
+    try {
+        amount = parseFloat(binance.amountToPrecision(CONFIG.pair, amount));
+        finalPrice = parseFloat(binance.priceToPrecision(CONFIG.pair, price));
+    } catch (e) {
+        console.warn('>> [WARN] Could not enforce precision:', e.message);
+    }
+
+    // P0 FIX: Allocation Enforcement (Real Budget Check)
+    const fin = await getDetailedFinancials().catch(() => null);
+    const finalNotionalUSDT = amount * finalPrice;
+
+    if (fin) {
+        if (level.side === 'buy') {
+            const budget = fin.freeUSDT * CONFIG.safetyMargin;
+            if (finalNotionalUSDT > budget) {
+                log('SKIP', `Allocation Budget: Need $${finalNotionalUSDT.toFixed(2)}, Budget $${budget.toFixed(2)} (Free $${fin.freeUSDT.toFixed(2)})`, 'warning');
+                return;
+            }
+        }
+        if (level.side === 'sell') {
+            const availableBase = Math.max(0, (fin.totalBTC || 0) - (fin.lockedBTC || 0));
+            if (amount > availableBase * 0.999) {
+                log('SKIP', `Insufficient BASE for SELL: Need ${amount.toFixed(6)} ${BASE_ASSET}, Avail ${availableBase.toFixed(6)}`, 'warning');
+                return;
+            }
+        }
+    }
+
     // Phase 4: Fee Optimization - Skip unprofitable orders
-    // FIX: Corrected signature: (orderSize, gridSpacing, currentPrice, tradingFee)
-    // P0 FIX: Pass Notional USDT to isOrderWorthPlacing
-    const notionalUSDT = new Decimal(amount).mul(price).toNumber();
+    // P0 FIX: Moved AFTER precision and allocation check
     const worthCheck = adaptiveHelpers.isOrderWorthPlacing(
-        notionalUSDT, // ✅ Correct Unit (USDT)
+        finalNotionalUSDT, // ✅ Correct Unit using PRECISE values
         CONFIG.gridSpacing,
-        price,
+        finalPrice,
         CONFIG.tradingFee
     );
 
     if (!worthCheck.worth) {
         log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
-        console.log(">> [SKIP] reason=UNPROFITABLE_ORDER", JSON.stringify({ reason: worthCheck.reason, minSize: CONFIG.minOrderSize }));
         return;
     }
+
+    // PROCEED TO EXECUTION...
 
     // PHASE 4.5: WALL PROTECTION (Order Book Intelligence)
     try {
@@ -962,24 +994,6 @@ async function placeOrder(level) {
         }
     } catch (e) {
         console.log('Wall check skipped');
-    }
-
-    // PRECISION ENFORCEMENT (Amount & Price)
-    try {
-        amount = parseFloat(binance.amountToPrecision(CONFIG.pair, amount));
-        // FIX: Enforce price precision regarding exchange rules
-        const precisionPrice = parseFloat(binance.priceToPrecision(CONFIG.pair, price));
-        if (Math.abs(price - precisionPrice) > Number.EPSILON) {
-            // If precision regulated price is different, use it (but logging original for context)
-            // console.log(`>> [ADJUST] Price adjusted for precision: ${price} -> ${precisionPrice}`); 
-        }
-        // We use the original 'price' variable for logic, but could update it here if strictness is required.
-        // For now, let's trust the exchange might round, OR explicitly round it:
-        // price = precisionPrice; // Un-commenting this is safer, but let's verify if 'price' is const. It is NOT (it was cast to number). 
-        // Wait, line 852: const price = ... It IS CONST. 
-        // We need to pass the precise price to createLimitOrder.
-    } catch (e) {
-        console.warn('>> [WARN] Could not enforce precision:', e.message);
     }
 
     // PHASE 5: SMART BALANCE CHECK (New Intelligence)
@@ -1012,13 +1026,7 @@ async function placeOrder(level) {
         } catch (e) { console.log('Balance race check failed (non-fatal)'); }
     }
 
-    // Calculate final precise price
-    let finalPrice = price;
-    try {
-        finalPrice = parseFloat(binance.priceToPrecision(CONFIG.pair, price));
-    } catch (e) {
-        // Fallback to original
-    }
+    // (Precision logic moved up)
 
     let order;
     try {
@@ -1026,7 +1034,8 @@ async function placeOrder(level) {
             // P0 FIX: Use Standard CCXT createOrder
             () => binance.createOrder(CONFIG.pair, 'limit', level.side, amount, finalPrice, {
                 newClientOrderId: uniqueId, // ✅ Binance Spot Requirement
-                clientOrderId: uniqueId     // Fallback
+                clientOrderId: uniqueId,    // Fallback
+                timeInForce: 'GTC'          // P0 NICE-TO-HAVE: Explicit GTC
             }),
             3,
             `Place ${level.side} order`
@@ -2415,6 +2424,16 @@ async function handleOrderFill(order, fillPrice) {
             }
         }
 
+        // P0 FIX: Inventory Shortfall Handling
+        if (remainingToSell > 0.00000001) {
+            log('WARN', `Inventory shortfall: Missing ${remainingToSell.toFixed(8)} ${BASE_ASSET}. Estimating cost basis.`, 'warning');
+            // Estimate cost for the missing portion
+            const estimatedBuyPrice = fillPrice / (1 + CONFIG.gridSpacing);
+            costBasis += (remainingToSell * estimatedBuyPrice);
+            entryFees += (remainingToSell * estimatedBuyPrice * CONFIG.tradingFee);
+            remainingToSell = 0;
+        }
+
         // Prune fully consumed lots to keep array clean
         state.inventory = state.inventory.filter(lot => lot.remaining > 0.00000001);
 
@@ -2607,13 +2626,8 @@ async function syncWithExchange() {
                 ...old, // Keep internal state (level, strategy details)
                 id: o.id,
                 side: o.side,
-                price: o.price,
-                amount: o.amount,
-                status: 'open',
-                timestamp: o.timestamp,
-                side: o.side,
-                price: o.price,
-                amount: o.amount,
+                price: parseFloat(o.price), // P0 FIX: Sanitize Types
+                amount: parseFloat(o.amount), // P0 FIX: Sanitize Types
                 status: 'open',
                 timestamp: o.timestamp,
                 clientOrderId: getClientId(o), // P0 FIX: Robust ID Persistence
@@ -2897,7 +2911,7 @@ server.listen(BOT_PORT, async () => {
     function generateDailyReport() {
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0];
-        const reportFile = path.join(REPORTS_DIR, `daily_report_${dateStr}.txt`);
+        const reportFile = path.join(REPORTS_DIR, `daily_report_${BOT_ID}_${PAIR_ID}_${dateStr}.txt`);
 
         // Calculate today's metrics
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
