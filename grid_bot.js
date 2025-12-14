@@ -155,42 +155,53 @@ const binance = new ccxt.binance({
     options: { 'adjustForTimeDifference': true }
 });
 
+// CRITICAL P0: Bot Isolation
+const BOT_ID = process.env.BOT_ID || "VANTAGE01";
+// PAIR_ID already defined above
+
+
 // ============================================
 // ENHANCED LOGGING SYSTEM - Full Transparency
 // ============================================
-const logBuffer = [];
+const logBuffer = []; // Re-added as it's used by addToBuffer, which is not in the diff but implied.
 const LOG_FILE = path.join(__dirname, 'bot_activity.log');
 const DECISION_LOG = path.join(__dirname, 'decisions.log');
+
+// ENGINEER FIX: Async Logging Strings (Performance P0)
+let logStream;
+let decisionStream;
 
 // Initialize log files
 function initializeLogs() {
     const header = `\n\n========== BOT SESSION STARTED: ${new Date().toISOString()} ==========\n`;
-    fs.appendFileSync(LOG_FILE, header);
-    fs.appendFileSync(DECISION_LOG, header);
+
+    // Create non-blocking streams
+    logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
+    decisionStream = fs.createWriteStream(DECISION_LOG, { flags: 'a' });
+
+    logStream.write(header);
+    decisionStream.write(header);
+}
+
+// Helper to add to logBuffer for UI
+function addToBuffer(logEntry) {
+    logBuffer.unshift(logEntry);
+    if (logBuffer.length > CONFIG.logBufferSize) logBuffer.pop();
 }
 
 // Main logging function - writes to console, UI, and file
-function log(type, msg, style = '') {
+function log(type, message, status = 'info') {
     const timestamp = new Date().toISOString();
-    const logLine = `[${timestamp}] [${type}] ${msg}`;
+    const logLine = `[${timestamp}] [${type}] ${message}`;
 
-    // Console
-    console.log(`[${new Date().toISOString()}] >> [${type}] ${msg}`);
-
-    // Persistent file (append)
-    try {
-        fs.appendFileSync(LOG_FILE, logLine + '\n');
-    } catch (e) {
-        console.error('Log write failed:', e.message);
-    }
-
-    // Buffer for UI
-    const logEntry = { type, msg, style, timestamp: Date.now() };
-    logBuffer.unshift(logEntry);
-    if (logBuffer.length > CONFIG.logBufferSize) logBuffer.pop();
+    console.log(`>> [${type}] ${message}`);
 
     // Emit to UI
-    io.emit('log_message', logEntry);
+    io.emit('log', { type, message, timestamp, status });
+    addToBuffer({ type, message, timestamp, status });
+
+    // Write to file (Non-blocking)
+    if (logStream) logStream.write(logLine + '\n');
 }
 
 // Decision logging - explains WHY the bot did something
@@ -210,8 +221,10 @@ function logDecision(action, reasons, data = {}) {
     const logLine = `[${timestamp}] ${action}: ${reasons.join(' | ')} | Price: $${state.currentPrice?.toFixed(0) || '??'} | Score: ${decision.compositeScore?.toFixed(0) || '??'}`;
 
     try {
-        fs.appendFileSync(DECISION_LOG, logLine + '\n');
-        fs.appendFileSync(DECISION_LOG, `  Details: ${JSON.stringify(data)}\n`);
+        if (decisionStream) {
+            decisionStream.write(logLine + '\n');
+            decisionStream.write(`  Details: ${JSON.stringify(data)}\n`);
+        }
     } catch (e) {
         console.error('Decision log failed:', e.message);
     }
@@ -228,7 +241,7 @@ function logDecision(action, reasons, data = {}) {
 
 // ENGINEER REQUEST: Explicit Decision Gate Logging
 function logDecisionGate(action, details) {
-    if (process.env.DEBUG_GATES === 'true' || true) { // Always on for now
+    if (process.env.DEBUG_GATES === 'true') { // ENGINEER FIX: Control via ENV
         // Format for readability: >> [DECISION] {"action":"HOLD", ...}
         console.log(">> [DECISION]", JSON.stringify({
             pair: CONFIG.pair,
@@ -1002,14 +1015,19 @@ async function placeOrder(level) {
     try {
         let order;
         // LIVE - Using resilient API call with retries
+        // CRITICAL P0: Isolation Tag
+        const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${Date.now()}`;
+
         order = await adaptiveHelpers.resilientAPICall(
-            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price),
+            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price, {
+                clientOrderId: uniqueId
+            }),
             3,
             `Place ${level.side} order`
         );
 
         // Log with full transparency
-        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} @ $${price.toFixed(2)}`, 'success');
+        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} @ $${price.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
         logActivity('PLACING_ORDER');
         logDecision(
             `ORDER_PLACED_${level.side.toUpperCase()}`,
@@ -2398,7 +2416,15 @@ async function handleOrderFill(order, fillPrice) {
 async function syncWithExchange() {
     log('SYSTEM', 'SYNCING WITH EXCHANGE...');
     try {
-        const openOrders = await binance.fetchOpenOrders(CONFIG.pair);
+        const allOpenOrders = await binance.fetchOpenOrders(CONFIG.pair);
+
+        // CRITICAL P0: Isolation - Only process orders belonging to THIS bot
+        const openOrders = allOpenOrders.filter(o => o.info.clientOrderId?.startsWith(BOT_ID) || o.clientOrderId?.startsWith(BOT_ID));
+        const ignoredCount = allOpenOrders.length - openOrders.length;
+        if (ignoredCount > 0) {
+            console.log(`>> [ISOLATION] Ignored ${ignoredCount} foreign/manual orders.`);
+        }
+
         const openIds = new Set(openOrders.map(o => o.id));
 
         // 1. Remove local orders that are no longer open on exchange
@@ -2407,35 +2433,53 @@ async function syncWithExchange() {
 
         for (const missingOrder of missingOrders) {
             try {
-                const orderInfo = await binance.fetchOrder(missingOrder.id, CONFIG.pair);
-                if (orderInfo.status === 'closed' || orderInfo.status === 'filled') {
+                // Check if it was filled
+                const order = await adaptiveHelpers.resilientAPICall(
+                    () => binance.fetchOrder(missingOrder.id, CONFIG.pair),
+                    3,
+                    `Check missing order ${missingOrder.id}`
+                );
+
+                if (order.status === 'closed' || order.status === 'filled') {
+                    // It was filled! Handle it.
                     log('SYNC', `Order ${missingOrder.id} filled while offline. Processing...`, 'success');
-                    // FIX: Use average price (real fill) if available, otherwise limit price
-                    const realFillPrice = orderInfo.average || orderInfo.price;
-                    await handleOrderFill(missingOrder, realFillPrice);
-                } else if (orderInfo.status === 'canceled') {
-                    log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`, 'info');
+                    await handleOrderFill({
+                        ...order,
+                        status: 'open', // Hack to force handleOrderFill to process it
+                        timestamp: order.timestamp
+                    });
+                } else if (order.status === 'canceled') {
+                    log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`);
                 }
             } catch (e) {
-                log('WARN', `Could not fetch status for missing order ${missingOrder.id}. Assuming canceled.`, 'warning');
+                log('WARN', `Could not verify missing order ${missingOrder.id}: ${e.message}`);
             }
         }
 
-        // Now update the active list
-        state.activeOrders = state.activeOrders.filter(o => openIds.has(o.id));
+        // Update active orders list
+        state.activeOrders = openOrders.map(o => ({
+            id: o.id,
+            side: o.side,
+            price: o.price,
+            amount: o.amount,
+            timestamp: o.timestamp
+        }));
 
-        // 2. Adopt orphan orders from exchange
+        // 2. Adopt ONLY tagged orphan orders (Isolation)
+        const localIds = new Set(state.activeOrders.map(o => o.id)); // Updated list
         let adoptedCount = 0;
+
+        // Since we already filtered 'openOrders' by BOT_ID, anything left that is NOT in local state is a valid orphan to adopt.
         for (const order of openOrders) {
-            const isKnown = state.activeOrders.some(o => o.id === order.id);
-            if (!isKnown) {
-                // Adopt it
+            if (!localIds.has(order.id)) {
+                // Double check tag just in case
+                if (!order.clientOrderId?.startsWith(BOT_ID)) continue;
+
                 state.activeOrders.push({
                     id: order.id,
                     side: order.side,
                     price: order.price,
                     amount: order.amount,
-                    level: 0, // Unknown level, assign 0 or estimate
                     status: 'open',
                     timestamp: order.timestamp
                 });
@@ -2452,6 +2496,8 @@ async function syncWithExchange() {
         }
 
         // 3. Sync recent history (for UI completeness)
+        // Note: fetchMyTrades doesn't easily support clientOrderId filtering without fetching all. 
+        // We'll leave history logic as is for now, as it's just for display.
         await syncHistoricalTrades();
 
     } catch (e) {
