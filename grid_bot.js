@@ -14,6 +14,20 @@ const path = require('path');
 require('dotenv').config();
 const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
+const crypto = require('crypto');
+
+// P0 FIX: Robust Order Filter Helper
+// Binance returns clientOrderId in different places depending on endpoint (openOrders vs myTrades)
+function getClientId(o) {
+    if (!o) return '';
+    return (
+        o.clientOrderId ||
+        o.info?.clientOrderId ||
+        o.info?.origClientOrderId ||
+        o.info?.newClientOrderId ||
+        ''
+    );
+}
 
 // --- ENGINEER FIX 1: Robust Fetch Environment Check ---
 if (!global.fetch) {
@@ -317,35 +331,22 @@ function loadState() {
             const raw = fs.readFileSync(CONFIG.stateFile);
             const saved = JSON.parse(raw);
 
-            // PHASE 4: AUTO-RECOVERY & PROFIT PRESERVATION
-            // If bot died from Stop Loss, we Reincarnate it automatically
+            // P0 FIX: Merge saved state BEFORE applied logic
+            // This prevents old saved values from overwriting the "reborn" logic above
+            state = { ...state, ...saved };
+
+            // P0 FIX: Restore accumulated profit if we just recovered
             if (saved.emergencyStop) {
-                log('RECOVERY', '🚨 PREVIOUS STOP-LOSS DETECTED. INITIATING AUTO-RECOVERY...', 'warning');
-
-                // 1. Archive the Crash State
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const archiveName = CONFIG.stateFile.replace('.json', `_CRASH_${timestamp}.json`);
-                try { fs.copyFileSync(CONFIG.stateFile, archiveName); } catch (e) { console.error('Archive failed', e); }
-
-                // 2. Salvage the Profit
+                // Redefine vars locally to ensure they exist
                 const oldSessionProfit = saved.totalProfit || 0;
                 const oldAccumulated = saved.accumulatedProfit || 0;
                 const legacyProfit = oldSessionProfit + oldAccumulated;
 
-                // 3. Reset State (Don't merge saved data)
-                // 'state' is currently fresh defaults. We just inject the history.
                 state.accumulatedProfit = legacyProfit;
-                // state.emergencyStop = false; // AUTOCLEAR DISABLED per User Doctrine
-
-                // 4. Force Save immediately (clean slate)
-                saveState();
-
-                log('RECOVERY', `✅ BOT REBORN! Profit History Preserved: $${legacyProfit.toFixed(2)}`, 'success');
-                // Return early so we don't load the bad state
-                // return; // RETURN DISABLED: Continue to load state to preserve flags if needed
+                // state.emergencyStop = false; // Doctrine: Keep true until manual intervention
             }
 
-            state = { ...state, ...saved };
+            // AUDIT FIX: Ensure inventory exists
             // AUDIT FIX: Ensure inventory exists
             if (!state.inventory) state.inventory = [];
 
@@ -588,6 +589,7 @@ async function updateBalance() {
             usdt: state.balance.usdt, // Free USDT
             btc: state.balance.btc,   // Free Base Asset (Legacy key 'btc' kept for UI compat)
             equity: totalEquity,      // Total Account Value
+            allocatedEquity: totalEquity * CAPITAL_ALLOCATION, // P1: Emit my slice
             isDemo: !state.isLive
         });
     } catch (e) {
@@ -988,7 +990,9 @@ async function placeOrder(level) {
 
     // LIVE - Using resilient API call with retries
     // CRITICAL P0: Isolation Tag
-    const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${Date.now()}`;
+    // P0 FIX: Use UUID to prevent collision
+    const simpleId = crypto.randomUUID().split('-')[0]; // Short unique
+    const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${simpleId}`;
 
     // P0 FIX: Race Condition Mitigation - Fresh Balance Check
     // Prevents "Insufficient Funds" spam when multi-bot races occur
@@ -1072,10 +1076,8 @@ async function cancelAllOrders() {
         const all = await binance.fetchOpenOrders(CONFIG.pair);
 
         // Filter carefully
-        const mine = all.filter(o =>
-            (o.info?.clientOrderId || o.clientOrderId || '').startsWith(myPrefix) ||
-            (o.info?.newClientOrderId || '').startsWith(myPrefix)
-        );
+        // Filter carefully using P0 Robust Helper
+        const mine = all.filter(o => getClientId(o).startsWith(myPrefix));
 
         if (mine.length === 0) {
             log('SYSTEM', 'No active bot orders found to cancel.', 'info');
@@ -1691,6 +1693,16 @@ async function getGlobalEquity() {
                 'Fetch SOL Price'
             );
             total += (balance.SOL.total * solPrice);
+        }
+
+        // P1 FIX: Add ETH value (Round out the Big 3)
+        if (balance.ETH && balance.ETH.total > 0) {
+            const ethPrice = await adaptiveHelpers.resilientAPICall(
+                () => binance.fetchTicker('ETH/USDT').then(t => t.last),
+                3,
+                'Fetch ETH Price'
+            );
+            total += (balance.ETH.total * ethPrice);
         }
 
         // Update Cache
@@ -2526,10 +2538,9 @@ async function syncWithExchange() {
 
         // CRITICAL P0: Isolation - Only process orders belonging to THIS bot AND THIS PAIR
         const myPrefix = `${BOT_ID}_${PAIR_ID}_`;
-        const openOrders = allOpenOrders.filter(o =>
-            (o.info?.clientOrderId || o.clientOrderId || '').startsWith(myPrefix) ||
-            (o.info?.newClientOrderId || '').startsWith(myPrefix)
-        );
+        // Use P0 Robust Helper
+        const openOrders = allOpenOrders.filter(o => getClientId(o).startsWith(myPrefix));
+
         const ignoredCount = allOpenOrders.length - openOrders.length;
         if (ignoredCount > 0) {
             console.log(`>> [ISOLATION] Ignored ${ignoredCount} foreign/manual orders.`);
