@@ -729,8 +729,9 @@ async function computeBotFinancials() {
             lockedBTC: myLockedBase,
             totalBTC: myTotalBase,
             btcValueUSDT: myBaseValue,
-            totalEquity: globalTotalEquity, // SWAPPED: Show Total Binance Balance ($5400) as requested
-            allocatedEquity: myAllocatedEquity, // Preserved: The actual bot slice
+            totalEquity: myAllocatedEquity, // RESTORED: Bot's specific slice ($130)
+            accountEquity: globalTotalEquity, // Available for Portfolio View (if supported)
+            globalEquity: globalTotalEquity, // Alias try
             profit: state.totalProfit + (state.accumulatedProfit || 0), // Lifetime Profit
             profitPercent,
             pair: CONFIG.pair,
