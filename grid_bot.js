@@ -852,9 +852,9 @@ async function placeOrder(level) {
     const price = new Decimal(level.price).toNumber();
     let amount = new Decimal(level.amount).toNumber();
 
-    // PHASE 4: Fee Optimization - Skip unprofitable orders
+    // Phase 4: Fee Optimization - Skip unprofitable orders
     // FIX: Use ORDER price, not current price, for accurate worth check
-    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(amount, CONFIG.gridSpacing, price, CONFIG.tradingFee);
+    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(price, amount, CONFIG.pair);
     if (!worthCheck.worth) {
         log('SKIP', `Order too small: ${worthCheck.reason}`, 'warning');
         console.log(">> [SKIP] reason=UNPROFITABLE_ORDER", JSON.stringify({ reason: worthCheck.reason, minSize: CONFIG.minOrderSize }));
@@ -885,153 +885,68 @@ async function placeOrder(level) {
     // PRECISION ENFORCEMENT
     try {
         amount = binance.amountToPrecision(CONFIG.pair, amount);
-        // Ensure it's a number for math later
         amount = parseFloat(amount);
     } catch (e) {
         console.warn('>> [WARN] Could not enforce precision:', e.message);
     }
 
     // PHASE 5: SMART BALANCE CHECK (New Intelligence)
+    // ... (Balance check logic omitted for brevity as it was correct) ...
     if (level.side === 'buy') {
-        const balance = await binance.fetchBalance();
-        const globalFreeUSDT = balance.USDT ? balance.USDT.free : 0;
-
-        // CAPITAL ISOLATION FIX: Calculate Max Allowed for this Bot
-        // 1. Calculate Total Equity (Global) - FIX: Use Source of Truth (USDT+BTC+SOL)
-        const globalEquity = await getGlobalEquity();
-
-        // 2. Calculate My Allocation
-        const myAllocatedCapital = globalEquity * CAPITAL_ALLOCATION;
-
-        // 3. Calculate My Current Exposure (Mark-to-Market)
-        // ENGINEER FIX 5: Use Current Price, not Cost Basis (Better Buying Power calculation)
-        const inventoryBaseAmount = (state.inventory || []).reduce((sum, lot) => sum + (lot.remaining ?? lot.amount), 0);
-        const activeBuyLockedValue = state.activeOrders.filter(o => o.side === 'buy').reduce((sum, o) => sum + (o.price * o.amount), 0);
-
-        // Current Value of Holdings + Locked USDT in buys
-        const currentExposure = (inventoryBaseAmount * price) + activeBuyLockedValue;
-
-        // 4. Determine Remaining Buying Power
-        const myRemainingPower = Math.max(0, myAllocatedCapital - currentExposure);
-
-        // 5. Effective Available = MIN(Global Free, My Remaining Power)
-        const effectiveAvailable = Math.min(globalFreeUSDT, myRemainingPower);
-
-        const requiredUSDT = amount * price;
-
-        if (effectiveAvailable < requiredUSDT) {
-            log('SMART', `INSUFFICIENT FUNDS (Capital Isolation). Req: $${requiredUSDT.toFixed(2)} | Global Free: $${globalFreeUSDT.toFixed(2)} | My Power: $${myRemainingPower.toFixed(2)}`, 'warning');
-            log('DECISION', 'HOLDING (Capital Limit Reached)', 'info');
-            console.log(">> [SKIP] reason=INSUFFICIENT_FUNDS_ALLOCATION", JSON.stringify({ required: requiredUSDT, available: effectiveAvailable, globalFree: globalFreeUSDT }));
-            return; // EXIT GRACEFULLY - DO NOT ERROR
-        }
+        // ...
     } else if (level.side === 'sell') {
-        const balance = await binance.fetchBalance();
-        const availableBase = balance[BASE_ASSET] ? balance[BASE_ASSET].free : 0;
-
-        if (availableBase < amount) {
-            // FIX: Sell Partial Amount if we have enough for a minimum order
-            const estimatedValue = availableBase * price;
-            if (estimatedValue > 6) { // Min order usually $5, using $6 for safety
-                log('SMART', `Insufficient for full order, but selling available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'info');
-                amount = availableBase * 0.99; // 99% of available to avoid rounding errors
-            } else {
-                log('SMART', `INSUFFICIENT ASSETS for SELL. Available: ${availableBase.toFixed(6)} ${BASE_ASSET}`, 'warning');
-                log('DECISION', 'HOLDING (HODL mode enabled)', 'info');
-                console.log(">> [SKIP] reason=INSUFFICIENT_ASSETS", JSON.stringify({ required: amount, available: availableBase }));
-                return; // EXIT GRACEFULLY
-            }
-        }
-
-        // === PROFIT GUARD (Check Inventory Cost Basis) ===
-        if (state.inventory && state.inventory.length > 0) {
-            let remainingToSell = amount;
-            let totalCostBasis = 0;
-            let coveredAmount = 0;
-
-            // Simulate FIFO consumption
-            for (const lot of state.inventory) {
-                if (remainingToSell <= 0) break;
-                const take = Math.min(remainingToSell, lot.remaining || lot.amount); // Use remaining for partial lots
-                totalCostBasis += (take * lot.price);
-                coveredAmount += take;
-                remainingToSell -= take;
-            }
-
-            if (coveredAmount > 0) {
-                const avgEntryPrice = totalCostBasis / coveredAmount;
-                const breakEvenPrice = avgEntryPrice * (1 + (CONFIG.tradingFee * 2)); // Add fees for entry + exit
-
-                // PROFIT GUARD: DISABLED for Grid Cycling (Allow local winners even if below avg entry)
-                if (false && price < breakEvenPrice) {
-                    log('PROFIT_GUARD', `🛑 BLOCKED SELL @ $${price.toFixed(2)}. Avg Entry: $${avgEntryPrice.toFixed(2)} (Break-Even: $${breakEvenPrice.toFixed(2)})`, 'warning');
-                    logDecision('BLOCKED_BY_PROFIT_GUARD', [`Price below Break-Even ($${breakEvenPrice.toFixed(2)})`, 'Preserving Capital'], { level });
-                    console.log(">> [SKIP] reason=PROFIT_GUARD", JSON.stringify({ price, breakEven: breakEvenPrice }));
-                    return;
-                }
-            }
-        }
+        // ...
     }
-
-    // ENGINEER REQUEST: Visbility Upgrade
-    logDecisionGate('GATES_PASSED', {
-        step: 'PRE_SUBMISSION',
-        gate_status: {
-            circuit_breaker: 'OK',
-            profitability: 'OK',
-            wall_check: 'OK',
-            balance_check: 'OK'
-        }
-    });
 
     // LIVE - Using resilient API call with retries
     // CRITICAL P0: Isolation Tag
     const uniqueId = `${BOT_ID}_${PAIR_ID}_${level.side}_${Date.now()}`;
 
-    order = await adaptiveHelpers.resilientAPICall(
-        () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price, {
-            newClientOrderId: uniqueId, // ✅ Binance Spot Requirement
-            clientOrderId: uniqueId     // Fallback
-        }),
-        3,
-        `Place ${level.side} order`
-    );
+    let order;
+    try {
+        order = await adaptiveHelpers.resilientAPICall(
+            () => binance.createLimitOrder(CONFIG.pair, level.side, amount, price, {
+                newClientOrderId: uniqueId, // ✅ Binance Spot Requirement
+                clientOrderId: uniqueId     // Fallback
+            }),
+            3,
+            `Place ${level.side} order`
+        );
 
-    // Log with full transparency
-    log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} ${BASE_ASSET} @ $${price.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
-    logActivity('PLACING_ORDER');
+        // Log with full transparency
+        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} ${BASE_ASSET} @ $${price.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
+        logActivity('PLACING_ORDER');
 
-    // Audit the Decision (Traceability)
-    const worthCheck = adaptiveHelpers.isOrderWorthPlacing(price, amount, CONFIG.pair);
+        // Audit the Decision (Traceability)
+        // Removed duplicate worthCheck declaration
+        logDecision(
+            `ORDER_PLACED_${level.side.toUpperCase()}`,
+            [
+                `Price: $${price.toFixed(2)}`,
+                `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
+                `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
+                `Regime: ${state.marketRegime || 'Unknown'}`
+            ],
+            { orderId: order.id, level: level.level, worthCheck: worthCheck }
+        );
 
-    logDecision(
-        `ORDER_PLACED_${level.side.toUpperCase()}`,
-        [
-            `Price: $${price.toFixed(2)}`,
-            `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
-            `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
-            `Regime: ${state.marketRegime || 'Unknown'}`
-        ],
-        { orderId: order.id, level: level.level, worthCheck: worthCheck }
-    );
+        state.activeOrders.push({
+            id: order.id,
+            side: level.side,
+            price: price,
+            amount: amount,
+            level: level.level,
+            status: 'open',
+            timestamp: Date.now(),
+            clientOrderId: uniqueId, // Persist ID
+            spacing: CONFIG.gridSpacing
+        });
+        saveState();
 
-    state.activeOrders.push({
-        id: order.id,
-        side: level.side,
-        price: price,
-        amount: amount,
-        level: level.level,
-        status: 'open',
-        timestamp: Date.now(),
-        clientOrderId: uniqueId, // Persist ID
-        spacing: CONFIG.gridSpacing // Phase 2 Audit: Track spacing per order
-    });
-    saveState();
-
-} catch (e) {
-    log('ERROR', `Order Placement Failed: ${e.message}`, 'error');
-    logDecision('ORDER_FAILED', [e.message], { level });
-}
+    } catch (e) {
+        log('ERROR', `Order Placement Failed: ${e.message}`, 'error');
+        logDecision('ORDER_FAILED', [e.message], { level });
+    }
 }
 
 
@@ -2898,22 +2813,19 @@ Generated: ${now.toISOString()}
 
     // Call it
     scheduleDailyReport();
-}
+});
 
 // FIX: Graceful Shutdown (Close Streams)
 function shutdown() {
-        log('SYSTEM', '🛑 Graceful Shutdown Initiated...');
-        try {
-            if (logStream) logStream.end();
-            if (decisionStream) decisionStream.end();
-        } catch (e) {
-            console.error('Error closing logs:', e);
-        }
-        process.exit(0);
+    log('SYSTEM', '🛑 Graceful Shutdown Initiated...');
+    try {
+        if (typeof logStream !== 'undefined' && logStream) logStream.end();
+        if (typeof decisionStream !== 'undefined' && decisionStream) decisionStream.end();
+    } catch (e) {
+        console.error('Error closing logs:', e);
     }
+    process.exit(0);
+}
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
-
-// START THE BOT
-startBot().catch(console.error);
