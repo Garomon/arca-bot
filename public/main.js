@@ -886,38 +886,33 @@ async function loadArcaData() {
     }
 
     if (data) {
-        if (saved) {
-            const data = JSON.parse(saved);
-            // Ensure new fields exist (migration)
-            if (!data.goals) data.goals = getDefaultGoals();
-            if (!data.flow) data.flow = getDefaultFlow();
+        // Ensure new fields exist (migration)
+        if (!data.goals) data.goals = getDefaultGoals();
+        if (!data.flow) data.flow = getDefaultFlow();
 
-            // Flow Manager Migration
-            if (typeof data.flow.fixedExpenses === 'number') {
-                data.flow.fixedItems = [{ name: 'General', amount: data.flow.fixedExpenses }];
-                delete data.flow.fixedExpenses;
-            }
-            if (typeof data.flow.variableExpenses === 'number') {
-                data.flow.variableItems = [{ name: 'General', amount: data.flow.variableExpenses }];
-                delete data.flow.variableExpenses;
-            }
-            if (!data.flow.fixedItems) data.flow.fixedItems = [];
-            if (!data.flow.variableItems) data.flow.variableItems = [];
-
-            // Migration: Rename GBM goal if exists
-            if (data.goals) {
-                const gbmGoal = data.goals.find(g => g.id === 'firstinvest');
-                if (gbmGoal && gbmGoal.name === 'Primera Inversión GBM+') {
-                    gbmGoal.name = 'Meta de Portafolio';
-                }
-            }
-
-            if (!data.customChecklist) data.customChecklist = [];
-            if (!data.botEquity) data.botEquity = 0;
-            return data;
+        // Flow Manager Migration
+        if (typeof data.flow.fixedExpenses === 'number') {
+            data.flow.fixedItems = [{ name: 'General', amount: data.flow.fixedExpenses }];
+            delete data.flow.fixedExpenses;
         }
-    } catch (e) {
-        console.error('Error loading Arca data:', e);
+        if (typeof data.flow.variableExpenses === 'number') {
+            data.flow.variableItems = [{ name: 'General', amount: data.flow.variableExpenses }];
+            delete data.flow.variableExpenses;
+        }
+        if (!data.flow.fixedItems) data.flow.fixedItems = [];
+        if (!data.flow.variableItems) data.flow.variableItems = [];
+
+        // Migration: Rename GBM goal if exists
+        if (data.goals) {
+            const gbmGoal = data.goals.find(g => g.id === 'firstinvest');
+            if (gbmGoal && gbmGoal.name === 'Primera Inversión GBM+') {
+                gbmGoal.name = 'Meta de Portafolio';
+            }
+        }
+
+        if (!data.customChecklist) data.customChecklist = [];
+        if (!data.botEquity) data.botEquity = 0;
+        return data;
     }
     // Default values
     return {
@@ -976,15 +971,7 @@ function getDefaultFlow() {
     };
 }
 
-// Save data to localStorage
-function saveArcaData(data) {
-    try {
-        localStorage.setItem('arcaFinanciera', JSON.stringify(data));
-        log("ARCA", "Datos guardados", "success");
-    } catch (e) {
-        console.error('Error saving Arca data:', e);
-    }
-}
+
 
 // Initialize Arca data
 let arcaData = loadArcaData();
