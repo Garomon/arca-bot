@@ -928,8 +928,10 @@ async function placeOrder(level) {
 
     // Phase 4: Fee Optimization - Skip unprofitable orders
     // FIX: Corrected signature: (orderSize, gridSpacing, currentPrice, tradingFee)
+    // P0 FIX: Pass Notional USDT to isOrderWorthPlacing
+    const notionalUSDT = new Decimal(amount).mul(price).toNumber();
     const worthCheck = adaptiveHelpers.isOrderWorthPlacing(
-        amount,
+        notionalUSDT, // ✅ Correct Unit (USDT)
         CONFIG.gridSpacing,
         price,
         CONFIG.tradingFee
@@ -1032,7 +1034,8 @@ async function placeOrder(level) {
 
         // Log with full transparency
         // P0 FIX: Audit Logging Consistency (Use Final Price)
-        log('LIVE', `${level.side.toUpperCase()} ${amount.toFixed(6)} ${BASE_ASSET} @ $${finalPrice.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
+        // P0 FIX: Audit Logging Consistency (Use Final Price) and Correct Units
+        log('LIVE', `${level.side.toUpperCase()} $${notionalUSDT.toFixed(2)} (~${amount.toFixed(6)} ${BASE_ASSET}) @ $${finalPrice.toFixed(2)} [Tag: ${uniqueId}]`, 'success');
         logActivity('PLACING_ORDER');
 
         // Audit the Decision (Traceability)
@@ -2613,7 +2616,9 @@ async function syncWithExchange() {
                 amount: o.amount,
                 status: 'open',
                 timestamp: o.timestamp,
-                clientOrderId: getClientId(o) // P0 FIX: Robust ID Persistence
+                clientOrderId: getClientId(o), // P0 FIX: Robust ID Persistence
+                spacing: old.spacing ?? CONFIG.gridSpacing, // P0 FIX: Default Spacing for Orphans
+                level: old.level ?? null // P0 FIX: Default Level for Orphans
             };
         });
 
@@ -2874,6 +2879,9 @@ server.listen(BOT_PORT, async () => {
 
     // AUTO-HEALTH CHECK: Ensure grid always has orders
     setInterval(async () => {
+        if (isRebalancing) return; // ✅ Anti-Storm Lock
+        if (state.isPaused) return; // ✅ Respect Pauses
+
         if (state.activeOrders.length === 0 && !state.emergencyStop) {
             log('AUTO', 'No active orders detected - Reinitializing grid automatically', 'warning');
             await initializeGrid(true);
@@ -2900,7 +2908,8 @@ server.listen(BOT_PORT, async () => {
         const todayWinRate = todaySells.length > 0 ? (todayWins / todaySells.length * 100).toFixed(1) : 'N/A';
 
         // Overall metrics
-        const totalProfit = state.totalProfit || 0;
+        const lifetimeProfit = (state.totalProfit || 0) + (state.accumulatedProfit || 0);
+        const totalProfit = lifetimeProfit; // P0 FIX: Report Lifetime Profit
         const initialCapital = state.initialCapital || 100;
         const totalROI = ((totalProfit / initialCapital) * 100).toFixed(2);
         const activeOrders = state.activeOrders?.length || 0;
@@ -3000,3 +3009,12 @@ function shutdown() {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+process.on('unhandledRejection', (reason) => {
+    log('ERROR', `Unhandled Rejection: ${reason?.message || reason}`, 'error');
+});
+
+process.on('uncaughtException', (err) => {
+    log('ERROR', `Uncaught Exception: ${err.message}`, 'error');
+    shutdown();
+});
