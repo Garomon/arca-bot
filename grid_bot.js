@@ -730,6 +730,7 @@ async function computeBotFinancials() {
             totalBTC: myTotalBase,
             btcValueUSDT: myBaseValue,
             totalEquity: myAllocatedEquity, // Show the user THEIR slice size
+            accountEquity: globalTotalEquity, // NEW: Show Total Binance Balance for Portfolio View
             profit: state.totalProfit + (state.accumulatedProfit || 0), // Lifetime Profit
             profitPercent,
             pair: CONFIG.pair,
