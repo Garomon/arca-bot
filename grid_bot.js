@@ -895,11 +895,8 @@ async function placeOrder(level) {
         const globalFreeUSDT = balance.USDT ? balance.USDT.free : 0;
 
         // CAPITAL ISOLATION FIX: Calculate Max Allowed for this Bot
-        // 1. Calculate Total Equity (Global)
-        const totalBTC = balance[BASE_ASSET]?.total || 0;
-        const totalUSDTK = balance.USDT?.total || 0;
-        const currentBTCValue = totalBTC * price;
-        const globalEquity = totalUSDTK + currentBTCValue;
+        // 1. Calculate Total Equity (Global) - FIX: Use Source of Truth (USDT+BTC+SOL)
+        const globalEquity = await getGlobalEquity();
 
         // 2. Calculate My Allocation
         const myAllocatedCapital = globalEquity * CAPITAL_ALLOCATION;
