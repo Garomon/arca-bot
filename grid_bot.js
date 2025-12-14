@@ -1002,14 +1002,6 @@ async function placeOrder(level) {
         console.log('Wall check skipped');
     }
 
-    // PHASE 5: SMART BALANCE CHECK (New Intelligence)
-    // ... (Balance check logic omitted for brevity as it was correct) ...
-    if (level.side === 'buy') {
-        // ...
-    } else if (level.side === 'sell') {
-        // ...
-    }
-
     // LIVE - Using resilient API call with retries
     // CRITICAL P0: Isolation Tag
     // P0 FIX: Use UUID to prevent collision
@@ -1023,7 +1015,8 @@ async function placeOrder(level) {
         try {
             const freshBalance = await binance.fetchBalance();
             const freshUSDT = freshBalance.USDT?.free || 0;
-            const orderCost = amount * price;
+            // P0 FIX: Use finalPrice (Precision) for accurate cost check
+            const orderCost = amount * finalPrice;
 
             // Simple check: Do we have enough?
             if (freshUSDT < orderCost) {
@@ -1059,7 +1052,7 @@ async function placeOrder(level) {
         logDecision(
             `ORDER_PLACED_${level.side.toUpperCase()}`,
             [
-                `Price: $${price.toFixed(2)}`,
+                `Price: $${finalPrice.toFixed(2)}`,
                 `Amount: ${amount.toFixed(6)} ${BASE_ASSET}`,
                 `Composite Score: ${state.compositeSignal?.score?.toFixed(0) || 'N/A'}`,
                 `Regime: ${state.marketRegime || 'Unknown'}`
@@ -2397,6 +2390,10 @@ async function handleOrderFill(order, fillPrice) {
     // Assign sanitized values
     order.amount = amt;
     fillPrice = px;
+
+    // P0 FIX: Remove filled order from activeOrders immediately (prevents phantom locked funds)
+    state.activeOrders = (state.activeOrders || []).filter(o => o.id !== order.id);
+    saveState();
 
     // FIX: Only SELL orders realize profit. BUY orders are just entries.
     let profit = 0;
