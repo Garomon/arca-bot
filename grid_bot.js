@@ -1272,7 +1272,10 @@ async function getCachedCandles(timeframe, limit = 100) {
     // 1h = 1 min cache, 4h/1d = 5 min cache
     const ttl = timeframe === '1h' ? 60 * 1000 : 5 * 60 * 1000;
 
-    if (candleCache[timeframe].data && (now - candleCache[timeframe].timestamp < ttl)) {
+    // FIX: Ensure we have enough data (Cache Hit = Fresh AND Sufficient Length)
+    if (candleCache[timeframe].data &&
+        (now - candleCache[timeframe].timestamp < ttl) &&
+        candleCache[timeframe].data.length >= limit) {
         return candleCache[timeframe].data;
     }
 
@@ -1418,7 +1421,7 @@ async function getMarketAnalysis(timeframe = '1h') {
 async function detectMarketRegime() {
     try {
         // Get multiple EMAs for trend analysis
-        const candles = await getCachedCandles('1h', 200);
+        const candles = await getCachedCandles('1h', 300); // Bumped to 300 for safe EMA200
         const closes = candles.map(c => c[4]);
 
         // EMA 50 and EMA 200
