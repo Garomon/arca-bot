@@ -403,6 +403,19 @@ function loadState() {
 let isSaving = false;
 let pendingSave = false;
 
+// Safe JSON Replacer to prevent Circular Errors
+const safeReplacer = (key, value) => {
+    // 1. Remove Circular References related to Timers
+    if (key === '_idleNext' || key === '_idlePrev') return undefined;
+    // 2. Filter out non-serializable objects
+    if (value && typeof value === 'object') {
+        if (value.constructor && (value.constructor.name === 'Timeout' || value.constructor.name === 'Interval' || value.constructor.name === 'Socket')) {
+            return undefined; // Filter out complex objects
+        }
+    }
+    return value;
+};
+
 async function saveState() {
     if (isSaving) {
         pendingSave = true;
@@ -412,12 +425,25 @@ async function saveState() {
 
     try {
         const tempFile = `${CONFIG.stateFile}.tmp`;
-        // Use Async Write
-        await fs.promises.writeFile(tempFile, JSON.stringify(state, null, 2));
+        // Use Async Write with SAFE REPLACER
+        const json = JSON.stringify(state, safeReplacer, 2);
+        await fs.promises.writeFile(tempFile, json);
         // Atomic Rename (Fast)
         await fs.promises.rename(tempFile, CONFIG.stateFile);
+
+        // Optional: Emit to UI (safely)
+        // io.emit('grid_state', JSON.parse(json)); 
     } catch (e) {
         console.error('>> [ERROR] Failed to save state:', e.message);
+        // Debug Finding: Identify the specific circular key if possible
+        try {
+            JSON.stringify(state, (key, value) => {
+                if (value && typeof value === 'object' && value.constructor && value.constructor.name === 'Timeout') {
+                    console.error(`>> [DEBUG] FOUND TIMEOUT IN STATE AT KEY: ${key}`);
+                }
+                return value;
+            });
+        } catch (e2) { /* ignore */ }
     } finally {
         isSaving = false;
         if (pendingSave) {
