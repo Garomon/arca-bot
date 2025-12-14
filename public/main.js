@@ -824,13 +824,9 @@ let saveTimeout = null;
 
 async function saveArcaData(data) {
     if (!supabase) {
-        console.warn('Supabase not loaded, falling back to localStorage');
-        localStorage.setItem('arcaFinanciera', JSON.stringify(data));
+        console.warn('Supabase not loaded, cannot save data (LocalStorage disabled per policy)');
         return;
     }
-
-    // Local save immediate (UI responsiveness)
-    localStorage.setItem('arcaFinanciera', JSON.stringify(data));
 
     // Cloud save debounced (2s)
     clearTimeout(saveTimeout);
@@ -850,19 +846,11 @@ async function saveArcaData(data) {
     }, 2000);
 }
 
-// Load saved data from Supabase (fallback to LocalStorage)
+// Load saved data from Supabase ONLY
 async function loadArcaData() {
     let data = null;
 
-    // 1. Try LocalStorage first (Instant Load)
-    try {
-        const saved = localStorage.getItem('arcaFinanciera');
-        if (saved) data = JSON.parse(saved);
-    } catch (e) {
-        console.error('Local load error:', e);
-    }
-
-    // 2. Fetch from Cloud (Background Sync)
+    // 1. Fetch from Cloud (Primary Source)
     if (supabase) {
         try {
             const { data: cloudData, error } = await supabase
@@ -872,17 +860,14 @@ async function loadArcaData() {
                 .single();
 
             if (cloudData && cloudData.data) {
-                console.log('>> [CLOUD] Data loaded from Supabase');
-                // Optional: Check timestamps to solve conflicts? For now, Cloud wins if simpler.
-                // Or merge? Let's assume Cloud is truth source for multi-device.
+                console.log('>> [CLOUD] Loaded data from Supabase');
                 data = cloudData.data;
-
-                // Update LocalStorage with fresh Cloud data
-                localStorage.setItem('arcaFinanciera', JSON.stringify(data));
             }
         } catch (e) {
             console.error('Cloud load failed:', e);
         }
+    } else {
+        console.warn('Supabase not available - starting with empty/default state');
     }
 
     if (data) {
@@ -914,7 +899,8 @@ async function loadArcaData() {
         if (!data.botEquity) data.botEquity = 0;
         return data;
     }
-    // Default values
+
+    // Default values if no cloud data found
     return {
         fintech: {
             didi: 0,
@@ -974,7 +960,11 @@ function getDefaultFlow() {
 
 
 // Initialize Arca data
-let arcaData = loadArcaData();
+// Initialize Arca data (Synchronous!)
+let arcaData = loadLocalData();
+
+// Trigger background cloud sync after 1s
+setTimeout(syncWithCloud, 1000);
 
 // ===== FINTECH CALCULATIONS =====
 function calculateFintechYields() {
