@@ -857,12 +857,34 @@ async function placeOrder(level) {
     // PHASE 5: SMART BALANCE CHECK (New Intelligence)
     if (level.side === 'buy') {
         const balance = await binance.fetchBalance();
-        const availableUSDT = balance.USDT ? balance.USDT.free : 0;
+        const globalFreeUSDT = balance.USDT ? balance.USDT.free : 0;
+
+        // CAPITAL ISOLATION FIX: Calculate Max Allowed for this Bot
+        // 1. Calculate Total Equity (Global)
+        const totalBTC = balance[BASE_ASSET]?.total || 0;
+        const totalUSDTK = balance.USDT?.total || 0;
+        const currentBTCValue = totalBTC * price;
+        const globalEquity = totalUSDTK + currentBTCValue;
+
+        // 2. Calculate My Allocation
+        const myAllocatedCapital = globalEquity * CAPITAL_ALLOCATION;
+
+        // 3. Calculate My Current Exposure (Inventory + Active Buys)
+        const inventoryValue = (state.inventory || []).reduce((sum, lot) => sum + (lot.price * (lot.remaining || lot.amount)), 0);
+        const activeBuyLocked = state.activeOrders.filter(o => o.side === 'buy').reduce((sum, o) => sum + (o.price * o.amount), 0);
+        const currentExposure = inventoryValue + activeBuyLocked;
+
+        // 4. Determine Remaining Buying Power
+        const myRemainingPower = Math.max(0, myAllocatedCapital - currentExposure);
+
+        // 5. Effective Available = MIN(Global Free, My Remaining Power)
+        const effectiveAvailable = Math.min(globalFreeUSDT, myRemainingPower);
+
         const requiredUSDT = amount * price;
 
-        if (availableUSDT < requiredUSDT) {
-            log('SMART', `INSUFFICIENT FUNDS for BUY. Available: $${availableUSDT.toFixed(2)}, Req: $${requiredUSDT.toFixed(2)}`, 'warning');
-            log('DECISION', 'HOLDING (Waiting for liquidity or sells)', 'info');
+        if (effectiveAvailable < requiredUSDT) {
+            log('SMART', `INSUFFICIENT FUNDS (Capital Isolation). Req: $${requiredUSDT.toFixed(2)} | Global Free: $${globalFreeUSDT.toFixed(2)} | My Power: $${myRemainingPower.toFixed(2)}`, 'warning');
+            log('DECISION', 'HOLDING (Capital Limit Reached)', 'info');
             return; // EXIT GRACEFULLY - DO NOT ERROR
         }
     } else if (level.side === 'sell') {
@@ -1573,8 +1595,8 @@ async function fetchOpenInterest() {
         const change = ((currentOI - previousOI) / previousOI) * 100;
 
         let signal = 'STABLE';
-        if (change > 5) signal = 'RISING_INTEREST'; // Increasing leverage/bets
-        else if (change < -5) signal = 'FALLING_INTEREST'; // Liquidations or closing
+        if (change > 5) signal = 'OI_INCREASING'; // Increasing leverage/bets
+        else if (change < -5) signal = 'OI_DECREASING'; // Liquidations or closing
 
         const oiData = {
             current: currentOI,
@@ -2091,8 +2113,12 @@ async function checkLiveOrders() {
             }
         }
 
-        // Update active list
-        state.activeOrders = state.activeOrders.filter(o => openOrderIds.has(o.id));
+        // FIX: Race Condition - Refetch open orders to catch any created during handleOrderFill
+        const openOrdersAfter = await binance.fetchOpenOrders(CONFIG.pair);
+        const openIdsAfter = new Set(openOrdersAfter.map(o => o.id));
+
+        // Update active list with FRESH data
+        state.activeOrders = state.activeOrders.filter(o => openIdsAfter.has(o.id));
         saveState();
         emitGridState();
         updateBalance(); // Keep balance fresh
