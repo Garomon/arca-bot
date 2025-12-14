@@ -349,6 +349,7 @@ function loadState() {
 
             // AUTO-SANITIZER: Fix Historical Profit Logic (Buys = 0) & Retroactive Fee Deduction
             let fixedProfit = 0;
+            let estimatedProfit = 0; // Separate estimated/unverified profit
             if (state.filledOrders) {
                 // FIXED: Migration Logic - Run cleanly
                 console.log('>> [MIGRATION] Verifying Fee Deduction on Historical Orders...');
@@ -360,9 +361,6 @@ function loadState() {
 
                     // 2. Deduct Fees from Sell Profit (Net = Gross - 0.2%)
                     if (o.side === 'sell' && o.profit > 0) {
-                        // Check if we already deducted fees (heuristic: is it weirdly precise?) 
-                        // Better: Just assume if it's high it's gross.
-                        // Or add a flag to the ORDER itself.
                         if (!o.isNetProfit) {
                             const estimatedFees = (o.price * o.amount) * (CONFIG.tradingFee * 2);
                             o.profit = Math.max(0, o.profit - estimatedFees);
@@ -370,9 +368,15 @@ function loadState() {
                             console.log(`>> [FIX] Order ${o.id}: Deducted $${estimatedFees.toFixed(4)} fees. New Net: $${o.profit.toFixed(4)}`);
                         }
                     }
-                    fixedProfit += (o.profit || 0);
+
+                    // P0 FIX: Only sum NET/REAL profit to totalProfit
+                    if (o.side === 'sell' && (o.profit || 0) > 0) {
+                        if (o.isNetProfit) fixedProfit += o.profit;
+                        else estimatedProfit += o.profit;
+                    }
                 });
-                state.totalProfit = fixedProfit; // Force Recalculation
+                state.totalProfit = fixedProfit; // Only proven profit
+                state.estimatedProfit = estimatedProfit; // Store for UI/Debug
                 state.feeCorrectionApplied = true;
             }
             // AUTO-DETECT firstTradeTime from earliest SELL with profit (for APY)
@@ -458,6 +462,13 @@ async function saveState() {
 // Ensures no lots are ever lost due to state file issues
 // ==================================================
 async function reconcileInventoryWithExchange() {
+    // P0 GUARD: CROSS-BOT ISOLATION
+    // If we only own 50% of the account, we CANNOT assume all trades/balance are ours.
+    if (CAPITAL_ALLOCATION < 1.0 && process.env.ALLOW_GLOBAL_RECONCILE !== 'true') {
+        log('RECONCILE', 'Skipped: allocation < 1.0 (prevents cross-bot inventory bleed).', 'warning');
+        return;
+    }
+
     log('RECONCILE', 'Syncing inventory with exchange history...', 'info');
     try {
         const balance = await binance.fetchBalance();
@@ -983,7 +994,7 @@ async function placeOrder(level) {
         state.activeOrders.push({
             id: order.id,
             side: level.side,
-            price: price,
+            price: finalPrice, // P0 FIX: Store Precise Price
             amount: amount,
             level: level.level,
             status: 'open',
@@ -2229,9 +2240,12 @@ async function checkLiveOrders() {
                 const info = await binance.fetchOrder(order.id, CONFIG.pair);
                 // FIX: CCXT/Binance returns 'filled' for completed orders. 'closed' is generic.
                 if (info.status === 'closed' || info.status === 'filled') {
-                    // CRITICAL: Use average fill price for accuracy, fallback to limit price
+                    // CRITICAL: Use average fill price and ACTUAL filled amount
                     const realFillPrice = info.average || info.price;
-                    await handleOrderFill(order, realFillPrice);
+                    const filledAmount = info.filled || order.amount; // P0 FIX: Partial Fills
+
+                    // Merge new data with order metadata
+                    await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice);
                 }
             } catch (e) {
                 // Order might be gone, assume filled if not in openOrders? 
