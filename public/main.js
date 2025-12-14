@@ -1004,6 +1004,10 @@ loadArcaData().then(data => {
     if (data) {
         arcaData = data;
         console.log('>> [INIT] Cloud data loaded, refreshing UI...');
+
+        // POPULATE INPUTS FROM DATA (New helper)
+        renderInputsFromData(data);
+
         // Refresh UI calculations with new data
         if (typeof calculateFintechYields === 'function') calculateFintechYields();
         if (typeof calculateDebts === 'function') calculateDebts();
@@ -1032,6 +1036,51 @@ loadArcaData().then(data => {
         updateCountdowns();
     }
 });
+
+// Helper: Populate Inputs from Data State
+function renderInputsFromData(data) {
+    if (!data) return;
+
+    // Fintech
+    if (data.fintech) {
+        setVal('didi-balance', data.fintech.didi);
+        setVal('nu-balance', data.fintech.nu);
+        setVal('mp-balance', data.fintech.mp);
+    }
+
+    // Debts
+    if (data.debts) {
+        setVal('rappi-amount', data.debts.rappiAmount);
+        setVal('nu-dic-amount', data.debts.nuDicAmount);
+        setVal('nu-ene-amount', data.debts.nuEneAmount);
+        setVal('kueski-amount', data.debts.kueskiAmount);
+
+        setCheck('rappi-paid', data.debts.rappiPaid);
+        setCheck('nu-dic-paid', data.debts.nuDicPaid);
+        setCheck('nu-ene-paid', data.debts.nuEnePaid);
+        setCheck('kueski-paid', data.debts.kueskiPaid);
+    }
+
+    // Portfolio
+    if (data.portfolio) {
+        setVal('vt-value', data.portfolio.vt);
+        setVal('qqq-value', data.portfolio.qqq);
+        setVal('gold-value', data.portfolio.gold);
+        setVal('vwo-value', data.portfolio.vwo);
+        setVal('crypto-value', data.portfolio.crypto);
+        setVal('monthly-contribution', data.portfolio.monthlyContribution);
+    }
+}
+
+function setVal(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val || 0;
+}
+
+function setCheck(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.checked = !!val;
+}
 
 // ===== FINTECH CALCULATIONS =====
 function calculateFintechYields() {
