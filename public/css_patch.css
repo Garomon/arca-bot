@@ -73,6 +73,18 @@
         display: none !important;
     }
 
+    /* ========== FIX: TAB CONTENT - PREVENT CLIPPING ========== */
+    .tab-content {
+        overflow: visible !important;
+        overflow-y: auto !important;
+        padding-top: 0 !important;
+    }
+
+    .tab-content.active {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
     /* ========== FIX: HUD HEADER ========== */
     .hud {
         flex-direction: column !important;
