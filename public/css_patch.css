@@ -1,0 +1,175 @@
+/* === MOBILE RESPONSIVENESS PATCH === */
+
+/* Mobile Header (Hidden on Desktop) */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(10, 10, 15, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    padding: 0 20px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mobile-menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--neon-blue);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.mobile-title {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+/* === MEDIA QUERIES === */
+@media (max-width: 900px) {
+    /* Show Mobile Header */
+    .mobile-header {
+        display: flex;
+    }
+
+    /* Layout Adjustments */
+    .app-container {
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden; /* Prevent body scroll, manage in dashboard */
+    }
+
+    /* Sidebar - Transform to Off-Canvas Drawer */
+    .sidebar {
+        position: fixed;
+        top: 60px; /* Below header */
+        bottom: 0;
+        left: 0;
+        width: 85%; /* Not full width to show context */
+        max-width: 320px;
+        z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: rgba(10, 10, 15, 0.98);
+        border-right: 1px solid var(--border-color, rgba(255,255,255,0.1));
+    }
+
+    .sidebar.visible {
+        transform: translateX(0);
+        box-shadow: 100px 0 0 1000px rgba(0,0,0,0.7); /* Overlay effect */
+    }
+
+    /* Keep logs visible in sidebar on mobile if desired, or hide to save space */
+    .sidebar .log-feed {
+        display: block !important; 
+        height: 300px;
+    }
+
+    /* Dashboard Adjustments */
+    .dashboard {
+        padding: 80px 16px 80px 16px; /* Top padding for header, Bottom for safe area */
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Tabs Navigation - Scrollable horizontal */
+    .tabs-nav {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 8px; /* For scrollbar */
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+        flex: 0 0 auto; /* Don't shrink */
+        white-space: nowrap;
+        padding: 10px 16px;
+        font-size: 0.8rem;
+    }
+
+    /* HUD Stack */
+    .hud {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .hud .separator {
+        display: none;
+    }
+
+    /* GRIDS -> STACK TO 1 COL */
+    .metrics-primary,
+    .metrics-secondary,
+    .mtf-grid,
+    .indicators-grid,
+    .settings-grid,
+    .metrics-grid-perf, /* Was 6 cols! */
+    .command-grid,
+    .fintech-grid,
+    .debt-grid, 
+    .portfolio-grid,
+    .intel-data {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+    }
+
+    /* Orderbook & Trading Panel */
+    .trading-display {
+        flex-direction: column;
+    }
+
+    .orderbook-panel,
+    .metrics-panel,
+    .signals-panel {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    /* Orderbook specific - Ensure it fits */
+    .orderbook {
+        font-size: 0.9em;
+    }
+
+    /* Font Size Adjustments */
+    .card .value, 
+    .metric-value,
+    .hero-value {
+        font-size: 1.5rem !important; /* Reduce huge fonts */
+    }
+
+    /* Flow Manager Health Bar */
+    .flow-health-bar {
+        height: 20px;
+    }
+
+    .flow-legend {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Tables */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Dialogs / Modals if any */
+    
+    /* Hide some less important elements if space is tight */
+    .doctrine-quote {
+        display: none;
+    }
+}

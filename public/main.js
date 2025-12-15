@@ -27,6 +27,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
+    // MOBILE MENU TOGGLE
+    const mobileBtn = document.getElementById('mobile-menu-toggle');
+    const mobileSidebar = document.querySelector('.sidebar');
+
+    if (mobileBtn && mobileSidebar) {
+        mobileBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from immediately closing it
+            mobileSidebar.classList.toggle('visible');
+            mobileBtn.innerText = mobileSidebar.classList.contains('visible') ? '✕' : '☰';
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (mobileSidebar.classList.contains('visible') &&
+                !mobileSidebar.contains(e.target) &&
+                e.target !== mobileBtn) {
+                mobileSidebar.classList.remove('visible');
+                mobileBtn.innerText = '☰';
+            }
+        });
+    }
+
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             tabBtns.forEach(b => b.classList.remove('active'));
