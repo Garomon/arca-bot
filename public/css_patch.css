@@ -6,7 +6,7 @@
 @media (max-width: 768px) {
 
     /* ========== FIX: TABS NAVIGATION ========== */
-    /* Make tabs scrollable horizontally and more visible */
+    /* Icon-only tabs on mobile - no horizontal scroll */
     .tabs-nav {
         position: fixed !important;
         bottom: 0 !important;
@@ -15,48 +15,65 @@
         z-index: 1000 !important;
         display: flex !important;
         flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+        overflow: hidden !important;
         gap: 0 !important;
         padding: 0 !important;
         background: rgba(10, 10, 20, 0.98) !important;
         border-top: 1px solid rgba(0, 255, 157, 0.3) !important;
         backdrop-filter: blur(20px) !important;
-        justify-content: stretch !important;
+        justify-content: space-around !important;
         /* Safe area for iPhone notch */
         padding-bottom: env(safe-area-inset-bottom, 0) !important;
     }
 
     .tab-btn {
-        flex: 1 0 auto !important;
-        min-width: 70px !important;
-        padding: 14px 8px !important;
-        font-size: 0.65rem !important;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 10px 4px 8px 4px !important;
+        font-size: 0.6rem !important;
         text-align: center !important;
         border-radius: 0 !important;
-        white-space: nowrap !important;
         border: none !important;
         background: transparent !important;
-        color: rgba(255, 255, 255, 0.6) !important;
+        color: rgba(255, 255, 255, 0.5) !important;
         transition: all 0.2s ease !important;
+        gap: 2px !important;
+    }
+
+    .tab-icon {
+        font-size: 1.3rem !important;
+        line-height: 1 !important;
+    }
+
+    .tab-text {
+        font-size: 0.55rem !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.3px !important;
     }
 
     .tab-btn.active {
-        background: linear-gradient(180deg, rgba(0, 255, 157, 0.2), transparent) !important;
+        background: linear-gradient(180deg, rgba(0, 255, 157, 0.15), transparent) !important;
         color: #00ff9d !important;
         font-weight: 700 !important;
-        border-top: 2px solid #00ff9d !important;
+    }
+
+    .tab-btn.active .tab-icon {
+        transform: scale(1.1) !important;
+    }
+
+    .tab-btn.active .tab-text {
+        color: #00ff9d !important;
     }
 
     /* ========== FIX: DASHBOARD CONTENT AREA ========== */
-    /* Prevent content from going behind bottom tabs */
     .dashboard {
-        padding: 12px 12px 90px 12px !important;
-        /* Extra bottom padding for tabs */
+        padding: 12px 12px 85px 12px !important;
         overflow-y: auto !important;
         height: 100vh !important;
         height: 100dvh !important;
-        /* Dynamic viewport height for mobile browsers */
     }
 
     /* ========== FIX: APP CONTAINER ========== */
