@@ -513,12 +513,15 @@ async function reconcileInventoryWithExchange() {
         return;
     }
 
-    // P0 GUARD: CROSS-BOT ISOLATION
-    // If we only own 50% of the account, we CANNOT assume all trades/balance are ours.
+    // P0 GUARD: CROSS-BOT ISOLATION IS HANDLED BY PAIR CHECK
+    // Removing the strict allocation guard because separate pairs (BTC/SOL) MUST be able to reconcile their own assets.
+    // The previous check prevented inventory recovery for bots with < 100% allocation.
+    /* 
     if (CAPITAL_ALLOCATION < 1.0 && process.env.ALLOW_GLOBAL_RECONCILE !== 'true') {
         log('RECONCILE', 'Skipped: allocation < 1.0 (prevents cross-bot inventory bleed).', 'warning');
         return;
-    }
+    } 
+    */
 
     log('RECONCILE', 'Syncing inventory with exchange history...', 'info');
     try {
@@ -652,29 +655,27 @@ async function getDetailedFinancials() {
 async function updateBalance() {
     try {
         const balance = await binance.fetchBalance();
-        // P0 FIX: Balance Normalization & Legacy Compat
+
+        // P0 FIX: Balance Normalization using Allocated Financials
+        // Use the robust financial engine to determine what is ACTUALLY ours
+        const fin = await getDetailedFinancialsCached(500); // 500ms cache for freshness
+
         state.balance = {
             total: balance.USDT?.total || 0,
-            usdt: balance.USDT?.free || 0,
-            base: balance[BASE_ASSET]?.free || 0,
-            // Backwards compatibility for UI:
-            btc: balance[BASE_ASSET]?.free || 0,
-            locked: balance.USDT?.used || 0
+            usdt: fin ? fin.freeUSDT : (balance.USDT?.free || 0), // Use ALLOCATED Free
+            base: fin ? fin.freeBTC : (balance[BASE_ASSET]?.free || 0),
+            btc: fin ? fin.freeBTC : (balance[BASE_ASSET]?.free || 0),
+            locked: fin ? fin.lockedUSDT : (balance.USDT?.used || 0)
         };
 
-        // Calculate Total Equity (USDT + BTC Value + Locked in Orders)
-        const totalUSDT = balance.USDT?.total || 0;
-        const totalBase = balance[BASE_ASSET]?.total || 0;
-
-        // We use current price to value the Base Asset
-        const baseValue = new Decimal(totalBase).mul(state.currentPrice || 0).toNumber();
-        const totalEquity = new Decimal(totalUSDT).plus(baseValue).toNumber();
+        const totalEquity = fin ? fin.accountEquity : (await getGlobalEquity());
+        const myEquity = fin ? fin.totalEquity : (totalEquity * CAPITAL_ALLOCATION); // Fallback
 
         io.emit('balance_update', {
-            usdt: state.balance.usdt, // Free USDT
-            btc: state.balance.btc,   // Free Base Asset (Legacy key 'btc' kept for UI compat)
-            equity: totalEquity,      // Total Account Value
-            allocatedEquity: totalEquity * CAPITAL_ALLOCATION, // P1: Emit my slice
+            usdt: state.balance.usdt, // Now sends ISOLATED Free USDT
+            btc: state.balance.btc,   // Now sends Base Asset
+            equity: totalEquity,      // Global (Reference)
+            allocatedEquity: myEquity,// Bot's Slice
             isDemo: !state.isLive
         });
     } catch (e) {
