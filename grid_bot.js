@@ -2198,13 +2198,15 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
     // === FINAL SCORE LOGGING ===
 
     // ENGINEER REQUEST: Visibility Upgrade - Score Breakdown
-    console.log(">> [SCORE_BREAKDOWN]", JSON.stringify({
+    // ENGINEER REQUEST: Visibility Upgrade - Score Breakdown
+    // P0 FIX: Persist this breakdown to decisions log so user can audit it later
+    logDecision('SCORE_BREAKDOWN', reasons, {
         total: score.toFixed(1),
         rsi: analysis.rsi.toFixed(1),
         regime: regime.regime,
         obRatio: pressure.ratio.toFixed(2),
-        reasons: reasons
-    }));
+        details: reasons
+    });
 
     // Clamp to 0-100
     score = Math.max(0, Math.min(100, score));
