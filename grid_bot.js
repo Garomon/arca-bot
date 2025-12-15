@@ -2200,13 +2200,19 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
     // ENGINEER REQUEST: Visibility Upgrade - Score Breakdown
     // ENGINEER REQUEST: Visibility Upgrade - Score Breakdown
     // P0 FIX: Persist this breakdown to decisions log so user can audit it later
-    logDecision('SCORE_BREAKDOWN', reasons, {
+    const breakdownData = {
         total: score.toFixed(1),
         rsi: analysis.rsi.toFixed(1),
         regime: regime.regime,
         obRatio: pressure.ratio.toFixed(2),
-        details: reasons
-    });
+        reasons: reasons
+    };
+
+    // 1. Log to Console (User Request: Keep it visible in logs)
+    console.log(">> [SCORE_BREAKDOWN]", JSON.stringify(breakdownData));
+
+    // 2. Persist to File (Audit Trail)
+    logDecision('SCORE_BREAKDOWN', reasons, breakdownData);
 
     // Clamp to 0-100
     score = Math.max(0, Math.min(100, score));
