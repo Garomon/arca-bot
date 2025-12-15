@@ -1,8 +1,8 @@
 # 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC & SOL)
 
-**IP VPS:** `167.71.1.124`
+**IP VPS:** `167.71.1.124`  ssh root@167.71.1.124       
 **Usuario:** `root`
-**Password:** `7q2$TA/nVP!CsFi`
+**Password:** 7q2$TA/nVP!CsFi
 
 ---
 

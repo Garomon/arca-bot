@@ -785,6 +785,14 @@ socket.on('settings_update', (data) => {
     if (ui.contextDisplay) {
         ui.contextDisplay.innerText = `Market: ${data.regime} | Vol: ${data.volatility}`;
     }
+
+    // NEW: Accounting Method Display
+    const accountingEl = document.getElementById('accounting-method');
+    if (accountingEl && data.accounting) {
+        accountingEl.innerText = data.accounting;
+        // Color code: LIFO = Green (Tax Efficient), FIFO = Orange (Standard)
+        accountingEl.style.color = data.accounting === 'LIFO' ? '#00ff9d' : '#ff9500';
+    }
 });
 
 // ===== CONTROLS =====

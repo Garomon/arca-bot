@@ -95,6 +95,10 @@ const PAIR_PRESETS = {
 let lastToleranceLog = 0;
 const TOLERANCE_LOG_INTERVAL = 5 * 60 * 1000; // Log every 5 minutes
 
+// ACCOUNTING METHOD: 'FIFO' (First-In First-Out) or 'LIFO' (Last-In First-Out)
+// LIFO (UEPS) is generally better for tax efficiency in active trading (sells newest/highest cost first).
+const ACCOUNTING_METHOD = process.env.ACCOUNTING_METHOD || 'LIFO';
+
 // (Duplicate checkGridHealth removed)
 
 // Get preset for current pair (fallback to BTC defaults)
@@ -1436,7 +1440,8 @@ async function runMonitorLoop(myId) {
                 safetyMargin: (CONFIG.safetyMargin * 100).toFixed(0),
                 rsiThresholds: state.marketCondition?.adaptiveRSI || { overbought: 70, oversold: 30 },
                 regime: state.marketRegime,
-                volatility: volatilityState
+                volatility: volatilityState,
+                accounting: ACCOUNTING_METHOD // NEW: Send LIFO/FIFO status to UI
             });
         }
 
@@ -2510,26 +2515,49 @@ async function handleOrderFill(order, fillPrice) {
         let consumedLots = 0;
 
         // Iterate mutable inventory
-        for (let i = 0; i < state.inventory.length; i++) {
-            if (remainingToSell <= 0.00000001) break; // Float epsilon
+        // FILTER: Only consider lots with remaining balance
+        // SORT/ITERATION: Depends on ACCOUNTING_METHOD
+        // FIFO = Start from Index 0 (Oldest)
+        // LIFO = Start from Index Length-1 (Newest)
 
-            let lot = state.inventory[i];
-            // Normalize lot structure if migrating from old state
-            if (lot.remaining === undefined) lot.remaining = lot.amount;
-
-            if (lot.remaining > 0) {
-                const take = Math.min(remainingToSell, lot.remaining);
-                costBasis += (take * lot.price);
-                // Calculate proportional entry fee for the amount taken
-                if (lot.fee && lot.amount > 0) {
-                    entryFees += (take / lot.amount) * lot.fee;
-                }
-
-                // MATH FIX: Prevent floating point dust
-                lot.remaining = Number((lot.remaining - take).toFixed(8)); // BTC/SOL precision
-                remainingToSell = Number((remainingToSell - take).toFixed(8));
-                consumedLots++;
+        const inventoryCandidates = [];
+        // Map to indices to modify original array
+        state.inventory.forEach((lot, index) => {
+            if (lot.remaining > 0.00000001) {
+                inventoryCandidates.push({ ...lot, originalIndex: index });
             }
+        });
+
+        // Sort candidates based on method
+        if (ACCOUNTING_METHOD === 'LIFO') {
+            // Newest First (Sort DESC by timestamp)
+            inventoryCandidates.sort((a, b) => b.timestamp - a.timestamp);
+        } else {
+            // FIFO (Default): Oldest First (Sort ASC by timestamp)
+            inventoryCandidates.sort((a, b) => a.timestamp - b.timestamp);
+        }
+
+        for (const candidate of inventoryCandidates) {
+            if (remainingToSell <= 0.00000001) break;
+
+            // Access ACTUAL lot in state by index reference
+            const lot = state.inventory[candidate.originalIndex];
+
+            // Double check it wasn't modified by another pass (unlikely in single thread but safe)
+            if (lot.remaining <= 0) continue;
+
+            const take = Math.min(remainingToSell, lot.remaining);
+            costBasis += (take * lot.price);
+
+            // Calculate proportional entry fee for the amount taken
+            if (lot.fee && lot.amount > 0) {
+                entryFees += (take / lot.amount) * lot.fee;
+            }
+
+            // MATH FIX: Prevent floating point dust
+            lot.remaining = Number((lot.remaining - take).toFixed(8));
+            remainingToSell = Number((remainingToSell - take).toFixed(8));
+            consumedLots++;
         }
 
         // P0 FIX: Inventory Shortfall Handling
@@ -2588,7 +2616,7 @@ async function handleOrderFill(order, fillPrice) {
             log('WARN', `🔧 Corrected Anomaly: Gross $${estimatedGross.toFixed(4)} - Fees $${estimatedTotalFees.toFixed(4)} = Net $${profit.toFixed(4)}`, 'warning');
         }
 
-        log('PROFIT', `FIFO Realized: Rev $${sellRevenue.toFixed(2)} - Cost $${costBasis.toFixed(2)} - Fees $${totalFees.toFixed(4)} (Entry: $${entryFees.toFixed(4)} + Exit: $${sellFee.toFixed(4)}) = $${profit.toFixed(4)}`, 'success');
+        log('PROFIT', `${ACCOUNTING_METHOD} Realized: Rev $${sellRevenue.toFixed(2)} - Cost $${costBasis.toFixed(2)} - Fees $${totalFees.toFixed(4)} (Entry: $${entryFees.toFixed(4)} + Exit: $${sellFee.toFixed(4)}) = $${profit.toFixed(4)}`, 'success');
     }
 
     // Update State
