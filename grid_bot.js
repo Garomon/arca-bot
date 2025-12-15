@@ -568,6 +568,31 @@ async function reconcileInventoryWithExchange() {
             remainingBalanceToFill -= amountToTake;
         }
 
+        // 2b. Handle Legacy/HODL Stack (The "Remainder")
+        // If we still have balance but ran out of history, this is OLD inventory.
+        // We MUST create a lot for it so LIFO doesn't crash into "Shortfall Estimation" (which resets cost basis).
+        if (remainingBalanceToFill > TOLERANCE) {
+            log('RECONCILE', `Found ${remainingBalanceToFill.toFixed(6)} ${baseAsset} in LEGACY/HODL stack (older than 100 trades).`, 'warning');
+
+            // Try to find a logical price for this legacy stack
+            // 1. Existing entry price from state?
+            // 2. Fallback to a safe low value? (Or current price if we want to be conservative?)
+            // DECISION: Use state.entryPrice if available, else use the oldest trade price we found.
+            const legacyPrice = state.entryPrice || (buyTrades.length > 0 ? buyTrades[buyTrades.length - 1].price : state.currentPrice);
+
+            newInventory.push({
+                id: 'LEGACY_STACK', // Special ID
+                price: legacyPrice,
+                amount: remainingBalanceToFill,
+                remaining: remainingBalanceToFill,
+                fee: 0, // Assume sunk cost
+                timestamp: 0, // BIRTH OF TIME (Ensures it is absolutely the Oldest)
+                recovered: true,
+                note: 'Auto-Recovered HODL Stack'
+            });
+            log('RECONCILE', `✅ Created LEGACY Lot: ${remainingBalanceToFill.toFixed(6)} ${baseAsset} @ $${legacyPrice.toFixed(2)} (Timestamp 0)`, 'success');
+        }
+
         // 3. Compare & Commit
         // Sort inventory Oldest -> Newest (Standard FIFO array order for selling)
         newInventory.sort((a, b) => a.timestamp - b.timestamp);
