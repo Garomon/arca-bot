@@ -898,17 +898,28 @@ async function initializeGrid(forceReset = false) {
 
         // --- GEOPOLITICAL RESERVE OVERRIDE ---
         // geoContext defined above safely now
-        if (geoContext.defenseLevel >= 1) {
-            // Level 1: 25% Reserve. Level 2 (Extreme): 50% Reserve.
-            const targetReserve = geoContext.defenseLevel >= 2 ? 0.50 : 0.25;
-            const defensiveReserve = dynamicCapital * targetReserve;
+        // PHASE 3: ADAPTIVE CAPITAL ALLOCATION (Brain Activation)
+        const capitalConfig = adaptiveHelpers.allocateCapital(
+            dynamicCapital,     // Total available
+            regime.regime,      // Market Phase
+            volatilityState,    // Risk Level
+            multiTF             // Trend Confidence
+        );
 
-            if (allocation.reserve < defensiveReserve) {
-                allocation.reserve = defensiveReserve;
-                allocation.grid = dynamicCapital - defensiveReserve;
-                allocation.reason += ` + GEO DEFENSE LVL ${geoContext.defenseLevel}`;
-                log('GEO', `Geopolitical Defense: Boosting Reserve to ${(targetReserve * 100).toFixed(0)}% ($${defensiveReserve.toFixed(2)})`, 'warning');
-            }
+        // Apply Geo-Defense Override (Safety Layer)
+        if (geoContext.defenseLevel >= 2) {
+            capitalConfig.grid *= 0.75; // Force extra 25% reserve in War/Crisis
+            capitalConfig.reason += ' + GEO_CRISIS';
+        }
+
+        // Apply computed allocation
+        allocation.grid = capitalConfig.grid;
+        allocation.reserve = dynamicCapital - capitalConfig.grid; // Ensure reserve assumes remainder
+        allocation.reason = capitalConfig.reason;
+
+        // Log the decision
+        if (allocation.allocation < 0.9) {
+            log('SMART', `🛡️ Defensive Allocation: ${(allocation.allocation * 100).toFixed(0)}% (Reserved: $${allocation.reserve.toFixed(2)})`, 'warning');
         }
 
         const safeCapital = allocation.grid;
