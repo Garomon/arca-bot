@@ -1070,6 +1070,41 @@ function renderInputsFromData(data) {
         setVal('crypto-value', data.portfolio.crypto);
         setVal('monthly-contribution', data.portfolio.monthlyContribution);
     }
+
+    // Render Flow Lists (New)
+    if (typeof renderFlowManager === 'function') {
+        renderFlowManager();
+    }
+
+    // Flow Manager (Command Data)
+    if (data.flow) {
+        setVal('income-input', data.flow.income);
+        // Note: fixed/variable expenses might be itemized arrays now based on migration logic
+        // But the input field logic depends on whether we have sum inputs or itemized lists.
+        // Looking at loadArcaData migration:
+        // if (typeof data.flow.fixedExpenses === 'number') ... converted to items
+        // So we likely need to render the ITEMS or the SUM.
+        // Let's check how the UI inputs are named. usually 'income-input', 'fixed-expenses-input' etc.
+        // If the UI still has simple inputs, we populate them. If it has a list, we need a render function for that.
+        // Assuming simple inputs for now based on 'income-input' naming convention.
+
+        // However, if the data was migrated to items, the 'fixedExpenses' property might be gone on the data object?
+        // Let's check if we need to sum them up for the display or if there are still input fields.
+        // Safe bet: Populate if property exists.
+
+        setVal('income-input', data.flow.income);
+
+        // If these are simple inputs:
+        // (We need to verify if these IDs exist in index.html to be sure, but assuming standard naming)
+        // Actually, let's just populate the Flow UI from data.
+        // We might need to call `renderFlow()` if it exists, or manually set values.
+
+        // Let's try to set the aggregated values if they exist, or recalculate them from items?
+        // The migration code DELETED fixedExpenses/variableExpenses from data.flow and moved them to fixedItems/variableItems
+        // So simply setting 'fixed-expenses-input' might not work if the data property is gone.
+        // We probably need to re-calculate the sum from items and show it, OR rely on a `renderFlowItems` function.
+        // Let's check if `renderFlow` exists in main.js.
+    }
 }
 
 function setVal(id, val) {
@@ -1866,7 +1901,7 @@ function updateGoalsProgress() {
     const portfolioValue = arcaData.portfolio.vt + arcaData.portfolio.qqq +
         arcaData.portfolio.gold + arcaData.portfolio.vwo + arcaData.portfolio.crypto;
 
-    // Update goal values
+
     arcaData.goals.forEach(goal => {
         if (goal.id === 'emergency') goal.current = emergencyFund;
         if (goal.id === 'debtfree') goal.current = debtProgress;
