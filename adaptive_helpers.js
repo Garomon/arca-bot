@@ -15,13 +15,13 @@ const GEOPOLITICAL_EVENTS = [
         description: 'Oracle/Broadcom Crash + Venezuela "War" Rhetoric. Risk-Off sentiment.'
     },
     {
-        name: 'BoJ Policy Meeting',
+        name: 'BoJ Policy Meeting (Carry Trade Risk)',
         date: '2025-12-19',
-        duration: 1,
+        duration: 2, // Extended for aftershock
         impact: 'HIGH',
         type: 'LIQUIDITY_SHOCK',
         sentiment: 'BEARISH',
-        description: 'Bank of Japan potentially hiking rates. Market risk: Capital repatriation.'
+        description: 'Bank of Japan Rate Decision. Risk: Carry Trade unwinding -> massive bond sell-off & capital repatriation. Global liquidity crunch.'
     }
 ];
 
