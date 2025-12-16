@@ -1431,6 +1431,23 @@ async function runMonitorLoop(myId) {
             const compositeSignal = await calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI);
             state.compositeSignal = compositeSignal;
 
+            // PHASE 2: DATA COLLECTION (Machine Learning Ground Truth)
+            // Log the snapshot of "What we saw" and "What we decided"
+            try {
+                // Construct external metrics object from cache
+                const externalMetrics = {
+                    fearGreed: externalDataCache.fearGreed,
+                    fundingRate: externalDataCache.fundingRate,
+                    btcDominance: externalDataCache.btcDominance,
+                    openInterest: externalDataCache.openInterest,
+                    orderBook: externalDataCache.orderBook
+                };
+                DataCollector.logSnapshot(state, analysis, compositeSignal, externalMetrics);
+            } catch (e) {
+                // Non-blocking error handler for data collection
+                console.error('>> [DATA] Snapshot failed:', e.message);
+            }
+
             if (myId !== monitorSessionId) return; // Zombie check
 
             io.emit('composite_signal', {

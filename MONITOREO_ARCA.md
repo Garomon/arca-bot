@@ -13,18 +13,20 @@ Copia y pega TODO el bloque gris en tu terminal SSH:
 
 ```bash
 clear; \
-echo -e "\n🔰 --- [BTC] STARTUP LOGS (Primeras 100 lineas) ---"; \
-head -n 100 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
-echo -e "\n🔰 --- [SOL] STARTUP LOGS (Primeras 100 lineas) ---"; \
-head -n 100 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log; \
-echo -e "\n💰 --- [BTC] REPORTE DE AYER ---"; \
-cat /root/arca-bot/reports/daily_report_$(date -d "yesterday" +%Y-%m-%d).txt; \
-echo -e "\n💰 --- [SOL] REPORTE DE AYER ---"; \
-cat /root/bot-sol/reports/daily_report_$(date -d "yesterday" +%Y-%m-%d).txt; \
-echo -e "\n🏥 --- [BTC] ACTIVIDAD RECIENTE (Ultimas 100 lineas) ---"; \
-tail -n 100 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
-echo -e "\n🏥 --- [SOL] ACTIVIDAD RECIENTE (Ultimas 100 lineas) ---"; \
-tail -n 100 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log
+echo -e "\n🚦 --- 1. STATUS DE PROCESOS (PM2) ---"; \
+pm2 list; \
+echo -e "\n💻 --- 2. SALUD DEL SERVIDOR (Disco/RAM) ---"; \
+df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
+echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? (Archivos 'rotados') ---"; \
+ls -lh /root/arca-bot/logs/VANTAGE* /root/bot-sol/logs/VANTAGE* | grep "$(date +%Y-%m-%d)"; \
+echo -e "\n🚨 --- 4. ERRORES RECIENTES (Últimas 24h) ---"; \
+grep -r "ERROR" /root/arca-bot/logs/ /root/bot-sol/logs/ | tail -n 5; \
+echo -e "\n💰 --- 5. REPORTE DE AYER ---"; \
+cat /root/arca-bot/reports/daily_report_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de ayer."; \
+echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO ---"; \
+tail -n 20 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
+echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO ---"; \
+tail -n 20 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log
 ```
 
 ---
