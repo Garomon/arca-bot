@@ -560,7 +560,8 @@ async function reconcileInventoryWithExchange() {
             const fee = originalFee * (amountToTake / trade.amount);
 
             newInventory.push({
-                id: trade.id,
+                // FIX: Use Order ID to match Live Logic/History (Fallback to Trade ID)
+                id: trade.order || trade.id,
                 price: trade.price,
                 amount: amountToTake, // FIX: Use the VIRTUAL amount (the slice we own), so calculations use this as denominator
                 remaining: amountToTake,
