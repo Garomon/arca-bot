@@ -733,15 +733,17 @@ socket.on('grid_state', (data) => {
 // Inventory Update (FIFO Warehouse Panel)
 let inventoryData = [];
 let inventorySortState = {
-    column: 'price', // Default sort by price
+    column: 'timestamp', // Default sort by Time (LIFO visual)
     desc: true
 };
 
 const inventoryColumnMap = {
-    1: 'price',
-    2: 'remaining',
-    3: 'value',
-    4: 'status'
+    0: 'timestamp',
+    1: 'id',
+    2: 'price',
+    3: 'remaining',
+    4: 'value',
+    5: 'status'
 };
 
 // Setup Inventory Sort Listeners
@@ -776,7 +778,7 @@ function renderInventory() {
     if (countBadge) countBadge.innerText = `${inventoryData.length} LOTS`;
 
     if (!inventoryData || inventoryData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
         return;
     }
 
@@ -805,7 +807,9 @@ function renderInventory() {
             if (prop === 'price') return item.price;
             if (prop === 'remaining') return rem;
             if (prop === 'value') return rem * currentPrice;
-            if (prop === 'status') return rem === item.amount ? 2 : (rem > 0 ? 1 : 0); // Open, Partial, Closed
+            if (prop === 'status') return rem === item.amount ? 2 : (rem > 0 ? 1 : 0);
+            if (prop === 'timestamp') return item.timestamp || 0;
+            if (prop === 'id') return item.id || 0;
             return 0;
         };
 
@@ -822,9 +826,17 @@ function renderInventory() {
         const pnlClass = pnl >= 0 ? 'color: #00ff9d' : 'color: #ff3b3b';
         const statusIcon = remaining === lot.amount ? '🟢' : (remaining > 0 ? '🟡' : '⚫');
 
+        // Format Date
+        const dateObj = lot.timestamp ? new Date(lot.timestamp) : null;
+        const dateStr = dateObj ? dateObj.toLocaleString('es-MX', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'N/A';
+
+        // Format ID
+        const shortId = lot.id ? (lot.id.toString().length > 6 ? '...' + lot.id.toString().slice(-6) : lot.id) : '?';
+
         return `
             <tr style="background: rgba(100,100,200,0.05);">
-                <td class="text-center">${idx + 1}</td>
+                <td class="text-secondary" style="font-size: 0.65rem;">${dateStr}</td>
+                <td class="text-muted" title="${lot.id}" style="cursor: help;">${shortId}</td>
                 <td class="text-end" style="${pnlClass}">$${lot.price.toFixed(2)}</td>
                 <td class="text-end">${remaining.toFixed(6)}</td>
                 <td class="text-end">$${value.toFixed(2)}</td>
