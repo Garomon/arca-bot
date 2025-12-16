@@ -646,85 +646,88 @@
                     </div>
                 </div>
 
-                <!-- INVENTORY PANEL (NEW - FIFO Warehouse Visual) -->
-                <div class="inventory-panel mt-3 p-3"
-                    style="background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(20,20,40,0.5)); border-radius: 12px; border: 1px solid rgba(100,100,200,0.15); box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="text-uppercase fw-bold mb-0"
-                            style="letter-spacing: 1px; font-size: 0.75rem; color: #7c7cff;">
-                            <i class="fas fa-warehouse me-2"></i>Inventory (<span id="accounting-method">LIFO</span>)
-                            <i class="fas fa-info-circle ms-1 text-muted" style="cursor: help; opacity: 0.7;"
-                                title="LIFO (UEPS): Sells newest lots first to minimize taxes. FIFO (PEPS): Sells oldest first."></i>
-                        </h6>
-                        <span class="badge bg-dark text-muted border border-secondary" style="font-size: 0.65rem;"
-                            id="inventory-count">0 LOTS</span>
+                <!-- SPLIT LAYOUT: LIFO & TRANSACTIONS -->
+                <div class="dashboard-split-layout mt-3">
+                    <!-- INVENTORY PANEL (NEW - FIFO Warehouse Visual) -->
+                    <div class="inventory-panel p-3"
+                        style="background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(20,20,40,0.5)); border-radius: 12px; border: 1px solid rgba(100,100,200,0.15); box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-uppercase fw-bold mb-0"
+                                style="letter-spacing: 1px; font-size: 0.75rem; color: #7c7cff;">
+                                <i class="fas fa-warehouse me-2"></i>Inventory (<span id="accounting-method">LIFO</span>)
+                                <i class="fas fa-info-circle ms-1 text-muted" style="cursor: help; opacity: 0.7;"
+                                    title="LIFO (UEPS): Sells newest lots first to minimize taxes. FIFO (PEPS): Sells oldest first."></i>
+                            </h6>
+                            <span class="badge bg-dark text-muted border border-secondary" style="font-size: 0.65rem;"
+                                id="inventory-count">0 LOTS</span>
+                        </div>
+                        <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+                            <table class="table table-sm table-borderless table-hover mb-0"
+                                style="font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.72rem; border-collapse: separate; border-spacing: 0 3px;">
+                                <thead>
+                                    <tr class="text-secondary text-uppercase"
+                                        style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <th class="text-center" style="width: 40px; min-width: 40px;">#</th>
+                                        <th class="text-end" style="min-width: 100px;">Entry Price</th>
+                                        <th class="text-end" style="min-width: 120px;">Asset Remaining</th>
+                                        <th class="text-end" style="min-width: 100px;">Value (USDT)</th>
+                                        <th class="text-center" style="min-width: 60px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-log-body">
+                                    <!-- Populated by JS -->
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted" style="opacity: 0.5;">Waiting for
+                                            inventory data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
-                        <table class="table table-sm table-borderless table-hover mb-0"
-                            style="font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.72rem; border-collapse: separate; border-spacing: 0 3px;">
-                            <thead>
-                                <tr class="text-secondary text-uppercase"
-                                    style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <th class="text-center" style="width: 40px; min-width: 40px;">#</th>
-                                    <th class="text-end" style="min-width: 100px;">Entry Price</th>
-                                    <th class="text-end" style="min-width: 120px;">Asset Remaining</th>
-                                    <th class="text-end" style="min-width: 100px;">Value (USDT)</th>
-                                    <th class="text-center" style="min-width: 60px;">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventory-log-body">
-                                <!-- Populated by JS -->
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted" style="opacity: 0.5;">Waiting for
-                                        inventory data...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
-                <!-- TRANSACTION LOG SECTION (MOVED HERE) -->
-                <div class="transaction-log-panel mt-3 p-3"
-                    style="background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="text-uppercase text-muted fw-bold mb-0"
-                            style="letter-spacing: 1px; font-size: 0.75rem;">
-                            <i class="fas fa-terminal me-2 text-warning"></i>Transaction Log
-                        </h6>
-                        <span class="badge bg-dark text-muted border border-secondary"
-                            style="font-size: 0.65rem;">HISTORY</span>
-                    </div>
-                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                        <table class="table table-sm table-borderless table-hover mb-0"
-                            style="font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.75rem; border-collapse: separate; border-spacing: 0 4px;">
-                            <thead>
-                                <tr class="text-secondary text-uppercase"
-                                    style="font-size: 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <th class="ps-3" style="width: 40px; min-width: 40px;">#</th>
-                                    <th
-                                        style="min-width: 140px; resize: horizontal; overflow: hidden; max-width: 300px;">
-                                        Time</th>
-                                    <th
-                                        style="min-width: 80px; resize: horizontal; overflow: hidden; max-width: 200px;">
-                                        ID</th>
-                                    <th class="text-center"
-                                        style="min-width: 80px; resize: horizontal; overflow: hidden; max-width: 150px;">
-                                        Side</th>
-                                    <th class="text-end"
-                                        style="min-width: 100px; resize: horizontal; overflow: hidden; max-width: 200px;">
-                                        Price</th>
-                                    <th class="text-end"
-                                        style="min-width: 100px; resize: horizontal; overflow: hidden; max-width: 200px;">
-                                        Amount</th>
-                                    <th class="text-end pe-3"
-                                        style="min-width: 100px; resize: horizontal; overflow: hidden; max-width: 200px;">
-                                        Profit</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transaction-log-body">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
+                    <!-- TRANSACTION LOG SECTION (MOVED HERE) -->
+                    <div class="transaction-log-panel p-3"
+                        style="background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-uppercase text-muted fw-bold mb-0"
+                                style="letter-spacing: 1px; font-size: 0.75rem;">
+                                <i class="fas fa-terminal me-2 text-warning"></i>Transaction Log
+                            </h6>
+                            <span class="badge bg-dark text-muted border border-secondary"
+                                style="font-size: 0.65rem;">HISTORY</span>
+                        </div>
+                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                            <table class="table table-sm table-borderless table-hover mb-0"
+                                style="font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.75rem; border-collapse: separate; border-spacing: 0 4px;">
+                                <thead>
+                                    <tr class="text-secondary text-uppercase"
+                                        style="font-size: 0.65rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <th class="ps-3" style="width: 40px; min-width: 40px;">#</th>
+                                        <th
+                                            style="min-width: 140px; resize: horizontal; overflow: hidden; max-width: 300px;">
+                                            Time</th>
+                                        <th
+                                            style="min-width: 80px; resize: horizontal; overflow: hidden; max-width: 200px;">
+                                            ID</th>
+                                        <th class="text-center"
+                                            style="min-width: 80px; resize: horizontal; overflow: hidden; max-width: 150px;">
+                                            Side</th>
+                                        <th class="text-end"
+                                            style="min-width: 100px; resize: horizontal; overflow: hidden; max-width: 200px;">
+                                            Price</th>
+                                        <th class="text-end"
+                                            style="min-width: 100px; resize: horizontal; overflow: hidden; max-width: 200px;">
+                                            Amount</th>
+                                        <th class="text-end pe-3"
+                                            style="min-width: 100px; resize: horizontal; overflow: hidden; max-width: 200px;">
+                                            Profit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-log-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
