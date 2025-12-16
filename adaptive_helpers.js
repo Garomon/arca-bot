@@ -6,13 +6,13 @@
 // --- GEOPOLITICAL & MACRO CONTEXT (Dec 2025) ---
 const GEOPOLITICAL_EVENTS = [
     {
-        name: 'MANUAL_INTEL: Tech Dump & Vzla Tension',
-        date: '2025-12-13',
-        duration: 2, // 48 Hours of Caution
+        name: 'US MACRO: Jobs/CPI & Burry Warning',
+        date: '2025-12-16',
+        duration: 4, // Through the week (Dec 19-20 impact)
         impact: 'HIGH',
-        type: 'MANUAL_INJECTION',
-        sentiment: 'BEARISH',
-        description: 'Oracle/Broadcom Crash + Venezuela "War" Rhetoric. Risk-Off sentiment.'
+        type: 'MACRO_DATA',
+        sentiment: 'VOLATILE',
+        description: 'Distorted Jobs report, CPI pending, and Burry nationalization warning. High uncertainty environment.'
     },
     {
         name: 'BoJ Policy Meeting (Carry Trade Risk)',
