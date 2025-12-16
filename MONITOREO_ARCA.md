@@ -26,7 +26,9 @@ cat /root/arca-bot/reports/daily_report_$(date -d "yesterday" +%Y-%m-%d).txt 2>/
 echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO ---"; \
 tail -n 20 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
 echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO ---"; \
-tail -n 20 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log
+tail -n 20 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log; \
+echo -e "\n🧠 --- 8. [AI] ENTRENAMIENTO (Último Dato) ---"; \
+tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."
 ```
 
 ---
