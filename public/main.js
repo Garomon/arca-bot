@@ -918,13 +918,13 @@ drawTriangle({ price: 0, orders: [] });
 // --- SUPABASE CONFIGURATION ---
 const SUPABASE_URL = 'https://lllyejsabiwwzcumemgt.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsbHllanNhYml3d3pjdW1lbWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0ODEwMjYsImV4cCI6MjA4MTA1NzAyNn0.SWkEeEFr90p5IY0Dfj1NgoG6S6UiB86wyuhbOBj7ZTE';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 // Ensure Debounce for Cloud Saving
 let saveTimeout = null;
 
 async function saveArcaData(data) {
-    if (!supabase) {
+    if (!supabaseClient) {
         console.warn('Supabase not loaded, cannot save data (LocalStorage disabled per policy)');
         return;
     }
@@ -933,7 +933,7 @@ async function saveArcaData(data) {
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(async () => {
         try {
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('arca_dashboard')
                 .upsert({ id: 'default', data: data, updated_at: new Date().toISOString() });
 
@@ -952,9 +952,9 @@ async function loadArcaData() {
     let data = null;
 
     // 1. Fetch from Cloud (Primary Source)
-    if (supabase) {
+    if (supabaseClient) {
         try {
-            const { data: cloudData, error } = await supabase
+            const { data: cloudData, error } = await supabaseClient
                 .from('arca_dashboard')
                 .select('data')
                 .eq('id', 'default')
