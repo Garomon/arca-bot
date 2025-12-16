@@ -731,23 +731,91 @@ socket.on('grid_state', (data) => {
 });
 
 // Inventory Update (FIFO Warehouse Panel)
+let inventoryData = [];
+let inventorySortState = {
+    column: 'price', // Default sort by price
+    desc: true
+};
+
+const inventoryColumnMap = {
+    1: 'price',
+    2: 'remaining',
+    3: 'value',
+    4: 'status'
+};
+
+// Setup Inventory Sort Listeners
+const invHeaders = document.querySelectorAll('.inventory-panel th');
+invHeaders.forEach((th, index) => {
+    if (inventoryColumnMap[index]) {
+        th.style.cursor = 'pointer';
+        th.title = "Click to Sort";
+        th.onclick = () => {
+            if (inventorySortState.column === inventoryColumnMap[index]) {
+                inventorySortState.desc = !inventorySortState.desc;
+            } else {
+                inventorySortState.column = inventoryColumnMap[index];
+                inventorySortState.desc = true;
+            }
+            renderInventory();
+        };
+    }
+});
+
 socket.on('inventory_update', (inventory) => {
+    inventoryData = inventory || [];
+    renderInventory();
+});
+
+function renderInventory() {
     const tbody = document.getElementById('inventory-log-body');
     const countBadge = document.getElementById('inventory-count');
 
     if (!tbody) return;
 
-    if (!inventory || inventory.length === 0) {
+    if (countBadge) countBadge.innerText = `${inventoryData.length} LOTS`;
+
+    if (!inventoryData || inventoryData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
-        if (countBadge) countBadge.innerText = '0 LOTS';
         return;
     }
 
-    if (countBadge) countBadge.innerText = `${inventory.length} LOTS`;
-
     const currentPrice = parseFloat(document.getElementById('price-display')?.innerText?.replace(/[^0-9.]/g, '')) || 0;
 
-    tbody.innerHTML = inventory.map((lot, idx) => {
+    // Update Header Icons
+    invHeaders.forEach((th, index) => {
+        const prop = inventoryColumnMap[index];
+        if (!prop) return;
+
+        let label = th.innerText.replace(' ⬇️', '').replace(' ⬆️', '');
+        if (prop === inventorySortState.column) {
+            th.innerText = `${label} ${inventorySortState.desc ? '⬇️' : '⬆️'}`;
+        } else {
+            th.innerText = label;
+        }
+    });
+
+    // Sort Logic
+    const sortedInv = [...inventoryData].sort((a, b) => {
+        let valA, valB;
+
+        // Helper to get value for comparison
+        const getVal = (item, prop) => {
+            const rem = item.remaining !== undefined ? item.remaining : item.amount;
+            if (prop === 'price') return item.price;
+            if (prop === 'remaining') return rem;
+            if (prop === 'value') return rem * currentPrice;
+            if (prop === 'status') return rem === item.amount ? 2 : (rem > 0 ? 1 : 0); // Open, Partial, Closed
+            return 0;
+        };
+
+        valA = getVal(a, inventorySortState.column);
+        valB = getVal(b, inventorySortState.column);
+
+        return inventorySortState.desc ? (valB - valA) : (valA - valB);
+    });
+
+    tbody.innerHTML = sortedInv.map((lot, idx) => {
         const remaining = lot.remaining !== undefined ? lot.remaining : lot.amount;
         const value = remaining * currentPrice;
         const pnl = currentPrice - lot.price;
@@ -764,7 +832,7 @@ socket.on('inventory_update', (inventory) => {
             </tr>
         `;
     }).join('');
-});
+}
 
 // Settings Update (Tab 4)
 socket.on('settings_update', (data) => {
