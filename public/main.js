@@ -488,7 +488,8 @@ const columnMap = {
     3: 'side',      // Side
     4: 'price',     // Price
     5: 'amount',    // Amount
-    6: 'profit'     // Profit
+    6: 'value',     // Value
+    7: 'profit'     // Profit
 };
 
 // Setup Sort Listeners (Run once)
@@ -548,6 +549,12 @@ function renderTradeHistory() {
             return 0;
         }
 
+        if (sortState.column === 'value') {
+            const valA = (parseFloat(a.price || 0) * parseFloat(a.amount || 0));
+            const valB = (parseFloat(b.price || 0) * parseFloat(b.amount || 0));
+            return sortState.desc ? (valB - valA) : (valA - valB);
+        }
+
         // Handle Numbers (default)
         valA = parseFloat(valA || 0);
         valB = parseFloat(valB || 0);
@@ -577,6 +584,8 @@ function renderTradeHistory() {
                 ? '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="width:50px; font-weight:500;">BUY</span>'
                 : '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="width:50px; font-weight:500;">SELL</span>';
 
+            const totalValue = (parseFloat(t.price || 0) * parseFloat(t.amount || 0));
+
             row.innerHTML = `
                 <td class="ps-3 text-muted" style="vertical-align: middle;">${index + 1}</td>
                 <td class="text-secondary" style="vertical-align: middle;">${dateStr}</td>
@@ -584,6 +593,7 @@ function renderTradeHistory() {
                 <td class="text-center" style="vertical-align: middle;">${sideBadge}</td>
                 <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${parseFloat(t.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
+                <td class="text-end text-muted" style="vertical-align: middle;">$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(isBuy ? 0 : (t.profit || 0)).toFixed(4)}</td>
             `;
             tbody.appendChild(row);
