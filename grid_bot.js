@@ -14,6 +14,7 @@ const path = require('path');
 require('dotenv').config();
 const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
+const DataCollector = require('./data_collector');
 const crypto = require('crypto');
 
 // P0 FIX: Robust Order Filter Helper
