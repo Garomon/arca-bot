@@ -838,7 +838,7 @@ function renderInventory() {
         return `
             <tr style="background: rgba(100,100,200,0.05);">
                 <td class="text-secondary" style="font-size: 0.65rem;">${dateStr}</td>
-                <td class="text-muted" title="${lot.id}" style="cursor: help;">${shortId}</td>
+                <td class="text-muted" title="${lot.id}" style="cursor: help; padding-right: 15px;">${shortId}</td>
                 <td class="text-end" style="${pnlClass}">$${lot.price.toFixed(2)}</td>
                 <td class="text-end text-muted">${lot.amount.toFixed(6)}</td>
                 <td class="text-end fw-bold">${remaining.toFixed(6)}</td>
