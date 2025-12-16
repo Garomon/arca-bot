@@ -219,6 +219,10 @@ body::before {
     gap: 20px;
 }
 
+.dashboard-split-layout.uneven {
+    grid-template-columns: 0.7fr 1.3fr;
+}
+
 @media (max-width: 900px) {
     .dashboard-split-layout {
         grid-template-columns: 1fr;
