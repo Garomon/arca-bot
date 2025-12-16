@@ -741,9 +741,10 @@ const inventoryColumnMap = {
     0: 'timestamp',
     1: 'id',
     2: 'price',
-    3: 'remaining',
-    4: 'value',
-    5: 'status'
+    3: 'amount',    // Original
+    4: 'remaining', // Current
+    5: 'value',
+    6: 'status'
 };
 
 // Setup Inventory Sort Listeners
@@ -778,7 +779,7 @@ function renderInventory() {
     if (countBadge) countBadge.innerText = `${inventoryData.length} LOTS`;
 
     if (!inventoryData || inventoryData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
         return;
     }
 
@@ -805,6 +806,7 @@ function renderInventory() {
         const getVal = (item, prop) => {
             const rem = item.remaining !== undefined ? item.remaining : item.amount;
             if (prop === 'price') return item.price;
+            if (prop === 'amount') return item.amount;
             if (prop === 'remaining') return rem;
             if (prop === 'value') return rem * currentPrice;
             if (prop === 'status') return rem === item.amount ? 2 : (rem > 0 ? 1 : 0);
@@ -838,7 +840,8 @@ function renderInventory() {
                 <td class="text-secondary" style="font-size: 0.65rem;">${dateStr}</td>
                 <td class="text-muted" title="${lot.id}" style="cursor: help;">${shortId}</td>
                 <td class="text-end" style="${pnlClass}">$${lot.price.toFixed(2)}</td>
-                <td class="text-end">${remaining.toFixed(6)}</td>
+                <td class="text-end text-muted">${lot.amount.toFixed(6)}</td>
+                <td class="text-end fw-bold">${remaining.toFixed(6)}</td>
                 <td class="text-end">$${value.toFixed(2)}</td>
                 <td class="text-center">${statusIcon}</td>
             </tr>
