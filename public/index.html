@@ -13,6 +13,9 @@
     <!-- Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- TradingView Widget SDK -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
 
 
     <!-- Hardened Socket.IO Load (Local with CDN Fallback) -->
@@ -761,7 +764,10 @@
                 <div class="chart-panel"
                     style="margin-top: 20px; margin-bottom: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.4); padding: 5px; height: 800px; overflow: hidden;">
                     <!-- Widget Container -->
-                    <div id="tradingview_chart" style="height: 100%; width: 100%;"></div>
+                    <div id="tradingview_chart"
+                        style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; color: #aaa;">
+                        <h2>⌛ CARGANDO GRÁFICO...</h2>
+                    </div>
                 </div>
             </div>
 

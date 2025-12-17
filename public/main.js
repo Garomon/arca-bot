@@ -277,6 +277,29 @@ let chartInitialized = false;
 function initTradingView(pair) {
     if (chartInitialized) return;
 
+    // RESTORED: Working Library Implementation
+    if (typeof TradingView === 'undefined') { setTimeout(() => initTradingView(pair), 1000); return; }
+
+    const symbol = pair ? pair.replace('/', '') : 'BTCUSDT';
+    const binanceSymbol = `BINANCE:${symbol}`;
+
+    try {
+        console.log(`[CHART] Initializing Widget for ${binanceSymbol}...`);
+        const container = document.getElementById('tradingview_chart');
+        if (container) container.innerHTML = ''; // Clear placeholder
+
+        new TradingView.widget({
+            "container_id": "tradingview_chart",
+            "width": "100%", "height": "100%",
+            "symbol": binanceSymbol, "interval": "60", "timezone": "Etc/UTC", "theme": "dark", "style": "1", "locale": "en", "enable_publishing": false, "allow_symbol_change": true, "toolbar_bg": "#1a1a2e", "hide_side_toolbar": false, "studies": ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"]
+        });
+        log('SYSTEM', `Chart loaded: ${symbol}`, 'success');
+        chartInitialized = true;
+    } catch (e) {
+        console.error("Chart Error:", e);
+    }
+}
+/* OLD BODY (DISABLED):
     const symbol = pair ? pair.replace('/', '') : 'BTCUSDT'; // Safe default
     const container = document.getElementById('tradingview_chart');
 
@@ -298,8 +321,7 @@ function initTradingView(pair) {
         log('SYSTEM', `Chart loaded (Iframe): ${symbol}`, 'success');
         chartInitialized = true;
     }
-}
-/* REMOVED LEGACY JS WIDGET CODE */
+*/
 
 
 
