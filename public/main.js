@@ -276,55 +276,37 @@ let chartInitialized = false;
 
 function initTradingView(pair) {
     if (chartInitialized) return;
+    if (typeof TradingView === 'undefined') {
+        setTimeout(() => initTradingView(pair), 1000);
+        return;
+    }
 
-    // RESTORED: Working Library Implementation
-    if (typeof TradingView === 'undefined') { setTimeout(() => initTradingView(pair), 1000); return; }
-
-    const symbol = pair ? pair.replace('/', '') : 'BTCUSDT';
+    const symbol = pair.replace('/', ''); // BTC/USDT -> BTCUSDT
     const binanceSymbol = `BINANCE:${symbol}`;
 
-    try {
-        console.log(`[CHART] Initializing Widget for ${binanceSymbol}...`);
-        const container = document.getElementById('tradingview_chart');
-        if (container) container.innerHTML = ''; // Clear placeholder
+    new TradingView.widget({
+        "container_id": "tradingview_chart",
+        "width": "100%",
+        "height": "100%",
+        "symbol": binanceSymbol,
+        "interval": "60",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "en",
+        "enable_publishing": false,
+        "allow_symbol_change": true,
+        "toolbar_bg": "#1a1a2e",
+        "hide_side_toolbar": false,
+        "studies": [
+            "RSI@tv-basicstudies",
+            "MASimple@tv-basicstudies"
+        ]
+    });
 
-        new TradingView.widget({
-            "container_id": "tradingview_chart",
-            "width": "100%", "height": "100%",
-            "symbol": binanceSymbol, "interval": "60", "timezone": "Etc/UTC", "theme": "dark", "style": "1", "locale": "en", "enable_publishing": false, "allow_symbol_change": true, "toolbar_bg": "#1a1a2e", "hide_side_toolbar": false, "studies": ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"]
-        });
-        log('SYSTEM', `Chart loaded: ${symbol}`, 'success');
-        chartInitialized = true;
-    } catch (e) {
-        console.error("Chart Error:", e);
-    }
+    log('SYSTEM', `Chart initialized for ${pair}`, 'success');
+    chartInitialized = true;
 }
-/* OLD BODY (DISABLED):
-    const symbol = pair ? pair.replace('/', '') : 'BTCUSDT'; // Safe default
-    const container = document.getElementById('tradingview_chart');
-
-    if (container) {
-        console.log(`[CHART] Injecting Iframe for ${symbol}...`);
-
-        // Construct Iframe URL (Hardcoded for stability)
-        const iframeHtml = `
-            <iframe 
-                id="tradingview_frame"
-                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_frame&symbol=BINANCE%3A${symbol}&interval=60&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%22RSI%40tv-basicstudies%22%2C%22MASimple%40tv-basicstudies%22%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&showpopupbutton=1&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3A${symbol}" 
-                style="width: 100%; height: 100%; border: none;" 
-                frameborder="0" 
-                allowtransparency="true" 
-                scrolling="no">
-            </iframe>`;
-
-        container.innerHTML = iframeHtml;
-        log('SYSTEM', `Chart loaded (Iframe): ${symbol}`, 'success');
-        chartInitialized = true;
-    }
-*/
-
-
-
 
 // Init State: Load Chart with correct pair
 socket.on('init_state', (state) => {
@@ -341,13 +323,8 @@ socket.on('financial_update', (data) => {
     // Store global equity for calculations
     window.currentEquity = data.totalEquity;
 
-    // DYNAMIC UI: Update Base Asset Label & CHART
+    // DYNAMIC UI: Update Base Asset Label (e.g. "BTC" or "SOL")
     if (data.pair) {
-        // Fallback Chart Init (In case init_state was missed)
-        if (!chartInitialized) {
-            initTradingView(data.pair);
-        }
-
         const baseAsset = data.pair.split('/')[0]; // "BTC/USDT" -> "BTC"
         const label = document.getElementById('base-asset-label');
         if (label && label.innerText !== baseAsset) {
@@ -2588,13 +2565,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
         log("ARCA", "Sistema Financiero v3.0 AUTOMATIZADO", "success");
         log("ARCA", `USD/MXN: $${window.usdMxnRate.toFixed(2)}`, "info");
-
-        // 🛡️ GUARANTEED CHART INIT (Fallback after 3 seconds)
-        setTimeout(() => {
-            if (!chartInitialized) {
-                console.log('[CHART FALLBACK] Triggering after 3s delay...');
-                initTradingView('BTC/USDT'); // Default to BTC if no pair received
-            }
-        }, 3000);
     }, 100);
 });
