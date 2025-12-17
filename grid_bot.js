@@ -179,6 +179,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,
     secret: process.env.BINANCE_SECRET,
+    timeout: 30000, // 30 seconds
     enableRateLimit: true,
     options: { 'adjustForTimeDifference': true }
 });
