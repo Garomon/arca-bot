@@ -258,7 +258,12 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
         // If price is below all sells (we are holding bags), we need to rebalance to add buys below
         // But if we just have NO orders at all, that's different.
         if (sellOrders.length > 0 && state.currentPrice < Math.min(...sellOrders.map(o => o.price))) {
-            triggers.push('IMBALANCE_LOW_BUYS');
+            // FIX: Cooldown for Low Buys (Prevents Budget-Skip Loops)
+            if (timeSinceReset > 300000) { // 5 minutes
+                triggers.push('IMBALANCE_LOW_BUYS');
+            } else {
+                // console.log('DEBUG: Skipping IMBALANCE_LOW_BUYS due to cooldown');
+            }
         }
     } else if (sellOrders.length === 0) {
         // If we have inventory but no sell orders, something is wrong -> Rebalance

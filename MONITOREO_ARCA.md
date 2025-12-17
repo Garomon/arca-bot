@@ -22,13 +22,19 @@ ls -lh /root/arca-bot/logs/VANTAGE* /root/bot-sol/logs/VANTAGE* | grep "$(date +
 echo -e "\n🚨 --- 4. ERRORES RECIENTES (Últimas 24h) ---"; \
 grep -r "ERROR" /root/arca-bot/logs/ /root/bot-sol/logs/ | tail -n 5; \
 echo -e "\n💰 --- 5. REPORTE DE AYER ---"; \
-cat /root/arca-bot/reports/daily_report_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de ayer."; \
+cat /root/arca-bot/reports/daily_report_*_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
+echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) ---"; \
+cat /root/bot-sol/reports/daily_report_*_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
 echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO ---"; \
-tail -n 20 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
+tail -n 300 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
 echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO ---"; \
-tail -n 20 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log; \
-echo -e "\n🧠 --- 8. [AI] ENTRENAMIENTO (Último Dato) ---"; \
-tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."
+tail -n 300 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log; \
+echo -e "\n🧠 --- 8. [AI BTC] ENTRENAMIENTO (Último Dato) ---"; \
+tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
+echo -e "\n🧠 --- 9. [AI SOL] ENTRENAMIENTO (Último Dato) ---"; \
+tail -n 1 /root/bot-sol/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
+echo -e "\n💾 --- 10. PULSO DE MEMORIA (Archivos de Estado) ---"; \
+ls -lh /root/arca-bot/data/sessions/*_state.json /root/bot-sol/data/sessions/*_state.json
 ```
 
 ---
