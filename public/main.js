@@ -271,49 +271,8 @@ socket.on('log_message', (data) => {
     log(data.type, data.msg, data.style);
 });
 
-// ===== TRADINGVIEW CHART =====
-let chartInitialized = false;
-
-function initTradingView(pair) {
-    if (chartInitialized) return;
-    if (typeof TradingView === 'undefined') {
-        setTimeout(() => initTradingView(pair), 1000);
-        return;
-    }
-
-    const symbol = pair.replace('/', ''); // BTC/USDT -> BTCUSDT
-    const binanceSymbol = `BINANCE:${symbol}`;
-
-    new TradingView.widget({
-        "container_id": "tradingview_chart",
-        "width": "100%",
-        "height": "100%",
-        "symbol": binanceSymbol,
-        "interval": "60",
-        "timezone": "Etc/UTC",
-        "theme": "dark",
-        "style": "1",
-        "locale": "en",
-        "enable_publishing": false,
-        "allow_symbol_change": true,
-        "toolbar_bg": "#1a1a2e",
-        "hide_side_toolbar": false,
-        "studies": [
-            "RSI@tv-basicstudies",
-            "MASimple@tv-basicstudies"
-        ]
-    });
-
-    log('SYSTEM', `Chart initialized for ${pair}`, 'success');
-    chartInitialized = true;
-}
-
-// Init State: Load Chart with correct pair
-socket.on('init_state', (state) => {
-    if (state && state.pair) {
-        initTradingView(state.pair);
-    }
-});
+// Init State (Populate Capital) - REMOVED (Smart Detection Active)
+// socket.on('init_state', (state) => {});
 
 // Financial Update
 socket.on('financial_update', (data) => {
