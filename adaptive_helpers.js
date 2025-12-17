@@ -259,10 +259,13 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
         // But if we just have NO orders at all, that's different.
         if (sellOrders.length > 0 && state.currentPrice < Math.min(...sellOrders.map(o => o.price))) {
             // FIX: Cooldown for Low Buys (Prevents Budget-Skip Loops)
-            if (timeSinceReset > 300000) { // 5 minutes
+            // Use state.lastGridReset because state.lastRebalance is not reliably updated on reset
+            const timeSinceGridReset = Date.now() - (state.lastGridReset || 0);
+
+            if (timeSinceGridReset > 300000) { // 5 minutes
                 triggers.push('IMBALANCE_LOW_BUYS');
             } else {
-                console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping IMBALANCE_LOW_BUYS. Time since reset: ${(timeSinceReset / 1000).toFixed(1)}s < 300s`);
+                console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping IMBALANCE_LOW_BUYS. Time since reset: ${(timeSinceGridReset / 1000).toFixed(1)}s < 300s`);
             }
         }
     } else if (sellOrders.length === 0) {
