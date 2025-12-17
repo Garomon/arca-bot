@@ -76,6 +76,10 @@ class DataCollector {
                 btc_dominance: externalMetrics?.btcDominance?.value?.value || 0,
                 open_interest_signal: externalMetrics?.openInterest?.value?.signal || 'NEUTRAL',
 
+                // 3.5 GEOPOLITICAL (The "Context")
+                geo_defense_level: externalMetrics?.geoContext?.defenseLevel || 0,
+                geo_status: externalMetrics?.geoContext?.status || 'NORMAL',
+
                 // 4. BOT INTERNAL STATE (The "Context")
                 active_orders: state.activeOrders ? state.activeOrders.length : 0,
                 inventory_lots: state.inventory ? state.inventory.length : 0,

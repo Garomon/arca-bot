@@ -1449,11 +1449,11 @@ async function runMonitorLoop(myId) {
             try {
                 // Construct external metrics object from cache
                 const externalMetrics = {
-                    fearGreed: externalDataCache.fearGreed,
                     fundingRate: externalDataCache.fundingRate,
                     btcDominance: externalDataCache.btcDominance,
                     openInterest: externalDataCache.openInterest,
-                    orderBook: externalDataCache.orderBook
+                    orderBook: externalDataCache.orderBook,
+                    geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price) // ✅ Pass Geo Context
                 };
                 DataCollector.logSnapshot(state, analysis, compositeSignal, externalMetrics);
             } catch (e) {
