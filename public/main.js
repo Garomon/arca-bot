@@ -324,8 +324,13 @@ socket.on('financial_update', (data) => {
     // Store global equity for calculations
     window.currentEquity = data.totalEquity;
 
-    // DYNAMIC UI: Update Base Asset Label (e.g. "BTC" or "SOL")
+    // DYNAMIC UI: Update Base Asset Label & CHART
     if (data.pair) {
+        // Fallback Chart Init (In case init_state was missed)
+        if (!chartInitialized) {
+            initTradingView(data.pair);
+        }
+
         const baseAsset = data.pair.split('/')[0]; // "BTC/USDT" -> "BTC"
         const label = document.getElementById('base-asset-label');
         if (label && label.innerText !== baseAsset) {
