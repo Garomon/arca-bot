@@ -15,13 +15,13 @@ const GEOPOLITICAL_EVENTS = [
         description: 'Distorted Jobs report, CPI pending, and Burry nationalization warning. High uncertainty environment.'
     },
     {
-        name: 'BoJ Policy Meeting (Carry Trade Risk)',
-        date: '2025-12-19',
-        duration: 2, // Extended for aftershock
-        impact: 'HIGH',
+        name: 'BoJ Policy Meeting (Carry Trade UNWIND)',
+        date: '2025-12-18', // Updated: Meeting starts 18th
+        duration: 3,        // Through 19th + 20th shockwave
+        impact: 'EXTREME',  // Upgraded from HIGH
         type: 'LIQUIDITY_SHOCK',
         sentiment: 'BEARISH',
-        description: 'Bank of Japan Rate Decision. Risk: Carry Trade unwinding -> massive bond sell-off & capital repatriation. Global liquidity crunch.'
+        description: 'BoJ Rate Hike (0.75% prob 98%). Historical impact: -20% to -30% on BTC due to Yen Carry Trade unwind. Critical Risk.'
     }
 ];
 
@@ -65,11 +65,12 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
         }
         // 2. ACTIVE EVENT (During the window)
         else if (isDuringEvent) {
+            const isExtreme = event.impact === 'EXTREME';
             candidateRisk = {
-                status: 'HIGH_VOLATILITY_EVENT',
-                modifier: 'PROTECTIVE',
-                defenseLevel: 2, // Maximum defense
-                scoreBias: -15,
+                status: isExtreme ? 'LIQUIDITY_CRISIS' : 'HIGH_VOLATILITY_EVENT',
+                modifier: isExtreme ? 'MAX_DEFENSE' : 'PROTECTIVE',
+                defenseLevel: isExtreme ? 3 : 2, // Level 3 for EXTREME events
+                scoreBias: isExtreme ? -25 : -15,
                 activeEvent: `${event.name} ACTIVE NOW`
             };
         }
@@ -392,18 +393,26 @@ function manageProfitTaking(totalProfit, initialCapital, state) {
 }
 
 // PHASE 3: Capital Allocation Strategy
-function allocateCapital(totalCapital, marketRegime, volatility, multiTF) {
+// PHASE 3: Capital Allocation Strategy
+function allocateCapital(totalCapital, marketRegime, volatility, multiTF, geoContext = { defenseLevel: 0 }) {
     let gridAllocation = 0.95; // Default
 
     // Conservative in uncertain conditions
     if (volatility === 'EXTREME') gridAllocation = 0.70;
     else if (volatility === 'HIGH') gridAllocation = 0.85;
 
+    // GEOPOLITICAL OVERRIDE (Cash is King during War/Crisis)
+    if (geoContext.defenseLevel >= 3) {
+        gridAllocation = 0.50; // EXTREME: Keep 50% in USDT reserve
+    } else if (geoContext.defenseLevel >= 2) {
+        gridAllocation = 0.75; // HIGH RISK: Keep 25% reserve
+    }
+
     if (marketRegime === 'STRONG_BEAR') gridAllocation = Math.min(gridAllocation, 0.80);
     else if (marketRegime === 'BEAR') gridAllocation = Math.min(gridAllocation, 0.90);
 
-    // Aggressive in high-confidence bull
-    if (marketRegime === 'STRONG_BULL' && multiTF.confidence === 'HIGH' && volatility === 'LOW') {
+    // Aggressive in high-confidence bull (Only if no Geo Risk)
+    if (marketRegime === 'STRONG_BULL' && multiTF.confidence === 'HIGH' && volatility === 'LOW' && geoContext.defenseLevel === 0) {
         gridAllocation = 0.98;
     }
 
@@ -411,7 +420,7 @@ function allocateCapital(totalCapital, marketRegime, volatility, multiTF) {
         grid: totalCapital * gridAllocation,
         reserve: totalCapital * (1 - gridAllocation),
         allocation: gridAllocation,
-        reason: `Regime: ${marketRegime} | Vol: ${volatility} | MTF: ${multiTF.confidence}`
+        reason: `Regime: ${marketRegime} | Vol: ${volatility} | GeoDef: ${geoContext.defenseLevel}`
     };
 }
 

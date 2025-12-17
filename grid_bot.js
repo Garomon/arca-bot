@@ -881,11 +881,19 @@ async function initializeGrid(forceReset = false) {
             CONFIG.gridSpacing = spacingConfig.spacing;
 
             // Apply Geopolitical Modifier if needed (Widen grid for safety)
-            if (geoContext.defenseLevel >= 2) {
+            if (geoContext.defenseLevel >= 3) {
+                CONFIG.gridSpacing *= 1.50; // +50% wider (EXTREME Defense)
+                CONFIG.safetyMargin = 0.50; // 🛑 HOARD CASH: Only trade with 50% of equity
+                log('GEO', `🛡️ Defense Level 3 (EXTREME): Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 50%`, 'error');
+            } else if (geoContext.defenseLevel >= 2) {
                 CONFIG.gridSpacing *= 1.25; // +25% wider
-                log('GEO', `Defense Level 2: Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}%`, 'warning');
+                CONFIG.safetyMargin = 0.75; // 🛡️ HIGH DEFENSE: Keep 25% reserve
+                log('GEO', `Defense Level 2: Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 75%`, 'warning');
             } else if (geoContext.defenseLevel >= 1) {
                 CONFIG.gridSpacing *= 1.10; // +10% wider
+                CONFIG.safetyMargin = 0.90; // Standard defensive trim
+            } else {
+                CONFIG.safetyMargin = 0.92; // Reset to default
             }
 
             log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${spacingConfig.multiplier})`, 'info');
