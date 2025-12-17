@@ -57,10 +57,15 @@ class DataCollector {
                 timestamp: Date.now(),
                 iso: new Date().toISOString(),
 
+                // 0. IDENTITY (Critical for Unified Model)
+                pair: state.pair || 'UNKNOWN',
+
                 // 1. MARKET DATA (The "Input")
                 price: state.currentPrice,
                 rsi: analysis.rsi,
                 ema: analysis.ema,
+                ema_dev_pct: analysis.ema ? ((state.currentPrice - analysis.ema) / analysis.ema) * 100 : 0, // Normalized Trend
+                bb_bandwidth: analysis.bandwidth,
                 bb_bandwidth: analysis.bandwidth,
                 volatility_regime: state.volatilityRegime,
                 market_regime: state.marketRegime,

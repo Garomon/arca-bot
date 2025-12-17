@@ -324,6 +324,7 @@ try { initializeLogs(); } catch (e) { console.log('Log init skipped'); }
 
 // --- STATE MANAGEMENT ---
 let state = {
+    pair: CONFIG.pair, // Identity for AI
     balance: { usdt: 0, btc: 0 },
     currentPrice: 0,
     entryPrice: 0,
