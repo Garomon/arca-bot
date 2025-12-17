@@ -281,33 +281,38 @@ function initTradingView(pair) {
         return;
     }
 
-    const symbol = pair.replace('/', ''); // BTC/USDT -> BTCUSDT
+    const symbol = pair ? pair.replace('/', '') : 'BTCUSDT'; // Safe default
     const binanceSymbol = `BINANCE:${symbol}`;
 
-    new TradingView.widget({
-        "container_id": "tradingview_chart",
-        "autosize": true,
-        "width": "100%",
-        "height": "100%",
-        "symbol": binanceSymbol,
-        "interval": "60",
-        "timezone": "Etc/UTC",
-        "theme": "dark",
-        "style": "1",
-        "locale": "en",
-        "enable_publishing": false,
-        "allow_symbol_change": true,
-        "toolbar_bg": "#1a1a2e",
-        "hide_side_toolbar": false,
-        "studies": [
-            "RSI@tv-basicstudies",
-            "MASimple@tv-basicstudies"
-        ]
-    });
-
-    log('SYSTEM', `Chart initialized for ${pair}`, 'success');
-    chartInitialized = true;
+    try {
+        console.log(`[CHART] Initializing for ${binanceSymbol}...`);
+        new TradingView.widget({
+            "container_id": "tradingview_chart",
+            "width": "100%",
+            "height": "100%",
+            "symbol": binanceSymbol,
+            "interval": "60",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "enable_publishing": false,
+            "allow_symbol_change": true,
+            "toolbar_bg": "#1a1a2e",
+            "hide_side_toolbar": false,
+            "studies": [
+                "RSI@tv-basicstudies",
+                "MASimple@tv-basicstudies"
+            ]
+        });
+        log('SYSTEM', `Chart loaded: ${symbol}`, 'success');
+        chartInitialized = true;
+    } catch (e) {
+        console.error("TradingView Error:", e);
+        log('SYSTEM', 'Chart init failed (check console)', 'error');
+    }
 }
+
 
 // Init State: Load Chart with correct pair
 socket.on('init_state', (state) => {
