@@ -843,6 +843,8 @@ async function initializeGrid(forceReset = false) {
             lastToleranceLog = Date.now(); // P1 FIX: Init Log Timer (Engineer FB Phase 28)
             await cancelAllOrders();
             state.startTime = Date.now();
+            state.lastGridReset = Date.now(); // FIX: Track reset time for cooldown logic
+            saveState(); // FIX: Persist reset time immediately
         }
 
         state.entryPrice = price;
