@@ -2969,6 +2969,8 @@ async function checkGridHealth(analysis, regime, multiTF) {
     if (analysis && regime && multiTF) {
         // Pass dynamic drift configuration to the brain
         const adaptiveConfig = { driftTolerance: driftTolerance };
+        // DEBUG: Check what time the bot THINKS it reset
+        // console.log(`DEBUG: Checking Grid Health. Last Reset: ${state.lastGridReset} (${((Date.now() - (state.lastGridReset||0))/1000).toFixed(1)}s ago)`);
         const triggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF, adaptiveConfig);
 
         if (triggers && triggers.length > 0) {
