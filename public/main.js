@@ -276,42 +276,32 @@ let chartInitialized = false;
 
 function initTradingView(pair) {
     if (chartInitialized) return;
-    if (typeof TradingView === 'undefined') {
-        setTimeout(() => initTradingView(pair), 1000);
-        return;
-    }
 
     const symbol = pair ? pair.replace('/', '') : 'BTCUSDT'; // Safe default
-    const binanceSymbol = `BINANCE:${symbol}`;
+    const container = document.getElementById('tradingview_chart');
 
-    try {
-        console.log(`[CHART] Initializing for ${binanceSymbol}...`);
-        new TradingView.widget({
-            "container_id": "tradingview_chart",
-            "width": "100%",
-            "height": "100%",
-            "symbol": binanceSymbol,
-            "interval": "60",
-            "timezone": "Etc/UTC",
-            "theme": "dark",
-            "style": "1",
-            "locale": "en",
-            "enable_publishing": false,
-            "allow_symbol_change": true,
-            "toolbar_bg": "#1a1a2e",
-            "hide_side_toolbar": false,
-            "studies": [
-                "RSI@tv-basicstudies",
-                "MASimple@tv-basicstudies"
-            ]
-        });
-        log('SYSTEM', `Chart loaded: ${symbol}`, 'success');
+    if (container) {
+        console.log(`[CHART] Injecting Iframe for ${symbol}...`);
+
+        // Construct Iframe URL (Hardcoded for stability)
+        const iframeHtml = `
+            <iframe 
+                id="tradingview_frame"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_frame&symbol=BINANCE%3A${symbol}&interval=60&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=%5B%22RSI%40tv-basicstudies%22%2C%22MASimple%40tv-basicstudies%22%5D&theme=dark&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=%5B%5D&disabled_features=%5B%5D&showpopupbutton=1&locale=en&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=BINANCE%3A${symbol}" 
+                style="width: 100%; height: 100%; border: none;" 
+                frameborder="0" 
+                allowtransparency="true" 
+                scrolling="no">
+            </iframe>`;
+
+        container.innerHTML = iframeHtml;
+        log('SYSTEM', `Chart loaded (Iframe): ${symbol}`, 'success');
         chartInitialized = true;
-    } catch (e) {
-        console.error("TradingView Error:", e);
-        log('SYSTEM', 'Chart init failed (check console)', 'error');
     }
 }
+/* REMOVED LEGACY JS WIDGET CODE */
+
+
 
 
 // Init State: Load Chart with correct pair
