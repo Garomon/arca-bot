@@ -2969,8 +2969,18 @@ async function checkGridHealth(analysis, regime, multiTF) {
     if (analysis && regime && multiTF) {
         // Pass dynamic drift configuration to the brain
         const adaptiveConfig = { driftTolerance: driftTolerance };
+
         // DEBUG: Check what time the bot THINKS it reset
-        // console.log(`DEBUG: Checking Grid Health. Last Reset: ${state.lastGridReset} (${((Date.now() - (state.lastGridReset||0))/1000).toFixed(1)}s ago)`);
+        const timeSinceResetSec = ((Date.now() - (state.lastGridReset || 0)) / 1000).toFixed(1);
+        log('DEBUG', `Checking Grid Health. Last Reset: ${state.lastGridReset} (${timeSinceResetSec}s ago)`);
+
+        // FAILSAFE: If lastGridReset is missing/zero, set it to NOW to stop the loop
+        if (!state.lastGridReset || state.lastGridReset === 0) {
+            log('WARNING', '⚠️ State corruption detected: lastGridReset is 0. Setting to NOW to prevent infinite loop.');
+            state.lastGridReset = Date.now();
+            saveState();
+        }
+
         const triggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF, adaptiveConfig);
 
         if (triggers && triggers.length > 0) {
