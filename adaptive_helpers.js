@@ -262,7 +262,7 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
             if (timeSinceReset > 300000) { // 5 minutes
                 triggers.push('IMBALANCE_LOW_BUYS');
             } else {
-                // console.log('DEBUG: Skipping IMBALANCE_LOW_BUYS due to cooldown');
+                console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping IMBALANCE_LOW_BUYS. Time since reset: ${(timeSinceReset / 1000).toFixed(1)}s < 300s`);
             }
         }
     } else if (sellOrders.length === 0) {
