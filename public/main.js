@@ -2576,5 +2576,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         log("ARCA", "Sistema Financiero v3.0 AUTOMATIZADO", "success");
         log("ARCA", `USD/MXN: $${window.usdMxnRate.toFixed(2)}`, "info");
+
+        // 🛡️ GUARANTEED CHART INIT (Fallback after 3 seconds)
+        setTimeout(() => {
+            if (!chartInitialized) {
+                console.log('[CHART FALLBACK] Triggering after 3s delay...');
+                initTradingView('BTC/USDT'); // Default to BTC if no pair received
+            }
+        }, 3000);
     }, 100);
 });
