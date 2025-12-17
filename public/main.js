@@ -286,6 +286,7 @@ function initTradingView(pair) {
 
     new TradingView.widget({
         "container_id": "tradingview_chart",
+        "autosize": true,
         "width": "100%",
         "height": "100%",
         "symbol": binanceSymbol,
