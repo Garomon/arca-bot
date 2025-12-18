@@ -17,6 +17,30 @@ const adaptiveHelpers = require('./adaptive_helpers');
 const DataCollector = require('./data_collector');
 const crypto = require('crypto');
 
+// --- ENGINEER FIX 0: crash Handler (Debug PM2 Restarts) ---
+process.on('uncaughtException', (err) => {
+    const msg = `[CRITICAL] Uncaught Exception: ${err.message}`;
+    console.error(msg);
+    console.error(err.stack);
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        fs.appendFileSync(path.join(__dirname, 'logs', 'pm2_crash.log'), `\n[${new Date().toISOString()}] ${msg}\n${err.stack}\n`);
+    } catch (e) { /* emergency log failed */ }
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    const msg = `[CRITICAL] Unhandled Rejection: ${reason}`;
+    console.error(msg);
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        fs.appendFileSync(path.join(__dirname, 'logs', 'pm2_crash.log'), `\n[${new Date().toISOString()}] ${msg}\n`);
+    } catch (e) { /* emergency log failed */ }
+    // Don't exit on rejection, just log it. Maybe it recovers.
+});
+
 // P0 FIX: Robust Order Filter Helper
 // Binance returns clientOrderId in different places depending on endpoint (openOrders vs myTrades)
 function getClientId(o) {
@@ -1014,8 +1038,24 @@ async function initializeGrid(forceReset = false) {
 
         // Place Orders
         log('GRID', `PLACING ${gridLevels.length} ORDERS (PYRAMID STRATEGY)...`);
+
+        // P0 FIX: Local Budget Tracking to prevent API Spam & Insufficient Funds
+        // Calculate available budget from cached financials ONCE
+        const startFin = await getDetailedFinancialsCached(500); // Ensure fresh
+        let currentFreeUSDT = startFin ? (startFin.freeUSDT * CONFIG.safetyMargin) : Infinity;
+
         for (const level of gridLevels) {
             try {
+                // Pre-Check Budget
+                if (level.side === 'buy') {
+                    const orderCost = level.amount * level.price;
+                    if (currentFreeUSDT < orderCost) {
+                        log('SKIP', `Budget Exhausted: Have $${currentFreeUSDT.toFixed(2)}, Need $${orderCost.toFixed(2)}`, 'warning');
+                        continue; // Skip this level, save API call
+                    }
+                    currentFreeUSDT -= orderCost; // Deduct locally
+                }
+
                 await placeOrder(level);
             } catch (e) {
                 log('ERROR', `Failed to place grid order: ${e.message}`, 'error');
@@ -1122,13 +1162,14 @@ async function placeOrder(level) {
 
     // P0 FIX: Race Condition Mitigation - Fresh Balance Check
     // Prevents "Insufficient Funds" spam when multi-bot races occur
+    // REMOVED: Handled by Local Budget Tracking in initializeGrid
+    /*
     if (level.side === 'buy') {
         try {
             const freshBalance = await binance.fetchBalance();
             const freshUSDT = freshBalance.USDT?.free || 0;
             // P0 FIX: Use finalPrice (Precision) for accurate cost check
             const orderCost = amount * finalPrice;
-
             // Simple check: Do we have enough?
             if (freshUSDT < orderCost) {
                 log('SKIP', `Insufficient Funds (Race Condition): Need $${orderCost.toFixed(2)}, Have $${freshUSDT.toFixed(2)}`, 'warning');
@@ -1136,6 +1177,7 @@ async function placeOrder(level) {
             }
         } catch (e) { console.log('Balance race check failed (non-fatal)'); }
     }
+    */
 
     // (Precision logic moved up)
 
