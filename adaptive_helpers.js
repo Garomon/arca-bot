@@ -27,11 +27,19 @@ const GEOPOLITICAL_EVENTS = [
 
 const MACRO_PRICE_ZONES = {
     'BTC/USDT': {
-        buyDip: { min: 82000, max: 86300, sentiment: 'STRONG_BUY_DIP' }, // Support: 86k-86.3k. Critical: 82k.
-        fairValue: { min: 86301, max: 88500, sentiment: 'NEUTRAL' },      // Tight Range: 86.3k - 88k.
-        overextended: { min: 88501, max: 999999, sentiment: 'TAKE_PROFIT' } // Liquidity Hunt at 88.1k -> 90k. Sell into probability.
+        // VIDEO STRATEGY (AGGRESSIVE): Fear of drop below $70k.
+        // Buy Zone lowered to catch the "Real Crash"
+        buyDip: { min: 69000, max: 76000, sentiment: 'BEAR_TRAP_BUY' }, // Target: $70k - $75k area.
+        fairValue: { min: 76001, max: 88000, sentiment: 'NEUTRAL' },      // Wide neutral range
+        overextended: { min: 88001, max: 999999, sentiment: 'TAKE_PROFIT' } // Resistances above 88k
+    },
+    'SOL/USDT': {
+        // CORRELATED STRATEGY: If BTC drops ~20% to $70k, SOL drops ~30%
+        // Current ~$122 -> Target ~$85-$92
+        buyDip: { min: 82.00, max: 92.00, sentiment: 'BEAR_TRAP_BUY' },
+        fairValue: { min: 92.01, max: 135.00, sentiment: 'NEUTRAL' },
+        overextended: { min: 135.01, max: 9999.00, sentiment: 'TAKE_PROFIT' }
     }
-    // Add other pairs if needed
 };
 
 // HELPER: Check for upcoming high-impact events
