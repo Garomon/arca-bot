@@ -3,33 +3,33 @@
  * Helper functions for fully adaptive bot intelligence
  */
 
-// --- GEOPOLITICAL & MACRO CONTEXT (Dec 2025) ---
+// --- GEOPOLITICAL & MACRO CONTEXT (Refined from Video Transcript) ---
 const GEOPOLITICAL_EVENTS = [
     {
-        name: 'US MACRO: Jobs/CPI & Burry Warning',
-        date: '2025-12-16',
-        duration: 4, // Through the week (Dec 19-20 impact)
-        impact: 'HIGH',
-        type: 'MACRO_DATA',
-        sentiment: 'VOLATILE',
-        description: 'Distorted Jobs report, CPI pending, and Burry nationalization warning. High uncertainty environment.'
+        name: 'BoJ Policy Meeting (Reactionary)',
+        date: '2025-12-18', // Thursday Night / Friday Morning
+        duration: 2,
+        impact: 'HIGH',     // "Small Scare" expected, not full crash (Already discounted?)
+        type: 'LIQUIDITY_SHOCK',
+        sentiment: 'BEARISH_SHORT_TERM',
+        description: 'Bank of Japan Rate Decision. Consensus: "Sell rumor, Buy news". Expect wicks/scare on Friday, then Rally.'
     },
     {
-        name: 'BoJ Policy Meeting (Carry Trade UNWIND)',
-        date: '2025-12-18', // Updated: Meeting starts 18th
-        duration: 3,        // Through 19th + 20th shockwave
-        impact: 'EXTREME',  // Upgraded from HIGH
-        type: 'LIQUIDITY_SHOCK',
-        sentiment: 'BEARISH',
-        description: 'BoJ Rate Hike (0.75% prob 98%). Historical impact: -20% to -30% on BTC due to Yen Carry Trade unwind. Critical Risk.'
+        name: 'Institutional Manipulation (Recurrent)',
+        date: '2025-12-21',
+        duration: 1,
+        impact: 'MEDIUM',
+        type: 'MANIPULATION',
+        sentiment: 'VOLATILE',
+        description: 'Recurrent manipulation observed: 16:00 UTC and Sunday midnights ("Shake the tree" before moves).'
     }
 ];
 
 const MACRO_PRICE_ZONES = {
     'BTC/USDT': {
-        buyDip: { min: 70000, max: 75000, sentiment: 'STRONG_BUY_DIP' },
-        fairValue: { min: 90000, max: 98000, sentiment: 'NEUTRAL' },
-        overextended: { min: 105000, max: 999999, sentiment: 'TAKE_PROFIT' }
+        buyDip: { min: 82000, max: 86300, sentiment: 'STRONG_BUY_DIP' }, // Support: 86k-86.3k. Critical: 82k.
+        fairValue: { min: 86301, max: 88500, sentiment: 'NEUTRAL' },      // Tight Range: 86.3k - 88k.
+        overextended: { min: 88501, max: 999999, sentiment: 'TAKE_PROFIT' } // Liquidity Hunt at 88.1k -> 90k. Sell into probability.
     }
     // Add other pairs if needed
 };
