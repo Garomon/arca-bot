@@ -18,6 +18,12 @@ Este documento detalla la estrategia técnica y filosofía para la integración 
     *   *Labels:* La decisión que tomó el bot (Score + Recomendación).
 *   ✅ **Almacenamiento:** Archivos ligeros `.jsonl` en `logs/training_data/`.
 
+## 🛡️ FASE 1.5: CAPA DE DEFENSA ACTIVA (✅ COMPLETADA)
+**Objetivo:** Sobrevivir a la manipulación de mercado ("Mechazos") sin IA predictiva.
+*   ✅ **Anti-Mechazo:** Expansión automática de la red (hasta 10% rango) en Volatilidad Extrema.
+*   ✅ **Protección Fin de Semana:** Reducción de riesgo automática sábados y domingos (Liquidez baja).
+*   ✅ **Corte de Órdenes:** Reducción del 50% de nuevas órdenes durante crisis para preservar capital.
+
 ---
 
 ## 🟡 FASE 3: EL MODELO CENTAURO (PRÓXIMAMENTE - Enero 2026)

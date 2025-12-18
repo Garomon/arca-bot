@@ -81,6 +81,19 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
         }
     }
 
+    // AUTOMATIC: Weekend Defense (Low Liquidity Zone protection)
+    // If no major event is overriding us, apply mild caution on Sat/Sun
+    const dayOfWeek = now.getUTCDay(); // 0 = Sun, 6 = Sat
+    if (riskLevel.defenseLevel === 0 && (dayOfWeek === 0 || dayOfWeek === 6)) {
+        riskLevel = {
+            status: 'WEEKEND_LOW_LIQUIDITY',
+            modifier: 'DEFENSIVE',
+            defenseLevel: 1, // Mild caution (Wider bands, less aggressive entry)
+            scoreBias: -5,
+            activeEvent: 'Weekend (Standard Defense)'
+        };
+    }
+
     return riskLevel;
 }
 
@@ -125,7 +138,9 @@ function calculateOptimalGridCount(capital, volatility) {
     else baseCount = 50;                       // Whale Tier
 
     // Adjust for volatility
-    if (volatility === 'HIGH') {
+    if (volatility === 'EXTREME') {
+        baseCount = Math.max(4, Math.floor(baseCount * 0.5)); // Slash orders to cover HUGE range
+    } else if (volatility === 'HIGH') {
         baseCount = Math.max(5, Math.floor(baseCount * 0.7)); // Fewer orders in high vol
     } else if (volatility === 'LOW') {
         baseCount = Math.min(60, Math.floor(baseCount * 1.2)); // More orders in low vol
@@ -328,7 +343,7 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopolitical
     let atrMultiplier = 1.0;
 
     // Adjust multiplier based on volatility
-    if (volatility === 'EXTREME') atrMultiplier = 2.0;       // Wide spacing
+    if (volatility === 'EXTREME') atrMultiplier = 3.0;       // MASSIVE spacing (Survival Mode)
     else if (volatility === 'HIGH') atrMultiplier = 1.5;
     else if (volatility === 'LOW') atrMultiplier = 0.8;      // Tight spacing
 
@@ -338,8 +353,8 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopolitical
     }
 
     // Calculate dynamic spacing
-    // Cap at 0.1% min and 5% max (increased from 3% for SOL volatility)
-    const spacing = Math.max(0.001, Math.min(0.05, atrPercent * atrMultiplier));
+    // Cap at 0.1% min and 10% max (Survival for 30% drops)
+    const spacing = Math.max(0.001, Math.min(0.10, atrPercent * atrMultiplier));
 
     return {
         spacing,
