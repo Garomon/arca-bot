@@ -268,7 +268,8 @@ function log(type, message, status = 'info') {
     const timestamp = new Date().toISOString();
     const logLine = `[${timestamp}] [${type}] ${message}`;
 
-    console.log(`>> [${type}] ${message}`);
+    // console.log(`>> [${type}] ${message}`); // OLD
+    console.log(`[${timestamp}] >> [${type}] ${message}`); // NEW: With Timestamp
 
     // Emit to UI
     io.emit('log', { type, message, timestamp, status });
