@@ -84,6 +84,27 @@ grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log
 
 ---
 
+## 🧹 4. Mantenimiento: Resetear Contadores (Restarts)
+Si has estado haciendo pruebas y quieres poner los contadores de "restarts" en cero para monitorear desde limpio:
+
+```bash
+pm2 reset all
+```
+*Esto NO reinicia los bots, solo pone a cero el contador `↺`.*
+
+---
+
+
+
+---
+
 ## 🛡️ NOTA: Tus Protecciones Activas
 *   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
 *   **Tope de Inventario (70%)**: Nunca llenará más del 70% de la bolsa con monedas.
+
+---
+
+## 💰 5. Verificación de Ganancias (Auditoría)
+El bot tiene 2 reglas de oro infalibles para garantizar tu dinero:
+1.  **El Portero:** Nunca abre una orden si la ganancia no cubre al menos **1.5 veces** las comisiones de compra y venta.
+2.  **El Reporte:** Cuando veas `PROFIT` en verde en los logs, es **GANANCIA NETA REAL**. El bot ya descontó las comisiones de Binance. Es dinero limpio.

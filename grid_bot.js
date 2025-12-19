@@ -1374,14 +1374,33 @@ async function runMonitorLoop(myId) {
         if (myId !== monitorSessionId) return; // Zombie check
 
         if (analysis) {
-            const trend = analysis.price > analysis.ema ? 'BULLISH' : 'BEARISH';
-            volatilityState = analysis.bandwidth > CONFIG.bandwidthHigh ? 'HIGH' :
-                (analysis.bandwidth < CONFIG.bandwidthLow ? 'LOW' : 'NORMAL');
+            const currentVol = state.volatilityRegime || 'NORMAL';
 
-            // PHASE 2: Adaptive RSI Thresholds
+            // VOLATILITY HYSTERESIS (Anti-Flicker)
+            const highThreshold = CONFIG.bandwidthHigh;
+            const highExitThreshold = highThreshold * 0.90; // Must drop 10% below limit to exit HIGH
+
+            const lowThreshold = CONFIG.bandwidthLow;
+            const lowExitThreshold = lowThreshold * 1.10; // Must rise 10% above limit to exit LOW
+
+            if (analysis.bandwidth > highThreshold) {
+                volatilityState = 'HIGH';
+            } else if (currentVol === 'HIGH' && analysis.bandwidth > highExitThreshold) {
+                volatilityState = 'HIGH'; // STICKY HIGH (Hysteresis)
+                if (monitorSessionId % 20 === 0) console.log(`>> [DEBUG] Volatility Hysteresis Active: Bandwidth ${analysis.bandwidth.toFixed(4)} > Exit ${highExitThreshold.toFixed(4)}`);
+            } else if (analysis.bandwidth < lowThreshold) {
+                volatilityState = 'LOW';
+            } else if (currentVol === 'LOW' && analysis.bandwidth < lowExitThreshold) {
+                volatilityState = 'LOW'; // STICKY LOW
+            } else {
+                volatilityState = 'NORMAL';
+            }
+
+            // RESTORED: Trend & Adaptive RSI (Now using STABLE volatilityState)
+            const trend = analysis.price > analysis.ema ? 'BULLISH' : 'BEARISH';
             const adaptiveRSI = adaptiveHelpers.getAdaptiveRSI(regime.regime, volatilityState);
 
-            // SMART FILTERS with ADAPTIVE thresholds
+            // RESTORED: Smart Filters & UI State
             state.marketCondition = {
                 rsi: analysis.rsi,
                 trend: trend,
@@ -1400,12 +1419,10 @@ async function runMonitorLoop(myId) {
             // FIX: Don't overwrite ATR base spacing, use it as the foundation
             let spacingMultiplier = 1.0;
 
-            if (analysis.bandwidth > CONFIG.bandwidthHigh) {
+            if (volatilityState === 'HIGH') {
                 spacingMultiplier = 1.5; // Widen by 50%
-                volatilityState = 'HIGH';
-            } else if (analysis.bandwidth < CONFIG.bandwidthLow) {
+            } else if (volatilityState === 'LOW') {
                 spacingMultiplier = 0.8; // Tighten by 20%
-                volatilityState = 'LOW';
             }
 
             // Calculate effective spacing (ATR-based or manual base * multiplier)
@@ -1630,13 +1647,20 @@ async function getMarketAnalysis(timeframe = '1h') {
         const currentRSI = rsiValues[rsiValues.length - 1];
         const currentEMA = emaValues[emaValues.length - 1];
 
-        // Calculate Bollinger Bands
+        // Calculate Bollinger Bands (Adaptive for Signals)
         const bbInput = { period: periods.bb, values: closes, stdDev: CONFIG.indicators.bbStdDev };
         const bbValues = BollingerBands.calculate(bbInput);
         const currentBB = bbValues[bbValues.length - 1];
 
-        // Calculate Bandwidth (Volatility Metric)
-        const bandwidth = (currentBB.upper - currentBB.lower) / currentBB.middle;
+        // VOLATILITY FIX: Standardized Bandwidth (Period 20)
+        // We use a FIXED yardstick to measure volatility, avoiding the "feedback loop"
+        // where High Vol -> Faster Bands -> Lower Bandwidth -> Low Vol -> Slower Bands -> High Vol loop.
+        const stdBBInput = { period: 20, values: closes, stdDev: 2 };
+        const stdBBValues = BollingerBands.calculate(stdBBInput);
+        const stdBB = stdBBValues.length > 0 ? stdBBValues[stdBBValues.length - 1] : currentBB;
+
+        // Calculate Bandwidth (Volatility Metric) using STANDARD bands
+        const bandwidth = (stdBB.upper - stdBB.lower) / stdBB.middle;
 
         // Calculate ATR (Average True Range) for Dynamic Spacing
         const atrInput = { high: highs, low: lows, close: closes, period: 14 };
