@@ -17,6 +17,17 @@ const adaptiveHelpers = require('./adaptive_helpers');
 const DataCollector = require('./data_collector');
 const crypto = require('crypto');
 
+// --- DEBUG HELPER ---
+function logDebugFinancials(tag, data) {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const file = path.join(__dirname, 'data', 'debug_financials.json');
+        const entry = { timestamp: new Date().toISOString(), tag, ...data };
+        fs.appendFileSync(file, JSON.stringify(entry) + '\n');
+    } catch (e) { /* ignore */ }
+}
+
 // --- ENGINEER FIX 0: crash Handler (Debug PM2 Restarts) ---
 process.on('uncaughtException', (err) => {
     const msg = `[CRITICAL] Uncaught Exception: ${err.message}`;
@@ -778,6 +789,17 @@ async function computeBotFinancials() {
         myFreeUSDT = Math.max(0, myFreeUSDT);
         myFreeUSDT = Math.min(myFreeUSDT, globalFreeUSDT); // Can't spend what doesn't exist
 
+        // DEBUG: Log Detailed Financials
+        logDebugFinancials('COMPUTE_FINANCIALS', {
+            globalTotalEquity,
+            capitalAllocation: CAPITAL_ALLOCATION,
+            myAllocatedEquity,
+            myBaseValue,
+            myLockedUSDT,
+            myFreeUSDT,
+            globalFreeUSDT
+        });
+
         // Profit calculations
         const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
 
@@ -1045,6 +1067,15 @@ async function initializeGrid(forceReset = false) {
         const startFin = await getDetailedFinancialsCached(500); // Ensure fresh
         let currentFreeUSDT = startFin ? (startFin.freeUSDT * CONFIG.safetyMargin) : Infinity;
 
+        logDebugFinancials('INIT_GRID_START', {
+            safeCapital,
+            dynamicGridCount,
+            startFinFreeUSDT: startFin?.freeUSDT,
+            safetyMargin: CONFIG.safetyMargin,
+            currentFreeUSDT,
+            firstOrderSizeUSDT: sizes[0] || 'N/A'
+        });
+
         for (const level of gridLevels) {
             try {
                 // Pre-Check Budget
@@ -1052,6 +1083,12 @@ async function initializeGrid(forceReset = false) {
                     const orderCost = level.amount * level.price;
                     if (currentFreeUSDT < orderCost) {
                         log('SKIP', `Budget Exhausted: Have $${currentFreeUSDT.toFixed(2)}, Need $${orderCost.toFixed(2)}`, 'warning');
+                        logDebugFinancials('BUDGET_EXHAUSTED', {
+                            currentFreeUSDT,
+                            orderCost,
+                            levelAmount: level.amount,
+                            levelPrice: level.price
+                        });
                         continue; // Skip this level, save API call
                     }
                     currentFreeUSDT -= orderCost; // Deduct locally
