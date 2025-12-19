@@ -1062,6 +1062,12 @@ async function initializeGrid(forceReset = false) {
         // Place Orders
         log('GRID', `PLACING ${gridLevels.length} ORDERS (PYRAMID STRATEGY)...`);
 
+        // P0 FIX: Check Safety Guards (Inventory/Cash)
+        const pauseCheck = await shouldPauseBuys();
+        if (pauseCheck.pause) {
+            log('SMART', `⚠️ BUY PROTECTION ACTIVE: ${pauseCheck.reason}. Filtering BUY orders.`);
+        }
+
         // P0 FIX: Local Budget Tracking to prevent API Spam & Insufficient Funds
         // Calculate available budget from cached financials ONCE
         const startFin = await getDetailedFinancialsCached(500); // Ensure fresh
@@ -1078,6 +1084,11 @@ async function initializeGrid(forceReset = false) {
 
         for (const level of gridLevels) {
             try {
+                // Pre-Check: Skip buys if paused
+                if (level.side === 'buy' && pauseCheck.pause) {
+                    continue;
+                }
+
                 // Pre-Check Budget
                 if (level.side === 'buy') {
                     const orderCost = level.amount * level.price;
@@ -2549,19 +2560,21 @@ async function checkFlashCrash() {
 // Prevents over-exposure by limiting BUY orders when USDT is low or inventory is high
 async function shouldPauseBuys() {
     try {
-        const balance = await binance.fetchBalance();
-        const equity = await getGlobalEquity();
+        // P0 FIX: Use Allocated Financials for correct isolation
+        const fin = await getDetailedFinancialsCached(1000);
+        if (!fin) return { pause: false }; // Fail open if no data
+
+        const equity = fin.totalEquity; // Allocated Equity
         const currentPrice = state.currentPrice || 0;
 
-        const freeUSDT = balance.USDT?.free || 0;
-        const totalBase = balance[BASE_ASSET]?.total || 0;
-        const baseValueUSDT = totalBase * currentPrice;
+        const freeUSDT = fin.freeUSDT; // Allocated Free USDT
+        const baseValueUSDT = fin.btcValueUSDT; // Allocated Base Value
 
         // Guard 1: USDT Floor - Keep minimum liquidity
         if (freeUSDT < equity * USDT_FLOOR_PERCENT) {
             return {
                 pause: true,
-                reason: `USDT_FLOOR (Free: $${freeUSDT.toFixed(2)} < ${(USDT_FLOOR_PERCENT * 100).toFixed(0)}% of $${equity.toFixed(2)})`
+                reason: `LOW_LIQUIDITY_ISOLATED (Free: $${freeUSDT.toFixed(2)} < Floor: $${(equity * USDT_FLOOR_PERCENT).toFixed(2)})`
             };
         }
 
@@ -2569,7 +2582,7 @@ async function shouldPauseBuys() {
         if (baseValueUSDT > equity * INVENTORY_CAP_PERCENT) {
             return {
                 pause: true,
-                reason: `INVENTORY_CAP (${((baseValueUSDT / equity) * 100).toFixed(1)}% > ${(INVENTORY_CAP_PERCENT * 100).toFixed(0)}%)`
+                reason: `INVENTORY_CAP_ISOLATED (${((baseValueUSDT / equity) * 100).toFixed(1)}% > ${(INVENTORY_CAP_PERCENT * 100).toFixed(0)}%)`
             };
         }
 
