@@ -20,7 +20,7 @@ df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
 echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? (Archivos 'rotados') ---"; \
 ls -lh /root/arca-bot/logs/VANTAGE* /root/bot-sol/logs/VANTAGE* | grep "$(date +%Y-%m-%d)"; \
 echo -e "\n🚨 --- 4. ERRORES RECIENTES (Últimas 24h) ---"; \
-grep -r "ERROR" /root/arca-bot/logs/ /root/bot-sol/logs/ | tail -n 5; \
+grep "ERROR" /root/arca-bot/logs/*activity.log /root/bot-sol/logs/*activity.log /root/arca-bot/logs/*$(date +%Y-%m-%d)* /root/bot-sol/logs/*$(date +%Y-%m-%d)* 2>/dev/null | tail -n 5; \
 echo -e "\n☠️ --- 4.b CRASH LOGS (¿Por qué se reinicia?) ---"; \
 cat /root/arca-bot/logs/pm2_crash.log /root/bot-sol/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados hoy (¡Bien!)"; \
 echo -e "\n💰 --- 5. REPORTE DE AYER ---"; \

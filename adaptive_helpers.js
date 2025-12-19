@@ -484,6 +484,12 @@ async function resilientAPICall(fn, maxRetries = 3, context = '') {
                 throw e;
             }
 
+            // P0 FIX: Don't retry fatal 4xx errors (Insufficient Funds, Bad Request)
+            if (e.message.includes('Insufficient balance') || e.message.includes('Account has insufficient balance') || e.message.includes('Order would trigger immediately') || e.code === 400 || e.code === -2010) {
+                console.error(`>> [FATAL] ${context} - Non-retriable error: ${e.message}`);
+                throw e; // Abort immediately
+            }
+
             const waitTime = 1000 * Math.pow(2, i); // Exponential backoff
             console.log(`>> [RETRY] ${context} attempt ${i + 1}/${maxRetries}. Waiting ${waitTime}ms...`);
             await new Promise(resolve => setTimeout(resolve, waitTime));

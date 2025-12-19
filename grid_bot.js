@@ -203,7 +203,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,
     secret: process.env.BINANCE_SECRET,
-    timeout: 30000, // 30 seconds
+    timeout: 60000, // 60 seconds (Engineer Fix)
     enableRateLimit: true,
     options: { 'adjustForTimeDifference': true }
 });
@@ -1056,7 +1056,7 @@ async function initializeGrid(forceReset = false) {
                     currentFreeUSDT -= orderCost; // Deduct locally
                 }
 
-                await placeOrder(level);
+                await placeOrder(level, true); // P0 FIX: Skip budget check, we tracked it locally
             } catch (e) {
                 log('ERROR', `Failed to place grid order: ${e.message}`, 'error');
             }
@@ -3300,14 +3300,42 @@ function shutdown() {
     process.exit(0);
 }
 
+// --- DEBUG: MEMORY WATCHDOG (Prevents Silent OOM Kills) ---
+setInterval(() => {
+    const used = process.memoryUsage().heapUsed / 1024 / 1024;
+    const rss = process.memoryUsage().rss / 1024 / 1024;
+
+    // Only log if memory is high to avoid log spam, OR every 10 mins
+    if (used > 300 || (Date.now() % 600000 < 60000)) {
+        console.log(`>> [MEM] Heap: ${Math.round(used)}MB | RSS: ${Math.round(rss)}MB`);
+        // Append to special debug file
+        try {
+            fs.appendFileSync(path.join(__dirname, 'logs', 'memory_monitor.log'),
+                `[${new Date().toISOString()}] Heap: ${Math.round(used)}MB | RSS: ${Math.round(rss)}MB\n`);
+        } catch (e) { }
+    }
+}, 60000); // Check every minute
+
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
 process.on('unhandledRejection', (reason) => {
-    log('ERROR', `Unhandled Rejection: ${reason?.message || reason}`, 'error');
+    const msg = `Unhandled Rejection: ${reason?.message || reason}`;
+    console.error(`[CRITICAL] ${msg}`);
+    try {
+        fs.appendFileSync(path.join(__dirname, 'logs', 'pm2_crash_debug.log'),
+            `\n[${new Date().toISOString()}] ${msg}\n`);
+    } catch (e) { }
+    // Do not exit, might be recoverable
 });
 
 process.on('uncaughtException', (err) => {
+    const msg = `Uncaught Exception: ${err.message}\n${err.stack}`;
+    console.error(`[CRITICAL] ${msg}`);
+    try {
+        fs.appendFileSync(path.join(__dirname, 'logs', 'pm2_crash_debug.log'),
+            `\n[${new Date().toISOString()}] ${msg}\n`);
+    } catch (e) { }
     log('ERROR', `Uncaught Exception: ${err.message}`, 'error');
-    shutdown();
+    process.exit(1); // Force exit so PM2 restarts
 });

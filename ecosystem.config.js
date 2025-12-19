@@ -9,7 +9,8 @@ module.exports = {
         BOT_PORT: 3000,
         CAPITAL_ALLOCATION: 0.5,
         NODE_ENV: "production"
-      }
+      },
+      max_memory_restart: "450M"
     },
     {
       name: "bot-sol",
@@ -20,7 +21,8 @@ module.exports = {
         BOT_PORT: 3001,
         CAPITAL_ALLOCATION: 0.5,
         NODE_ENV: "production"
-      }
+      },
+      max_memory_restart: "450M"
     }
     // Future bots
     /*
