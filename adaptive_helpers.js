@@ -222,7 +222,7 @@ function getAdaptiveRSI(marketRegime, volatility) {
 }
 
 // PHASE 2: Adaptive Safety Margin
-function getAdaptiveSafetyMargin(volatility, marketRegime) {
+function getAdaptiveSafetyMargin(volatility, marketRegime, geoContext = { defenseLevel: 0 }) {
     let margin = 0.95; // Base 95%
 
     // More cautious in high volatility
@@ -238,7 +238,24 @@ function getAdaptiveSafetyMargin(volatility, marketRegime) {
         margin = 0.98; // 98%
     }
 
-    return Math.max(margin, 0.80); // Never less than 80%
+    // GEOPOLITICAL OVERRIDE (Centralized)
+    const defenseLevel = geoContext.defenseLevel !== undefined ? geoContext.defenseLevel : 0;
+
+    if (defenseLevel === -1) {
+        // INFLATIONARY MODE: Aggressive Capital Deployment
+        margin = 0.98;
+    } else if (defenseLevel >= 3) {
+        // CRISIS: Defensive
+        margin = Math.min(margin, 0.50);
+    } else if (defenseLevel >= 2) {
+        // HIGH RISK
+        margin = Math.min(margin, 0.75);
+    } else if (defenseLevel >= 1) {
+        // ANXIETY
+        margin = Math.min(margin, 0.90);
+    }
+
+    return Math.max(margin, 0.50); // Floor at 50% (Crisis level)
 }
 
 // PHASE 2: Order Size Optimization (Pyramid Strategy)
@@ -385,7 +402,7 @@ function getAdaptiveIndicatorPeriods(volatility, marketRegime) {
 }
 
 // PHASE 4: Dynamic Grid Spacing
-function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopoliticalStatus) {
+function calculateOptimalGridSpacing(atr, currentPrice, volatility, geoContext = { status: 'NORMAL', defenseLevel: 0 }) {
     if (!atr || !currentPrice) return { spacing: 0.01, multiplier: 1.0, rawAtrPercent: 0.01 }; // Default
 
     const atrPercent = atr / currentPrice;
@@ -396,9 +413,24 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geopolitical
     else if (volatility === 'HIGH') atrMultiplier = 1.5;
     else if (volatility === 'LOW') atrMultiplier = 0.8;      // Tight spacing
 
-    // Geopolitical Override
-    if (geopoliticalStatus === 'MARKET_ANXIETY' || geopoliticalStatus === 'HIGH_VOLATILITY_EVENT') {
-        atrMultiplier *= 1.5; // INCREASE SPACING by 50%
+    // Geopolitical Override (Centralized Logic)
+    // Handle specific Defense Levels
+    const defenseLevel = geoContext.defenseLevel !== undefined ? geoContext.defenseLevel : 0;
+    const status = geoContext.status || 'NORMAL';
+
+    if (defenseLevel === -1) {
+        // INFLATIONARY ACCUMULATION (New Mode)
+        // Tighter grid to capture granular moves
+        atrMultiplier *= 0.90; // 10% tighter
+    } else if (defenseLevel >= 3) {
+        // LIQUIDITY CRISIS
+        atrMultiplier *= 1.50; // +50% wider (EXTREME Defense)
+    } else if (defenseLevel >= 2) {
+        // HIGH VOLATILITY EVENT
+        atrMultiplier *= 1.25; // +25% wider
+    } else if (defenseLevel >= 1 || status === 'MARKET_ANXIETY') {
+        // MARKET ANXIETY
+        atrMultiplier *= 1.10; // +10% wider
     }
 
     // Calculate dynamic spacing
@@ -466,14 +498,27 @@ function allocateCapital(totalCapital, marketRegime, volatility, multiTF, geoCon
     else if (volatility === 'HIGH') gridAllocation = 0.85;
 
     // GEOPOLITICAL OVERRIDE (Cash is King during War/Crisis)
-    if (geoContext.defenseLevel >= 3) {
+    let reason = `Regime: ${marketRegime} | Vol: ${volatility} | GeoDef: ${geoContext.defenseLevel}`;
+
+    if (geoContext.defenseLevel === -1) {
+        // INFLATIONARY ACCUMULATION
+        // Ensure we aren't limited by 'Normal' volatility
+        if (gridAllocation < 0.98) {
+            gridAllocation = 0.98;
+            reason += ' + INFLATION_MAX';
+        }
+    } else if (geoContext.defenseLevel >= 3) {
         gridAllocation = 0.50; // EXTREME: Keep 50% in USDT reserve
+        reason += ' + GEO_CRISIS';
     } else if (geoContext.defenseLevel >= 2) {
-        gridAllocation = 0.75; // HIGH RISK: Keep 25% reserve
+        gridAllocation = Math.min(gridAllocation, 0.75); // HIGH RISK: Cap at 75% (Don't increase if Extreme Vol set it to 70%)
+        reason += ' + GEO_HIGH';
     }
 
-    if (marketRegime === 'STRONG_BEAR') gridAllocation = Math.min(gridAllocation, 0.80);
-    else if (marketRegime === 'BEAR') gridAllocation = Math.min(gridAllocation, 0.90);
+    if (geoContext.defenseLevel !== -1) {
+        if (marketRegime === 'STRONG_BEAR') gridAllocation = Math.min(gridAllocation, 0.80);
+        else if (marketRegime === 'BEAR') gridAllocation = Math.min(gridAllocation, 0.90);
+    }
 
     // Aggressive in high-confidence bull (Only if no Geo Risk)
     if (marketRegime === 'STRONG_BULL' && multiTF.confidence === 'HIGH' && volatility === 'LOW' && geoContext.defenseLevel === 0) {
@@ -484,7 +529,7 @@ function allocateCapital(totalCapital, marketRegime, volatility, multiTF, geoCon
         grid: totalCapital * gridAllocation,
         reserve: totalCapital * (1 - gridAllocation),
         allocation: gridAllocation,
-        reason: `Regime: ${marketRegime} | Vol: ${volatility} | GeoDef: ${geoContext.defenseLevel}`
+        reason: reason
     };
 }
 

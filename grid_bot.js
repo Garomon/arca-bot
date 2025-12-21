@@ -910,6 +910,9 @@ async function initializeGrid(forceReset = false) {
         const volatilityState = analysis && analysis.bandwidth > CONFIG.bandwidthHigh ? 'HIGH' :
             (analysis && analysis.bandwidth < CONFIG.bandwidthLow ? 'LOW' : 'NORMAL');
 
+        // P0 FIX: Persist Volatility State for Helpers
+        state.volatilityRegime = volatilityState;
+
         // PHASE 2.5: ATR GRID SPACING (Dynamic Volatility Surfing)
         // FIX: Initialize geoContext with safe default before potential override
         let geoContext = { status: 'NORMAL', defenseLevel: 0 };
@@ -919,35 +922,20 @@ async function initializeGrid(forceReset = false) {
             geoContext = checkGeopoliticalContext(regime.regime, price, regime.ema200);
 
             // FIX: Always calculate ATR spacing, regardless of geo status
+            // Use CENTRALIZED logic in adaptive_helpers (Pass full geoContext)
             const spacingConfig = adaptiveHelpers.calculateOptimalGridSpacing(
                 analysis.atr,
                 price,
                 volatilityState,
-                geoContext.status // Still pass status for logging/helper awareness
+                geoContext // Pass full object (includes defenseLevel & status)
             );
 
             CONFIG.gridSpacing = spacingConfig.spacing;
 
-            // Apply Geopolitical Modifier
-            if (geoContext.defenseLevel === -1) {
-                // INFLATIONARY ACCUMULATION (New Mode)
-                // Tighter grid to capture granular moves + Max Capital deployment
-                CONFIG.gridSpacing *= 0.90; // 10% tighter
-                CONFIG.safetyMargin = 0.98; // 🚀 FULL SEND: Use 98% of equity
-                log('GEO', `🔥 INFLATIONARY MODE (Cash=Trash): Tightening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 98%`, 'success');
-            } else if (geoContext.defenseLevel >= 3) {
-                CONFIG.gridSpacing *= 1.50; // +50% wider (EXTREME Defense)
-                CONFIG.safetyMargin = 0.50; // 🛑 HOARD CASH: Only trade with 50% of equity
-                log('GEO', `🛡️ Defense Level 3 (EXTREME): Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 50%`, 'error');
-            } else if (geoContext.defenseLevel >= 2) {
-                CONFIG.gridSpacing *= 1.25; // +25% wider
-                CONFIG.safetyMargin = 0.75; // 🛡️ HIGH DEFENSE: Keep 25% reserve
-                log('GEO', `Defense Level 2: Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 75%`, 'warning');
-            } else if (geoContext.defenseLevel >= 1) {
-                CONFIG.gridSpacing *= 1.10; // +10% wider
-                CONFIG.safetyMargin = 0.90; // Standard defensive trim
-            } else {
-                CONFIG.safetyMargin = 0.92; // Reset to default
+            // Manual Spacing Overrides REMOVED (Now handled in adaptive_helpers)
+            // This prevents double-counting of risk multipliers.
+            if (geoContext.defenseLevel !== 0) {
+                log('GEO', `Spacing Adjusted by Helper: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (DefLevel: ${geoContext.defenseLevel})`, 'info');
             }
 
             log('ATR', `Dynamic Spacing Set: ${(CONFIG.gridSpacing * 100).toFixed(2)}% (ATR: ${analysis.atr.toFixed(2)} | Mult: ${spacingConfig.multiplier})`, 'info');
@@ -961,50 +949,39 @@ async function initializeGrid(forceReset = false) {
 
         // PHASE 3: Use allocateCapital for smarter distribution
         const multiTF = await analyzeMultipleTimeframes();
-        let allocation = adaptiveHelpers.allocateCapital(dynamicCapital, regime.regime, volatilityState, multiTF);
 
         // --- GEOPOLITICAL RESERVE OVERRIDE ---
         // geoContext defined above safely now
         // PHASE 3: ADAPTIVE CAPITAL ALLOCATION (Brain Activation)
+        // NOW PASSING GEOCONTEXT to helper (Centralized Logic)
         const capitalConfig = adaptiveHelpers.allocateCapital(
             dynamicCapital,     // Total available
             regime.regime,      // Market Phase
             volatilityState,    // Risk Level
-            multiTF             // Trend Confidence
+            multiTF,            // Trend Confidence
+            geoContext          // Geopolitical Context
         );
 
-        // Apply Geo-Defense Override (Safety Layer)
-        if (geoContext.defenseLevel === -1) {
-            capitalConfig.grid *= 1.0; // Ensure 100% of calculated grid capital is used
-            // Actually, ensure we aren't limited by 'Normal' volatility
-            if (capitalConfig.allocation < 0.98) {
-                capitalConfig.grid = dynamicCapital * 0.98;
-                capitalConfig.reason += ' + INFLATION_MAX_EXPOSURE';
-            }
-        } else if (geoContext.defenseLevel >= 2) {
-            capitalConfig.grid *= 0.75; // Force extra 25% reserve in War/Crisis
-            capitalConfig.reason += ' + GEO_CRISIS';
-        }
-
-        // Apply computed allocation
-        allocation.grid = capitalConfig.grid;
-        allocation.reserve = dynamicCapital - capitalConfig.grid; // Ensure reserve assumes remainder
-        allocation.reason = capitalConfig.reason;
-
-        // Log the decision
-        if (allocation.allocation < 0.9) {
-            log('SMART', `🛡️ Defensive Allocation: ${(allocation.allocation * 100).toFixed(0)}% (Reserved: $${allocation.reserve.toFixed(2)})`, 'warning');
-        } else if (geoContext.defenseLevel === -1) {
-            log('SMART', `🔥 INFLATIONARY ALLOCATION: ${(allocation.allocation * 100).toFixed(0)}% | Reserve minimized.`, 'success');
-        }
+        // Apply computed allocation (Restored)
+        let allocation = {
+            grid: capitalConfig.grid,
+            reserve: dynamicCapital - capitalConfig.grid,
+            allocation: capitalConfig.allocation,
+            reason: capitalConfig.reason
+        };
 
         const safeCapital = allocation.grid;
 
         log('SYSTEM', `CAPITAL ALLOCATION: $${safeCapital.toFixed(2)} for grid | $${allocation.reserve.toFixed(2)} reserve (${allocation.reason})`);
 
-        // Log adaptive safety margin for transparency
-        const adaptiveSafetyMargin = adaptiveHelpers.getAdaptiveSafetyMargin(volatilityState, regime.regime);
-        CONFIG.safetyMargin = adaptiveSafetyMargin; // Apply globally
+        // Calculate Safety Margin based on Geo Level (Now handled by Helper)
+        // P0 FIX: centralized logic in adaptive_helpers
+        const adaptiveSafetyMargin = adaptiveHelpers.getAdaptiveSafetyMargin(
+            volatilityState,
+            regime.regime,
+            geoContext
+        );
+        CONFIG.safetyMargin = adaptiveSafetyMargin;
         log('ADAPTIVE', `Safety Margin: ${(adaptiveSafetyMargin * 100).toFixed(0)}% (Vol: ${volatilityState} | Regime: ${regime.regime})`, 'info');
 
         // Track initial capital for profit % (only set once on first run)
@@ -1460,6 +1437,13 @@ async function runMonitorLoop(myId) {
                 volatilityState = 'NORMAL';
             }
 
+            // P0 FIX: Update State for Helpers (Prevents Stale Data in shouldRebalance)
+            if (state.volatilityRegime !== volatilityState) {
+                state.lastVolatility = state.volatilityRegime;
+                state.volatilityRegime = volatilityState;
+                log('VOLATILITY', `Regime Shift: ${state.lastVolatility} -> ${state.volatilityRegime}`, 'warning');
+            }
+
             // RESTORED: Trend & Adaptive RSI (Now using STABLE volatilityState)
             const trend = analysis.price > analysis.ema ? 'BULLISH' : 'BEARISH';
             const adaptiveRSI = adaptiveHelpers.getAdaptiveRSI(regime.regime, volatilityState);
@@ -1500,10 +1484,9 @@ async function runMonitorLoop(myId) {
             const newSpacing = baseSpacing * spacingMultiplier;
 
             // FIX: Always update Volatility State (Stale State Bug Fix)
-            // Save previous purely for change detection in helpers
-            const prevVol = state.volatilityRegime || 'NORMAL';
-            state.volatilityRegime = volatilityState;
-            state.lastVolatility = prevVol;
+            // Use currentVol (captured at start of loop) for change detection
+            const prevVol = currentVol;
+            // state.volatilityRegime is already updated at line 1443
 
             // Check if we need to adapt (with Smart Hysteresis)
             const lastResetTime = state.lastRebalance?.timestamp || 0;
