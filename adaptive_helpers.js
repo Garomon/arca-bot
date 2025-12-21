@@ -92,9 +92,28 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
             };
         }
 
+        // 3. MACRO THEME (Inflationary / "Cash is Trash")
+        else if (event.type === 'MACRO_THEME' && event.sentiment === 'BULISH_HARD_ASSETS') {
+            // Special Mode: INFLATIONARY ACCUMULATION
+            // We do NOT want high defense (cash hoarding). We want exposure.
+            candidateRisk = {
+                status: 'INFLATIONARY_ACCUMULATION',
+                modifier: 'AGGRESSIVE',
+                defenseLevel: -1, // Negative defense = Aggression (Hold less cash)
+                scoreBias: 15,    // Boost buy score
+                activeEvent: `${event.name}: ${event.description}`
+            };
+        }
+
         // FIX: Prioritization Logic - Only upgrade risk, never downgrade
-        if (candidateRisk && candidateRisk.defenseLevel > riskLevel.defenseLevel) {
-            riskLevel = candidateRisk;
+        // UNLESS we are in Inflationary Mode which overrides mild caution
+        if (candidateRisk) {
+            if (candidateRisk.defenseLevel > riskLevel.defenseLevel) {
+                riskLevel = candidateRisk;
+            } else if (candidateRisk.defenseLevel === -1 && riskLevel.defenseLevel < 2) {
+                // Allow Inflationary Override ONLY if not in active Crisis (Level 2+)
+                riskLevel = candidateRisk;
+            }
         }
     }
 

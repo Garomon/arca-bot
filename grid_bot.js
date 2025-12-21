@@ -928,8 +928,14 @@ async function initializeGrid(forceReset = false) {
 
             CONFIG.gridSpacing = spacingConfig.spacing;
 
-            // Apply Geopolitical Modifier if needed (Widen grid for safety)
-            if (geoContext.defenseLevel >= 3) {
+            // Apply Geopolitical Modifier
+            if (geoContext.defenseLevel === -1) {
+                // INFLATIONARY ACCUMULATION (New Mode)
+                // Tighter grid to capture granular moves + Max Capital deployment
+                CONFIG.gridSpacing *= 0.90; // 10% tighter
+                CONFIG.safetyMargin = 0.98; // 🚀 FULL SEND: Use 98% of equity
+                log('GEO', `🔥 INFLATIONARY MODE (Cash=Trash): Tightening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 98%`, 'success');
+            } else if (geoContext.defenseLevel >= 3) {
                 CONFIG.gridSpacing *= 1.50; // +50% wider (EXTREME Defense)
                 CONFIG.safetyMargin = 0.50; // 🛑 HOARD CASH: Only trade with 50% of equity
                 log('GEO', `🛡️ Defense Level 3 (EXTREME): Widening Grid to ${(CONFIG.gridSpacing * 100).toFixed(2)}% | Safety Margin: 50%`, 'error');
@@ -968,7 +974,14 @@ async function initializeGrid(forceReset = false) {
         );
 
         // Apply Geo-Defense Override (Safety Layer)
-        if (geoContext.defenseLevel >= 2) {
+        if (geoContext.defenseLevel === -1) {
+            capitalConfig.grid *= 1.0; // Ensure 100% of calculated grid capital is used
+            // Actually, ensure we aren't limited by 'Normal' volatility
+            if (capitalConfig.allocation < 0.98) {
+                capitalConfig.grid = dynamicCapital * 0.98;
+                capitalConfig.reason += ' + INFLATION_MAX_EXPOSURE';
+            }
+        } else if (geoContext.defenseLevel >= 2) {
             capitalConfig.grid *= 0.75; // Force extra 25% reserve in War/Crisis
             capitalConfig.reason += ' + GEO_CRISIS';
         }
@@ -981,6 +994,8 @@ async function initializeGrid(forceReset = false) {
         // Log the decision
         if (allocation.allocation < 0.9) {
             log('SMART', `🛡️ Defensive Allocation: ${(allocation.allocation * 100).toFixed(0)}% (Reserved: $${allocation.reserve.toFixed(2)})`, 'warning');
+        } else if (geoContext.defenseLevel === -1) {
+            log('SMART', `🔥 INFLATIONARY ALLOCATION: ${(allocation.allocation * 100).toFixed(0)}% | Reserve minimized.`, 'success');
         }
 
         const safeCapital = allocation.grid;
