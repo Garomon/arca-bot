@@ -318,8 +318,9 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
         const lastFillTime = state.lastFillTime || Date.now();
         const lastRebalanceTime = state.lastRebalance?.timestamp || 0;
 
-        // Use the LATEST activity (Fill OR Reset)
-        const lastActivityTime = Math.max(lastFillTime, lastRebalanceTime);
+        // Use the LATEST activity (Fill OR Reset OR Manual/Forced Grid Reset)
+        // FIX: Include lastGridReset to prevent "Reboot Loop" when bot just reset itself
+        const lastActivityTime = Math.max(lastFillTime, lastRebalanceTime, state.lastGridReset || 0);
         const hoursSinceActivity = (Date.now() - lastActivityTime) / (1000 * 60 * 60);
 
         // Only trigger if truly stale (> 24h since ANY activity)

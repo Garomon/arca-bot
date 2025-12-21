@@ -7,104 +7,153 @@
 ---
 
 ## ⚡ 1. COMANDO MAESTRO (EL ÚNICO QUE NECESITAS)
-Este comando descarga toda la verdad: **Inicios de sesión** (Startup), **Reporte de ganancias de ayer** y **Actividad detallada reciente**.
 
 Copia y pega TODO el bloque gris en tu terminal SSH:
 
 ```bash
 clear; \
-echo -e "\n🚦 --- 1. STATUS DE PROCESOS (PM2) ---"; \
+echo -e "\n� ═══════════════════════════════════════════════════════════════"; \
+echo -e "                    RESUMEN EJECUTIVO [HOY]"; \
+echo -e "═══════════════════════════════════════════════════════════════\n"; \
+BTC_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
+SOL_JSON=$(tail -n 1 /root/bot-sol/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
+BTC_PROFIT_TODAY=$(grep "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
+SOL_PROFIT_TODAY=$(grep "PROFIT" /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
+echo "BTC: Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') ($(echo $BTC_JSON | jq -r '.decision_rec // "?"')) | $(echo $BTC_JSON | jq -r '.market_regime // "?"') | \$$(echo $BTC_JSON | jq -r '.price // "?"')"; \
+echo "SOL: Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') ($(echo $SOL_JSON | jq -r '.decision_rec // "?"')) | $(echo $SOL_JSON | jq -r '.market_regime // "?"') | \$$(echo $SOL_JSON | jq -r '.price // "?"')"; \
+echo -e "\n═══════════════════════════════════════════════════════════════\n"; \
+echo -e "\n�🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
 pm2 list; \
-echo -e "\n💻 --- 2. SALUD DEL SERVIDOR (Disco/RAM) ---"; \
+echo -e "\n💻 --- 2. SALUD DEL SERVIDOR (Disco/RAM) [TIEMPO REAL] ---"; \
 df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
-echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? (Archivos 'rotados') ---"; \
+echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? [HOY] ---"; \
 ls -lh /root/arca-bot/logs/VANTAGE* /root/bot-sol/logs/VANTAGE* | grep "$(date +%Y-%m-%d)"; \
-echo -e "\n🚨 --- 4. ERRORES RECIENTES (Últimas 24h) ---"; \
-grep "ERROR" /root/arca-bot/logs/*activity.log /root/bot-sol/logs/*activity.log /root/arca-bot/logs/*$(date +%Y-%m-%d)* /root/bot-sol/logs/*$(date +%Y-%m-%d)* 2>/dev/null | tail -n 5; \
-echo -e "\n☠️ --- 4.b CRASH LOGS (¿Por qué se reinicia?) ---"; \
-cat /root/arca-bot/logs/pm2_crash.log /root/bot-sol/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados hoy (¡Bien!)"; \
-echo -e "\n💰 --- 5. REPORTE DE AYER ---"; \
+echo -e "\n🚨 --- 4. ERRORES DE HOY [HOY] ---"; \
+grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
+echo -e "\n☠️ --- 4.b CRASH LOGS [HISTÓRICO - desde último borrado] ---"; \
+cat /root/arca-bot/logs/pm2_crash.log /root/bot-sol/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (¡Bien!)"; \
+echo -e "\n💰 --- 5. REPORTE DE AYER [AYER] ---"; \
 cat /root/arca-bot/reports/daily_report_*_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
-echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) ---"; \
+echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) [AYER] ---"; \
 cat /root/bot-sol/reports/daily_report_*_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
-echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO ---"; \
+echo -e "\n📈 --- 5.c TRADES DE HOY [HOY - Ventas con Profit] ---"; \
+echo "BTC:"; grep -c "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null || echo "0"; \
+grep "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null | tail -n 3; \
+echo "SOL:"; grep -c "PROFIT" /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null || echo "0"; \
+grep "PROFIT" /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | tail -n 3; \
+echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
 tail -n 300 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
-echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO ---"; \
+echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
 tail -n 300 /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log; \
-echo -e "\n🧠 --- 8. [AI BTC] ENTRENAMIENTO (Último Dato) ---"; \
+echo -e "\n🧠 --- 8. [AI BTC] ENTRENAMIENTO [TIEMPO REAL - Último Dato de HOY] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
-echo -e "\n🧠 --- 9. [AI SOL] ENTRENAMIENTO (Último Dato) ---"; \
+echo -e "\n🧠 --- 9. [AI SOL] ENTRENAMIENTO [TIEMPO REAL - Último Dato de HOY] ---"; \
 tail -n 1 /root/bot-sol/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
-echo -e "\n💾 --- 10. PULSO DE MEMORIA (Archivos de Estado) ---"; \
+echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL - Última modificación] ---"; \
 ls -lh /root/arca-bot/data/sessions/*_state.json /root/bot-sol/data/sessions/*_state.json
 ```
 
 ---
 
-## 🚦 2. Semáforo de Salud
+## � LEYENDA DE TIEMPOS (¡IMPORTANTE!)
 
-Una vez que corras el comando, busca esto:
+| Etiqueta | Significado |
+|----------|-------------|
+| `[TIEMPO REAL]` | Dato que refleja el estado AHORA MISMO. Úsalo para diagnosticar problemas actuales. |
+| `[HOY]` | Dato que se limpia cada día a las 00:00 UTC. Solo muestra actividad del día en curso. |
+| `[AYER]` | Reporte del día anterior. Útil para comparar rendimiento. |
+| `[ÚLTIMAS 24H]` | Errores de las últimas 24 horas (puede incluir ayer). |
+| `[HISTÓRICO]` | ⚠️ **CUIDADO:** Este dato es ACUMULADO desde que instalaste el bot. NO es de hoy. |
+
+---
+
+## 🚦 2. Semáforo de Salud (Solo usa datos `[TIEMPO REAL]`)
 
 ### 🟢 SANO (Todo bien)
-*   **Startup:** Ves mensajes de `[CONFIG] Loaded...` o `All systems normal`.
-*   **Actividad:** Ves `[AI] ANALYZING`, `[INTEL] Regime: ...`, o logs de `ORDER_PLACED`.
-*   **Sync:** `Active Orders` coincide con lo que esperas.
+*   **PM2 Status:** Ambos bots dicen `online` en verde.
+*   **Actividad:** Los logs muestran timestamps recientes (últimos 5 minutos).
+*   **Logs:** Ves `[AI] ANALYZING`, `[INTEL] Regime: ...`, `[SYNC] STATE IS IN SYNC`.
 
-### 🟡 ALERTA (Ojo)
-*   `High drawdown`: El precio bajó, el bot está aguantando. Normal en bajadas.
-*   `🛡️ BUY BLOCKED: USDT_FLOOR`: El bot dejó de comprar para proteger tu efectivo. **Bueno.**
-*   `Regime: BEAR`: El bot operará menos y venderá menos. **Esperado.**
+### 🟡 ALERTA (Ojo, pero no es emergencia)
+*   `🛡️ BUY BLOCKED: USDT_FLOOR`: El bot pausó compras para proteger liquidez. **Correcto.**
+*   `Regime: WEAK_BEAR`: El bot está en modo defensivo. **Esperado en mercado bajista.**
+*   `BUY WALL DETECTED`: El bot espera un mejor precio. **Estrategia normal.**
 
 ### 🔴 PELIGRO (Acción Inmediata)
-*   **Logs vacíos:** Si el comando no muestra nada nuevo (hora vieja).
-*   **Errores:** `ECONNRESET`, `Binance API Down`, `CRITICAL ERROR`.
-*   **Rebooting:** Si ves que el bot se reinicia a cada rato en el Startup.
+*   **Logs vacíos o timestamps viejos:** El bot puede estar muerto.
+*   **PM2 dice `stopped` o `errored`:** Necesita reinicio.
+*   **Errores repetidos:** `ECONNRESET`, `Binance API Down`, `CRITICAL ERROR`.
+*   **Contador `↺` alto + tú NO reiniciaste:** Hay crashes reales. Revisa `pm2_crash.log`.
+
+> **Nota sobre el contador `↺` (restarts):** Si tú hiciste mantenimientos/resets manuales, este contador estará alto. Usa `pm2 reset all` para ponerlo en cero y monitorear desde limpio.
 
 ---
 
 ## 🆘 3. Comandos de Emergencia
 
-Si el semáforo está en **ROJO**:
-
-**A) Resucitar los bots (Actualizar y Reiniciar):**
+**A) Resucitar los bots:**
 ```bash
 /root/arca-bot/scripts/update_all_bots.sh
 ```
 
-**B) Ver si los procesos están muertos:**
+**B) Ver status de procesos:**
 ```bash
 pm2 list
 ```
-*(Deben decir "online" en verde).*
 
-**C) Buscar errores específicos:**
+**C) Buscar errores en logs:**
 ```bash
-grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log
+grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log | tail -n 20
 ```
 
 ---
 
-## 🧹 4. Mantenimiento: Resetear Contadores (Restarts)
-Si has estado haciendo pruebas y quieres poner los contadores de "restarts" en cero para monitorear desde limpio:
+## 🧹 4. Comandos de Limpieza/Reset
 
+### Resetear contador de restarts (PM2):
 ```bash
 pm2 reset all
 ```
-*Esto NO reinicia los bots, solo pone a cero el contador `↺`.*
+*Solo limpia el contador `↺`. No afecta los bots ni los datos.*
+
+### Resetear Max Drawdown (Histórico):
+```bash
+# BTC Bot
+ssh root@167.71.1.124 "cd /root/arca-bot && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_BTCUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
+
+# SOL Bot
+ssh root@167.71.1.124 "cd /root/bot-sol && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_SOLUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
+```
+*Esto pone a cero el "récord de peor caída". El bot debe reiniciarse después.*
+
+### Borrar Crash Logs (para empezar limpio):
+```bash
+echo "" > /root/arca-bot/logs/pm2_crash.log
+echo "" > /root/bot-sol/logs/pm2_crash.log
+```
 
 ---
 
-
-
----
-
-## 🛡️ NOTA: Tus Protecciones Activas
+## 🛡️ 5. Protecciones Activas (Configuración)
 *   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
 *   **Tope de Inventario (70%)**: Nunca llenará más del 70% de la bolsa con monedas.
 
 ---
 
-## 💰 5. Verificación de Ganancias (Auditoría)
-El bot tiene 2 reglas de oro infalibles para garantizar tu dinero:
-1.  **El Portero:** Nunca abre una orden si la ganancia no cubre al menos **1.5 veces** las comisiones de compra y venta.
-2.  **El Reporte:** Cuando veas `PROFIT` en verde en los logs, es **GANANCIA NETA REAL**. El bot ya descontó las comisiones de Binance. Es dinero limpio.
+## 💰 6. Entendiendo el Reporte Diario
+
+El reporte tiene datos de diferentes temporalidades. Aquí está la guía:
+
+| Campo | Temporalidad | Descripción |
+|-------|--------------|-------------|
+| `Today's Profit` | `[HOY]` | Ganancia neta SOLO del día. Se resetea a las 00:00 UTC. |
+| `Total Profit` | `[HISTÓRICO]` | Ganancia acumulada desde que instalaste el bot. |
+| `Max Drawdown` | `[HISTÓRICO]` | La peor caída que ha tenido el bot EN SU VIDA. No es de hoy. |
+| `Total ROI` | `[HISTÓRICO]` | Retorno total basado en `Total Profit` / `Initial Capital`. |
+| `Trades Executed` | `[HOY]` | Órdenes ejecutadas hoy. |
+| `Active Orders` | `[TIEMPO REAL]` | Órdenes abiertas ahora mismo. |
+| `Inventory Lots` | `[TIEMPO REAL]` | Lotes de monedas que el bot tiene en inventario. |
+| `Current Price` | `[TIEMPO REAL]` | Precio del par al momento del reporte. |
+| `Market Regime` | `[TIEMPO REAL]` | Clasificación del mercado (BULL, BEAR, etc.). |
+
+> **Regla de Oro:** Si algo dice `[HISTÓRICO]` y te parece raro (ej: Drawdown alto), probablemente es un "fantasma del pasado", no un problema de hoy.
