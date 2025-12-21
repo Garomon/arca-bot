@@ -920,6 +920,7 @@ async function initializeGrid(forceReset = false) {
         if (analysis && analysis.atr) {
             // --- GEOPOLITICAL CHECK ---
             geoContext = checkGeopoliticalContext(regime.regime, price, regime.ema200);
+            geoContext.tradingFee = CONFIG.tradingFee || 0.001; // Pass Fee for Spacing Calc
 
             // FIX: Always calculate ATR spacing, regardless of geo status
             // Use CENTRALIZED logic in adaptive_helpers (Pass full geoContext)
