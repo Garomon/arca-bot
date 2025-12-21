@@ -22,6 +22,15 @@ const GEOPOLITICAL_EVENTS = [
         type: 'MANIPULATION',
         sentiment: 'VOLATILE',
         description: 'Recurrent manipulation observed: 16:00 UTC and Sunday midnights ("Shake the tree" before moves).'
+    },
+    {
+        name: 'INFLATIONARY_CRASH_WATCH (Long Term)',
+        date: '2025-12-21',
+        duration: 90, // 3 Months Watch
+        impact: 'MEDIUM',
+        type: 'MACRO_THEME',
+        sentiment: 'BULISH_HARD_ASSETS',
+        description: 'Thesis: "Cash is Trash". Flight to quality (Big Tech, BTC, Gold). Bias: Accumulate Dips, hold less USDT long term.'
     }
 ];
 
