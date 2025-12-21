@@ -176,10 +176,6 @@ const CONFIG = {
     compoundProfits: true,
     minProfitToCompound: 0.5,
 
-    // AGGRESSIVE DCA MODE
-    dcaEnabled: true,
-    dcaDropPercent: 0.02,
-    dcaMultiplier: 1.5,
 
     // System Settings
     monitorInterval: 3000,
@@ -2128,40 +2124,52 @@ function checkGeopoliticalContext(currentRegime = 'NEUTRAL', currentPrice = 0, e
     // 3. Market Structure Override (The "Trend is King" Rule)
     // If Market is in STRONG BEAR trend, we assume "Fear/Risk" context regardless of news.
     let structureRisk = { status: 'NORMAL', modifier: 'NONE', defenseLevel: 0 };
-    if (currentRegime === 'STRONG_BEAR' || currentRegime === 'BEAR') {
+    if (currentRegime === 'STRONG_BEAR') {
+        structureRisk = {
+            status: 'BEAR_MARKET_STRUCTURE',
+            modifier: 'DEFENSIVE',
+            defenseLevel: 2 // High caution in Strong Bear
+        };
+    } else if (currentRegime === 'BEAR') {
         structureRisk = {
             status: 'MARKET_FEAR',
             modifier: 'DEFENSIVE',
-            defenseLevel: 1
+            defenseLevel: 1 // Moderate caution in Bear
         };
     }
 
-    // Combine Risks (Special handling for Inflationary Mode)
-    // defenseLevel: -1 = AGGRESSIVE (Inflation), 0 = Normal, 1-3 = Defensive
-    let defenseLevel;
-    let finalStatus = structureRisk.status;
-    let finalModifier = structureRisk.modifier;
-    let activeMessage = null;
+    // 4. Resolve Conflict (Prioritization Logic)
+    // Hierarchy: 
+    // 1. LIQUIDITY CRISIS (Level 3+) -> Trumps everything (Safety First)
+    // 2. INFLATIONARY ACCUMULATION (Level -1) -> Trumps Bear Markets (Levels 1 & 2) ("Cash is Trash")
+    // 3. STANDARD DEFENSE -> Highest risk level wins (Math.max)
 
-    // CASE 1: INFLATIONARY OVERRIDE (-1)
-    // "Cash is Trash" thesis: Aggressive mode beats Normal (0) and mild defense (1).
-    // Only true crisis (Level 2+) can override the inflation thesis.
-    if (eventRisk.defenseLevel === -1 && structureRisk.defenseLevel < 2) {
+    let finalStatus = eventRisk.status;
+    let finalModifier = eventRisk.modifier;
+    let defenseLevel = 0;
+    let activeMessage = eventRisk.activeEvent;
+
+    // CASE 1: Crisis always wins (Level 3+)
+    if (eventRisk.defenseLevel >= 3 || structureRisk.defenseLevel >= 3) {
+        defenseLevel = Math.max(eventRisk.defenseLevel, structureRisk.defenseLevel);
+        finalModifier = 'MAX_DEFENSE';
+        activeMessage = "LIQUIDITY CRISIS DETECTED";
+    }
+    // CASE 2: Inflationary Accumulation Override
+    else if (eventRisk.defenseLevel === -1) {
         defenseLevel = -1;
-        finalStatus = eventRisk.status;
-        finalModifier = eventRisk.modifier;
-        activeMessage = eventRisk.activeEvent;
+        // Keep event status/modifier (AGGRESSIVE)
     }
-    // CASE 2: Normal Priority (Higher defense wins)
-    else if (eventRisk.defenseLevel > structureRisk.defenseLevel) {
-        defenseLevel = eventRisk.defenseLevel;
-        finalStatus = eventRisk.status;
-        finalModifier = eventRisk.modifier;
-        activeMessage = eventRisk.activeEvent;
-    }
-    // CASE 3: Structure Risk wins or tie
+    // CASE 3: Standard Risk Management (Highest Risk Wins)
     else {
         defenseLevel = Math.max(eventRisk.defenseLevel, structureRisk.defenseLevel);
+
+        // If Structure is riskier, update status text
+        if (structureRisk.defenseLevel > eventRisk.defenseLevel) {
+            finalStatus = structureRisk.status;
+            finalModifier = structureRisk.modifier;
+            activeMessage = "Market Structure Override";
+        }
     }
 
     return {
@@ -2572,6 +2580,7 @@ async function checkFlashCrash() {
 
 // Phase 31: PRODUCTION SAFETY GUARDRAILS
 // Prevents over-exposure by limiting BUY orders when USDT is low or inventory is high
+// P0 FIX: NOW DYNAMIC based on Geopolitical Defense Level
 async function shouldPauseBuys() {
     try {
         // P0 FIX: Use Allocated Financials for correct isolation
@@ -2581,22 +2590,59 @@ async function shouldPauseBuys() {
         const equity = fin.totalEquity; // Allocated Equity
         const currentPrice = state.currentPrice || 0;
 
+        // DYNAMIC LIMITS (Context Aware)
+        // ---------------------------------------------------------
+        // Level -1 (Inflationary): Floor 2% (Gas only), Cap 98% (All in)
+        // Level 0  (Normal):       Floor 15%, Cap 70% (Standard)
+        // Level 1  (Defensive):    Floor 25%, Cap 50% (Cautious)
+        // Level 2  (Crisis):       Floor 50%, Cap 30% (Cash is King)
+        // ---------------------------------------------------------
+
+        // 1. Get Context (Lightweight if possible, fallback to state)
+        let defenseLevel = 0;
+        try {
+            // Try to get cached regime if fresh, else detect
+            // We need EMA200 for accurate context
+            const regime = await detectMarketRegime();
+            const geo = checkGeopoliticalContext(regime.regime, currentPrice, regime.ema200);
+            defenseLevel = geo.defenseLevel;
+        } catch (e) {
+            // Fallback to existing state if detection fails to avoid blocking
+            // (Assumes state.marketRegime is reasonably fresh)
+            defenseLevel = 0;
+        }
+
+        // 2. Set Dynamic Thresholds
+        let effectiveFloor = 0.15; // Default (USDT_FLOOR_PERCENT)
+        let effectiveCap = 0.70;   // Default (INVENTORY_CAP_PERCENT)
+
+        if (defenseLevel === -1) {
+            effectiveFloor = 0.02; // 2% USDT Floor
+            effectiveCap = 0.98;   // 98% Inventory Cap
+        } else if (defenseLevel === 1) {
+            effectiveFloor = 0.25;
+            effectiveCap = 0.50;
+        } else if (defenseLevel >= 2) {
+            effectiveFloor = 0.50;
+            effectiveCap = 0.30;
+        }
+
         const freeUSDT = fin.freeUSDT; // Allocated Free USDT
         const baseValueUSDT = fin.btcValueUSDT; // Allocated Base Value
 
-        // Guard 1: USDT Floor - Keep minimum liquidity
-        if (freeUSDT < equity * USDT_FLOOR_PERCENT) {
+        // Guard 1: USDT Floor - Ensure we don't run out of ammo (Dynamic)
+        if (freeUSDT < equity * effectiveFloor) {
             return {
                 pause: true,
-                reason: `LOW_LIQUIDITY_ISOLATED (Free: $${freeUSDT.toFixed(2)} < Floor: $${(equity * USDT_FLOOR_PERCENT).toFixed(2)})`
+                reason: `USDT_FLOOR_DYNAMIC (Free: $${freeUSDT.toFixed(2)} < Floor: $${(equity * effectiveFloor).toFixed(2)} [${(effectiveFloor * 100).toFixed(0)}% @ Def:${defenseLevel}])`
             };
         }
 
-        // Guard 2: Inventory Cap - Limit exposure to BASE_ASSET
-        if (baseValueUSDT > equity * INVENTORY_CAP_PERCENT) {
+        // Guard 2: Inventory Cap - Limit exposure to BASE_ASSET (Dynamic)
+        if (baseValueUSDT > equity * effectiveCap) {
             return {
                 pause: true,
-                reason: `INVENTORY_CAP_ISOLATED (${((baseValueUSDT / equity) * 100).toFixed(1)}% > ${(INVENTORY_CAP_PERCENT * 100).toFixed(0)}%)`
+                reason: `INVENTORY_CAP_DYNAMIC (${((baseValueUSDT / equity) * 100).toFixed(1)}% > ${(effectiveCap * 100).toFixed(0)}% [Def: ${defenseLevel}])`
             };
         }
 
