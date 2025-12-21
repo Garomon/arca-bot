@@ -2153,16 +2153,32 @@ function checkGeopoliticalContext(currentRegime = 'NEUTRAL', currentPrice = 0) {
         };
     }
 
-    // Combine Risks (Max Defense Wins)
-    const defenseLevel = Math.max(eventRisk.defenseLevel, structureRisk.defenseLevel);
+    // Combine Risks (Special handling for Inflationary Mode)
+    // defenseLevel: -1 = AGGRESSIVE (Inflation), 0 = Normal, 1-3 = Defensive
+    let defenseLevel;
     let finalStatus = structureRisk.status;
     let finalModifier = structureRisk.modifier;
     let activeMessage = null;
 
-    if (eventRisk.defenseLevel > structureRisk.defenseLevel) {
+    // CASE 1: INFLATIONARY OVERRIDE (-1)
+    // "Cash is Trash" thesis: Aggressive mode beats Normal (0) and mild defense (1).
+    // Only true crisis (Level 2+) can override the inflation thesis.
+    if (eventRisk.defenseLevel === -1 && structureRisk.defenseLevel < 2) {
+        defenseLevel = -1;
         finalStatus = eventRisk.status;
         finalModifier = eventRisk.modifier;
         activeMessage = eventRisk.activeEvent;
+    }
+    // CASE 2: Normal Priority (Higher defense wins)
+    else if (eventRisk.defenseLevel > structureRisk.defenseLevel) {
+        defenseLevel = eventRisk.defenseLevel;
+        finalStatus = eventRisk.status;
+        finalModifier = eventRisk.modifier;
+        activeMessage = eventRisk.activeEvent;
+    }
+    // CASE 3: Structure Risk wins or tie
+    else {
+        defenseLevel = Math.max(eventRisk.defenseLevel, structureRisk.defenseLevel);
     }
 
     return {
