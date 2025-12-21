@@ -19,8 +19,8 @@ BTC_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_$(date +
 SOL_JSON=$(tail -n 1 /root/bot-sol/logs/training_data/market_snapshots_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
 BTC_PROFIT_TODAY=$(grep "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
 SOL_PROFIT_TODAY=$(grep "PROFIT" /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
-echo "BTC: Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') ($(echo $BTC_JSON | jq -r '.decision_rec // "?"')) | $(echo $BTC_JSON | jq -r '.market_regime // "?"') | \$$(echo $BTC_JSON | jq -r '.price // "?"')"; \
-echo "SOL: Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') ($(echo $SOL_JSON | jq -r '.decision_rec // "?"')) | $(echo $SOL_JSON | jq -r '.market_regime // "?"') | \$$(echo $SOL_JSON | jq -r '.price // "?"')"; \
+echo "BTC: Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') | $(echo $BTC_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $BTC_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $BTC_JSON | jq -r '.geo_defense_level // "0"'))"; \
+echo "SOL: Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') | $(echo $SOL_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $SOL_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $SOL_JSON | jq -r '.geo_defense_level // "0"'))"; \
 echo -e "\n═══════════════════════════════════════════════════════════════\n"; \
 echo -e "\n�🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
 pm2 list; \
