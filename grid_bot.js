@@ -916,7 +916,7 @@ async function initializeGrid(forceReset = false) {
 
         if (analysis && analysis.atr) {
             // --- GEOPOLITICAL CHECK ---
-            geoContext = checkGeopoliticalContext(regime.regime, price);
+            geoContext = checkGeopoliticalContext(regime.regime, price, regime.ema200);
 
             // FIX: Always calculate ATR spacing, regardless of geo status
             const spacingConfig = adaptiveHelpers.calculateOptimalGridSpacing(
@@ -1553,7 +1553,7 @@ async function runMonitorLoop(myId) {
                 bandwidth: analysis.bandwidth,
                 volatility: volatilityState,
                 pressure: externalDataCache.orderBook.value || { ratio: 1.0, signal: 'NEUTRAL' },
-                geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price),
+                geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price, regime.ema200),
                 warning: state.marketCondition.isOverbought ? 'OVERBOUGHT' : (state.marketCondition.isOversold ? 'OVERSOLD' : null),
                 signalScore: state.marketCondition.signalScore,
                 regime: state.marketRegime,
@@ -1577,7 +1577,7 @@ async function runMonitorLoop(myId) {
                     btcDominance: externalDataCache.btcDominance,
                     openInterest: externalDataCache.openInterest,
                     orderBook: externalDataCache.orderBook,
-                    geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price) // ✅ Pass Geo Context
+                    geoContext: checkGeopoliticalContext(state.marketRegime, analysis.price, regime.ema200) // ✅ Pass Geo Context with EMA200
                 };
                 DataCollector.logSnapshot(state, analysis, compositeSignal, externalMetrics);
             } catch (e) {
@@ -2134,13 +2134,12 @@ function checkMarketTiming() {
 }
 
 // GEOPOLITICAL & MACRO CONTEXT (Dynamic Adaptation)
-function checkGeopoliticalContext(currentRegime = 'NEUTRAL', currentPrice = 0) {
+function checkGeopoliticalContext(currentRegime = 'NEUTRAL', currentPrice = 0, ema200 = null) {
     // 1. Check Specific Scheduled Events (e.g. BoJ Dec 19)
     const eventRisk = adaptiveHelpers.evaluateGeopoliticalRisk(new Date());
 
-    // 2. Check Macro Price Zones (e.g. BTC Buy Dip)
-    // pass CONFIG.pair to helper
-    const macroSentiment = adaptiveHelpers.evaluateMacroSentiment(CONFIG.pair, currentPrice);
+    // 2. Check Macro Price Zones (DYNAMIC: based on EMA200)
+    const macroSentiment = adaptiveHelpers.evaluateMacroSentiment(CONFIG.pair, currentPrice, ema200);
 
     // 3. Market Structure Override (The "Trend is King" Rule)
     // If Market is in STRONG BEAR trend, we assume "Fear/Risk" context regardless of news.
@@ -2366,7 +2365,7 @@ async function calculateCompositeSignal(analysis, regime, multiTF, adaptiveRSI =
     }
 
     // === GEOPOLITICAL CONTEXT (Corrected & Adaptive) ===
-    const geo = checkGeopoliticalContext(regime.regime || 'NEUTRAL', analysis.price);
+    const geo = checkGeopoliticalContext(regime.regime || 'NEUTRAL', analysis.price, regime.ema200);
     if (geo.scoreBias !== 0) {
         score += geo.scoreBias;
         reasons.push(`${geo.status} (${geo.scoreBias > 0 ? '+' : ''}${geo.scoreBias})`);

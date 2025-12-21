@@ -34,22 +34,11 @@ const GEOPOLITICAL_EVENTS = [
     }
 ];
 
-const MACRO_PRICE_ZONES = {
-    'BTC/USDT': {
-        // VIDEO STRATEGY (AGGRESSIVE): Fear of drop below $70k.
-        // Buy Zone lowered to catch the "Real Crash"
-        buyDip: { min: 69000, max: 76000, sentiment: 'BEAR_TRAP_BUY' }, // Target: $70k - $75k area.
-        fairValue: { min: 76001, max: 88000, sentiment: 'NEUTRAL' },      // Wide neutral range
-        overextended: { min: 88001, max: 999999, sentiment: 'TAKE_PROFIT' } // Resistances above 88k
-    },
-    'SOL/USDT': {
-        // CORRELATED STRATEGY: If BTC drops ~20% to $70k, SOL drops ~30%
-        // Current ~$122 -> Target ~$85-$92
-        buyDip: { min: 82.00, max: 92.00, sentiment: 'BEAR_TRAP_BUY' },
-        fairValue: { min: 92.01, max: 135.00, sentiment: 'NEUTRAL' },
-        overextended: { min: 135.01, max: 9999.00, sentiment: 'TAKE_PROFIT' }
-    }
-};
+// MACRO ZONES: Now DYNAMIC based on MA200 (calculated in evaluateMacroSentiment)
+// Zone thresholds relative to MA200:
+// - BUY_DIP:       Price < MA200 (below long-term average = accumulation opportunity)
+// - FAIR_VALUE:    MA200 <= Price <= MA200 * 1.20 (healthy range, up to 20% above)
+// - OVEREXTENDED:  Price > MA200 * 1.20 (more than 20% above = take profit zone)
 
 // HELPER: Check for upcoming high-impact events
 function evaluateGeopoliticalRisk(currentDate = new Date()) {
@@ -136,31 +125,51 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
     return riskLevel;
 }
 
-// HELPER: Check if we are in a specific macro accumulation/distribution zone
-function evaluateMacroSentiment(pair, currentPrice) {
-    if (!MACRO_PRICE_ZONES[pair]) return null;
+// HELPER: Dynamic Macro Zone Calculation based on MA200
+// Zones adapt automatically to market conditions without hardcoded prices
+function evaluateMacroSentiment(pair, currentPrice, ma200 = null) {
+    // If no MA200 available, return neutral (can't calculate zones)
+    if (!ma200 || ma200 <= 0) {
+        return { zone: 'NEUTRAL', sentiment: 'NEUTRAL', scoreBonus: 0, advice: 'MA200 unavailable - trading ranges' };
+    }
 
-    const zones = MACRO_PRICE_ZONES[pair];
+    // Calculate price distance from MA200
+    const distanceFromMA = (currentPrice - ma200) / ma200;
+    const distancePercent = (distanceFromMA * 100).toFixed(1);
 
-    if (currentPrice >= zones.buyDip.min && currentPrice <= zones.buyDip.max) {
+    // ZONE THRESHOLDS (relative to MA200):
+    // - BUY_DIP:       Price < MA200 (below long-term average)
+    // - FAIR_VALUE:    MA200 <= Price <= MA200 * 1.20 (up to 20% above)
+    // - OVEREXTENDED:  Price > MA200 * 1.20 (more than 20% above)
+
+    if (currentPrice < ma200) {
         return {
             zone: 'BUY_DIP',
             sentiment: 'STRONG_BUY',
-            scoreBonus: 20, // Significant boost to buy signals
-            advice: 'Accumulate aggressively (Institutional Zone)'
+            scoreBonus: 20,
+            advice: `Below MA200 (${distancePercent}%) - Accumulate aggressively`,
+            ma200: ma200
         };
     }
 
-    if (currentPrice >= zones.overextended.min) {
+    if (currentPrice > ma200 * 1.20) {
         return {
             zone: 'OVEREXTENDED',
             sentiment: 'SELL',
             scoreBonus: -10,
-            advice: 'Take profits, reduced exposure'
+            advice: `Above MA200 by ${distancePercent}% - Take profits zone`,
+            ma200: ma200
         };
     }
 
-    return { zone: 'NEUTRAL', sentiment: 'NEUTRAL', scoreBonus: 0, advice: 'Trade ranges' };
+    // Default: Fair Value (between MA200 and +20%)
+    return {
+        zone: 'FAIR_VALUE',
+        sentiment: 'NEUTRAL',
+        scoreBonus: 0,
+        advice: `${distancePercent}% above MA200 - Fair value range`,
+        ma200: ma200
+    };
 }
 
 // PHASE 2: Dynamic Grid Count
