@@ -70,8 +70,19 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
         // Check if we are literally INSIDE the event window (Start <= Now <= End)
         const isDuringEvent = now >= eventDate && now <= eventEnd;
 
-        // 1. Pre-Event Anxiety (3 days before)
-        if (!isDuringEvent && daysToEvent > 0 && daysToEvent <= 3) {
+        // 1. MACRO THEME (Inflationary / "Cash is Trash")
+        // P0 FIX: Check this FIRST to prevent "During Event" generic catch-all from swallowing it
+        if (event.type === 'MACRO_THEME' && event.sentiment === 'BULISH_HARD_ASSETS' && isDuringEvent) {
+            candidateRisk = {
+                status: 'INFLATIONARY_ACCUMULATION',
+                modifier: 'AGGRESSIVE',
+                defenseLevel: -1, // Negative defense = Aggression (Hold less cash)
+                scoreBias: 15,    // Boost buy score
+                activeEvent: `${event.name}: ${event.description}`
+            };
+        }
+        // 2. Pre-Event Anxiety (3 days before)
+        else if (!isDuringEvent && daysToEvent > 0 && daysToEvent <= 3) {
             candidateRisk = {
                 status: 'MARKET_ANXIETY',
                 modifier: 'DEFENSIVE',
@@ -80,7 +91,7 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
                 activeEvent: `${event.name} in ${daysToEvent.toFixed(1)} days`
             };
         }
-        // 2. ACTIVE EVENT (During the window)
+        // 3. ACTIVE EVENT (During the window) - Generic Volatility/Crisis
         else if (isDuringEvent) {
             const isExtreme = event.impact === 'EXTREME';
             candidateRisk = {
@@ -92,27 +103,19 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
             };
         }
 
-        // 3. MACRO THEME (Inflationary / "Cash is Trash")
-        else if (event.type === 'MACRO_THEME' && event.sentiment === 'BULISH_HARD_ASSETS') {
-            // Special Mode: INFLATIONARY ACCUMULATION
-            // We do NOT want high defense (cash hoarding). We want exposure.
-            candidateRisk = {
-                status: 'INFLATIONARY_ACCUMULATION',
-                modifier: 'AGGRESSIVE',
-                defenseLevel: -1, // Negative defense = Aggression (Hold less cash)
-                scoreBias: 15,    // Boost buy score
-                activeEvent: `${event.name}: ${event.description}`
-            };
-        }
-
-        // FIX: Prioritization Logic - Only upgrade risk, never downgrade
-        // UNLESS we are in Inflationary Mode which overrides mild caution
+        // FIX: Prioritization Logic
         if (candidateRisk) {
-            if (candidateRisk.defenseLevel > riskLevel.defenseLevel) {
+            if (candidateRisk.defenseLevel > riskLevel.defenseLevel && riskLevel.defenseLevel !== -1) {
+                // Normal Escalation: Upgrade defense level
                 riskLevel = candidateRisk;
-            } else if (candidateRisk.defenseLevel === -1 && riskLevel.defenseLevel < 2) {
-                // Allow Inflationary Override ONLY if not in active Crisis (Level 2+)
-                riskLevel = candidateRisk;
+            } else if (candidateRisk.defenseLevel === -1) {
+                // Inflationary Override Logic:
+                // If we are currently at Level 0, 1, or 2 (Standard Volatility), Inflation WINS.
+                // "Cash is Trash" means we ignore standard volatility to accumulate hard assets.
+                // BUT if Level is 3 (Liquidity Crisis/System Failure), Safety still wins.
+                if (riskLevel.defenseLevel < 3) {
+                    riskLevel = candidateRisk;
+                }
             }
         }
     }
