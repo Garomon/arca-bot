@@ -2884,6 +2884,9 @@ async function handleOrderFill(order, fillPrice) {
 
     state.lastFillTime = Date.now();
 
+    // P0 FIX: Save state immediately to persist profit
+    saveState();
+
     const profitMsg = profit > 0 ? `| Profit: $${profit.toFixed(4)}` : '';
     log('EXECUTION', `💰 ${order.side.toUpperCase()} FILLED @ $${fillPrice.toFixed(2)} ${profitMsg}`, 'success');
     io.emit('trade_success', { side: order.side, price: fillPrice, profit });
