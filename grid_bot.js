@@ -3070,7 +3070,8 @@ async function syncWithExchange() {
 
 async function syncHistoricalTrades() {
     try {
-        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 50); // Last 50 trades
+        // ENGINEER FIX: Increase lookback to 500 to recover "lost" trades after a crash
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
         if (trades.length > 0) log('DEBUG', `Fetched ${trades.length} trades. Verifying against known orders...`);
         let addedCount = 0;
 
