@@ -425,8 +425,14 @@ function loadState() {
             // AUTO-SANITIZER: Fix Historical Profit Logic (Buys = 0) & Retroactive Fee Deduction
             let fixedProfit = 0;
             let estimatedProfit = 0; // Separate estimated/unverified profit
-            if (state.filledOrders) {
-                // FIXED: Migration Logic - Run cleanly
+
+            // P0 FIX: Check if we have a forensic audit baseline
+            const accumulated = state.accumulatedProfit || 0;
+            const hasAuditBaseline = accumulated > 0;
+
+            if (state.filledOrders && !hasAuditBaseline) {
+                // ONLY run migration/recalculation if NO audit baseline exists
+                // If accumulated > 0, the audit script already calculated the EXACT profit.
                 console.log('>> [MIGRATION] Verifying Fee Deduction on Historical Orders...');
                 state.filledOrders.forEach(o => {
                     // 1. Zero out Buy Profit
@@ -451,21 +457,17 @@ function loadState() {
                     }
                 });
 
-                // ENGINEER FIX: Accept Estimated Profit as Real (Better to have ~99% accuracy than $0)
-                // Also add "Archived/Accumulated" profit from pruned history
-                const accumulated = state.accumulatedProfit || 0;
-
-                // P0 FIX: Prevent Double-Counting after Forensic Audit
-                // If accumulated > 0, the audit already counted all historical trades.
-                // estimatedProfit is from syncHistoricalTrades re-discovering the SAME trades.
-                // Only add estimatedProfit if there's NO accumulated (fresh bot, no audit).
-                const safeEstimated = (accumulated > 0) ? 0 : estimatedProfit;
-
-                state.totalProfit = accumulated + fixedProfit + safeEstimated;
-
-                state.estimatedProfit = estimatedProfit; // Store for UI/Debug
-                state.feeCorrectionApplied = true;
+                // No audit baseline: use calculated values
+                state.totalProfit = fixedProfit + estimatedProfit;
+                state.estimatedProfit = estimatedProfit;
+            } else if (hasAuditBaseline) {
+                // AUDIT MODE: Trust the accumulated value, ignore filledOrders calculations
+                console.log(`>> [AUDIT] Using forensic audit baseline: $${accumulated.toFixed(4)}`);
+                state.totalProfit = accumulated;
+                // Future trades with isNetProfit = true will add to this via handleOrderFill
             }
+
+            state.feeCorrectionApplied = true;
             // AUTO-DETECT firstTradeTime from earliest SELL with profit (for APY)
             if (!state.firstTradeTime && state.filledOrders && state.filledOrders.length > 0) {
                 // Only count SELLs with profit - that's when we actually started making money
