@@ -3148,6 +3148,8 @@ async function syncHistoricalTrades() {
             }
             log('SYNC', `Imported ${addedCount} historical trades from exchange`, 'success');
             saveState();
+            // ENGINEER FIX: Force UI refresh to show recovered profit immediately
+            io.emit('init_state', state);
         }
 
         // Emit updated history to UI (Debugging Payload) - SORTED
