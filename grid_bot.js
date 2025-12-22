@@ -454,7 +454,14 @@ function loadState() {
                 // ENGINEER FIX: Accept Estimated Profit as Real (Better to have ~99% accuracy than $0)
                 // Also add "Archived/Accumulated" profit from pruned history
                 const accumulated = state.accumulatedProfit || 0;
-                state.totalProfit = accumulated + fixedProfit + estimatedProfit;
+
+                // P0 FIX: Prevent Double-Counting after Forensic Audit
+                // If accumulated > 0, the audit already counted all historical trades.
+                // estimatedProfit is from syncHistoricalTrades re-discovering the SAME trades.
+                // Only add estimatedProfit if there's NO accumulated (fresh bot, no audit).
+                const safeEstimated = (accumulated > 0) ? 0 : estimatedProfit;
+
+                state.totalProfit = accumulated + fixedProfit + safeEstimated;
 
                 state.estimatedProfit = estimatedProfit; // Store for UI/Debug
                 state.feeCorrectionApplied = true;
