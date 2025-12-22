@@ -5,44 +5,62 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const ARGS = process.argv.slice(2);
 const PAIR = ARGS[0] || 'SOL/USDT';
-const BOT_ID = 'bot-sol';
+// ENGINEER FIX: Fallback logic for finding the correct file
+// The bot defaults to "VANTAGE01" if BOT_ID env is not set in ecosystem.config.js
+const POSSIBLE_BOT_IDS = ['VANTAGE01', 'bot-sol', 'bot-btc'];
 
-// Configuration
-// FIX: Match grid_bot.js PAIR_ID naming (SOL/USDT -> SOLUSDT)
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
+
+console.log(`>> [RECALCULATOR] Starting LIFO (Scalping) Audit for ${PAIR}...`);
+
+// FIND STATE FILE
+const sessionsDir = path.join(__dirname, '..', 'data', 'sessions');
+let stateFile = null;
+
+// Brute-force find the file
+if (fs.existsSync(sessionsDir)) {
+    const files = fs.readdirSync(sessionsDir);
+    console.log(`>> [DEBUG] Found files in sessions dir:`, files);
+
+    // Exact match search
+    for (const file of files) {
+        if (file.includes(PAIR_ID) && file.endsWith('_state.json')) {
+            stateFile = path.join(sessionsDir, file);
+            console.log(`>> [SUCCESS] Found target state file: ${file}`);
+            break;
+        }
+    }
+}
+
+if (!stateFile) {
+    console.error(`>> [ERROR] Could not find any state file for pair ${PAIR_ID} in ${sessionsDir}`);
+    // Create one if forcing? No, safer to fail.
+    process.exit(1);
+}
+
 const CONFIG = {
     pair: PAIR,
     tradingFee: 0.001,
-    stateFile: path.join(__dirname, '..', 'data', 'sessions', `${BOT_ID}_${PAIR_ID}_state.json`)
+    stateFile: stateFile
 };
 
-console.log(`>> [RECALCULATOR] Starting LIFO (Scalping) Audit for ${PAIR}...`);
-console.log(`>> [STATE] Looking for state file: ${CONFIG.stateFile}`);
 
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY || process.env.API_KEY,
-    secret: process.env.BINANCE_API_SECRET || process.env.API_SECRET,
+    secret: process.env.BINANCE_SECRET || process.env.API_SECRET,
     enableRateLimit: true
 });
 
 async function runAudit() {
     try {
         console.log('>> [API] Fetching trades...');
-        // Try to fetch more by iterating? For now just try limit 1000 again.
-        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 1000);
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500); // 500 enough if just recovering recent crash
         console.log(`>> [API] Fetched ${trades.length} trades.`);
-
-        // LIFO SIMULATION (Sort by Time ASC first to build sequence, but consume Newest)
-        // Actually, to simulate properly:
-        // 1. Process trades in chronological order.
-        // 2. Buys add to end of inventory.
-        // 3. Sells consume from END of inventory (LIFO).
 
         let inventory = [];
         let totalProfit = 0;
         let totalFees = 0;
 
-        // Sort Ascending (Chronological Replay)
         trades.sort((a, b) => a.timestamp - b.timestamp);
 
         for (const trade of trades) {
@@ -64,8 +82,7 @@ async function runAudit() {
                 let costBasis = 0;
                 let entryFees = 0;
 
-                // LIFO CONSUMPTION: Start from END of array (Newest)
-                // We iterate backwards to find available lots
+                // LIFO
                 for (let i = inventory.length - 1; i >= 0; i--) {
                     const lot = inventory[i];
                     if (remainingToSell <= 0.00000001) break;
@@ -82,13 +99,8 @@ async function runAudit() {
                     remainingToSell -= take;
                 }
 
-                // Clean empty lots? No, strictly keep them to preserve index order if needed, 
-                // but for simple array iteration, filtering is safer to avoid leaks in logic.
-                // Re-filtering might mess up LIFO if we just pop? 
-                // Better to filter out fully consumed lots occasionally.
                 inventory = inventory.filter(l => l.remaining > 0.00000001);
 
-                // Handle Shortfall
                 if (remainingToSell > 0.00000001) {
                     console.log(`>> [WARN] LIFO Shortfall @ ${price}. Using estimate.`);
                     const estBuyPrice = price / 1.006;
@@ -108,24 +120,17 @@ async function runAudit() {
         console.log(`>> Realized Profit: $${totalProfit.toFixed(4)}`);
         console.log('------------------------------------------------');
 
-        if (fs.existsSync(CONFIG.stateFile)) {
-            const raw = fs.readFileSync(CONFIG.stateFile);
-            let state = JSON.parse(raw);
+        const raw = fs.readFileSync(CONFIG.stateFile);
+        let state = JSON.parse(raw);
 
-            // Backup
-            fs.copyFileSync(CONFIG.stateFile, CONFIG.stateFile + '.fix.bak');
+        fs.copyFileSync(CONFIG.stateFile, CONFIG.stateFile + '.fix.bak');
 
-            // Update
-            state.totalProfit = totalProfit;
-            // Clear accumulation/estimation since we did a full audit
-            state.accumulatedProfit = 0;
-            state.estimatedProfit = 0;
+        state.totalProfit = totalProfit;
+        state.accumulatedProfit = 0;
+        state.estimatedProfit = 0;
 
-            fs.writeFileSync(CONFIG.stateFile, JSON.stringify(state, null, 2));
-            console.log(`>> [SUCCESS] State file updated! Restart bot to see changes.`);
-        } else {
-            console.error(`>> [ERROR] Still cannot find state file at ${CONFIG.stateFile}`);
-        }
+        fs.writeFileSync(CONFIG.stateFile, JSON.stringify(state, null, 2));
+        console.log(`>> [SUCCESS] State file updated! Restart bot to see changes.`);
 
     } catch (e) {
         console.error('>> [ERROR]', e.message);
