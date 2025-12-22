@@ -5,36 +5,37 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const ARGS = process.argv.slice(2);
 const PAIR = ARGS[0] || 'SOL/USDT';
-// ENGINEER FIX: Fallback logic for finding the correct file
-// The bot defaults to "VANTAGE01" if BOT_ID env is not set in ecosystem.config.js
-const POSSIBLE_BOT_IDS = ['VANTAGE01', 'bot-sol', 'bot-btc'];
-
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 
 console.log(`>> [RECALCULATOR] Starting LIFO (Scalping) Audit for ${PAIR}...`);
 
-// FIND STATE FILE
+// FIND STATE FILE - PREFER VANTAGE01 PREFIXED FILES (Active Bot Files)
 const sessionsDir = path.join(__dirname, '..', 'data', 'sessions');
 let stateFile = null;
 
-// Brute-force find the file
 if (fs.existsSync(sessionsDir)) {
     const files = fs.readdirSync(sessionsDir);
     console.log(`>> [DEBUG] Found files in sessions dir:`, files);
 
-    // Exact match search
-    for (const file of files) {
-        if (file.includes(PAIR_ID) && file.endsWith('_state.json')) {
-            stateFile = path.join(sessionsDir, file);
-            console.log(`>> [SUCCESS] Found target state file: ${file}`);
-            break;
+    // PRIORITY 1: Look for VANTAGE01_<PAIR_ID>_state.json (Active Bot File)
+    const preferredFile = `VANTAGE01_${PAIR_ID}_state.json`;
+    if (files.includes(preferredFile)) {
+        stateFile = path.join(sessionsDir, preferredFile);
+        console.log(`>> [SUCCESS] Found PREFERRED state file: ${preferredFile}`);
+    } else {
+        // PRIORITY 2: Fallback to any matching file (legacy)
+        for (const file of files) {
+            if (file.includes(PAIR_ID) && file.endsWith('_state.json') && !file.includes('.bak') && !file.includes('CRASH')) {
+                stateFile = path.join(sessionsDir, file);
+                console.log(`>> [FALLBACK] Found alternate state file: ${file}`);
+                break;
+            }
         }
     }
 }
 
 if (!stateFile) {
     console.error(`>> [ERROR] Could not find any state file for pair ${PAIR_ID} in ${sessionsDir}`);
-    // Create one if forcing? No, safer to fail.
     process.exit(1);
 }
 
@@ -44,17 +45,16 @@ const CONFIG = {
     stateFile: stateFile
 };
 
-
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY || process.env.API_KEY,
-    secret: process.env.BINANCE_SECRET || process.env.API_SECRET,
+    secret: process.env.BINANCE_API_SECRET || process.env.API_SECRET,
     enableRateLimit: true
 });
 
 async function runAudit() {
     try {
         console.log('>> [API] Fetching trades...');
-        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500); // 500 enough if just recovering recent crash
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
         console.log(`>> [API] Fetched ${trades.length} trades.`);
 
         let inventory = [];
@@ -126,14 +126,14 @@ async function runAudit() {
         fs.copyFileSync(CONFIG.stateFile, CONFIG.stateFile + '.fix.bak');
 
         // P0 FIX: Push ALL calculated profit to "accumulated" and clear the list.
-        // This prevents loadState() from recalculating a lower number from the partial list.
         state.accumulatedProfit = totalProfit;
-        state.filledOrders = []; // Clear history so we start fresh from this verified balance
+        state.filledOrders = [];
         state.totalProfit = totalProfit;
         state.estimatedProfit = 0;
 
         fs.writeFileSync(CONFIG.stateFile, JSON.stringify(state, null, 2));
-        console.log(`>> [SUCCESS] State file updated! History archived into accumulated profit ($${totalProfit.toFixed(4)}).`);
+        console.log(`>> [SUCCESS] State file updated! Total Profit set to $${totalProfit.toFixed(4)}.`);
+        console.log(`>> [IMPORTANT] Now run: pm2 restart all`);
 
     } catch (e) {
         console.error('>> [ERROR]', e.message);
