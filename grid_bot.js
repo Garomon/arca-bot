@@ -823,7 +823,7 @@ async function computeBotFinancials() {
             totalEquity: myAllocatedEquity, // RESTORED: Bot's specific slice ($130)
             accountEquity: globalTotalEquity, // Available for Portfolio View (if supported)
             globalEquity: globalTotalEquity, // Alias try
-            profit: state.totalProfit + (state.accumulatedProfit || 0), // Lifetime Profit
+            profit: state.totalProfit, // Lifetime Profit (already includes accumulated)
             profitPercent,
             pair: CONFIG.pair,
             startTime: state.firstTradeTime || state.startTime,
@@ -3370,7 +3370,7 @@ server.listen(BOT_PORT, async () => {
         const todayWinRate = todaySells.length > 0 ? (todayWins / todaySells.length * 100).toFixed(1) : 'N/A';
 
         // Overall metrics
-        const lifetimeProfit = (state.totalProfit || 0) + (state.accumulatedProfit || 0);
+        const lifetimeProfit = (state.totalProfit || 0);
         const totalProfit = lifetimeProfit; // P0 FIX: Report Lifetime Profit
         const initialCapital = state.initialCapital || 100;
         const totalROI = ((totalProfit / initialCapital) * 100).toFixed(2);
