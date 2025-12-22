@@ -47,7 +47,7 @@ const CONFIG = {
 
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY || process.env.API_KEY,
-    secret: process.env.BINANCE_API_SECRET || process.env.API_SECRET,
+    secret: process.env.BINANCE_SECRET || process.env.API_SECRET,
     enableRateLimit: true
 });
 
