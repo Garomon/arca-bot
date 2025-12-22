@@ -450,7 +450,12 @@ function loadState() {
                         else estimatedProfit += o.profit;
                     }
                 });
-                state.totalProfit = fixedProfit; // Only proven profit
+
+                // ENGINEER FIX: Accept Estimated Profit as Real (Better to have ~99% accuracy than $0)
+                // Also add "Archived/Accumulated" profit from pruned history
+                const accumulated = state.accumulatedProfit || 0;
+                state.totalProfit = accumulated + fixedProfit + estimatedProfit;
+
                 state.estimatedProfit = estimatedProfit; // Store for UI/Debug
                 state.feeCorrectionApplied = true;
             }
@@ -2879,6 +2884,12 @@ async function handleOrderFill(order, fillPrice) {
 
     // MEMORY LEAK PROTECTION: Keep last 1000 orders only
     if (state.filledOrders.length > 1000) {
+        const removed = state.filledOrders.slice(0, state.filledOrders.length - 1000);
+        const removedProfit = removed.reduce((sum, o) => sum + (o.profit || 0), 0);
+
+        state.accumulatedProfit = (state.accumulatedProfit || 0) + removedProfit;
+        log('SYSTEM', `📦 Archived ${removed.length} orders. Moved $${removedProfit.toFixed(4)} profit to Deep Storage.`);
+
         state.filledOrders = state.filledOrders.slice(-1000);
     }
 
@@ -3124,6 +3135,14 @@ async function syncHistoricalTrades() {
             state.filledOrders.sort((a, b) => b.timestamp - a.timestamp);
             // Keep size manageable
             if (state.filledOrders.length > 200) {
+                const removed = state.filledOrders.slice(200);
+                const removedProfit = removed.reduce((sum, o) => sum + (o.profit || 0), 0);
+
+                state.accumulatedProfit = (state.accumulatedProfit || 0) + removedProfit;
+                if (removedProfit > 0) {
+                    log('SYNC', `📦 Archived ${removed.length} orders. Moved $${removedProfit.toFixed(4)} profit to Deep Storage.`);
+                }
+
                 state.filledOrders = state.filledOrders.slice(0, 200);
             }
             log('SYNC', `Imported ${addedCount} historical trades from exchange`, 'success');
