@@ -125,12 +125,15 @@ async function runAudit() {
 
         fs.copyFileSync(CONFIG.stateFile, CONFIG.stateFile + '.fix.bak');
 
+        // P0 FIX: Push ALL calculated profit to "accumulated" and clear the list.
+        // This prevents loadState() from recalculating a lower number from the partial list.
+        state.accumulatedProfit = totalProfit;
+        state.filledOrders = []; // Clear history so we start fresh from this verified balance
         state.totalProfit = totalProfit;
-        state.accumulatedProfit = 0;
         state.estimatedProfit = 0;
 
         fs.writeFileSync(CONFIG.stateFile, JSON.stringify(state, null, 2));
-        console.log(`>> [SUCCESS] State file updated! Restart bot to see changes.`);
+        console.log(`>> [SUCCESS] State file updated! History archived into accumulated profit ($${totalProfit.toFixed(4)}).`);
 
     } catch (e) {
         console.error('>> [ERROR]', e.message);
