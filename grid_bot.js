@@ -2644,8 +2644,8 @@ async function shouldPauseBuys() {
         let effectiveCap = 0.70;   // Default (INVENTORY_CAP_PERCENT)
 
         if (defenseLevel === -1) {
-            effectiveFloor = 0.02; // 2% USDT Floor
-            effectiveCap = 0.98;   // 98% Inventory Cap
+            effectiveFloor = 0.10; // 10% USDT Floor (Raised from 2% to preserve dry powder)
+            effectiveCap = 0.90;   // 90% Inventory Cap (Lowered from 98% for balance)
         } else if (defenseLevel === 1) {
             effectiveFloor = 0.25;
             effectiveCap = 0.50;
