@@ -813,7 +813,23 @@ async function computeBotFinancials() {
         });
 
         // Profit calculations
-        const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
+        // P0 FIX: Ensure Total Profit INCLUDES Accumulated Profit
+        // If totalProfit ($0.30) < accumulatedProfit ($2.36), we know it was reset by sync.
+        // We must present the SUM to the user.
+        let effectiveProfit = state.totalProfit;
+        if (state.accumulatedProfit && state.accumulatedProfit > state.totalProfit) {
+            // If the disparity is large, it means totalProfit is likely just the "new" session profit
+            effectiveProfit = state.accumulatedProfit + state.totalProfit;
+
+            // Auto-Correct State for next save
+            if (state.totalProfit < state.accumulatedProfit) {
+                // Don't save here to avoid loop, but use for display
+                console.log(`>> [DEBUG] Profit Mismatch! State: ${state.totalProfit} | Acc: ${state.accumulatedProfit} -> Shown: ${effectiveProfit}`);
+            }
+        }
+
+        // Use EFFECTIVE profit for % calculation
+        const profitPercent = state.initialCapital ? (effectiveProfit / state.initialCapital) * 100 : 0;
 
         return {
             freeUSDT: myFreeUSDT,       // CORRECTED: Isolated available capital
@@ -825,8 +841,8 @@ async function computeBotFinancials() {
             totalEquity: myAllocatedEquity, // RESTORED: Bot's specific slice ($130)
             accountEquity: globalTotalEquity, // Available for Portfolio View (if supported)
             globalEquity: globalTotalEquity, // Alias try
-            profit: state.totalProfit, // Lifetime Profit (already includes accumulated)
-            profitPercent,
+            profit: effectiveProfit, // P0 FIX: Send CORRECTED Total Profit
+            profitPercent: profitPercent,
             pair: CONFIG.pair,
             startTime: state.firstTradeTime || state.startTime,
             activeOrders: {
