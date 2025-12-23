@@ -409,14 +409,20 @@ function loadState() {
             // This prevents old saved values from overwriting the "reborn" logic above
             state = { ...state, ...saved };
 
-            // P0 FIX: Restore accumulated profit if we just recovered
-            if (saved.emergencyStop) {
-                // Redefine vars locally to ensure they exist
-                const oldSessionProfit = saved.totalProfit || 0;
-                const oldAccumulated = saved.accumulatedProfit || 0;
-                const legacyProfit = oldSessionProfit + oldAccumulated;
+            // P0 FIX: UNIFY PROFIT ARCHITECTURE (Professional Grade)
+            // Ensure totalProfit is ALWAYS at least the value of accumulated (audited) profit
+            const acc = saved.accumulatedProfit || 0;
+            const tot = saved.totalProfit || 0;
+            state.totalProfit = Math.max(acc, tot);
+            state.accumulatedProfit = Math.max(acc, tot); // Sync both in memory
 
-                state.accumulatedProfit = legacyProfit;
+            if (state.totalProfit > tot) {
+                console.log(`>> [RECOVERY] Restored $${state.totalProfit.toFixed(4)} from Audited Baseline.`);
+            }
+
+            // P0 FIX: Restore accumulated profit if we just recovered from emergency stop
+            if (saved.emergencyStop) {
+                state.accumulatedProfit = state.totalProfit;
                 // state.emergencyStop = false; // Doctrine: Keep true until manual intervention
             }
 
@@ -813,17 +819,7 @@ async function computeBotFinancials() {
         });
 
         // Profit calculations
-        // P0 FIX: ALWAYS use the MAXIMUM between accumulated (audited) and live (totalProfit)
-        // This protects against any runtime corruption of totalProfit after loading from disk.
-        const accProfit = state.accumulatedProfit || 0;
-        const liveProfit = state.totalProfit || 0;
-        const effectiveProfit = Math.max(accProfit, liveProfit);
-        if (effectiveProfit !== liveProfit) {
-            console.log(`>> [PROFIT_GUARD] DISCREPANCY DETECTED! File: $${accProfit.toFixed(4)} | Memory: $${liveProfit.toFixed(4)} -> Using: $${effectiveProfit.toFixed(4)}`);
-        }
-
-        // Use EFFECTIVE profit for % calculation
-        const profitPercent = state.initialCapital ? (effectiveProfit / state.initialCapital) * 100 : 0;
+        const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
 
         return {
             freeUSDT: myFreeUSDT,       // CORRECTED: Isolated available capital
@@ -835,7 +831,7 @@ async function computeBotFinancials() {
             totalEquity: myAllocatedEquity, // RESTORED: Bot's specific slice ($130)
             accountEquity: globalTotalEquity, // Available for Portfolio View (if supported)
             globalEquity: globalTotalEquity, // Alias try
-            profit: effectiveProfit, // P0 FIX: Send CORRECTED Total Profit
+            profit: state.totalProfit, // Lifetime Profit (Unified)
             profitPercent: profitPercent,
             pair: CONFIG.pair,
             startTime: state.firstTradeTime || state.startTime,
