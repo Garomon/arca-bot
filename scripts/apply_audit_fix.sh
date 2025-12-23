@@ -9,6 +9,8 @@ echo "=========================================="
 # 1. STOP BOTS
 echo ">> [1/4] Stopping All Bots..."
 pm2 stop all
+echo ">> [WAIT] Allowing 5s for graceful shutdown..."
+sleep 5
 
 # 2. REPAIR BTC BOT (/root/arca-bot)
 if [ -d "/root/arca-bot" ]; then
