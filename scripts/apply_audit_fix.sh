@@ -35,7 +35,13 @@ if [ -d "/root/bot-sol" ]; then
     git stash
     git pull
     echo ">> Running Audit for SOL/USDT..."
+    echo ">> Running Audit for SOL/USDT..."
     node scripts/recalculate_profit.js SOL/USDT
+    
+    # VERIFICATION ON DISK
+    echo ">> [VERIFY] Checking disk content for SOL:"
+    grep -o '"totalProfit":[0-9.]*' data/sessions/VANTAGE01_SOLUSDT_state.json || echo ">> [ERROR] Could not read profit from file!"
+    
 else
     echo ">> ⚠️ /root/bot-sol not found. Skipping SOL repair."
 fi
@@ -43,6 +49,8 @@ fi
 # 4. RESTART
 echo ""
 echo ">> [4/4] Restarting Swarm..."
+# Force flushing of any pending PM2 operations
+pm2 flush
 pm2 restart all
 
 echo "=========================================="

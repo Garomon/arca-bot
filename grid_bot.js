@@ -401,6 +401,7 @@ const externalDataCache = {
 function loadState() {
     try {
         if (fs.existsSync(CONFIG.stateFile)) {
+            console.log(`>> [DEBUG] Loading state from: ${CONFIG.stateFile}`);
             const raw = fs.readFileSync(CONFIG.stateFile);
             const saved = JSON.parse(raw);
 
