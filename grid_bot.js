@@ -313,7 +313,8 @@ function logDecision(action, reasons, data = {}) {
     }
 
     // Also log to main feed
-    log('DECISION', `${action}: ${reasons.slice(0, 2).join(', ')}`,
+    // Also log to main feed
+    log('DECISION', `${action}: ${reasons.join(', ')}`,
         action.includes('BUY') ? 'success' : (action.includes('SELL') ? 'warning' : 'info'));
 
     // Emit to UI for activity feed
