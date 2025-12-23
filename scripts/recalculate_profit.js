@@ -53,9 +53,9 @@ const binance = new ccxt.binance({
 
 async function runAudit() {
     try {
-        console.log('>> [API] Fetching FULL trade history (Pagination)...');
-        let trades = [];
-        let since = undefined;
+        // FIX: Set explicit start time to ensure we get FULL history (Binance defaults to recent if undefined)
+        // Using Jan 1, 2024 as a safe "beginning of time" for this bot
+        let since = 1704067200000;
         let lastId = 0;
 
         while (true) {
