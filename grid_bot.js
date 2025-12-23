@@ -880,9 +880,14 @@ async function initializeGrid(forceReset = false) {
 
         // Check for "New Money" (Capital Injection > 10% of THIS PAIR's allocation)
         if (state.initialCapital) {
-            const capitalGrowth = (allocatedEquity - state.initialCapital) / state.initialCapital;
+            // P0 FIX: Profit-Aware Capital Detection
+            // Subtract realized profit to see if the growth is ACTUALLY from a deposit
+            // allocatedEquity includes (Base + Profit + Deposits). We want (Base + Deposits).
+            const profitAdjustedEquity = allocatedEquity - (state.totalProfit || 0);
 
-            // If capital grew by >10% (and it's not just profit, i.e., instantaneous jump vs previous partial state)
+            const capitalGrowth = (profitAdjustedEquity - state.initialCapital) / state.initialCapital;
+
+            // If capital grew by >10% (excluding profit)
             if (capitalGrowth > 0.10) {
                 log('MONEY', `💰 CAPITAL INJECTION DETECTED! ($${state.initialCapital.toFixed(2)} -> $${allocatedEquity.toFixed(2)})`, 'success');
                 log('SYSTEM', `UPGRADING GRID (${(CAPITAL_ALLOCATION * 100).toFixed(0)}% of new total)...`, 'info');
