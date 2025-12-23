@@ -3200,9 +3200,6 @@ async function checkGridHealth(analysis, regime, multiTF) {
 
     // PHASE 3: INTELLIGENT REBALANCE TRIGGER (Brain Activation)
     if (analysis && regime && multiTF) {
-        // Pass dynamic drift configuration to the brain
-        const adaptiveConfig = { driftTolerance: driftTolerance };
-
         // DEBUG: Check what time the bot THINKS it reset
         const timeSinceResetSec = ((Date.now() - (state.lastGridReset || 0)) / 1000).toFixed(1);
         log('DEBUG', `Checking Grid Health. Last Reset: ${state.lastGridReset} (${timeSinceResetSec}s ago)`);
@@ -3213,6 +3210,14 @@ async function checkGridHealth(analysis, regime, multiTF) {
             state.lastGridReset = Date.now();
             saveState();
         }
+
+        // Check if Buy Protection is active (USDT Floor)
+        // This prevents false positive IMBALANCE_LOW_BUYS when no buys is intentional
+        const buyStatus = await shouldPauseBuys();
+        const adaptiveConfig = {
+            driftTolerance: driftTolerance,
+            buyProtectionActive: buyStatus.pause
+        };
 
         const triggers = adaptiveHelpers.shouldRebalance(state, analysis, regime, multiTF, adaptiveConfig);
 

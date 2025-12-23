@@ -352,7 +352,13 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
             const timeSinceGridReset = Date.now() - (state.lastGridReset || 0);
 
             if (timeSinceGridReset > 300000) { // 5 minutes
-                triggers.push('IMBALANCE_LOW_BUYS');
+                // FIX: Skip if buy protection is active (USDT floor triggered)
+                // This prevents false positive rebalances when low buys are intentional
+                if (config.buyProtectionActive) {
+                    console.log(`>> [DEBUG] SKIPPING IMBALANCE_LOW_BUYS: Buy protection is active (USDT Floor)`);
+                } else {
+                    triggers.push('IMBALANCE_LOW_BUYS');
+                }
             } else {
                 console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping IMBALANCE_LOW_BUYS. Time since reset: ${(timeSinceGridReset / 1000).toFixed(1)}s < 300s`);
             }
