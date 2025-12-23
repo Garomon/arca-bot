@@ -813,19 +813,14 @@ async function computeBotFinancials() {
         });
 
         // Profit calculations
-        // P0 FIX: Ensure Total Profit INCLUDES Accumulated Profit
-        // If totalProfit ($0.30) < accumulatedProfit ($2.36), we know it was reset by sync.
-        // We must present the SUM to the user.
-        let effectiveProfit = state.totalProfit;
-        if (state.accumulatedProfit && state.accumulatedProfit > state.totalProfit) {
-            // If the disparity is large, it means totalProfit is likely just the "new" session profit
-            effectiveProfit = state.accumulatedProfit + state.totalProfit;
+        // P0 FIX: ALWAYS use the MAXIMUM between accumulated (audited) and live (totalProfit)
+        // This protects against any runtime corruption of totalProfit after loading from disk.
+        const accProfit = state.accumulatedProfit || 0;
+        const liveProfit = state.totalProfit || 0;
+        const effectiveProfit = Math.max(accProfit, liveProfit);
 
-            // Auto-Correct State for next save
-            if (state.totalProfit < state.accumulatedProfit) {
-                // Don't save here to avoid loop, but use for display
-                console.log(`>> [DEBUG] Profit Mismatch! State: ${state.totalProfit} | Acc: ${state.accumulatedProfit} -> Shown: ${effectiveProfit}`);
-            }
+        if (effectiveProfit !== liveProfit) {
+            console.log(`>> [PROFIT_GUARD] DISCREPANCY DETECTED! File: $${accProfit.toFixed(4)} | Memory: $${liveProfit.toFixed(4)} -> Using: $${effectiveProfit.toFixed(4)}`);
         }
 
         // Use EFFECTIVE profit for % calculation
