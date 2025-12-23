@@ -7,7 +7,7 @@ const ARGS = process.argv.slice(2);
 const PAIR = ARGS[0] || 'SOL/USDT';
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 
-console.log(`>> [RECALCULATOR] Starting LIFO (Scalping) Audit for ${PAIR}...`);
+console.log(`>> [RECALCULATOR] Starting FIFO (Standard) Audit for ${PAIR}...`);
 
 // FIND STATE FILE - PREFER VANTAGE01 PREFIXED FILES (Active Bot Files)
 const sessionsDir = path.join(__dirname, '..', 'data', 'sessions');
@@ -101,8 +101,8 @@ async function runAudit() {
                 let costBasis = 0;
                 let entryFees = 0;
 
-                // LIFO
-                for (let i = inventory.length - 1; i >= 0; i--) {
+                // FIFO (First-In First-Out) - Maximizes Realized Profit in Uptrends
+                for (let i = 0; i < inventory.length; i++) {
                     const lot = inventory[i];
                     if (remainingToSell <= 0.00000001) break;
                     if (lot.remaining <= 0) continue;
@@ -135,7 +135,7 @@ async function runAudit() {
         }
 
         console.log('------------------------------------------------');
-        console.log(`>> [RESULTS] LIFO Audit Complete`);
+        console.log(`>> [RESULTS] FIFO Audit Complete`);
         console.log(`>> Realized Profit: $${totalProfit.toFixed(4)}`);
         console.log('------------------------------------------------');
 
