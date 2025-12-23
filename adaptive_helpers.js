@@ -314,13 +314,11 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
         // Use state.lastGridReset because state.lastRebalance is not reliably updated on forced reset
         const timeSinceGridResetVol = Date.now() - (state.lastGridReset || 0);
 
-        if (timeSinceGridReset > cooldownMs) {
-            // Only trigger if we aren't already in cooldown from a grid reset
-            if (timeSinceGridResetVol > 300000) { // 5 minutes (matches grid_bot.js)
-                triggers.push(`VOLATILITY_SHIFT (${state.lastVolatility} -> ${currentVol})`);
-            } else {
-                console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping VOLATILITY_SHIFT. Time since reset: ${(timeSinceGridResetVol / 1000).toFixed(1)}s < 300s`);
-            }
+        // Check if cooldown has passed
+        if (timeSinceGridResetVol > 300000) { // 5 minutes (matches grid_bot.js)
+            triggers.push(`VOLATILITY_SHIFT (${state.lastVolatility} -> ${currentVol})`);
+        } else {
+            console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping VOLATILITY_SHIFT. Time since reset: ${(timeSinceGridResetVol / 1000).toFixed(1)}s < 300s`);
         }
     }
 
