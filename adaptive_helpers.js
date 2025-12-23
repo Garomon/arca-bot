@@ -66,7 +66,7 @@ function evaluateGeopoliticalRisk(currentDate = new Date()) {
                 status: 'INFLATIONARY_ACCUMULATION',
                 modifier: 'AGGRESSIVE',
                 defenseLevel: -1, // Negative defense = Aggression (Hold less cash)
-                scoreBias: 15,    // Boost buy score
+                scoreBias: 5,     // Boost buy score (Reduced from 15 to prevent permanent strong buy)
                 activeEvent: `${event.name}: ${event.description}`
             };
         }
@@ -146,7 +146,7 @@ function evaluateMacroSentiment(pair, currentPrice, ma200 = null) {
         return {
             zone: 'BUY_DIP',
             sentiment: 'STRONG_BUY',
-            scoreBonus: 20,
+            scoreBonus: 10,
             advice: `Below MA200 (${distancePercent}%) - Accumulate aggressively`,
             ma200: ma200
         };
