@@ -36,6 +36,7 @@ process.on('uncaughtException', (err) => {
     try {
         const fs = require('fs');
         const path = require('path');
+        if (!fs.existsSync(path.join(__dirname, 'logs'))) fs.mkdirSync(path.join(__dirname, 'logs'));
         fs.appendFileSync(path.join(__dirname, 'logs', 'pm2_crash.log'), `\n[${new Date().toISOString()}] ${msg}\n${err.stack}\n`);
     } catch (e) { /* emergency log failed */ }
     process.exit(1);
@@ -1096,7 +1097,7 @@ async function initializeGrid(forceReset = false) {
                 if (level.side === 'buy') {
                     const orderCost = level.amount * level.price;
                     if (currentFreeUSDT < orderCost) {
-                        log('SKIP', `Budget Exhausted: Have $${currentFreeUSDT.toFixed(2)}, Need $${orderCost.toFixed(2)}`, 'warning');
+                        log('SKIP', `Budget Exhausted: Have $${currentFreeUSDT.toFixed(2)}, Need $${orderCost.toFixed(2)}`, 'info');
                         logDebugFinancials('BUDGET_EXHAUSTED', {
                             currentFreeUSDT,
                             orderCost,

@@ -20,20 +20,22 @@ class DataCollector {
     }
 
     /**
-     * Initializes or rotates the write stream based on the current date.
+     * Initializes or rotates the write stream based on the current date and pair.
      */
-    _getStream() {
+    _getStream(pair) {
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const pairStr = pair ? pair.replace('/', '') : 'UNKNOWN';
 
-        // Rotate file if day changed
-        if (dateStr !== this.currentDateStr || !this.writeStream) {
+        // Rotate file if day changed OR pair changed (shouldn't happen in singleton but safe)
+        if (dateStr !== this.currentDateStr || !this.writeStream || this.currentPairStr !== pairStr) {
             if (this.writeStream) {
                 this.writeStream.end();
             }
 
             this.currentDateStr = dateStr;
-            const filename = path.join(LOG_DIR, `market_snapshots_${dateStr}.jsonl`);
+            this.currentPairStr = pairStr;
+            const filename = path.join(LOG_DIR, `market_snapshots_${pairStr}_${dateStr}.jsonl`);
             console.log(`>> [DATA_COLLECTOR] Logging to: ${filename}`);
 
             this.writeStream = fs.createWriteStream(filename, { flags: 'a' });
@@ -98,7 +100,7 @@ class DataCollector {
                 decision_reasons: compositeSignal?.reasons || []
             };
 
-            const stream = this._getStream();
+            const stream = this._getStream(state.pair);
             if (stream) {
                 stream.write(JSON.stringify(snapshot) + '\n');
             }

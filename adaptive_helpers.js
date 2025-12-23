@@ -366,7 +366,14 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
         const isHostingBag = avgEntryPrice > 0 && state.currentPrice < avgEntryPrice;
 
         if (hasInventory && !isHostingBag) {
-            triggers.push('IMBALANCE_NO_SELLS');
+            // FIX: Cooldown for No Sells (Prevents Wall-Block Loops)
+            const timeSinceGridReset = Date.now() - (state.lastGridReset || 0);
+
+            if (timeSinceGridReset > 300000) { // 5 minutes
+                triggers.push('IMBALANCE_NO_SELLS');
+            } else {
+                console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping IMBALANCE_NO_SELLS. Time since reset: ${(timeSinceGridReset / 1000).toFixed(1)}s < 300s`);
+            }
         }
     }
 
