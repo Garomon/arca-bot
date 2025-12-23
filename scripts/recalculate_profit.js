@@ -55,6 +55,7 @@ async function runAudit() {
     try {
         // FIX: Set explicit start time to ensure we get FULL history (Binance defaults to recent if undefined)
         // Using Jan 1, 2024 as a safe "beginning of time" for this bot
+        let trades = [];
         let since = 1704067200000;
         let lastId = 0;
 
