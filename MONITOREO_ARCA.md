@@ -21,7 +21,9 @@ SOL_JSON=$(tail -n 1 /root/bot-sol/logs/training_data/market_snapshots_SOLUSDT_$
 BTC_PROFIT_TODAY=$(grep "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
 SOL_PROFIT_TODAY=$(grep "PROFIT" /root/bot-sol/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
 echo "BTC: Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') | $(echo $BTC_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $BTC_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $BTC_JSON | jq -r '.geo_defense_level // "0"'))"; \
+echo "     InRange: $(echo $BTC_JSON | jq -r '.in_range_percent // "?"')% | AvgCost: \$$(echo $BTC_JSON | jq -r '.inventory_avg_cost // "?"') | B&H: $(echo $BTC_JSON | jq -r '.buy_hold_return_pct // "?"')%"; \
 echo "SOL: Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') | $(echo $SOL_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $SOL_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $SOL_JSON | jq -r '.geo_defense_level // "0"'))"; \
+echo "     InRange: $(echo $SOL_JSON | jq -r '.in_range_percent // "?"')% | AvgCost: \$$(echo $SOL_JSON | jq -r '.inventory_avg_cost // "?"') | B&H: $(echo $SOL_JSON | jq -r '.buy_hold_return_pct // "?"')%"; \
 echo -e "\n═══════════════════════════════════════════════════════════════\n"; \
 echo -e "\n�🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
 pm2 list; \
@@ -156,5 +158,9 @@ El reporte tiene datos de diferentes temporalidades. Aquí está la guía:
 | `Inventory Lots` | `[TIEMPO REAL]` | Lotes de monedas que el bot tiene en inventario. |
 | `Current Price` | `[TIEMPO REAL]` | Precio del par al momento del reporte. |
 | `Market Regime` | `[TIEMPO REAL]` | Clasificación del mercado (BULL, BEAR, etc.). |
+| `% Time In Range` | `[DESDE INICIO]` | % de ciclos donde el precio estuvo dentro del grid. |
+| `Avg Cost` | `[TIEMPO REAL]` | Costo promedio de tu inventario (si estás "cargado"). |
+| `Buy & Hold Return` | `[DESDE INICIO]` | Retorno si hubieras holdeado en lugar de usar el bot. |
+| `Bot vs Hold` | `[DESDE INICIO]` | Indica quién está ganando: el bot o simplemente holdear. |
 
 > **Regla de Oro:** Si algo dice `[HISTÓRICO]` y te parece raro (ej: Drawdown alto), probablemente es un "fantasma del pasado", no un problema de hoy.

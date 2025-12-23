@@ -381,7 +381,14 @@ let state = {
     lastRebalance: null,   // PHASE 3: Last rebalance info
     lastFillTime: null,    // PHASE 3: Last order fill time
     lastVolatility: null,  // PHASE 3: Previous volatility state
-    lastRegime: null       // PHASE 3: Previous market regime
+    lastRegime: null,      // PHASE 3: Previous market regime
+    // PHASE 4: Weekly Metrics for Performance Tracking
+    metrics: {
+        ticksInRange: 0,       // Cycles where price was inside grid
+        ticksOutOfRange: 0,    // Cycles where price was outside grid
+        buyHoldStartPrice: 0,  // Price at bot start for Buy & Hold comparison
+        metricsStartTime: 0    // When we started tracking
+    }
 };
 
 // Cache for external data (avoid rate limits) - HOISTED TO TOP
@@ -2681,6 +2688,19 @@ async function shouldPauseBuys() {
     }
 }
 
+// PHASE 4: Inventory Report (Weekly Metrics)
+function calculateInventoryReport() {
+    if (!state.inventory || state.inventory.length === 0) {
+        return { totalAmount: 0, avgCost: 0, currentValue: 0, unrealizedPnL: 0 };
+    }
+    const totalAmount = state.inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
+    const totalCost = state.inventory.reduce((sum, lot) => sum + ((lot.price || 0) * (lot.remaining || 0)), 0);
+    const avgCost = totalAmount > 0 ? totalCost / totalAmount : 0;
+    const currentValue = totalAmount * (state.currentPrice || 0);
+    const unrealizedPnL = currentValue - totalCost;
+    return { totalAmount, avgCost, currentValue, unrealizedPnL };
+}
+
 // PHASE 1: Fee-Aware Profit Calculation
 function calculateNetProfit(buyPrice, sellPrice, amount) {
     const grossProfit = (sellPrice - buyPrice) * amount;
@@ -3237,6 +3257,16 @@ async function checkGridHealth(analysis, regime, multiTF) {
     const lowerBound = minPrice * (1 - driftTolerance);
     const upperBound = maxPrice * (1 + driftTolerance);
 
+    // PHASE 4: Track In-Range vs Out-of-Range for Weekly Metrics
+    if (!state.metrics) state.metrics = { ticksInRange: 0, ticksOutOfRange: 0, buyHoldStartPrice: 0, metricsStartTime: 0 };
+    if (state.metrics.buyHoldStartPrice === 0 && currentPrice > 0) {
+        state.metrics.buyHoldStartPrice = currentPrice;
+        state.metrics.metricsStartTime = Date.now();
+    }
+    const isInRange = currentPrice >= minPrice && currentPrice <= maxPrice;
+    if (isInRange) state.metrics.ticksInRange++;
+    else state.metrics.ticksOutOfRange++;
+
     // ANTI-LOOP: Don't check health if we have too few orders (likely partial init)
     if (state.activeOrders.length < 3) {
         return;
@@ -3403,6 +3433,15 @@ server.listen(BOT_PORT, async () => {
         if (state.emergencyStop) anomalies.push('🚨 EMERGENCY STOP ACTIVE');
         if (todayProfit < 0) anomalies.push(`⚠️ Negative profit today: $${todayProfit.toFixed(4)}`);
 
+        // PHASE 4: Weekly Metrics Calculations
+        const inv = calculateInventoryReport();
+        const totalTicks = (state.metrics?.ticksInRange || 0) + (state.metrics?.ticksOutOfRange || 0);
+        const inRangePercent = totalTicks > 0 ? ((state.metrics.ticksInRange / totalTicks) * 100).toFixed(1) : 'N/A';
+        const buyHoldReturn = state.metrics?.buyHoldStartPrice > 0
+            ? (((state.currentPrice - state.metrics.buyHoldStartPrice) / state.metrics.buyHoldStartPrice) * 100).toFixed(2)
+            : 'N/A';
+        const botBeatsHold = parseFloat(totalROI) > parseFloat(buyHoldReturn || 0);
+
         const report = `
 ╔══════════════════════════════════════════════════════════════╗
 ║       VANTAGE BOT [${CONFIG.pair}] - DAILY PERFORMANCE REPORT       ║
@@ -3422,6 +3461,16 @@ server.listen(BOT_PORT, async () => {
   Total ROI:            ${totalROI}%
   Max Drawdown:         ${(state.maxDrawdown || 0).toFixed(2)}%
   Initial Capital:      $${initialCapital.toFixed(2)}
+
+╠══════════════════════════════════════════════════════════════╣
+║  WEEKLY METRICS (Since ${new Date(state.metrics?.metricsStartTime || Date.now()).toISOString().split('T')[0]})  ║
+╠══════════════════════════════════════════════════════════════╣
+  % Time In Range:      ${inRangePercent}% (${state.metrics?.ticksInRange || 0}/${totalTicks} cycles)
+  Inventory:            ${inv.totalAmount.toFixed(6)} ${CONFIG.pair.split('/')[0]}
+  Avg Cost:             $${inv.avgCost.toFixed(2)}
+  Unrealized PnL:       $${inv.unrealizedPnL.toFixed(4)}
+  Buy & Hold Return:    ${buyHoldReturn}%
+  Bot vs Hold:          ${botBeatsHold ? '🏆 BOT WINS' : '📉 HOLD WINS'} (Bot ${totalROI}% vs Hold ${buyHoldReturn}%)
 
 ╠══════════════════════════════════════════════════════════════╣
 ║  CURRENT STATE                                               ║

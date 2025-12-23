@@ -92,6 +92,18 @@ class DataCollector {
                 inventory_lots: state.inventory ? state.inventory.length : 0,
                 total_profit: state.totalProfit,
 
+                // 4.5 WEEKLY METRICS (Performance Tracking)
+                in_range_percent: state.metrics && (state.metrics.ticksInRange + state.metrics.ticksOutOfRange) > 0
+                    ? ((state.metrics.ticksInRange / (state.metrics.ticksInRange + state.metrics.ticksOutOfRange)) * 100).toFixed(1)
+                    : 'N/A',
+                inventory_avg_cost: state.inventory && state.inventory.length > 0
+                    ? (state.inventory.reduce((s, l) => s + (l.price || 0) * (l.remaining || 0), 0) /
+                        state.inventory.reduce((s, l) => s + (l.remaining || 0), 0)).toFixed(2)
+                    : 0,
+                buy_hold_return_pct: state.metrics?.buyHoldStartPrice > 0
+                    ? (((state.currentPrice - state.metrics.buyHoldStartPrice) / state.metrics.buyHoldStartPrice) * 100).toFixed(2)
+                    : 'N/A',
+
                 // 5. THE OUTPUT (The "Label" for training)
                 // We record what the logic DECIDED to do.
                 // Later, ML will learn: "Inputs -> Decision -> Result (Price Change)"
