@@ -53,9 +53,27 @@ const binance = new ccxt.binance({
 
 async function runAudit() {
     try {
-        console.log('>> [API] Fetching trades...');
-        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
-        console.log(`>> [API] Fetched ${trades.length} trades.`);
+        console.log('>> [API] Fetching FULL trade history (Pagination)...');
+        let trades = [];
+        let since = undefined;
+        let lastId = 0;
+
+        while (true) {
+            // Fetch 1000 at a time (Binance max)
+            const batch = await binance.fetchMyTrades(CONFIG.pair, since, 1000, { fromId: lastId ? lastId + 1 : undefined });
+            if (!batch || batch.length === 0) break;
+
+            trades = trades.concat(batch);
+            lastId = batch[batch.length - 1].info.id; // Use raw IO ID for robust pagination
+            console.log(`>> [API] Fetched batch: ${batch.length} trades (Total: ${trades.length})`);
+
+            if (batch.length < 1000) break; // End of history
+
+            // Rate limit safety
+            await new Promise(r => setTimeout(r, 200));
+        }
+
+        console.log(`>> [API] Audit Base: ${trades.length} historical trades.`);
 
         let inventory = [];
         let totalProfit = 0;
