@@ -818,7 +818,6 @@ async function computeBotFinancials() {
         const accProfit = state.accumulatedProfit || 0;
         const liveProfit = state.totalProfit || 0;
         const effectiveProfit = Math.max(accProfit, liveProfit);
-
         if (effectiveProfit !== liveProfit) {
             console.log(`>> [PROFIT_GUARD] DISCREPANCY DETECTED! File: $${accProfit.toFixed(4)} | Memory: $${liveProfit.toFixed(4)} -> Using: $${effectiveProfit.toFixed(4)}`);
         }
