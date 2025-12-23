@@ -3404,7 +3404,7 @@ server.listen(BOT_PORT, async () => {
 
         const report = `
 ╔══════════════════════════════════════════════════════════════╗
-║           VANTAGE BOT - DAILY PERFORMANCE REPORT             ║
+║       VANTAGE BOT [${CONFIG.pair}] - DAILY PERFORMANCE REPORT       ║
 ║                    ${dateStr}                                ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  TODAY'S PERFORMANCE                                         ║
