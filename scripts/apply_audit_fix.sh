@@ -23,14 +23,6 @@ if [ -d "/root/arca-bot" ]; then
     # Ensure dependencies are installed just in case
     # npm install 
     node scripts/recalculate_profit.js BTC/USDT
-    
-    # FIX: Repair SOL here too, in case 'bot-sol' is running from this folder (Monolithic Setup)
-    echo ">> [INFO] checking for local SOL bot files..."
-    if [ -f "data/sessions/VANTAGE01_SOLUSDT_state.json" ] || [ -f "data/sessions/SOLUSDT_state.json" ]; then
-         echo ">> [DETECTED] SOL State file found in arca-bot. Running Shadow Repair..."
-         node scripts/recalculate_profit.js SOL/USDT
-         grep -o '"totalProfit":[0-9.]*' data/sessions/VANTAGE01_SOLUSDT_state.json || echo ">> [WARN] Could not verify SOL profit in arca-bot"
-    fi
 else
     echo ">> ⚠️ /root/arca-bot not found. Skipping BTC repair."
 fi

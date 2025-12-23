@@ -309,18 +309,19 @@ function shouldRebalance(state, analysis, regime, multiTF, config = {}) {
     const cooldownMs = 20 * 60 * 1000; // 20 min cooldown (matches grid_bot.js)
     const timeSinceReset = Date.now() - lastRebalanceTime;
 
+    // DISABLED: VOLATILITY_SHIFT trigger removed (2025-12-22)
+    // REASON: ATR fluctuates naturally every minute, causing frequent resets.
+    // The grid spacing already adjusts dynamically when new orders are placed.
+    // Full grid reset is NOT needed just because volatility changed slightly.
+    // Valid triggers remain: PRICE_DRIFT, REGIME_CHANGE, STALE_GRID, IMBALANCE
+    /*
     if (state.lastVolatility && state.lastVolatility !== currentVol) {
-        // FIX: Cooldown for Volatility Shifts (Prevents Rapid-Fire Resets)
-        // Use state.lastGridReset because state.lastRebalance is not reliably updated on forced reset
         const timeSinceGridResetVol = Date.now() - (state.lastGridReset || 0);
-
-        // Check if cooldown has passed
-        if (timeSinceGridResetVol > 300000) { // 5 minutes (matches grid_bot.js)
+        if (timeSinceGridResetVol > 300000) {
             triggers.push(`VOLATILITY_SHIFT (${state.lastVolatility} -> ${currentVol})`);
-        } else {
-            console.log(`>> [DEBUG] COOLDOWN ACTIVE: Skipping VOLATILITY_SHIFT. Time since reset: ${(timeSinceGridResetVol / 1000).toFixed(1)}s < 300s`);
         }
     }
+    */
 
     // 3. Market regime change
     if (state.lastRegime && state.lastRegime !== regime.regime) {
