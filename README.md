@@ -1,93 +1,205 @@
-# 🦈 Vantage Quantum Bot: Remora Edition (v2.1.0)
+# 🦈 VANTAGE QUANTUM BOT v3.0.0
+## Arca Financiera Garossa - Multi-Asset Grid Trading System
 
-> "The Remora attaches itself to the Shark. Where the Shark goes, the Remora feeds."
+> *"Acumular cuando todos dudan, mantener cuando todos temen"*
 
 ![Dashboard Preview](assets/dashboard-preview.png)
 
+---
+
 ## 🚀 Overview
-**Vantage Quantum (Remora Edition)** is a high-frequency grid trading bot designed for **BTC/USDT** on Binance. Unlike "dumb" grid bots, it uses **Composite Market Intelligence** to adapt its behavior in real-time. It acts as a "Remora fish," detecting large market movements (Sharks/Whales) via Order Book Pressure and riding their wake.
 
-**Current Version:** `2.1.0`
-**License:** Private (Arca Financiera Garossa)
+**Vantage Quantum** es un bot de grid trading de alta frecuencia con **Inteligencia de Mercado Compuesta**. A diferencia de los grid bots "tontos", este sistema usa análisis técnico, contexto geopolítico, y presión del order book para adaptar su comportamiento en tiempo real.
 
-## ✨ Key Features
+**Versión:** `3.0.0`  
+**Par Principal:** BTC/USDT (expandible a SOL/USDT)  
+**Licencia:** Privada (Arca Financiera Garossa)
 
-### 1. 🧠 Shark Mode (Order Book Intelligence)
-The bot reads the Order Book depth in real-time to calculate **Order Book Pressure**.
-- **Sell Wall Detected (Pressure < 0.3):** The bot *pauses* buy orders to avoid catching a falling knife.
-- **Buy Wall Detected (Pressure > 3.0):** The bot *pauses* sell orders to let the price run up.
-- **Result:** It avoids trading *against* the Whales.
+---
 
-### 2. 💸 Real Net Profit Calculation
-Most bots show "Gross Profit" (Profit before fees). We do it better:
-- **Fee Awareness:** Automatically deducts **0.1%** (Maker/Taker) or **0.075%** (BNB Discount) from every trade.
-- **Net Pocket:** The "Total Profit" shown in the UI is 100% realized, withdrawable cash.
-- **Retroactive Sanitization:** On startup, it re-scans history to ensure no "phantom profit" exists.
+## ✨ Características Principales
 
-### 3. 🛡️ Risk Management (Circuit Breakers)
-- **Emergency Stop:** If Equity drops > 10% rapidly, the bot halts.
-- **Geopolitical Context:** Widens grid spacing during high-risk global events (Election Cycles, FED meetings).
-- **BTC Flight-to-Safety:** Monitors BTC Dominance to adjust aggression.
+### 🧠 1. Shark Mode - Order Book Intelligence
+El bot analiza la profundidad del Order Book en tiempo real:
+- **Sell Wall (Presión < 0.3):** Pausa compras para evitar caídas
+- **Buy Wall (Presión > 3.0):** Pausa ventas para aprovechar subidas
+- **Resultado:** Opera *con* las ballenas, no contra ellas
 
-### 4. ⚡ High-Performance UI
-- **Real-Time Websocket:** Sub-second updates.
-- **Neon Aesthetic:** Dark mode optimized for night trading.
-- **Transaction Log:** Sortable history with "Today" highlighter (Neon Blue Border).
-- **Triangle Visualizer:** Real-time canvas rendering of the current trade setup.
+### 📊 2. Detección de Régimen de Mercado
+Sistema de 5 EMAs adaptativo:
+- **TREND_UP:** Mercado alcista - Grid agresivo
+- **TREND_DOWN:** Mercado bajista - Grid defensivo  
+- **RANGE_BOUND:** Lateral - Grid optimizado para scalping
 
-## 🛠️ Installation & Setup
+### 🛡️ 3. USDT Floor Protection
+Protección automática del capital base:
+- Mantiene un mínimo de USDT como "floor" de seguridad
+- Pausa compras automáticamente cuando se agota el presupuesto
+- Evita over-exposure en un solo activo
 
-### Prerequisites
-- Node.js (v18+)
-- Binance API Key (Spot Trading Enabled)
+### 💰 4. Contabilidad Avanzada (LIFO)
+- Tracking de lotes individuales por precio de compra
+- Cálculo de profit real por transacción
+- Persistencia de estado entre reinicios
+- Reportes diarios automáticos
 
-### Quick Start
-1.  **Clone the Repo:**
-    ```bash
-    git clone https://github.com/your-repo/vantage-bot.git
-    cd vantage-bot
-    ```
+### 🌍 5. Contexto Geopolítico
+Ajusta agresividad basado en eventos macro:
+- **INFLATIONARY_ACCUMULATION:** Modo acumulación ("Cash is Trash")
+- **RISK_OFF:** Reduce exposición en eventos de riesgo
+- **LIQUIDITY_CRISIS:** Pausa total si hay crisis de liquidez
 
-2.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
+### 📈 6. Dashboard Profesional
+- WebSocket en tiempo real (sub-segundo)
+- Visualización de Order Book
+- Log de transacciones con highlighting
+- Panel de inventario LIFO
+- Métricas: RSI, EMA, Volatilidad, Presión
 
-3.  **Configure Creds:**
-    Create a `.env` file:
-    ```env
-    BINANCE_API_KEY=your_key
-    BINANCE_SECRET=your_secret
-    ```
+---
 
-4.  **Run:**
-    ```bash
-    # Run with auto-restart (Recommended)
-    nodemon grid_bot.js
+## 🏗️ Arquitectura
 
-    # Or standard node
-    npm start
-    ```
+```
+vantage-bot/
+├── grid_bot.js          # Core del bot + API WebSocket
+├── adaptive_helpers.js  # Funciones de análisis técnico
+├── data_collector.js    # Recolección de datos para ML
+├── ecosystem.config.js  # Configuración PM2 (multi-bot)
+├── public/
+│   ├── index.html       # Dashboard UI principal
+│   ├── main.js          # Lógica del cliente
+│   └── style.css        # Estilos neon/dark mode
+├── data/
+│   └── sessions/        # Estado persistente por par
+└── scripts/             # Utilidades (auditoría, reset)
+```
 
-## 📊 Configuration (`grid_bot.js`)
+---
 
-You can tweak the "Remora" behavior in the `CONFIG` object:
+## ⚡ Quick Start
+
+### Prerrequisitos
+- Node.js v18+
+- API Key de Binance (Spot Trading habilitado)
+
+### Instalación
+
+```bash
+# Clonar repositorio
+git clone https://github.com/garossa/vantage-bot.git
+cd vantage-bot
+
+# Instalar dependencias
+npm install
+
+# Configurar credenciales
+cp .env.example .env
+# Editar .env con tus API keys
+```
+
+### Configuración `.env`
+```env
+BINANCE_API_KEY=tu_api_key
+BINANCE_SECRET=tu_api_secret
+```
+
+### Ejecución
+
+```bash
+# Desarrollo (single bot)
+npm run dev
+
+# Producción con PM2 (recomendado)
+pm2 start ecosystem.config.js
+
+# Ver logs
+pm2 logs bot-btc
+```
+
+---
+
+## 🎛️ Configuración
+
+Principales parámetros en `grid_bot.js`:
 
 ```javascript
 const CONFIG = {
     pair: 'BTC/USDT',
-    tradingFee: 0.001,       // 0.1% (Set to 0.00075 if paying with BNB)
-    gridSpacing: 0.003,      // 0.3% base spacing (Adaptive)
-    gridCount: 16,           // Max grid lines
-    riskLevel: 'AGGRESSIVE'  // AGGRESSIVE | MODERATE | CONSERVATIVE
+    tradingFee: 0.001,        // 0.1% (o 0.00075 con BNB)
+    gridSpacing: 0.003,       // 0.3% spacing base
+    gridCount: 16,            // Líneas del grid
+    usdtFloor: 50,            // USDT mínimo protegido
+    minProfitMargin: 0.002,   // Profit mínimo por trade
 };
 ```
 
-## 📜 recent Changelog (v2.1.0)
-- **[NEW]** Shark Logic: Order Book Pressure integration.
-- **[FIX]** Profit Math: Retroactive fee deduction logic.
-- **[UI]** Added "Today" transaction highlighter.
-- **[UI]** Fixed "Bouncing Log" issue.
+---
+
+## 📊 Monitoreo
+
+### Dashboard Web
+Accede al dashboard en `http://localhost:3000` (o tu IP:Puerto del VPS)
+
+### Comando de Monitoreo Rápido
+```bash
+# Ver estado de todos los bots
+pm2 status
+
+# Monitoreo detallado
+pm2 monit
+```
+
+### Archivo de Monitoreo
+Consulta `MONITOREO_ARCA.md` para comandos completos de SSH y debugging.
 
 ---
-*Built with ❤️ by Antigravity for Arca Financiera Garossa.*
+
+## 📜 Changelog Reciente
+
+### v3.0.0 (Diciembre 2024)
+- **[NEW]** Sistema multi-bot (BTC + SOL simultáneos)
+- **[NEW]** Weekly Metrics: Time Out of Range, Inventory Report
+- **[NEW]** USDT Floor Protection inteligente
+- **[NEW]** Contexto geopolítico con zonas macro dinámicas
+- **[NEW]** Dashboard con inventario LIFO visual
+- **[FIX]** Corrección de double-counting en profit
+- **[FIX]** False positive en IMBALANCE_LOW_BUYS
+
+### v2.1.0
+- **[NEW]** Shark Logic con Order Book Pressure
+- **[FIX]** Profit Math retroactivo
+
+---
+
+## 🤖 Soporte Multi-Bot
+
+El sistema soporta múltiples instancias operando diferentes pares:
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: 'bot-btc',
+      script: 'grid_bot.js',
+      env: { PAIR: 'BTC/USDT', PORT: 3000 }
+    },
+    {
+      name: 'bot-sol', 
+      script: 'grid_bot.js',
+      env: { PAIR: 'SOL/USDT', PORT: 3001 }
+    }
+  ]
+};
+```
+
+---
+
+## ⚠️ Disclaimer
+
+Este bot está diseñado para uso personal de Arca Financiera Garossa. El trading de criptomonedas conlleva riesgos significativos. Usa bajo tu propia responsabilidad.
+
+---
+
+*Built with ❤️ by Antigravity para Arca Financiera Garossa*
