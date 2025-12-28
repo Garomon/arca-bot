@@ -2814,6 +2814,7 @@ async function handleOrderFill(order, fillPrice) {
         let costBasis = 0;
         let entryFees = 0; // Track entry fees from consumed lots
         let consumedLots = 0;
+        const matchedLots = []; // NEW: Track which lots were consumed for transparency
 
         // Iterate mutable inventory
         // FILTER: Only consider lots with remaining balance
@@ -2854,6 +2855,14 @@ async function handleOrderFill(order, fillPrice) {
             if (lot.fee && lot.amount > 0) {
                 entryFees += (take / lot.amount) * lot.fee;
             }
+
+            // NEW: Track matched lot for transparency
+            matchedLots.push({
+                lotId: lot.id,
+                buyPrice: lot.price,
+                amountTaken: take,
+                timestamp: lot.timestamp
+            });
 
             // MATH FIX: Prevent floating point dust
             lot.remaining = Number((lot.remaining - take).toFixed(8));
@@ -2917,13 +2926,31 @@ async function handleOrderFill(order, fillPrice) {
             log('WARN', `🔧 Corrected Anomaly: Gross $${estimatedGross.toFixed(4)} - Fees $${estimatedTotalFees.toFixed(4)} = Net $${profit.toFixed(4)}`, 'warning');
         }
 
-        log('PROFIT', `${ACCOUNTING_METHOD} Realized: Rev $${sellRevenue.toFixed(2)} - Cost $${costBasis.toFixed(2)} - Fees $${totalFees.toFixed(4)} (Entry: $${entryFees.toFixed(4)} + Exit: $${sellFee.toFixed(4)}) = $${profit.toFixed(4)}`, 'success');
+        // NEW: Calculate spread for visibility
+        const avgCost = costBasis / order.amount;
+        const spreadPct = ((fillPrice - avgCost) / avgCost * 100);
+        
+        log('PROFIT', `${ACCOUNTING_METHOD} | Cost: $${avgCost.toFixed(2)} → Sell: $${fillPrice.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Fees: $${totalFees.toFixed(4)} | Net: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
     }
 
     // Update State
     state.totalProfit += profit;
     // CRITICAL FIX: Mark as Net Profit so loadState doesn't deduct fees again!
-    state.filledOrders.push({ ...order, fillPrice, profit, timestamp: Date.now(), isNetProfit: true });
+    // NEW: Include cost basis info for Transaction Log transparency
+    const orderRecord = { 
+        ...order, 
+        fillPrice, 
+        profit, 
+        timestamp: Date.now(), 
+        isNetProfit: true 
+    };
+    // Add cost basis details for sells
+    if (order.side === 'sell' && typeof avgCost !== 'undefined') {
+        orderRecord.costBasis = avgCost;
+        orderRecord.spreadPct = spreadPct;
+        orderRecord.matchedLots = matchedLots;
+    }
+    state.filledOrders.push(orderRecord);
 
     // MEMORY LEAK PROTECTION: Keep last 1000 orders only
     if (state.filledOrders.length > 1000) {
@@ -2941,8 +2968,13 @@ async function handleOrderFill(order, fillPrice) {
     // P0 FIX: Save state immediately to persist profit
     saveState();
 
-    const profitMsg = profit > 0 ? `| Profit: $${profit.toFixed(4)}` : '';
-    log('EXECUTION', `💰 ${order.side.toUpperCase()} FILLED @ $${fillPrice.toFixed(2)} ${profitMsg}`, 'success');
+    // NEW: Enhanced execution log with cost basis for sells
+    if (order.side === 'sell' && typeof avgCost !== 'undefined') {
+        const profitEmoji = profit > 0 ? '💰' : '📉';
+        log('EXECUTION', `${profitEmoji} SELL @ $${fillPrice.toFixed(2)} | Cost: $${avgCost.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Profit: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
+    } else {
+        log('EXECUTION', `📥 BUY FILLED @ $${fillPrice.toFixed(2)}`, 'success');
+    }
     io.emit('trade_success', { side: order.side, price: fillPrice, profit });
 
     // Re-place opposite order
