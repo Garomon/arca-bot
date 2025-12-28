@@ -870,32 +870,40 @@ async function computeBotFinancials() {
             globalFreeUSDT
         });
 
-        // PHASE 5: Detect Capital Changes (Deposits/Withdrawals)
-        // Compare current allocated equity with last known capital
-        const lastCapital = state.capitalHistory?.length > 0
-            ? state.capitalHistory[state.capitalHistory.length - 1].amount
-            : state.initialCapital;
+        // PHASE 5: Detect USDT Deposits/Withdrawals (NOT equity changes)
+        // This tracks actual USDT added to Spot account, not price fluctuations
+        const lastUSDT = state._lastTrackedUSDT || 0;
+        const usdtChange = globalTotalUSDT - lastUSDT;
 
-        // If equity changed significantly (>5% swing not explained by profit/price movement), log it
-        if (lastCapital && myAllocatedEquity > 0) {
-            const capitalDiff = myAllocatedEquity - lastCapital;
-            const recentProfit = state.totalProfit - (state._lastLoggedProfit || 0);
-            const unexplainedChange = Math.abs(capitalDiff - recentProfit);
+        // Only detect if:
+        // 1. We have a previous reading
+        // 2. Change is significant (>$25 to avoid noise)
+        // 3. Change is NOT explained by a recent sell (which adds USDT)
+        if (lastUSDT > 0 && Math.abs(usdtChange) > 25) {
+            // Check if there was a recent sell that could explain the USDT increase
+            const recentSells = (state.filledOrders || [])
+                .filter(o => o.side === 'sell' && o.timestamp > Date.now() - 60000) // Last minute
+                .reduce((sum, o) => sum + (o.price * o.amount), 0);
 
-            // If change > $20 and not explained by profit, it's likely a deposit/withdrawal
-            if (unexplainedChange > 20 && Math.abs(capitalDiff) > lastCapital * 0.03) {
+            const unexplainedUSDT = usdtChange - recentSells;
+
+            // If USDT increased without a sell, it's a deposit
+            // If USDT decreased without a buy (checked separately), it's a withdrawal
+            if (Math.abs(unexplainedUSDT) > 25) {
+                const myShareChange = unexplainedUSDT * CAPITAL_ALLOCATION;
                 state.capitalHistory = state.capitalHistory || [];
                 state.capitalHistory.push({
                     amount: myAllocatedEquity,
                     timestamp: Date.now(),
-                    reason: capitalDiff > 0 ? 'DEPOSIT_DETECTED' : 'WITHDRAWAL_DETECTED',
-                    delta: capitalDiff
+                    reason: unexplainedUSDT > 0 ? 'USDT_DEPOSIT' : 'USDT_WITHDRAWAL',
+                    delta: myShareChange,
+                    rawUSDT: unexplainedUSDT
                 });
-                state._lastLoggedProfit = state.totalProfit;
-                log('CAPITAL', `📊 Capital change detected: ${capitalDiff > 0 ? '+' : ''}$${capitalDiff.toFixed(2)} → New: $${myAllocatedEquity.toFixed(2)}`, capitalDiff > 0 ? 'success' : 'warning');
+                log('CAPITAL', `💰 USDT ${unexplainedUSDT > 0 ? 'deposit' : 'withdrawal'} detected: ${unexplainedUSDT > 0 ? '+' : ''}$${unexplainedUSDT.toFixed(2)} → My share: ${myShareChange > 0 ? '+' : ''}$${myShareChange.toFixed(2)}`, unexplainedUSDT > 0 ? 'success' : 'warning');
                 saveState();
             }
         }
+        state._lastTrackedUSDT = globalTotalUSDT; // Update tracker
 
         // PHASE 5: Use Time-Weighted Average Capital for accurate APY
         const twac = calculateTimeWeightedCapital();
