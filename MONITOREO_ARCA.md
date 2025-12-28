@@ -18,32 +18,37 @@ echo -e "                    RESUMEN EJECUTIVO [HOY]"; \
 echo -e "═══════════════════════════════════════════════════════════════\n"; \
 BTC_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
 SOL_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
-BTC_PROFIT_TODAY=$(grep "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
-SOL_PROFIT_TODAY=$(grep "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
+BTC_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
+SOL_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
 echo "BTC: Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') | $(echo $BTC_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $BTC_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $BTC_JSON | jq -r '.geo_defense_level // "0"'))"; \
 echo "     InRange: $(echo $BTC_JSON | jq -r '.in_range_percent // "?"')% | AvgCost: \$$(echo $BTC_JSON | jq -r '.inventory_avg_cost // "?"') | B&H: $(echo $BTC_JSON | jq -r '.buy_hold_return_pct // "?"')%"; \
 echo "SOL: Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') | $(echo $SOL_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $SOL_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $SOL_JSON | jq -r '.geo_defense_level // "0"'))"; \
 echo "     InRange: $(echo $SOL_JSON | jq -r '.in_range_percent // "?"')% | AvgCost: \$$(echo $SOL_JSON | jq -r '.inventory_avg_cost // "?"') | B&H: $(echo $SOL_JSON | jq -r '.buy_hold_return_pct // "?"')%"; \
 echo -e "\n═══════════════════════════════════════════════════════════════\n"; \
-echo -e "\n�🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
+echo -e "\n🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
 pm2 list; \
 echo -e "\n💻 --- 2. SALUD DEL SERVIDOR (Disco/RAM) [TIEMPO REAL] ---"; \
 df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
 echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? [HOY] ---"; \
-ls -lh /root/arca-bot/logs/VANTAGE* /root/arca-bot/logs/VANTAGE* | grep "$(date +%Y-%m-%d)"; \
+ls -lh /root/arca-bot/logs/VANTAGE* 2>/dev/null | grep "$(date +%Y-%m-%d)"; \
 echo -e "\n🚨 --- 4. ERRORES DE HOY [HOY] ---"; \
 grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
 echo -e "\n☠️ --- 4.b CRASH LOGS [HISTÓRICO - desde último borrado] ---"; \
-cat /root/arca-bot/logs/pm2_crash.log /root/arca-bot/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (¡Bien!)"; \
+cat /root/arca-bot/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (¡Bien!)"; \
 echo -e "\n💰 --- 5. REPORTE DE AYER [AYER] ---"; \
-cat /root/arca-bot/reports/daily_report_*_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
+cat /root/arca-bot/reports/daily_report_*_BTCUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
 echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) [AYER] ---"; \
-cat /root/arca-bot/reports/daily_report_*_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
-echo -e "\n📈 --- 5.c TRADES DE HOY [HOY - Ventas con Profit] ---"; \
-echo "BTC:"; grep -c "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null || echo "0"; \
-grep "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log 2>/dev/null | tail -n 3; \
-echo "SOL:"; grep -c "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null || echo "0"; \
-grep "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | tail -n 3; \
+cat /root/arca-bot/reports/daily_report_*_SOLUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
+TODAY=$(date +%Y-%m-%d); \
+echo -e "\n📈 --- 5.c TRADES DE HOY [HOY] ---"; \
+echo "BTC:"; \
+echo "  Compras (Acumulación): $(grep -h "BUY FILLED" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
+echo "  Ventas (Profit):       $(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
+grep -h "FILLED" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 3; \
+echo "SOL:"; \
+echo "  Compras (Acumulación): $(grep -h "BUY FILLED" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
+echo "  Ventas (Profit):       $(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
+grep -h "FILLED" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 3; \
 echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
 tail -n 300 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
 echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
@@ -124,15 +129,14 @@ pm2 reset all
 # BTC Bot
 ssh root@167.71.1.124 "cd /root/arca-bot && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_BTCUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
 
-# SOL Bot
-ssh root@167.71.1.124 "cd /root/bot-sol && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_SOLUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
+# SOL Bot (uses same codebase as BTC)
+ssh root@167.71.1.124 "cd /root/arca-bot && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_SOLUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
 ```
 *Esto pone a cero el "récord de peor caída". El bot debe reiniciarse después.*
 
 ### Borrar Crash Logs (para empezar limpio):
 ```bash
 echo "" > /root/arca-bot/logs/pm2_crash.log
-echo "" > /root/bot-sol/logs/pm2_crash.log
 ```
 
 ---
