@@ -371,6 +371,7 @@ let state = {
     pauseUntil: null,
     pauseReason: null,
     initialCapital: null, // Track starting capital for profit % calculation
+    capitalHistory: [],   // PHASE 5: Track deposits/withdrawals for accurate APY: [{amount, timestamp}]
     firstTradeTime: null, // NEVER resets - for APY calculation
     isLive: true,
     startTime: Date.now(),
@@ -760,6 +761,49 @@ async function getCurrentPrice() {
     }
 }
 
+// PHASE 5: Time-Weighted Average Capital (TWAC) for accurate APY calculation
+// This accounts for deposits/withdrawals that happened during the trading period
+function calculateTimeWeightedCapital() {
+    const history = state.capitalHistory || [];
+    const now = Date.now();
+
+    // If no history or only one entry, use initialCapital
+    if (history.length === 0) {
+        return state.initialCapital || 100;
+    }
+
+    // If only one entry, return that capital
+    if (history.length === 1) {
+        return history[0].amount;
+    }
+
+    // Calculate time-weighted average
+    let totalWeightedCapital = 0;
+    let totalTime = 0;
+
+    for (let i = 0; i < history.length; i++) {
+        const entry = history[i];
+        const startTime = entry.timestamp;
+        const endTime = (i < history.length - 1) ? history[i + 1].timestamp : now;
+        const duration = endTime - startTime;
+
+        totalWeightedCapital += entry.amount * duration;
+        totalTime += duration;
+    }
+
+    // Avoid division by zero
+    if (totalTime === 0) return state.initialCapital || 100;
+
+    const avgCapital = totalWeightedCapital / totalTime;
+
+    // Debug log (infrequent)
+    if (Math.random() < 0.01) {
+        console.log(`>> [APY] Time-Weighted Capital: $${avgCapital.toFixed(2)} (from ${history.length} entries)`);
+    }
+
+    return avgCapital;
+}
+
 // P0 FIX: Detailed Financials (Equity & Limits)
 // RENAMED to avoid conflict with legacy function name (Engineer FB Phase 27)
 async function computeBotFinancials() {
@@ -826,8 +870,36 @@ async function computeBotFinancials() {
             globalFreeUSDT
         });
 
-        // Profit calculations
-        const profitPercent = state.initialCapital ? (state.totalProfit / state.initialCapital) * 100 : 0;
+        // PHASE 5: Detect Capital Changes (Deposits/Withdrawals)
+        // Compare current allocated equity with last known capital
+        const lastCapital = state.capitalHistory?.length > 0
+            ? state.capitalHistory[state.capitalHistory.length - 1].amount
+            : state.initialCapital;
+
+        // If equity changed significantly (>5% swing not explained by profit/price movement), log it
+        if (lastCapital && myAllocatedEquity > 0) {
+            const capitalDiff = myAllocatedEquity - lastCapital;
+            const recentProfit = state.totalProfit - (state._lastLoggedProfit || 0);
+            const unexplainedChange = Math.abs(capitalDiff - recentProfit);
+
+            // If change > $20 and not explained by profit, it's likely a deposit/withdrawal
+            if (unexplainedChange > 20 && Math.abs(capitalDiff) > lastCapital * 0.03) {
+                state.capitalHistory = state.capitalHistory || [];
+                state.capitalHistory.push({
+                    amount: myAllocatedEquity,
+                    timestamp: Date.now(),
+                    reason: capitalDiff > 0 ? 'DEPOSIT_DETECTED' : 'WITHDRAWAL_DETECTED',
+                    delta: capitalDiff
+                });
+                state._lastLoggedProfit = state.totalProfit;
+                log('CAPITAL', `📊 Capital change detected: ${capitalDiff > 0 ? '+' : ''}$${capitalDiff.toFixed(2)} → New: $${myAllocatedEquity.toFixed(2)}`, capitalDiff > 0 ? 'success' : 'warning');
+                saveState();
+            }
+        }
+
+        // PHASE 5: Use Time-Weighted Average Capital for accurate APY
+        const twac = calculateTimeWeightedCapital();
+        const profitPercent = twac > 0 ? (state.totalProfit / twac) * 100 : 0;
 
         return {
             freeUSDT: myFreeUSDT,       // CORRECTED: Isolated available capital
@@ -841,6 +913,8 @@ async function computeBotFinancials() {
             globalEquity: globalTotalEquity, // Alias try
             profit: state.totalProfit, // Lifetime Profit (Unified)
             profitPercent: profitPercent,
+            avgCapital: twac,             // NEW: Time-weighted average capital for UI
+            capitalHistoryCount: (state.capitalHistory || []).length, // NEW: How many entries
             pair: CONFIG.pair,
             startTime: state.firstTradeTime || state.startTime,
             activeOrders: {
@@ -2929,7 +3003,7 @@ async function handleOrderFill(order, fillPrice) {
         // NEW: Calculate spread for visibility
         const avgCost = costBasis / order.amount;
         const spreadPct = ((fillPrice - avgCost) / avgCost * 100);
-        
+
         log('PROFIT', `${ACCOUNTING_METHOD} | Cost: $${avgCost.toFixed(2)} → Sell: $${fillPrice.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Fees: $${totalFees.toFixed(4)} | Net: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
     }
 
@@ -2937,12 +3011,12 @@ async function handleOrderFill(order, fillPrice) {
     state.totalProfit += profit;
     // CRITICAL FIX: Mark as Net Profit so loadState doesn't deduct fees again!
     // NEW: Include cost basis info for Transaction Log transparency
-    const orderRecord = { 
-        ...order, 
-        fillPrice, 
-        profit, 
-        timestamp: Date.now(), 
-        isNetProfit: true 
+    const orderRecord = {
+        ...order,
+        fillPrice,
+        profit,
+        timestamp: Date.now(),
+        isNetProfit: true
     };
     // Add cost basis details for sells
     if (order.side === 'sell' && typeof avgCost !== 'undefined') {
@@ -3351,6 +3425,13 @@ server.listen(BOT_PORT, async () => {
             if (totalEquity > 0) {
                 // Apply CAPITAL_ALLOCATION - this bot's share of total
                 state.initialCapital = totalEquity * CAPITAL_ALLOCATION;
+
+                // PHASE 5: Initialize capitalHistory with first entry
+                state.capitalHistory = [{
+                    amount: state.initialCapital,
+                    timestamp: Date.now(),
+                    reason: 'INITIAL_CAPITAL'
+                }];
 
                 console.log(`>> [AUTO] Universal Equity (USDT+BTC+SOL): $${totalEquity.toFixed(2)}`);
                 console.log(`>> [AUTO] Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);

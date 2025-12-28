@@ -329,7 +329,9 @@ socket.on('financial_update', (data) => {
         const dailyROI = data.profitPercent / daysRunning;
         const apy = dailyROI * 365;
         const apyColor = apy >= 50 ? '#00ff9d' : apy >= 20 ? '#00d4ff' : '#ff9500';
-        apyEl.innerHTML = `<span style="color:${apyColor}">APY: ~${apy.toFixed(0)}%</span> <small style="color:#666">(${daysRunning.toFixed(1)}d)</small>`;
+        // Show time-weighted capital if available
+        const avgCapitalNote = data.avgCapital ? ` | Avg: $${data.avgCapital.toFixed(0)}` : '';
+        apyEl.innerHTML = `<span style="color:${apyColor}">APY: ~${apy.toFixed(0)}%</span> <small style="color:#666">(${daysRunning.toFixed(1)}d${avgCapitalNote})</small>`;
     }
 
     if (ui.activeLoops) ui.activeLoops.innerText = data.activeOrders.total;
