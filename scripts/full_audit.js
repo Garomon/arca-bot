@@ -13,7 +13,8 @@ const ccxt = require('ccxt');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const ARGS = process.argv.slice(2);
-const PAIR = ARGS[0] || 'BTC/USDT';
+const PAIR = ARGS.find(a => !a.startsWith('--')) || 'BTC/USDT';
+const FIX_MODE = ARGS.includes('--fix');
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 const BASE_ASSET = PAIR.split('/')[0];
 const FEE_RATE = 0.001; // 0.1% per trade
@@ -27,6 +28,9 @@ const DEFAULT_SPACING = PAIR_PRESETS[PAIR]?.spacing || 0.007;
 
 console.log('\n╔══════════════════════════════════════════════════════════════════╗');
 console.log(`║   COMPREHENSIVE PROFIT AUDIT v2 - ${PAIR.padEnd(12)} (SPREAD_MATCH)   ║`);
+if (FIX_MODE) {
+    console.log('║   🔧 FIX MODE ENABLED - Will update state file if needed         ║');
+}
 console.log('╠══════════════════════════════════════════════════════════════════╣');
 
 const binance = new ccxt.binance({
@@ -297,12 +301,15 @@ async function fullAudit() {
         const stateFileName = `VANTAGE01_${PAIR_ID}_state.json`;
         const stateFilePath = path.join(sessionsDir, stateFileName);
 
+        let needsFix = false;
+        let state = null;
+
         if (fs.existsSync(stateFilePath)) {
             console.log('\n╔══════════════════════════════════════════════════════════════════╗');
             console.log('║  [PHASE 4] STATE FILE COMPARISON                                 ║');
             console.log('╠══════════════════════════════════════════════════════════════════╣');
 
-            const state = JSON.parse(fs.readFileSync(stateFilePath, 'utf8'));
+            state = JSON.parse(fs.readFileSync(stateFilePath, 'utf8'));
             const stateProfit = state.totalProfit || 0;
             const stateFilledCount = (state.filledOrders || []).length;
             const stateInventory = state.inventory || [];
@@ -311,14 +318,66 @@ async function fullAudit() {
             const profitDiff = totalRealizedProfit - stateProfit;
             const invDiff = remainingInventory - stateInvTotal;
 
+            const profitNeedsFix = Math.abs(profitDiff) > 0.01;
+            const invNeedsFix = Math.abs(invDiff) > 0.0001;
+            needsFix = profitNeedsFix || invNeedsFix;
+
             console.log(`║  State File Profit:      $${stateProfit.toFixed(4).padStart(12)}                       ║`);
             console.log(`║  Audit Profit:           $${totalRealizedProfit.toFixed(4).padStart(12)}                       ║`);
-            console.log(`║  DIFFERENCE:             $${profitDiff.toFixed(4).padStart(12)} ${Math.abs(profitDiff) > 0.01 ? '⚠️' : '✅'}                  ║`);
+            console.log(`║  DIFFERENCE:             $${profitDiff.toFixed(4).padStart(12)} ${profitNeedsFix ? '⚠️' : '✅'}                  ║`);
             console.log('╠══════════════════════════════════════════════════════════════════╣');
             console.log(`║  State Inventory:        ${stateInvTotal.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
             console.log(`║  Audit Inventory:        ${remainingInventory.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
-            console.log(`║  DIFFERENCE:             ${invDiff.toFixed(6).padStart(12)} ${BASE_ASSET} ${Math.abs(invDiff) > 0.0001 ? '⚠️' : '✅'}             ║`);
+            console.log(`║  DIFFERENCE:             ${invDiff.toFixed(6).padStart(12)} ${BASE_ASSET} ${invNeedsFix ? '⚠️' : '✅'}             ║`);
             console.log('╚══════════════════════════════════════════════════════════════════╝');
+
+            // ==================== AUTO-FIX LOGIC ====================
+            if (FIX_MODE && needsFix) {
+                console.log('\n╔══════════════════════════════════════════════════════════════════╗');
+                console.log('║  🔧 AUTO-FIX: Updating state file...                             ║');
+                console.log('╠══════════════════════════════════════════════════════════════════╣');
+
+                // Create backup
+                const backupPath = stateFilePath.replace('.json', `_backup_${Date.now()}.json`);
+                fs.writeFileSync(backupPath, JSON.stringify(state, null, 2));
+                console.log(`║  📁 Backup created: ${path.basename(backupPath).padEnd(35)}    ║`);
+
+                // Update profit
+                const oldProfit = state.totalProfit || 0;
+                state.totalProfit = totalRealizedProfit;
+                state.accumulatedProfit = totalRealizedProfit;
+                console.log(`║  💰 Profit: $${oldProfit.toFixed(4)} → $${totalRealizedProfit.toFixed(4)}                           ║`);
+
+                // Update inventory with audited lots
+                const oldInvCount = (state.inventory || []).length;
+                state.inventory = inventory.map(lot => ({
+                    id: lot.orderId || `AUDIT_${lot.timestamp}`,
+                    price: lot.price,
+                    amount: lot.remaining,
+                    remaining: lot.remaining,
+                    fee: lot.fee || 0,
+                    timestamp: lot.timestamp,
+                    recovered: true,
+                    auditVerified: true
+                }));
+                console.log(`║  📦 Inventory: ${oldInvCount} lots → ${state.inventory.length} lots (${remainingInventory.toFixed(6)} ${BASE_ASSET})     ║`);
+
+                // Update avg cost
+                state.entryPrice = avgInvCost;
+                console.log(`║  📊 Avg Cost: $${avgInvCost.toFixed(2).padEnd(42)}║`);
+
+                // Save
+                fs.writeFileSync(stateFilePath, JSON.stringify(state, null, 2));
+                console.log('╠══════════════════════════════════════════════════════════════════╣');
+                console.log('║  ✅ STATE FILE UPDATED SUCCESSFULLY                              ║');
+                console.log('║  ⚠️  RESTART THE BOT to apply changes: pm2 restart bot-btc       ║');
+                console.log('╚══════════════════════════════════════════════════════════════════╝');
+            } else if (FIX_MODE && !needsFix) {
+                console.log('\n✅ No fixes needed - state file is accurate.');
+            } else if (!FIX_MODE && needsFix) {
+                console.log('\n⚠️  Discrepancies found! Run with --fix to auto-correct:');
+                console.log(`   node scripts/full_audit.js ${PAIR} --fix`);
+            }
         }
 
         // ==================== PHASE 5: SAVE DETAILED REPORT ====================
