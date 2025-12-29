@@ -1,7 +1,7 @@
 /**
- * BACKFILL PROFITS SCRIPT
- * Calculates real LIFO profit for each historical trade and updates the state file
- * This makes the Transaction Log show accurate profit per trade
+ * BACKFILL PROFITS SCRIPT v2
+ * FIXED: Correctly calculates LIFO cost basis for each sell
+ * Re-run this to fix incorrect costBasis values in the Transaction Log
  */
 
 const fs = require('fs');
@@ -14,7 +14,7 @@ const PAIR = ARGS[0] || 'SOL/USDT';
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 const FEE = 0.001; // 0.1% per trade
 
-console.log(`>> [BACKFILL] Starting LIFO Profit Backfill for ${PAIR}...`);
+console.log(`>> [BACKFILL v2] Starting LIFO Profit Backfill for ${PAIR}...`);
 
 // Find state file
 const sessionsDir = path.join(__dirname, '..', 'data', 'sessions');
@@ -42,117 +42,154 @@ const binance = new ccxt.binance({
 
 async function backfillProfits() {
     try {
-        // Fetch all trades from Binance
+        // Fetch ALL trades from Binance (from start of 2024)
         let trades = [];
         let since = 1704067200000; // Jan 1, 2024
 
+        console.log('>> [API] Fetching all trades from Binance...');
         while (true) {
             const batch = await binance.fetchMyTrades(PAIR, since, 1000);
             if (!batch || batch.length === 0) break;
             trades = trades.concat(batch);
             since = batch[batch.length - 1].timestamp + 1;
+            console.log(`   Fetched ${trades.length} trades so far...`);
             if (batch.length < 1000) break;
             await new Promise(r => setTimeout(r, 200));
         }
 
+        // Sort by timestamp (oldest first)
         trades.sort((a, b) => a.timestamp - b.timestamp);
-        console.log(`>> [API] Fetched ${trades.length} trades from Binance`);
+        console.log(`>> [API] Total: ${trades.length} trades from ${new Date(trades[0].timestamp).toISOString()} to ${new Date(trades[trades.length - 1].timestamp).toISOString()}`);
 
-        // Calculate LIFO profit for each sell
-        let inventory = [];
-        const tradeResults = new Map(); // id -> {profit, costBasis, spreadPct}
+        // Process LIFO - build inventory and calculate profit for each sell
+        let inventory = []; // Array of {price, amount, remaining, fee, timestamp, orderId}
+        const tradeResults = new Map(); // orderId -> {profit, costBasis, spreadPct}
+
+        console.log('\n>> [LIFO] Processing trades chronologically...');
+        let buyCount = 0, sellCount = 0;
 
         for (const trade of trades) {
-            const tradeId = trade.order || trade.orderId || trade.id; // Use ORDER ID, not trade ID"
+            const orderId = String(trade.order || trade.orderId || trade.id);
             const price = parseFloat(trade.price);
             const amount = parseFloat(trade.amount);
             const feeCost = trade.fee ? parseFloat(trade.fee.cost) : (price * amount * FEE);
 
             if (trade.side === 'buy') {
+                // Add to inventory
                 inventory.push({
+                    orderId: orderId,
                     price: price,
                     amount: amount,
                     remaining: amount,
                     fee: feeCost,
                     timestamp: trade.timestamp
                 });
-                tradeResults.set(tradeId, { profit: 0, costBasis: null, spreadPct: null });
+                tradeResults.set(orderId, { profit: 0, costBasis: null, spreadPct: null });
+                buyCount++;
             } else {
-                // LIFO: consume from newest first
+                // SELL - consume inventory in LIFO order (newest first)
                 let remainingToSell = amount;
-                let costBasis = 0;
-                let entryFees = 0;
+                let totalCost = 0;
+                let totalEntryFees = 0;
+                let lotsUsed = [];
 
-                for (let i = inventory.length - 1; i >= 0; i--) {
+                // Process from end (newest) to start (oldest)
+                for (let i = inventory.length - 1; i >= 0 && remainingToSell > 0.00000001; i--) {
                     const lot = inventory[i];
-                    if (remainingToSell <= 0.00000001) break;
-                    if (lot.remaining <= 0) continue;
+                    if (lot.remaining <= 0.00000001) continue;
 
                     const take = Math.min(remainingToSell, lot.remaining);
-                    costBasis += (take * lot.price);
+                    totalCost += (take * lot.price);
+
+                    // Proportional fee from the lot
                     if (lot.amount > 0) {
-                        entryFees += (take / lot.amount) * lot.fee;
+                        totalEntryFees += (take / lot.amount) * lot.fee;
                     }
+
                     lot.remaining -= take;
                     remainingToSell -= take;
+                    lotsUsed.push({ price: lot.price, amount: take });
                 }
 
-                // Clean up empty lots
+                // Clean up fully consumed lots
                 inventory = inventory.filter(l => l.remaining > 0.00000001);
 
-                // Handle shortfall
+                // Handle shortfall (sold more than we had in known inventory)
+                // This shouldn't happen with complete data, but if it does, estimate
                 if (remainingToSell > 0.00000001) {
-                    const estBuyPrice = price / 1.006;
-                    costBasis += (remainingToSell * estBuyPrice);
+                    console.log(`   [WARN] Shortfall for order ${orderId}: ${remainingToSell.toFixed(6)} units missing, estimating...`);
+                    // Use a reasonable estimate (slightly below sell price)
+                    const estBuyPrice = price * 0.995;
+                    totalCost += (remainingToSell * estBuyPrice);
                 }
 
+                // Calculate profit
                 const revenue = price * amount;
-                const profit = revenue - costBasis - entryFees - feeCost;
-                const avgCost = costBasis / amount;
+                const profit = revenue - totalCost - totalEntryFees - feeCost;
+                const avgCost = totalCost / amount;
                 const spreadPct = ((price - avgCost) / avgCost * 100);
 
-                tradeResults.set(tradeId, {
+                tradeResults.set(orderId, {
                     profit: profit,
                     costBasis: avgCost,
                     spreadPct: spreadPct
                 });
+                sellCount++;
             }
         }
+
+        console.log(`>> [LIFO] Processed ${buyCount} buys and ${sellCount} sells`);
+        console.log(`>> [LIFO] Remaining inventory: ${inventory.length} lots, ${inventory.reduce((s, l) => s + l.remaining, 0).toFixed(6)} units`);
 
         // Load state file
         const raw = fs.readFileSync(stateFile);
         let state = JSON.parse(raw);
 
-        // Backup
-        fs.copyFileSync(stateFile, stateFile + '.backfill.bak');
+        // Backup original
+        const backupFile = stateFile + '.backup_' + Date.now();
+        fs.copyFileSync(stateFile, backupFile);
+        console.log(`>> [BACKUP] Saved to: ${backupFile}`);
 
-        // Update filledOrders with real profits
+        // Update filledOrders with CORRECT profits
         let updatedCount = 0;
+        let totalProfit = 0;
+
         if (state.filledOrders && state.filledOrders.length > 0) {
             for (const order of state.filledOrders) {
-                const result = tradeResults.get(order.id);
+                const orderId = String(order.id);
+                const result = tradeResults.get(orderId);
+
                 if (result) {
                     order.profit = result.profit;
                     order.costBasis = result.costBasis;
                     order.spreadPct = result.spreadPct;
-                    order.isEstimated = false; // Now it's real LIFO data
+                    order.isEstimated = false;
+                    order.isNetProfit = false;
                     updatedCount++;
+
+                    if (result.profit !== null && result.profit !== 0) {
+                        totalProfit += result.profit;
+                    }
                 }
             }
         }
 
+        // Update total profit
+        state.totalProfit = totalProfit;
+
         // Save updated state
         fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
 
-        console.log('------------------------------------------------');
-        console.log(`>> [SUCCESS] Backfill Complete!`);
-        console.log(`>> Updated ${updatedCount} orders with real LIFO profits`);
-        console.log(`>> Total Profit: $${state.totalProfit?.toFixed(4) || 'N/A'}`);
-        console.log('------------------------------------------------');
+        console.log('\n================================================');
+        console.log(`>> [SUCCESS] Backfill Complete for ${PAIR}!`);
+        console.log(`>> Updated ${updatedCount} orders with CORRECT LIFO profits`);
+        console.log(`>> Total Realized Profit: $${totalProfit.toFixed(4)}`);
+        console.log('================================================');
         console.log('>> [IMPORTANT] Run: pm2 restart all');
 
     } catch (e) {
         console.error('>> [ERROR]', e.message);
+        console.error(e.stack);
     }
 }
 
