@@ -3261,16 +3261,10 @@ async function syncHistoricalTrades() {
             // Check if we know this trade
             if (!knownIds.has(tradeId)) {
 
-                // Estimate Profit (Heuristic for Grid Bot)
-                // We assume Sells are closing profitable grid levels (~gridSpacing)
-                // Buys are entries, so 0 realized profit.
-                let estimatedProfit = 0;
-                if (trade.side === 'sell') {
-                    // DEBUG: Log calculation details
-                    log('DEBUG', `Calc Profit: ${trade.amount} * ${trade.price} * ${CONFIG.gridSpacing}`);
-                    estimatedProfit = (trade.amount * trade.price) * CONFIG.gridSpacing;
-                    // state.totalProfit += estimatedProfit; // FIX: Disabled Double Counting
-                }
+                // HONESTY FIX: Don't estimate profits for synced trades
+                // Only real-time handleOrderFill() has accurate LIFO profit
+                // Synced trades show profit=0; run recalculate_profit.js for totals
+                const estimatedProfit = 0;
 
                 // Add to history
                 state.filledOrders.push({
@@ -3281,21 +3275,14 @@ async function syncHistoricalTrades() {
                     timestamp: trade.timestamp,
                     profit: estimatedProfit,
                     status: 'filled',
+                    isEstimated: true, // Synced from exchange history, not real-time LIFO
                     isNetProfit: false // Estimated, not FIFO-calculated
                 });
                 knownIds.add(tradeId); // Prevent duplicates in this loop
                 addedCount++;
-            } else {
-                // BACKFILL CHECK: If we know it, but profit is 0 and it's a SELL, fix it!
-                const existingOrder = state.filledOrders.find(o => o.id === tradeId);
-                if (existingOrder && existingOrder.side === 'sell' && existingOrder.profit === 0) {
-                    const estimatedProfit = (trade.amount * trade.price) * CONFIG.gridSpacing;
-                    existingOrder.profit = estimatedProfit;
-                    // state.totalProfit += estimatedProfit; // FIX: Disabled Double Counting
-                    log('SYNC', `REPAIRED history for Sell ${trade.orderId}: +$${estimatedProfit.toFixed(4)}`, 'success');
-                    addedCount++; // Count as an update so we save state
-                }
             }
+            // NOTE: Removed backfill "repair" that was inventing fake profits
+            // Real profit comes from handleOrderFill LIFO or recalculate_profit.js
         }
 
         if (addedCount > 0) {
