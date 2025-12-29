@@ -3070,6 +3070,8 @@ async function handleOrderFill(order, fillPrice) {
         orderRecord.costBasis = sellAvgCost;
         orderRecord.spreadPct = sellSpreadPct;
         orderRecord.matchedLots = sellMatchedLots;
+        orderRecord.fees = totalFees; // NEW: Store fees for UI transparency
+        orderRecord.matchMethod = ACCOUNTING_METHOD; // NEW: Store method used
     }
     state.filledOrders.push(orderRecord);
 

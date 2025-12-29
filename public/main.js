@@ -533,7 +533,7 @@ function renderTradeHistory() {
     tbody.innerHTML = ''; // Clear
 
     if (!tradeHistory || tradeHistory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding: 10px;">No transaction history found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding: 10px;">No transaction history found</td></tr>';
         return;
     }
 
@@ -596,6 +596,7 @@ function renderTradeHistory() {
                 <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${parseFloat(t.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? '$' + parseFloat(t.costBasis).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-')}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : (t.spreadPct > 0 ? 'text-success' : 'text-danger')}" style="vertical-align: middle;">${isBuy ? '-' : (t.spreadPct !== undefined ? t.spreadPct.toFixed(2) + '%' : '-')}</td>
+                <td class="text-end text-warning" style="vertical-align: middle; font-size: 0.7rem;">${isBuy ? '-' : (t.fees ? '$' + parseFloat(t.fees).toFixed(4) : '-')}</td>
                 <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
                 <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(isBuy ? 0 : (t.profit || 0)).toFixed(4)}</td>
             `;
@@ -792,7 +793,7 @@ function renderInventory() {
     if (countBadge) countBadge.innerText = `${inventoryData.length} LOTS`;
 
     if (!inventoryData || inventoryData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted" style="opacity: 0.5;">No inventory (all sold or none bought yet)</td></tr>';
         return;
     }
 
@@ -838,7 +839,9 @@ function renderInventory() {
         const remaining = lot.remaining !== undefined ? lot.remaining : lot.amount;
         const value = remaining * currentPrice;
         const pnl = currentPrice - lot.price;
+        const unrealizedPnl = (currentPrice - lot.price) * remaining; // NEW: Unrealized PnL in USD
         const pnlClass = pnl >= 0 ? 'color: #00ff9d' : 'color: #ff3b3b';
+        const unrealizedClass = unrealizedPnl >= 0 ? 'text-success' : 'text-danger';
         const statusIcon = remaining === lot.amount ? '🟢' : (remaining > 0 ? '🟡' : '⚫');
 
         // Format Date
@@ -856,6 +859,7 @@ function renderInventory() {
                 <td class="text-end text-muted">${lot.amount.toFixed(6)}</td>
                 <td class="text-end fw-bold">${remaining.toFixed(6)}</td>
                 <td class="text-end">$${value.toFixed(2)}</td>
+                <td class="text-end ${unrealizedClass}" style="font-size: 0.7rem;">${unrealizedPnl >= 0 ? '+' : ''}$${unrealizedPnl.toFixed(2)}</td>
                 <td class="text-center">${statusIcon}</td>
             </tr>
         `;
