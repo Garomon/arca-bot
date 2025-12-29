@@ -456,12 +456,12 @@ function calculateOptimalGridSpacing(atr, currentPrice, volatility, geoContext =
 
     // Calculate dynamic spacing
     // Cap at 0.1% min and 10% max (Survival for 30% drops)
-    // Calculate dynamic spacing
-    // Cap at 0.1% min and 10% max (Survival for 30% drops)
     // FIX: Enforce minimum profitable spacing (Fees * 3) to satisfy isOrderWorthPlacing (Fees * 1.5 coverage)
     // 0.1% trading fee * 2 (round trip) * 1.5 (buffer) = 0.3% min spacing
+    // NEW: Allow pair-specific floor from geoContext.minSpacing (from PAIR_PRESETS.spacingLow)
     const feeBuffer = (geoContext.tradingFee || 0.001) * 3.5;
-    const minSpacing = Math.max(0.001, feeBuffer);
+    const pairMinSpacing = geoContext.minSpacing || 0; // From PAIR_PRESETS.spacingLow
+    const minSpacing = Math.max(0.001, feeBuffer, pairMinSpacing); // Use highest of all floors
 
     const spacing = Math.max(minSpacing, Math.min(0.10, atrPercent * atrMultiplier));
 
