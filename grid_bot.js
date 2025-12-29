@@ -2766,6 +2766,26 @@ async function shouldPauseBuys() {
             };
         }
 
+        // Guard 3: SMART DCA - Prevent buying above average cost when underwater
+        // Only applies when we have inventory AND price is higher than our avg cost
+        // This prevents "buying expensive" when we're already in the red
+        if (state.inventory && state.inventory.length > 0) {
+            const invReport = calculateInventoryReport();
+            const avgCost = invReport.avgCost;
+            const DCA_BUFFER = 1.02; // Allow buying up to 2% above avg (for grid flexibility)
+
+            if (avgCost > 0 && currentPrice > avgCost * DCA_BUFFER) {
+                // We're underwater - buying now would increase avg cost (bad DCA)
+                // Only log as info, not a hard block (allow some tolerance)
+                const pctAbove = ((currentPrice / avgCost) - 1) * 100;
+                log('SMART_DCA', `⚠️ Price $${currentPrice.toFixed(2)} is ${pctAbove.toFixed(1)}% above avg cost $${avgCost.toFixed(2)} - BLOCKING NEW BUYS to protect avg cost`, 'warning');
+                return {
+                    pause: true,
+                    reason: `SMART_DCA (Price ${pctAbove.toFixed(1)}% > AvgCost. Waiting for dip.)`
+                };
+            }
+        }
+
         return { pause: false };
     } catch (e) {
         console.error('>> [ERROR] shouldPauseBuys check failed:', e.message);
