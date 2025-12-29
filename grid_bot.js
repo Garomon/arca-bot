@@ -2873,6 +2873,11 @@ async function handleOrderFill(order, fillPrice) {
     // FIX: Only SELL orders realize profit. BUY orders are just entries.
     let profit = 0;
 
+    // SCOPE FIX: Declare these at function level for orderRecord access
+    let sellAvgCost = null;
+    let sellSpreadPct = null;
+    let sellMatchedLots = [];
+
     if (order.side === 'buy') {
         // INVENTORY TRACKING: Add new lot
         if (!state.inventory) state.inventory = [];
@@ -2896,7 +2901,7 @@ async function handleOrderFill(order, fillPrice) {
         let costBasis = 0;
         let entryFees = 0; // Track entry fees from consumed lots
         let consumedLots = 0;
-        const matchedLots = []; // NEW: Track which lots were consumed for transparency
+        const matchedLots = []; // Track which lots were consumed for transparency
 
         // Iterate mutable inventory
         // FILTER: Only consider lots with remaining balance
@@ -3008,9 +3013,14 @@ async function handleOrderFill(order, fillPrice) {
             log('WARN', `🔧 Corrected Anomaly: Gross $${estimatedGross.toFixed(4)} - Fees $${estimatedTotalFees.toFixed(4)} = Net $${profit.toFixed(4)}`, 'warning');
         }
 
-        // NEW: Calculate spread for visibility
+        // Calculate spread for visibility and ASSIGN to function-scoped vars
         const avgCost = costBasis / order.amount;
         const spreadPct = ((fillPrice - avgCost) / avgCost * 100);
+
+        // Store in function-scoped variables for orderRecord
+        sellAvgCost = avgCost;
+        sellSpreadPct = spreadPct;
+        sellMatchedLots = matchedLots;
 
         log('PROFIT', `${ACCOUNTING_METHOD} | Cost: $${avgCost.toFixed(2)} → Sell: $${fillPrice.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Fees: $${totalFees.toFixed(4)} | Net: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
     }
@@ -3026,11 +3036,11 @@ async function handleOrderFill(order, fillPrice) {
         timestamp: Date.now(),
         isNetProfit: true
     };
-    // Add cost basis details for sells
-    if (order.side === 'sell' && typeof avgCost !== 'undefined') {
-        orderRecord.costBasis = avgCost;
-        orderRecord.spreadPct = spreadPct;
-        orderRecord.matchedLots = matchedLots;
+    // Add cost basis details for sells (using function-scoped vars)
+    if (order.side === 'sell' && sellAvgCost !== null) {
+        orderRecord.costBasis = sellAvgCost;
+        orderRecord.spreadPct = sellSpreadPct;
+        orderRecord.matchedLots = sellMatchedLots;
     }
     state.filledOrders.push(orderRecord);
 
@@ -3050,10 +3060,10 @@ async function handleOrderFill(order, fillPrice) {
     // P0 FIX: Save state immediately to persist profit
     saveState();
 
-    // NEW: Enhanced execution log with cost basis for sells
-    if (order.side === 'sell' && typeof avgCost !== 'undefined') {
+    // Enhanced execution log with cost basis for sells (using function-scoped vars)
+    if (order.side === 'sell' && sellAvgCost !== null) {
         const profitEmoji = profit > 0 ? '💰' : '📉';
-        log('EXECUTION', `${profitEmoji} SELL @ $${fillPrice.toFixed(2)} | Cost: $${avgCost.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Profit: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
+        log('EXECUTION', `${profitEmoji} SELL @ $${fillPrice.toFixed(2)} | Cost: $${sellAvgCost.toFixed(2)} | Spread: ${sellSpreadPct.toFixed(2)}% | Profit: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
     } else {
         log('EXECUTION', `📥 BUY FILLED @ $${fillPrice.toFixed(2)}`, 'success');
     }
