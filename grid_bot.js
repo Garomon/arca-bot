@@ -1087,8 +1087,13 @@ async function initializeGrid(forceReset = false) {
             reason: capitalConfig.reason
         };
 
-        const safeCapital = allocation.grid;
+        // Deduct locked profit from usable capital (PROFIT PROTECTION)
+        const lockedProfit = state.lockedProfit || 0;
+        const safeCapital = Math.max(0, allocation.grid - lockedProfit);
 
+        if (lockedProfit > 0) {
+            log('SYSTEM', `💰 PROFIT LOCK: $${lockedProfit.toFixed(2)} protected | Usable: $${safeCapital.toFixed(2)}`);
+        }
         log('SYSTEM', `CAPITAL ALLOCATION: $${safeCapital.toFixed(2)} for grid | $${allocation.reserve.toFixed(2)} reserve (${allocation.reason})`);
 
         // Calculate Safety Margin based on Geo Level (Now handled by Helper)
@@ -1704,9 +1709,13 @@ async function runMonitorLoop(myId) {
             const profitActions = adaptiveHelpers.manageProfitTaking(state.totalProfit, state.initialCapital, state);
             profitActions.forEach(action => {
                 if (action.type === 'LOCK_PROFIT') {
-                    log('PROFIT', `🎯 ${action.reason} - Locking $${action.amount.toFixed(2)}`, 'success');
+                    // REAL EXECUTION: Lock the profit so it's not used for new buys
+                    const previousLocked = state.lockedProfit || 0;
+                    state.lockedProfit = Math.max(previousLocked, action.amount);
+                    log('PROFIT', `🔒 ${action.reason} - LOCKED $${state.lockedProfit.toFixed(2)} (Protected from trading)`, 'success');
+                    saveState(); // Persist immediately
                 } else if (action.type === 'TRAILING_STOP') {
-                    log('PROFIT', `⚠️ ${action.reason}`, 'warning');
+                    log('PROFIT', `⚠️ ${action.reason} - Consider reducing position`, 'warning');
                 }
             });
         }
