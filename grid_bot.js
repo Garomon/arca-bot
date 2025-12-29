@@ -132,9 +132,11 @@ const PAIR_PRESETS = {
 let lastToleranceLog = 0;
 const TOLERANCE_LOG_INTERVAL = 5 * 60 * 1000; // Log every 5 minutes
 
-// ACCOUNTING METHOD: 'FIFO' (First-In First-Out) or 'LIFO' (Last-In First-Out)
-// LIFO (UEPS) is generally better for tax efficiency in active trading (sells newest/highest cost first).
-const ACCOUNTING_METHOD = process.env.ACCOUNTING_METHOD || 'LIFO';
+// ACCOUNTING METHOD: 'SPREAD_MATCH' (Best for Grid), 'FIFO', or 'LIFO'
+// SPREAD_MATCH: Matches sells to buys where buyPrice * (1+spread) ≈ sellPrice (Optimal for Grid Trading)
+// FIFO: First-In First-Out (Sells oldest inventory first)
+// LIFO: Last-In First-Out (Sells newest inventory first - BAD for grid trading!)
+const ACCOUNTING_METHOD = process.env.ACCOUNTING_METHOD || 'SPREAD_MATCH';
 
 // (Duplicate checkGridHealth removed)
 
@@ -2907,6 +2909,7 @@ async function handleOrderFill(order, fillPrice) {
         // Iterate mutable inventory
         // FILTER: Only consider lots with remaining balance
         // SORT/ITERATION: Depends on ACCOUNTING_METHOD
+        // SPREAD_MATCH = Find lot where buyPrice * (1+spread) ≈ sellPrice (Best for Grid)
         // FIFO = Start from Index 0 (Oldest)
         // LIFO = Start from Index Length-1 (Newest)
 
@@ -2918,8 +2921,33 @@ async function handleOrderFill(order, fillPrice) {
             }
         });
 
-        // Sort candidates based on method
-        if (ACCOUNTING_METHOD === 'LIFO') {
+        // === SPREAD_MATCH: Priority Sort by Sell Price Match ===
+        // For grid trading, each sell was placed when a buy filled.
+        // The sell price = buyPrice * (1 + gridSpacing)
+        // So we reverse: expectedBuyPrice = sellPrice / (1 + spacing)
+        // Then find the lot closest to that expected buy price.
+
+        if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
+            // Use the order's spacing if available, else default
+            const spacing = order.spacing || CONFIG.gridSpacing || 0.01;
+            const expectedBuyPrice = fillPrice / (1 + spacing);
+            const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance for rounding
+
+            // Sort by proximity to expected buy price (closest first)
+            inventoryCandidates.sort((a, b) => {
+                const diffA = Math.abs(a.price - expectedBuyPrice);
+                const diffB = Math.abs(b.price - expectedBuyPrice);
+                return diffA - diffB;
+            });
+
+            // Log the match attempt for transparency
+            if (inventoryCandidates.length > 0) {
+                const bestMatch = inventoryCandidates[0];
+                const priceDiff = Math.abs(bestMatch.price - expectedBuyPrice);
+                const matchQuality = priceDiff <= tolerance ? '✅ EXACT' : (priceDiff <= expectedBuyPrice * 0.02 ? '⚠️ CLOSE' : '❌ FALLBACK');
+                log('SPREAD_MATCH', `Sell @ $${fillPrice.toFixed(2)} → Expected Buy: $${expectedBuyPrice.toFixed(2)} | Best Lot: $${bestMatch.price.toFixed(2)} | ${matchQuality}`, matchQuality.includes('✅') ? 'success' : 'warning');
+            }
+        } else if (ACCOUNTING_METHOD === 'LIFO') {
             // Newest First (Sort DESC by timestamp)
             inventoryCandidates.sort((a, b) => b.timestamp - a.timestamp);
         } else {

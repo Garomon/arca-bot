@@ -1,6 +1,6 @@
 /**
- * COMPREHENSIVE PROFIT AUDIT SCRIPT
- * Fetches ALL trades from Binance and produces detailed report
+ * COMPREHENSIVE PROFIT AUDIT SCRIPT v2
+ * Uses SPREAD_MATCH method (correct for grid trading)
  * 
  * Usage: node full_audit.js [PAIR]
  * Example: node full_audit.js BTC/USDT
@@ -18,8 +18,15 @@ const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 const BASE_ASSET = PAIR.split('/')[0];
 const FEE_RATE = 0.001; // 0.1% per trade
 
+// Grid spacing varies by pair
+const PAIR_PRESETS = {
+    'BTC/USDT': { spacing: 0.006 },  // 0.6%
+    'SOL/USDT': { spacing: 0.007 }   // 0.7%
+};
+const DEFAULT_SPACING = PAIR_PRESETS[PAIR]?.spacing || 0.007;
+
 console.log('\n╔══════════════════════════════════════════════════════════════════╗');
-console.log(`║   COMPREHENSIVE PROFIT AUDIT - ${PAIR.padEnd(12)}                    ║`);
+console.log(`║   COMPREHENSIVE PROFIT AUDIT v2 - ${PAIR.padEnd(12)} (SPREAD_MATCH)   ║`);
 console.log('╠══════════════════════════════════════════════════════════════════╣');
 
 const binance = new ccxt.binance({
@@ -68,9 +75,9 @@ async function fullAudit() {
         console.log(`║  >> Last Trade:  ${lastTrade.toISOString().split('T')[0]}                              ║`);
         console.log(`║  >> Trading Period: ${tradingDays} days                                    ║`);
 
-        // ==================== PHASE 2: LIFO CALCULATION ====================
+        // ==================== PHASE 2: SPREAD_MATCH CALCULATION ====================
         console.log('╠══════════════════════════════════════════════════════════════════╣');
-        console.log('║  [PHASE 2] LIFO Profit Calculation                               ║');
+        console.log('║  [PHASE 2] SPREAD_MATCH Profit Calculation                       ║');
         console.log('╠══════════════════════════════════════════════════════════════════╣');
 
         let inventory = []; // Array of lots: {price, amount, remaining, fee, timestamp}
@@ -82,6 +89,9 @@ async function fullAudit() {
         let sellCount = 0;
         let profitableSells = 0;
         let losingSells = 0;
+        let exactMatches = 0;
+        let closeMatches = 0;
+        let fallbackMatches = 0;
 
         // Detailed trade log
         const tradeLog = [];
@@ -95,7 +105,13 @@ async function fullAudit() {
             const timestamp = trade.timestamp;
             const orderId = String(trade.order || trade.id);
 
-            totalFeesPaid += feeCost;
+            // Convert fee to USDT if in base asset
+            let feeUSDT = feeCost;
+            if (feeAsset === BASE_ASSET) {
+                feeUSDT = feeCost * price;
+            }
+
+            totalFeesPaid += feeUSDT;
 
             if (trade.side === 'buy') {
                 // Add to inventory
@@ -104,7 +120,7 @@ async function fullAudit() {
                     price,
                     amount,
                     remaining: amount,
-                    fee: feeCost,
+                    fee: feeUSDT,
                     timestamp
                 });
 
@@ -117,22 +133,56 @@ async function fullAudit() {
                     price,
                     amount,
                     cost,
-                    fee: feeCost,
+                    fee: feeUSDT,
                     profit: null,
                     spreadPct: null,
                     inventoryAfter: inventory.reduce((s, l) => s + l.remaining, 0)
                 });
 
             } else if (trade.side === 'sell') {
-                // LIFO: Consume from newest lots first
+                // === SPREAD_MATCH: Find the buy lot that corresponds to this sell ===
+                // Expected buy price = sellPrice / (1 + spacing)
+                const spacing = DEFAULT_SPACING;
+                const expectedBuyPrice = price / (1 + spacing);
+                const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance
+
                 let remainingToSell = amount;
                 let totalCostBasis = 0;
                 let totalEntryFees = 0;
                 const lotsConsumed = [];
+                let matchType = 'NONE';
 
-                // Process from end (newest) to start (oldest)
-                for (let i = inventory.length - 1; i >= 0 && remainingToSell > 0.00000001; i--) {
-                    const lot = inventory[i];
+                // Sort inventory by proximity to expected buy price (SPREAD_MATCH)
+                const candidates = inventory
+                    .map((lot, idx) => ({ ...lot, originalIndex: idx }))
+                    .filter(lot => lot.remaining > 0.00000001)
+                    .sort((a, b) => {
+                        const diffA = Math.abs(a.price - expectedBuyPrice);
+                        const diffB = Math.abs(b.price - expectedBuyPrice);
+                        return diffA - diffB;
+                    });
+
+                // Determine match quality
+                if (candidates.length > 0) {
+                    const bestMatch = candidates[0];
+                    const priceDiff = Math.abs(bestMatch.price - expectedBuyPrice);
+                    if (priceDiff <= tolerance) {
+                        matchType = 'EXACT';
+                        exactMatches++;
+                    } else if (priceDiff <= expectedBuyPrice * 0.02) {
+                        matchType = 'CLOSE';
+                        closeMatches++;
+                    } else {
+                        matchType = 'FALLBACK';
+                        fallbackMatches++;
+                    }
+                }
+
+                // Consume from sorted candidates
+                for (const candidate of candidates) {
+                    if (remainingToSell <= 0.00000001) break;
+
+                    const lot = inventory[candidate.originalIndex];
                     if (lot.remaining <= 0.00000001) continue;
 
                     const take = Math.min(remainingToSell, lot.remaining);
@@ -145,7 +195,8 @@ async function fullAudit() {
                     lotsConsumed.push({
                         lotPrice: lot.price,
                         amount: take,
-                        age: Math.round((timestamp - lot.timestamp) / (1000 * 60)) // minutes
+                        age: Math.round((timestamp - lot.timestamp) / (1000 * 60)),
+                        matchType
                     });
 
                     lot.remaining -= take;
@@ -155,16 +206,17 @@ async function fullAudit() {
                 // Clean up consumed lots
                 inventory = inventory.filter(l => l.remaining > 0.00000001);
 
-                // Handle shortfall (sold more than recorded buys)
+                // Handle shortfall
                 let shortfall = 0;
                 if (remainingToSell > 0.00000001) {
                     shortfall = remainingToSell;
-                    const estBuyPrice = price * 0.995; // Estimate 0.5% spread
+                    const estBuyPrice = price * 0.995;
                     totalCostBasis += (remainingToSell * estBuyPrice);
                 }
 
                 const revenue = price * amount;
-                const profit = revenue - totalCostBasis - totalEntryFees - feeCost;
+                const sellFee = revenue * FEE_RATE;
+                const profit = revenue - totalCostBasis - totalEntryFees - sellFee;
                 const avgCostBasis = totalCostBasis / amount;
                 const spreadPct = ((price - avgCostBasis) / avgCostBasis) * 100;
 
@@ -181,10 +233,12 @@ async function fullAudit() {
                     price,
                     amount,
                     revenue,
-                    fee: feeCost,
+                    fee: sellFee,
                     costBasis: avgCostBasis,
                     profit,
                     spreadPct,
+                    matchType,
+                    expectedBuyPrice,
                     lotsConsumed,
                     shortfall: shortfall > 0 ? shortfall : null,
                     inventoryAfter: inventory.reduce((s, l) => s + l.remaining, 0)
@@ -204,15 +258,22 @@ async function fullAudit() {
         const unrealizedPnL = remainingInventory * (currentPrice - avgInvCost);
         const totalPnL = totalRealizedProfit + unrealizedPnL;
 
+        const winRate = sellCount > 0 ? ((profitableSells / sellCount) * 100) : 0;
+
         console.log('╠══════════════════════════════════════════════════════════════════╣');
-        console.log('║  [PHASE 3] AUDIT RESULTS                                         ║');
+        console.log('║  [PHASE 3] AUDIT RESULTS (SPREAD_MATCH)                          ║');
         console.log('╠══════════════════════════════════════════════════════════════════╣');
         console.log(`║  📊 TRADE STATISTICS                                              ║`);
         console.log(`║     Total Trades:        ${(buyCount + sellCount).toString().padStart(6)}                              ║`);
         console.log(`║     Buy Orders:          ${buyCount.toString().padStart(6)}                              ║`);
         console.log(`║     Sell Orders:         ${sellCount.toString().padStart(6)}                              ║`);
-        console.log(`║     Profitable Sells:    ${profitableSells.toString().padStart(6)} (${((profitableSells / sellCount) * 100).toFixed(1)}%)                      ║`);
-        console.log(`║     Losing Sells:        ${losingSells.toString().padStart(6)} (${((losingSells / sellCount) * 100).toFixed(1)}%)                       ║`);
+        console.log(`║     Profitable Sells:    ${profitableSells.toString().padStart(6)} (${winRate.toFixed(1)}%)                      ║`);
+        console.log(`║     Losing Sells:        ${losingSells.toString().padStart(6)} (${(100 - winRate).toFixed(1)}%)                       ║`);
+        console.log('╠══════════════════════════════════════════════════════════════════╣');
+        console.log(`║  🎯 SPREAD_MATCH QUALITY                                          ║`);
+        console.log(`║     Exact Matches:       ${exactMatches.toString().padStart(6)} (Within 0.5%)               ║`);
+        console.log(`║     Close Matches:       ${closeMatches.toString().padStart(6)} (Within 2%)                 ║`);
+        console.log(`║     Fallback Matches:    ${fallbackMatches.toString().padStart(6)} (Best Available)           ║`);
         console.log('╠══════════════════════════════════════════════════════════════════╣');
         console.log(`║  💰 VOLUME                                                        ║`);
         console.log(`║     Total Buy Volume:    $${totalBuyVolume.toFixed(2).padStart(12)}                       ║`);
@@ -252,17 +313,12 @@ async function fullAudit() {
 
             console.log(`║  State File Profit:      $${stateProfit.toFixed(4).padStart(12)}                       ║`);
             console.log(`║  Audit Profit:           $${totalRealizedProfit.toFixed(4).padStart(12)}                       ║`);
-            console.log(`║  DIFFERENCE:             $${profitDiff.toFixed(4).padStart(12)} ${profitDiff > 0.01 || profitDiff < -0.01 ? '⚠️' : '✅'}                  ║`);
+            console.log(`║  DIFFERENCE:             $${profitDiff.toFixed(4).padStart(12)} ${Math.abs(profitDiff) > 0.01 ? '⚠️' : '✅'}                  ║`);
             console.log('╠══════════════════════════════════════════════════════════════════╣');
             console.log(`║  State Inventory:        ${stateInvTotal.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
             console.log(`║  Audit Inventory:        ${remainingInventory.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
             console.log(`║  DIFFERENCE:             ${invDiff.toFixed(6).padStart(12)} ${BASE_ASSET} ${Math.abs(invDiff) > 0.0001 ? '⚠️' : '✅'}             ║`);
             console.log('╚══════════════════════════════════════════════════════════════════╝');
-
-            if (Math.abs(profitDiff) > 0.01 || Math.abs(invDiff) > 0.0001) {
-                console.log('\n⚠️  DISCREPANCY DETECTED! Consider running:');
-                console.log(`   node scripts/backfill_profits.js ${PAIR}`);
-            }
         }
 
         // ==================== PHASE 5: SAVE DETAILED REPORT ====================
@@ -275,7 +331,9 @@ async function fullAudit() {
 
         const report = {
             generatedAt: new Date().toISOString(),
+            method: 'SPREAD_MATCH',
             pair: PAIR,
+            spacing: DEFAULT_SPACING,
             tradingPeriod: {
                 start: firstTrade.toISOString(),
                 end: lastTrade.toISOString(),
@@ -287,7 +345,12 @@ async function fullAudit() {
                 sellCount,
                 profitableSells,
                 losingSells,
-                winRate: ((profitableSells / sellCount) * 100).toFixed(2) + '%'
+                winRate: winRate.toFixed(2) + '%'
+            },
+            matchQuality: {
+                exactMatches,
+                closeMatches,
+                fallbackMatches
             },
             volume: {
                 totalBuyVolume,
