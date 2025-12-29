@@ -886,8 +886,9 @@ socket.on('settings_update', (data) => {
     const accountingEl = document.getElementById('accounting-method');
     if (accountingEl && data.accounting) {
         accountingEl.innerText = data.accounting;
-        // Color code: LIFO = Green (Tax Efficient), FIFO = Orange (Standard)
-        accountingEl.style.color = data.accounting === 'LIFO' ? '#00ff9d' : '#ff9500';
+        // Color code: SPREAD_MATCH = Cyan (Optimal for Grid), LIFO = Green, FIFO = Orange
+        accountingEl.style.color = data.accounting === 'SPREAD_MATCH' ? '#00d4ff' :
+            (data.accounting === 'LIFO' ? '#00ff9d' : '#ff9500');
     }
 });
 
