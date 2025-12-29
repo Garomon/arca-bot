@@ -63,7 +63,7 @@ async function backfillProfits() {
         const tradeResults = new Map(); // id -> {profit, costBasis, spreadPct}
 
         for (const trade of trades) {
-            const tradeId = trade.id || trade.order;
+            const tradeId = trade.order || trade.orderId || trade.id; // Use ORDER ID, not trade ID"
             const price = parseFloat(trade.price);
             const amount = parseFloat(trade.amount);
             const feeCost = trade.fee ? parseFloat(trade.fee.cost) : (price * amount * FEE);
