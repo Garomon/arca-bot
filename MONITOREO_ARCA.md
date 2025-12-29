@@ -1,5 +1,5 @@
-# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC & SOL) v2.1
-*(Actualizado: Fix Imbalance + Reportes Identificados)*
+# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC & SOL) v3.0
+*(Actualizado: 2025-12-29 - SPREAD_MATCH Accounting + Auditorías Verificadas)*
 
 **IP VPS:** `167.71.1.124`  ssh root@167.71.1.124       
 **Usuario:** `root`
@@ -141,13 +141,67 @@ echo "" > /root/arca-bot/logs/pm2_crash.log
 
 ---
 
-## 🛡️ 5. Protecciones Activas (Configuración)
+## 🔍 5. AUDITORÍAS Y VERIFICACIÓN DE PROFIT
+
+### Comando Rápido - Ver P&L Real (Flujo de Caja):
+```bash
+cd /root/arca-bot && node scripts/raw_cashflow_audit.js
+```
+*Muestra: USDT gastado, USDT recibido, fees, inventario, P&L total*
+
+### Auditoría Completa con SPREAD_MATCH:
+```bash
+cd /root/arca-bot && node scripts/full_audit.js BTC/USDT
+cd /root/arca-bot && node scripts/full_audit.js SOL/USDT
+```
+*Muestra: Win rate, calidad de matches, profit realizado vs estado*
+
+### Auditoría Cuántica (Trade por Trade):
+```bash
+cd /root/arca-bot && node scripts/quantum_audit.js BTC/USDT
+cd /root/arca-bot && node scripts/quantum_audit.js SOL/USDT
+```
+*Muestra: Cada trade individual con running totals y checksum verification*
+
+### Recalcular Profits (Después de correcciones):
+```bash
+cd /root/arca-bot && node scripts/backfill_profits.js BTC/USDT
+cd /root/arca-bot && node scripts/backfill_profits.js SOL/USDT
+pm2 restart all
+```
+*⚠️ Solo usar si se detectan discrepancias. Reconstruye inventario y profits.*
+
+### Verificar Balance Real de Binance:
+```bash
+cd /root/arca-bot && node -e "
+const ccxt = require('ccxt');
+require('dotenv').config();
+const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.API_KEY, secret: process.env.BINANCE_SECRET || process.env.API_SECRET});
+(async () => {
+    const bal = await b.fetchBalance();
+    const btcPrice = (await b.fetchTicker('BTC/USDT')).last;
+    const solPrice = (await b.fetchTicker('SOL/USDT')).last;
+    const usdtBal = bal.USDT?.total || 0;
+    const btcBal = bal.BTC?.total || 0;
+    const solBal = bal.SOL?.total || 0;
+    const total = usdtBal + (btcBal * btcPrice) + (solBal * solPrice);
+    console.log('USDT:', usdtBal.toFixed(2));
+    console.log('BTC:', btcBal.toFixed(6), '= \$' + (btcBal * btcPrice).toFixed(2));
+    console.log('SOL:', solBal.toFixed(6), '= \$' + (solBal * solPrice).toFixed(2));
+    console.log('TOTAL:', '\$' + total.toFixed(2));
+})();
+" 2>/dev/null
+```
+
+---
+
+## 🛡️ 6. Protecciones Activas (Configuración)
 *   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
 *   **Tope de Inventario (70%)**: Nunca llenará más del 70% de la bolsa con monedas.
 
 ---
 
-## 💰 6. Entendiendo el Reporte Diario
+## 💰 7. Entendiendo el Reporte Diario
 
 El reporte tiene datos de diferentes temporalidades. Aquí está la guía:
 
