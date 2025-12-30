@@ -157,7 +157,7 @@ const pairPreset = PAIR_PRESETS[TRADING_PAIR] || PAIR_PRESETS['BTC/USDT'];
 const CONFIG = {
     // Trading Pair (Dynamic)
     pair: TRADING_PAIR,
-    tradingFee: 0.001,       // 0.1% Standard Fee
+    tradingFee: parseFloat(process.env.TRADING_FEE) || 0.001, // 0.1% default, set to 0.00075 for BNB 25% discount
 
     // GRID SETTINGS (PAIR-SPECIFIC)
     gridCount: pairPreset.gridCount || 16, // Dynamic Grid Count (20 for BTC, 40 for SOL)
