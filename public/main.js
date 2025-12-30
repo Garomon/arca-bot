@@ -599,12 +599,12 @@ function renderTradeHistory() {
                 // Build tooltip with matched lots info
                 const lots = t.matchedLots || t.lotsUsed || [];
                 if (lots.length > 0) {
-                    // Backend saves: lotId, buyPrice, amountTaken OR price, amount (from backfill)
+                    // Backend saves: lotId, buyPrice/price, amountTaken/amount
                     matchTooltip = `${t.matchType}: ` + lots.map(l => {
                         const id = l.lotId || l.id || '?';
                         const price = l.buyPrice || l.price || 0;
                         const amt = l.amountTaken || l.amount || 0;
-                        return `#${id.toString().slice(-4)} @ $${parseFloat(price).toFixed(2)}`;
+                        return `#${id.toString().slice(-6)} @ $${parseFloat(price).toFixed(2)} × ${parseFloat(amt).toFixed(5)}`;
                     }).join(' + ');
                 } else {
                     matchTooltip = t.matchType || '';
