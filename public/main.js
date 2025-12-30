@@ -297,10 +297,16 @@ socket.on('financial_update', (data) => {
         const pairLabel = document.getElementById('trading-pair-label');
         if (pairLabel) pairLabel.innerText = data.pair;
 
-        // NEW: Update Symbol (₿ or ◎)
+        // NEW: Update Symbol (₿ for BTC, ◎ for SOL, Ð for DOGE)
         const symbolLabel = document.getElementById('pair-symbol');
         if (symbolLabel) {
-            symbolLabel.innerText = baseAsset === 'SOL' ? '◎' : '₿';
+            if (baseAsset === 'SOL') {
+                symbolLabel.innerText = '◎';
+            } else if (baseAsset === 'DOGE') {
+                symbolLabel.innerText = 'Ð';
+            } else {
+                symbolLabel.innerText = '₿';
+            }
         }
     }
 

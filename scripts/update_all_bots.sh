@@ -35,11 +35,12 @@ if [ -d "/root/arca-bot" ]; then
         echo "Use --update-env to update environment variables"
     fi
     
-    # Reload both bots from the same codebase
+    # Reload all bots from the same codebase
     echo ""
     echo ">> 🔄 Reloading PM2 processes..."
     pm2 reload bot-btc && echo ">> ✅ BTC Bot Reloaded"
     pm2 reload bot-sol && echo ">> ✅ SOL Bot Reloaded"
+    pm2 reload bot-doge && echo ">> ✅ DOGE Bot Reloaded"
     
 else
     echo ">> ❌ CRITICAL ERROR: Directory /root/arca-bot not found!"

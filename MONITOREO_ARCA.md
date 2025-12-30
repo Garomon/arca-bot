@@ -1,5 +1,5 @@
-# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC & SOL) v3.0
-*(Actualizado: 2025-12-29 - SPREAD_MATCH Accounting + Auditorías Verificadas)*
+# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v4.0
+*(Actualizado: 2025-12-30 - Soporte para 3 bots + SPREAD_MATCH Accounting)*
 
 **IP VPS:** `167.71.1.124`  ssh root@167.71.1.124       
 **Usuario:** `root`
@@ -18,12 +18,13 @@ echo -e "                    RESUMEN EJECUTIVO [HOY]"; \
 echo -e "═══════════════════════════════════════════════════════════════\n"; \
 BTC_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
 SOL_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
+DOGE_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_DOGEUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
 BTC_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
 SOL_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
-echo "BTC: Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') | $(echo $BTC_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $BTC_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $BTC_JSON | jq -r '.geo_defense_level // "0"'))"; \
-echo "     InRange: $(echo $BTC_JSON | jq -r '.in_range_percent // "?"')% | AvgCost: \$$(echo $BTC_JSON | jq -r '.inventory_avg_cost // "?"') | B&H: $(echo $BTC_JSON | jq -r '.buy_hold_return_pct // "?"')%"; \
-echo "SOL: Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') | $(echo $SOL_JSON | jq -r '.market_regime // "?"') | Mode: $(echo $SOL_JSON | jq -r '.geo_status // "NORMAL"') (Lvl: $(echo $SOL_JSON | jq -r '.geo_defense_level // "0"'))"; \
-echo "     InRange: $(echo $SOL_JSON | jq -r '.in_range_percent // "?"')% | AvgCost: \$$(echo $SOL_JSON | jq -r '.inventory_avg_cost // "?"') | B&H: $(echo $SOL_JSON | jq -r '.buy_hold_return_pct // "?"')%"; \
+DOGE_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
+echo "BTC:  Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') | $(echo $BTC_JSON | jq -r '.market_regime // "?"')"; \
+echo "SOL:  Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') | $(echo $SOL_JSON | jq -r '.market_regime // "?"')"; \
+echo "DOGE: Profit HOY \$${DOGE_PROFIT_TODAY:-0} | Lotes: $(echo $DOGE_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $DOGE_JSON | jq -r '.decision_score // "?"') | $(echo $DOGE_JSON | jq -r '.market_regime // "?"')"; \
 echo -e "\n═══════════════════════════════════════════════════════════════\n"; \
 echo -e "\n🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
 pm2 list; \
@@ -32,38 +33,35 @@ df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
 echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? [HOY] ---"; \
 ls -lh /root/arca-bot/logs/VANTAGE* 2>/dev/null | grep "$(date +%Y-%m-%d)"; \
 echo -e "\n🚨 --- 4. ERRORES DE HOY [HOY] ---"; \
-grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
+grep "ERROR" /root/arca-bot/logs/VANTAGE01_*_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
 echo -e "\n☠️ --- 4.b CRASH LOGS [HISTÓRICO - desde último borrado] ---"; \
 cat /root/arca-bot/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (¡Bien!)"; \
 echo -e "\n💰 --- 5. REPORTE DE AYER [AYER] ---"; \
 cat /root/arca-bot/reports/daily_report_*_BTCUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
 echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) [AYER] ---"; \
 cat /root/arca-bot/reports/daily_report_*_SOLUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
+echo -e "\n💰 --- 5.c REPORTE DE AYER (DOGE) [AYER] ---"; \
+cat /root/arca-bot/reports/daily_report_*_DOGEUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de DOGE de ayer."; \
 TODAY=$(date +%Y-%m-%d); \
-echo -e "\n📈 --- 5.c TRADES DE HOY [HOY] ---"; \
-echo "BTC:"; \
-echo "  Compras (Acumulación): $(grep -h "BUY FILLED" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
-echo "  Ventas (Profit):       $(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
-grep -h "FILLED" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 3; \
-echo "SOL:"; \
-echo "  Compras (Acumulación): $(grep -h "BUY FILLED" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
-echo "  Ventas (Profit):       $(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
-grep -h "FILLED" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 3; \
+echo -e "\n📈 --- 5.d TRADES DE HOY [HOY] ---"; \
+echo "BTC:  Buys=$(grep -h \"BUY FILLED\" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l) | Sells=$(grep -h \"PROFIT\" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l)"; \
+echo "SOL:  Buys=$(grep -h \"BUY FILLED\" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l) | Sells=$(grep -h \"PROFIT\" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l)"; \
+echo "DOGE: Buys=$(grep -h \"BUY FILLED\" /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l) | Sells=$(grep -h \"PROFIT\" /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l)"; \
 echo -e "\n🧬 --- 5.d TRAZABILIDAD DE LOTES (HOY) ---"; \
 grep -h "Matched Lots" /root/arca-bot/logs/VANTAGE01_*_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 5; \
-echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
-tail -n 300 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
-echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
-tail -n 300 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
-echo -e "\n🧠 --- 8. [AI BTC] ENTRENAMIENTO [TIEMPO REAL - Último Dato de HOY] ---"; \
-tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
-echo -e "\n🧠 --- 9. [AI SOL] ENTRENAMIENTO [TIEMPO REAL - Último Dato de HOY] ---"; \
-tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
+echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD (últimas 100 líneas) ---"; \
+tail -n 100 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
+echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD (últimas 100 líneas) ---"; \
+tail -n 100 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
+echo -e "\n🏥 --- 8. [DOGE] ACTIVIDAD (últimas 100 líneas) ---"; \
+tail -n 100 /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity.log; \
 echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL - Última modificación] ---"; \
 ls -lh /root/arca-bot/data/sessions/*_state.json /root/arca-bot/data/sessions/*_state.json; \
 echo -e "\n🔬 --- 11. AUDITORÍA SEMANAL [OPCIONAL - Correr manualmente] ---"; \
 echo "Para verificar profit real vs state file, ejecuta:"; \
-echo "  node scripts/full_audit.js BTC/USDT && node scripts/full_audit.js SOL/USDT"; \
+echo "  node scripts/full_audit.js BTC/USDT"; \
+echo "  node scripts/full_audit.js SOL/USDT"; \
+echo "  node scripts/full_audit.js DOGE/USDT"; \
 echo "Si hay ⚠️ discrepancias, agrega --fix al final."
 ```
 
@@ -84,7 +82,7 @@ echo "Si hay ⚠️ discrepancias, agrega --fix al final."
 ## 🚦 2. Semáforo de Salud (Solo usa datos `[TIEMPO REAL]`)
 
 ### 🟢 SANO (Todo bien)
-*   **PM2 Status:** Ambos bots dicen `online` en verde.
+*   **PM2 Status:** Los 3 bots dicen `online` en verde.
 *   **Actividad:** Los logs muestran timestamps recientes (últimos 5 minutos).
 *   **Logs:** Ves `[AI] ANALYZING`, `[INTEL] Regime: ...`, `[SYNC] STATE IS IN SYNC`.
 
@@ -159,6 +157,7 @@ cd /root/arca-bot && node scripts/raw_cashflow_audit.js
 ```bash
 cd /root/arca-bot && node scripts/full_audit.js BTC/USDT
 cd /root/arca-bot && node scripts/full_audit.js SOL/USDT
+cd /root/arca-bot && node scripts/full_audit.js DOGE/USDT
 ```
 *Muestra: Win rate, calidad de matches, profit realizado vs estado*
 
@@ -166,6 +165,7 @@ cd /root/arca-bot && node scripts/full_audit.js SOL/USDT
 ```bash
 cd /root/arca-bot && node scripts/quantum_audit.js BTC/USDT
 cd /root/arca-bot && node scripts/quantum_audit.js SOL/USDT
+cd /root/arca-bot && node scripts/quantum_audit.js DOGE/USDT
 ```
 *Muestra: Cada trade individual con running totals y checksum verification*
 
