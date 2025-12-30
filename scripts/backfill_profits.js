@@ -180,7 +180,8 @@ async function backfillProfits() {
                 // Calculate profit
                 const revenue = price * amount;
                 const sellFee = revenue * FEE_RATE;
-                const profit = revenue - totalCostBasis - totalEntryFees - sellFee;
+                const totalFees = totalEntryFees + sellFee; // FIX: Total fees for UI
+                const profit = revenue - totalCostBasis - totalFees;
                 const avgCostBasis = amount > 0 ? totalCostBasis / amount : 0;
                 const spreadPct = avgCostBasis > 0 ? ((price - avgCostBasis) / avgCostBasis * 100) : 0;
 
@@ -190,6 +191,7 @@ async function backfillProfits() {
                     profit,
                     costBasis: avgCostBasis,
                     spreadPct,
+                    fees: totalFees, // FIX: Include fees for UI display
                     matchType,
                     lotsUsed,
                     isNetProfit: true
@@ -227,6 +229,7 @@ async function backfillProfits() {
                     order.profit = result.profit;
                     order.costBasis = result.costBasis;
                     order.spreadPct = result.spreadPct;
+                    order.fees = result.fees; // FIX: Include fees for UI display
                     order.matchType = result.matchType;
                     order.isNetProfit = true;
                     order.accountingMethod = 'SPREAD_MATCH';
