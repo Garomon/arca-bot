@@ -3001,16 +3001,19 @@ async function handleOrderFill(order, fillPrice) {
                 entryFees += (take / lot.amount) * lot.fee;
             }
 
+            // MATH FIX: Prevent floating point dust
+            const remainingAfter = Number((lot.remaining - take).toFixed(8));
+
             // NEW: Track matched lot for transparency
             matchedLots.push({
                 lotId: lot.id,
                 buyPrice: lot.price,
                 amountTaken: take,
+                remainingAfter: remainingAfter,
                 timestamp: lot.timestamp
             });
 
-            // MATH FIX: Prevent floating point dust
-            lot.remaining = Number((lot.remaining - take).toFixed(8));
+            lot.remaining = remainingAfter;
             remainingToSell = Number((remainingToSell - take).toFixed(8));
             consumedLots++;
         }
@@ -3082,7 +3085,7 @@ async function handleOrderFill(order, fillPrice) {
 
         // TRACEABILITY LOG: Show exactly which lots were consumed
         if (matchedLots.length > 0) {
-            const lotDetails = matchedLots.map(l => `#${l.lotId} @ $${l.buyPrice.toFixed(2)} (x${l.amountTaken.toFixed(5)})`).join(' + ');
+            const lotDetails = matchedLots.map(l => `#${l.lotId} @ $${l.buyPrice.toFixed(2)} (x${l.amountTaken.toFixed(5)} | Rem: ${l.remainingAfter.toFixed(5)})`).join(' + ');
             log('TRACE', `Matched Lots: ${lotDetails}`, 'info');
         }
 
