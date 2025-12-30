@@ -49,6 +49,8 @@ echo "SOL:"; \
 echo "  Compras (Acumulación): $(grep -h "BUY FILLED" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
 echo "  Ventas (Profit):       $(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | wc -l)"; \
 grep -h "FILLED" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 3; \
+echo -e "\n🧬 --- 5.d TRAZABILIDAD DE LOTES (HOY) ---"; \
+grep -h "Matched Lots" /root/arca-bot/logs/VANTAGE01_*_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 5; \
 echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
 tail -n 300 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
 echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD AHORA MISMO [TIEMPO REAL] ---"; \
