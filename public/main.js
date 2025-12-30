@@ -13,6 +13,9 @@ let socketOptions = {};
 if (pathName.startsWith('/sol')) {
     socketOptions.path = '/sol/socket.io';
     console.log('>> [SYSTEM] Connecting to SOLANA Bot via /sol/socket.io');
+} else if (pathName.startsWith('/doge')) {
+    socketOptions.path = '/doge/socket.io';
+    console.log('>> [SYSTEM] Connecting to DOGE Bot via /doge/socket.io');
 } else if (pathName.startsWith('/eth')) {
     socketOptions.path = '/eth/socket.io';
     console.log('>> [SYSTEM] Connecting to ETH Bot via /eth/socket.io');
