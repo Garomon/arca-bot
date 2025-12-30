@@ -60,7 +60,11 @@ tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-
 echo -e "\n🧠 --- 9. [AI SOL] ENTRENAMIENTO [TIEMPO REAL - Último Dato de HOY] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
 echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL - Última modificación] ---"; \
-ls -lh /root/arca-bot/data/sessions/*_state.json /root/arca-bot/data/sessions/*_state.json
+ls -lh /root/arca-bot/data/sessions/*_state.json /root/arca-bot/data/sessions/*_state.json; \
+echo -e "\n🔬 --- 11. AUDITORÍA SEMANAL [OPCIONAL - Correr manualmente] ---"; \
+echo "Para verificar profit real vs state file, ejecuta:"; \
+echo "  node scripts/full_audit.js BTC/USDT && node scripts/full_audit.js SOL/USDT"; \
+echo "Si hay ⚠️ discrepancias, agrega --fix al final."
 ```
 
 ---
