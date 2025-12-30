@@ -163,6 +163,12 @@ cd /root/arca-bot && node scripts/quantum_audit.js SOL/USDT
 ```
 *Muestra: Cada trade individual con running totals y checksum verification*
 
+### Trazabilidad Forense (Ver qué lotes se vendieron):
+```bash
+grep "Matched Lots" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log | tail -n 20
+```
+*Muestra exactamente qué ID de compra se usó para cada venta (ej: #1234 @ $90k).*
+
 ### Recalcular Profits (Después de correcciones):
 ```bash
 cd /root/arca-bot && node scripts/backfill_profits.js BTC/USDT

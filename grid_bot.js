@@ -3080,6 +3080,12 @@ async function handleOrderFill(order, fillPrice) {
         sellSpreadPct = spreadPct;
         sellMatchedLots = matchedLots;
 
+        // TRACEABILITY LOG: Show exactly which lots were consumed
+        if (matchedLots.length > 0) {
+            const lotDetails = matchedLots.map(l => `#${l.lotId} @ $${l.buyPrice.toFixed(2)} (x${l.amountTaken.toFixed(5)})`).join(' + ');
+            log('TRACE', `Matched Lots: ${lotDetails}`, 'info');
+        }
+
         log('PROFIT', `${ACCOUNTING_METHOD} | Cost: $${avgCost.toFixed(2)} → Sell: $${fillPrice.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Fees: $${totalFees.toFixed(4)} | Net: $${profit.toFixed(4)}`, profit > 0 ? 'success' : 'warning');
     }
 
