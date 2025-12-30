@@ -2909,6 +2909,7 @@ async function handleOrderFill(order, fillPrice) {
     let sellAvgCost = null;
     let sellSpreadPct = null;
     let sellMatchedLots = [];
+    let sellTotalFees = 0; // FIX: Declare at function scope for orderRecord access
 
     if (order.side === 'buy') {
         // INVENTORY TRACKING: Add new lot
@@ -3082,6 +3083,7 @@ async function handleOrderFill(order, fillPrice) {
         sellAvgCost = avgCost;
         sellSpreadPct = spreadPct;
         sellMatchedLots = matchedLots;
+        sellTotalFees = totalFees; // FIX: Store in function-scoped variable
 
         // TRACEABILITY LOG: Show exactly which lots were consumed
         if (matchedLots.length > 0) {
@@ -3108,7 +3110,7 @@ async function handleOrderFill(order, fillPrice) {
         orderRecord.costBasis = sellAvgCost;
         orderRecord.spreadPct = sellSpreadPct;
         orderRecord.matchedLots = sellMatchedLots;
-        orderRecord.fees = totalFees; // NEW: Store fees for UI transparency
+        orderRecord.fees = sellTotalFees; // FIX: Use function-scoped variable
         orderRecord.matchMethod = ACCOUNTING_METHOD; // NEW: Store method used
     }
     state.filledOrders.push(orderRecord);
