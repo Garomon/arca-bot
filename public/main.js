@@ -133,32 +133,55 @@ const ui = {
     logFeed: document.getElementById('log-feed')
 };
 
+// ===== DYNAMIC PRICE FORMATTING =====
+// Returns appropriate decimal places based on price magnitude
+function formatPrice(price) {
+    if (price === null || price === undefined) return '$0.00';
+    const p = parseFloat(price);
+    if (p < 1) return `$${p.toFixed(4)}`;      // DOGE: $0.1234
+    if (p < 10) return `$${p.toFixed(3)}`;     // Low-price alts: $1.234
+    if (p < 100) return `$${p.toFixed(2)}`;    // SOL: $124.52
+    if (p < 1000) return `$${p.toFixed(1)}`;   // ETH: $2345.6
+    return `$${p.toLocaleString('en-US', { maximumFractionDigits: 0 })}`; // BTC: $88,459
+}
+
+// Same but without $ prefix for order book
+function formatPriceShort(price) {
+    if (price === null || price === undefined) return '0';
+    const p = parseFloat(price);
+    if (p < 1) return p.toFixed(4);
+    if (p < 10) return p.toFixed(3);
+    if (p < 100) return p.toFixed(2);
+    if (p < 1000) return p.toFixed(1);
+    return p.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
 // ===== ANIMATED PRICE VISUALIZATION =====
 function updatePriceDisplay(data) {
     // Calculate MXN price
     const priceMXN = (data.price || 0) * window.usdMxnRate;
 
-    // Update main price display
+    // Update main price display (uses dynamic decimals)
     if (ui.priceDisplay && data.price) {
-        ui.priceDisplay.innerHTML = `$${data.price.toFixed(2)} <small style="color:#888;font-size:0.5em;display:block">≈ $${priceMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })} MXN</small>`;
+        ui.priceDisplay.innerHTML = `${formatPrice(data.price)} <small style="color:#888;font-size:0.5em;display:block">≈ $${priceMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })} MXN</small>`;
     }
     if (ui.livePrice && data.price) {
-        ui.livePrice.innerHTML = `$${data.price.toFixed(0)} <small style="color:#888;font-size:0.6em">MXN: $${priceMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</small>`;
+        ui.livePrice.innerHTML = `${formatPrice(data.price)} <small style="color:#888;font-size:0.6em">MXN: $${priceMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</small>`;
     }
 
-    // Update order book bars
+    // Update order book bars (uses dynamic decimals)
     if (data.orders && data.orders.length > 0) {
         const buyOrders = data.orders.filter(o => o.side === 'buy').slice(0, 4);
         const sellOrders = data.orders.filter(o => o.side === 'sell').slice(0, 4);
 
         buyOrders.forEach((order, i) => {
             const el = document.getElementById(`buy-${i + 1}`);
-            if (el) el.innerText = `$${order.price.toFixed(0)}`;
+            if (el) el.innerText = `$${formatPriceShort(order.price)}`;
         });
 
         sellOrders.forEach((order, i) => {
             const el = document.getElementById(`sell-${i + 1}`);
-            if (el) el.innerText = `$${order.price.toFixed(0)}`;
+            if (el) el.innerText = `$${formatPriceShort(order.price)}`;
         });
     }
 }
@@ -407,7 +430,7 @@ socket.on('financial_update', (data) => {
 socket.on('analysis_update', (data) => {
     // Tab 1: Intel Snapshot
     if (ui.rsiValue) ui.rsiValue.innerText = data.rsi.toFixed(1);
-    if (ui.emaValue) ui.emaValue.innerText = `$${data.ema.toFixed(0)}`;
+    if (ui.emaValue) ui.emaValue.innerText = formatPrice(data.ema);
 
     if (ui.trendValue) {
         ui.trendValue.innerText = data.trend;
