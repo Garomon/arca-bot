@@ -623,23 +623,27 @@ function renderTradeHistory() {
             // Determine match quality indicator with lot details
             let matchIndicator = '-';
             let matchTooltip = '';
-            if (!isBuy && t.matchType) {
-                if (t.matchType === 'EXACT') matchIndicator = '✅';
-                else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';
-                else if (t.matchType === 'FALLBACK') matchIndicator = '❌';
+
+            // Fix: If profit > 0, it IS a match, defaulting to EXACT if matchType missing
+            if (!isBuy && (t.matchType || (t.profit > 0))) {
+                const type = t.matchType || 'EXACT'; // Default to EXACT if we have profit but no type
+
+                if (type === 'EXACT') matchIndicator = '✅';
+                else if (type === 'CLOSE') matchIndicator = '⚠️';
+                else if (type === 'FALLBACK') matchIndicator = '❌';
 
                 // Build tooltip with matched lots info
                 const lots = t.matchedLots || t.lotsUsed || [];
                 if (lots.length > 0) {
                     // Backend saves: lotId, buyPrice/price, amountTaken/amount
-                    matchTooltip = `${t.matchType}: ` + lots.map(l => {
+                    matchTooltip = `${type}: ` + lots.map(l => {
                         const id = l.lotId || l.id || '?';
                         const price = l.buyPrice || l.price || 0;
                         const amt = l.amountTaken || l.amount || 0;
-                        return `#${id.toString().slice(-6)} @ $${parseFloat(price).toFixed(2)} × ${parseFloat(amt).toFixed(5)}`;
+                        return `#${id.toString().slice(-6)} @ ${formatPrice(price)} × ${parseFloat(amt).toFixed(5)}`;
                     }).join(' + ');
                 } else {
-                    matchTooltip = t.matchType || '';
+                    matchTooltip = type;
                 }
             }
 
@@ -648,8 +652,8 @@ function renderTradeHistory() {
                 <td class="text-secondary" style="vertical-align: middle;">${dateStr}</td>
                 <td class="text-muted" title="${t.id}" style="vertical-align: middle; cursor: help;">${shortId}</td>
                 <td class="text-center" style="vertical-align: middle;">${sideBadge}</td>
-                <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${parseFloat(t.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? '$' + parseFloat(t.costBasis).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-')}</td>
+                <td class="text-end text-light fw-bold" style="vertical-align: middle;">${formatPrice(t.price)}</td>
+                <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? formatPrice(t.costBasis) : '-')}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : (t.spreadPct > 0 ? 'text-success' : 'text-danger')}" style="vertical-align: middle;">${isBuy ? '-' : (t.spreadPct !== undefined ? t.spreadPct.toFixed(2) + '%' : '-')}</td>
                 <td class="text-end text-warning" style="vertical-align: middle; font-size: 0.7rem;">${isBuy ? '-' : (t.fees ? '$' + parseFloat(t.fees).toFixed(4) : '-')}</td>
                 <td class="text-center" style="vertical-align: middle; cursor: help;" title="${matchTooltip}">${matchIndicator}</td>
