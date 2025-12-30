@@ -3596,6 +3596,27 @@ server.listen(BOT_PORT, async () => {
         const todayWins = todaySells.filter(o => o.profit > 0).length;
         const todayWinRate = todaySells.length > 0 ? (todayWins / todaySells.length * 100).toFixed(1) : 'N/A';
 
+        // NEW: Match Quality Metrics
+        const exactMatches = todaySells.filter(o => o.matchType === 'EXACT' || o.matchMethod === 'SPREAD_MATCH').length;
+        const closeMatches = todaySells.filter(o => o.matchType === 'CLOSE').length;
+        const fallbackMatches = todaySells.filter(o => o.matchType === 'FALLBACK').length;
+        const matchQualityPct = todaySells.length > 0
+            ? `${((exactMatches / todaySells.length) * 100).toFixed(0)}% EXACT | ${((closeMatches / todaySells.length) * 100).toFixed(0)}% CLOSE | ${((fallbackMatches / todaySells.length) * 100).toFixed(0)}% FALLBACK`
+            : 'N/A';
+
+        // NEW: Fees & Spread Metrics
+        const todayFees = todaySells.reduce((sum, o) => sum + (o.fees || 0), 0);
+        const avgSpread = todaySells.length > 0
+            ? (todaySells.reduce((sum, o) => sum + (o.spreadPct || 0), 0) / todaySells.length).toFixed(2)
+            : 'N/A';
+
+        // NEW: Best & Worst Trade
+        const sortedByProfit = [...todaySells].sort((a, b) => (b.profit || 0) - (a.profit || 0));
+        const bestTrade = sortedByProfit[0];
+        const worstTrade = sortedByProfit[sortedByProfit.length - 1];
+        const bestTradeStr = bestTrade ? `$${(bestTrade.profit || 0).toFixed(4)} @ $${(bestTrade.fillPrice || bestTrade.price || 0).toFixed(2)}` : 'N/A';
+        const worstTradeStr = worstTrade ? `$${(worstTrade.profit || 0).toFixed(4)} @ $${(worstTrade.fillPrice || worstTrade.price || 0).toFixed(2)}` : 'N/A';
+
         // Overall metrics
         const lifetimeProfit = (state.totalProfit || 0);
         const totalProfit = lifetimeProfit; // P0 FIX: Report Lifetime Profit
@@ -3630,7 +3651,16 @@ server.listen(BOT_PORT, async () => {
   Trades Executed:      ${todayTrades.length}
   Sells (Profit Events): ${todaySells.length}
   Today's Profit:       $${todayProfit.toFixed(4)}
+  Today's Fees:         $${todayFees.toFixed(4)}
   Win Rate:             ${todayWinRate}%
+
+╠══════════════════════════════════════════════════════════════╣
+║  TRADE QUALITY                                               ║
+╠══════════════════════════════════════════════════════════════╣
+  Match Quality:        ${matchQualityPct}
+  Avg Spread:           ${avgSpread}%
+  Best Trade:           ${bestTradeStr}
+  Worst Trade:          ${worstTradeStr}
 
 ╠══════════════════════════════════════════════════════════════╣
 ║  CUMULATIVE STATS                                            ║
