@@ -84,6 +84,21 @@ async function fullAudit() {
         console.log('║  [PHASE 2] SPREAD_MATCH Profit Calculation                       ║');
         console.log('╠══════════════════════════════════════════════════════════════════╣');
 
+        // Load state file to get actual spacing values used by bot
+        const sessionsDir = path.join(__dirname, '..', 'data', 'sessions');
+        const stateFileName = `VANTAGE01_${PAIR_ID}_state.json`;
+        const stateFilePath = path.join(sessionsDir, stateFileName);
+        let stateFilledOrders = [];
+        if (fs.existsSync(stateFilePath)) {
+            try {
+                const stateData = JSON.parse(fs.readFileSync(stateFilePath, 'utf8'));
+                stateFilledOrders = stateData.filledOrders || [];
+                console.log(`║  >> Loaded ${stateFilledOrders.length} orders from state for spacing reference ║`);
+            } catch (e) {
+                console.log(`║  >> Warning: Could not load state file, using default spacing  ║`);
+            }
+        }
+
         let inventory = []; // Array of lots: {price, amount, remaining, fee, timestamp}
         let totalRealizedProfit = 0;
         let totalFeesPaid = 0;
@@ -145,10 +160,19 @@ async function fullAudit() {
 
             } else if (trade.side === 'sell') {
                 // === SPREAD_MATCH: Find the buy lot that corresponds to this sell ===
+                // Try to get actual spacing from state file if available
+                let spacing = DEFAULT_SPACING;
+                const stateOrder = stateFilledOrders.find(o =>
+                    String(o.id) === orderId || String(o.clientOrderId)?.includes(orderId.slice(-6))
+                );
+                if (stateOrder && stateOrder.spacing) {
+                    spacing = stateOrder.spacing;
+                }
+
                 // Expected buy price = sellPrice / (1 + spacing)
-                const spacing = DEFAULT_SPACING;
                 const expectedBuyPrice = price / (1 + spacing);
-                const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance
+                // Use 2% tolerance to handle dynamic spacing variations
+                const tolerance = expectedBuyPrice * 0.02; // INCREASED: 2% tolerance for dynamic spacing
 
                 let remainingToSell = amount;
                 let totalCostBasis = 0;
@@ -297,9 +321,7 @@ async function fullAudit() {
         console.log('╚══════════════════════════════════════════════════════════════════╝');
 
         // ==================== PHASE 4: COMPARE WITH STATE FILE ====================
-        const sessionsDir = path.join(__dirname, '..', 'data', 'sessions');
-        const stateFileName = `VANTAGE01_${PAIR_ID}_state.json`;
-        const stateFilePath = path.join(sessionsDir, stateFileName);
+        // (reusing sessionsDir, stateFileName, stateFilePath from Phase 2)
 
         let needsFix = false;
         let state = null;
