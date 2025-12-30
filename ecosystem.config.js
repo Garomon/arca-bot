@@ -8,6 +8,7 @@ module.exports = {
         TRADING_PAIR: "BTC/USDT",
         BOT_PORT: 3000,
         CAPITAL_ALLOCATION: 0.40,
+        TRADING_FEE: 0.00075,  // BNB 25% discount (0.075%)
         NODE_ENV: "production"
       },
       max_memory_restart: "800M"
@@ -20,6 +21,7 @@ module.exports = {
         TRADING_PAIR: "SOL/USDT",
         BOT_PORT: 3001,
         CAPITAL_ALLOCATION: 0.40,
+        TRADING_FEE: 0.00075,  // BNB 25% discount (0.075%)
         NODE_ENV: "production"
       },
       max_memory_restart: "800M"
@@ -32,6 +34,7 @@ module.exports = {
         TRADING_PAIR: "DOGE/USDT",
         BOT_PORT: 3002,
         CAPITAL_ALLOCATION: 0.20,
+        TRADING_FEE: 0.00075,  // BNB 25% discount (0.075%)
         NODE_ENV: "production"
       },
       max_memory_restart: "800M"
