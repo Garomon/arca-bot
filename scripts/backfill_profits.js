@@ -163,7 +163,7 @@ async function backfillProfits() {
                         totalEntryFees += (take / lot.amount) * lot.fee;
                     }
 
-                    lotsUsed.push({ price: lot.price, amount: take });
+                    lotsUsed.push({ lotId: lot.orderId, price: lot.price, amount: take });
                     lot.remaining = Number((lot.remaining - take).toFixed(8));
                     remainingToSell = Number((remainingToSell - take).toFixed(8));
                 }
@@ -231,6 +231,7 @@ async function backfillProfits() {
                     order.spreadPct = result.spreadPct;
                     order.fees = result.fees; // FIX: Include fees for UI display
                     order.matchType = result.matchType;
+                    order.matchedLots = result.lotsUsed; // FIX: Include lot IDs for traceability
                     order.isNetProfit = true;
                     order.accountingMethod = 'SPREAD_MATCH';
                     updatedCount++;
