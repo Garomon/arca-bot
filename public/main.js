@@ -533,7 +533,7 @@ function renderTradeHistory() {
     tbody.innerHTML = ''; // Clear
 
     if (!tradeHistory || tradeHistory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding: 10px;">No transaction history found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted" style="padding: 10px;">No transaction history found</td></tr>';
         return;
     }
 
@@ -588,6 +588,23 @@ function renderTradeHistory() {
 
             const totalValue = (parseFloat(t.price || 0) * parseFloat(t.amount || 0));
 
+            // Determine match quality indicator with lot details
+            let matchIndicator = '-';
+            let matchTooltip = '';
+            if (!isBuy && t.matchType) {
+                if (t.matchType === 'EXACT') matchIndicator = '✅';
+                else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';
+                else if (t.matchType === 'FALLBACK') matchIndicator = '❌';
+
+                // Build tooltip with matched lots info
+                const lots = t.matchedLots || t.lotsUsed || [];
+                if (lots.length > 0) {
+                    matchTooltip = `${t.matchType}: ` + lots.map(l => `$${parseFloat(l.price).toFixed(2)} × ${parseFloat(l.amount).toFixed(5)}`).join(' + ');
+                } else {
+                    matchTooltip = t.matchType || '';
+                }
+            }
+
             row.innerHTML = `
                 <td class="ps-3 text-muted" style="vertical-align: middle;">${index + 1}</td>
                 <td class="text-secondary" style="vertical-align: middle;">${dateStr}</td>
@@ -597,6 +614,7 @@ function renderTradeHistory() {
                 <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? '$' + parseFloat(t.costBasis).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-')}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : (t.spreadPct > 0 ? 'text-success' : 'text-danger')}" style="vertical-align: middle;">${isBuy ? '-' : (t.spreadPct !== undefined ? t.spreadPct.toFixed(2) + '%' : '-')}</td>
                 <td class="text-end text-warning" style="vertical-align: middle; font-size: 0.7rem;">${isBuy ? '-' : (t.fees ? '$' + parseFloat(t.fees).toFixed(4) : '-')}</td>
+                <td class="text-center" style="vertical-align: middle; cursor: help;" title="${matchTooltip}">${matchIndicator}</td>
                 <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
                 <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(isBuy ? 0 : (t.profit || 0)).toFixed(4)}</td>
             `;
