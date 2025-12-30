@@ -121,6 +121,17 @@ const PAIR_PRESETS = {
         bandwidthHigh: 0.08,
         bandwidthLow: 0.02,
         toleranceMultiplier: 15
+    },
+    'DOGE/USDT': {
+        minOrderSize: 10,        // ~$3.50 minimum order (DOGE trades in whole coins)
+        gridSpacing: 0.010,      // 1.0% base (meme coin = wider spreads needed)
+        gridCount: 50,           // +/- 25% active range (DOGE can swing hard)
+        spacingNormal: 0.012,    // 1.2% normal
+        spacingHigh: 0.020,      // 2.0% high volatility (DOGE pumps/dumps)
+        spacingLow: 0.008,       // 0.8% low volatility
+        bandwidthHigh: 0.10,     // 10% bollinger bandwidth = high vol
+        bandwidthLow: 0.03,      // 3% = low vol
+        toleranceMultiplier: 20  // More tolerance for DOGE price swings
     }
     // ETH/BTC Removed temporarily (requires non-USDT safety guard bypass)
     // 'ETH/BTC': { ... }
