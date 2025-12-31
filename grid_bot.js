@@ -402,7 +402,10 @@ let state = {
         ticksOutOfRange: 0,    // Cycles where price was outside grid
         buyHoldStartPrice: 0,  // Price at bot start for Buy & Hold comparison
         metricsStartTime: 0    // When we started tracking
-    }
+    },
+    // PHASE 5: Automatic Capital Change Detection
+    lastKnownEquity: null,     // Last equity for detecting deposits/withdrawals
+    lastEquityCheck: null      // Timestamp of last check
 };
 
 // Cache for external data (avoid rate limits) - HOISTED TO TOP
@@ -2826,6 +2829,114 @@ function calculateInventoryReport() {
     return { totalAmount, avgCost, currentValue, unrealizedPnL };
 }
 
+// PHASE 5: AUTOMATIC CAPITAL CHANGE DETECTION
+// Detects deposits/withdrawals by comparing current equity to last known value
+// Threshold: 3% change without corresponding trades = deposit/withdrawal
+async function detectCapitalChange() {
+    try {
+        const currentEquity = await getGlobalEquity() * CAPITAL_ALLOCATION;
+        const now = Date.now();
+
+        // Initialize on first run
+        if (!state.lastKnownEquity || !state.lastEquityCheck) {
+            state.lastKnownEquity = currentEquity;
+            state.lastEquityCheck = now;
+            if (!state.capitalHistory) state.capitalHistory = [];
+            saveState();
+            return null;
+        }
+
+        // Calculate change since last check
+        const changePct = Math.abs((currentEquity - state.lastKnownEquity) / state.lastKnownEquity);
+        const changeAmount = currentEquity - state.lastKnownEquity;
+
+        // Only trigger if change > 3% (significant deposit/withdrawal)
+        // and enough time has passed (avoid false positives from volatility)
+        const timeSinceLastCheck = now - state.lastEquityCheck;
+        const minCheckInterval = 5 * 60 * 1000; // 5 minutes minimum
+
+        if (changePct > 0.03 && timeSinceLastCheck > minCheckInterval) {
+            // Calculate expected profit from trades since last check
+            const recentTrades = (state.filledOrders || []).filter(
+                o => o.timestamp > state.lastEquityCheck && o.side === 'sell'
+            );
+            const recentProfit = recentTrades.reduce((sum, o) => sum + (o.profit || 0), 0);
+
+            // If change is much larger than profit from trades → deposit/withdrawal
+            const unexplainedChange = changeAmount - recentProfit;
+
+            if (Math.abs(unexplainedChange) > currentEquity * 0.02) {
+                const eventType = unexplainedChange > 0 ? 'DEPOSIT' : 'WITHDRAWAL';
+                const eventAmount = Math.abs(unexplainedChange);
+
+                // Log the event
+                console.log(`>> [CAPITAL] ${eventType} DETECTED: $${eventAmount.toFixed(2)} USDT`);
+                log('CAPITAL', `📊 ${eventType} detected: $${eventAmount.toFixed(2)} USDT`, 'info');
+
+                // Add to capital history
+                if (!state.capitalHistory) state.capitalHistory = [];
+                state.capitalHistory.push({
+                    type: eventType,
+                    amount: eventAmount,
+                    timestamp: now,
+                    equityBefore: state.lastKnownEquity,
+                    equityAfter: currentEquity
+                });
+
+                // ADJUST INITIAL CAPITAL for accurate APY
+                // Add deposits, subtract withdrawals from initial capital
+                if (eventType === 'DEPOSIT') {
+                    state.initialCapital = (state.initialCapital || 0) + eventAmount;
+                    console.log(`>> [CAPITAL] Initial capital adjusted to: $${state.initialCapital.toFixed(2)}`);
+                } else {
+                    // For withdrawals: don't reduce below current equity
+                    const newInitial = Math.max(currentEquity, (state.initialCapital || 0) - eventAmount);
+                    state.initialCapital = newInitial;
+                    console.log(`>> [CAPITAL] Initial capital adjusted to: $${state.initialCapital.toFixed(2)}`);
+                }
+
+                saveState();
+            }
+        }
+
+        // Always update last known values
+        state.lastKnownEquity = currentEquity;
+        state.lastEquityCheck = now;
+
+        return { currentEquity, changePct, changeAmount };
+
+    } catch (e) {
+        console.error('>> [ERROR] detectCapitalChange:', e.message);
+        return null;
+    }
+}
+
+// PHASE 5: Time-Weighted APY Calculation
+// Considers deposits/withdrawals for accurate APY
+function calculateAccurateAPY() {
+    const profit = state.totalProfit || 0;
+    const initialCapital = state.initialCapital || 100;
+    const firstTrade = state.firstTradeTime || state.startTime;
+    const daysActive = Math.max(1, (Date.now() - firstTrade) / (1000 * 60 * 60 * 24));
+
+    // Simple ROI
+    const roi = (profit / initialCapital) * 100;
+
+    // Annualized APY
+    const dailyReturn = roi / daysActive;
+    const projectedAnnual = dailyReturn * 365;
+
+    return {
+        roi: roi.toFixed(2),
+        daysActive: daysActive.toFixed(1),
+        dailyAvg: dailyReturn.toFixed(4),
+        projectedAPY: projectedAnnual.toFixed(2),
+        initialCapital: initialCapital.toFixed(2),
+        totalDeposits: (state.capitalHistory || []).filter(e => e.type === 'DEPOSIT').length,
+        totalWithdrawals: (state.capitalHistory || []).filter(e => e.type === 'WITHDRAWAL').length
+    };
+}
+
 // PHASE 1: Fee-Aware Profit Calculation
 function calculateNetProfit(buyPrice, sellPrice, amount) {
     const grossProfit = (sellPrice - buyPrice) * amount;
@@ -3598,6 +3709,12 @@ server.listen(BOT_PORT, async () => {
             await initializeGrid(true);
         }
     }, 60000); // Check every minute
+
+    // PHASE 5: CAPITAL CHANGE DETECTION (Every 5 minutes)
+    // Detects deposits/withdrawals and adjusts APY calculation automatically
+    setInterval(async () => {
+        await detectCapitalChange();
+    }, 5 * 60 * 1000); // Check every 5 minutes
 
     // === DAILY PERFORMANCE REPORT ===
     const REPORTS_DIR = path.join(__dirname, 'reports');
