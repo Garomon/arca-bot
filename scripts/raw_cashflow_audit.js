@@ -125,6 +125,7 @@ async function rawCashFlowAudit(pair) {
     try {
         await rawCashFlowAudit('BTC/USDT');
         await rawCashFlowAudit('SOL/USDT');
+        await rawCashFlowAudit('DOGE/USDT');
     } catch (e) {
         console.error('Error:', e.message);
     }

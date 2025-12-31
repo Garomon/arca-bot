@@ -19,7 +19,8 @@ const BASE_ASSET = PAIR.split('/')[0];
 // Grid spacing by pair
 const PAIR_PRESETS = {
     'BTC/USDT': { spacing: 0.006 },
-    'SOL/USDT': { spacing: 0.007 }
+    'SOL/USDT': { spacing: 0.007 },
+    'DOGE/USDT': { spacing: 0.010 }
 };
 const DEFAULT_SPACING = PAIR_PRESETS[PAIR]?.spacing || 0.007;
 const FEE_RATE = 0.001;

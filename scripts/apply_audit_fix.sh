@@ -1,6 +1,6 @@
 #!/bin/bash
 # scripts/apply_audit_fix.sh
-# AUTOMATED REPAIR FOR BOTH BOTS (BTC & SOL)
+# AUTOMATED REPAIR FOR ALL BOTS (BTC, SOL & DOGE)
 
 echo "=========================================="
 echo "🛡️  STARTING UNIVERSAL PROFIT REPAIR  🛡️"
@@ -12,44 +12,32 @@ pm2 stop all
 echo ">> [WAIT] Allowing 5s for graceful shutdown..."
 sleep 5
 
-# 2. REPAIR BTC BOT (/root/arca-bot)
+# 2. REPAIR ALL BOTS (all run from /root/arca-bot)
 if [ -d "/root/arca-bot" ]; then
     echo ""
-    echo ">> [2/4] Repairing BTC BOT (/root/arca-bot)..."
+    echo ">> [2/4] Updating codebase..."
     cd /root/arca-bot
     git stash
     git pull
-    echo ">> Running Audit for BTC/USDT..."
-    # Ensure dependencies are installed just in case
-    # npm install 
-    node scripts/recalculate_profit.js BTC/USDT
-else
-    echo ">> ⚠️ /root/arca-bot not found. Skipping BTC repair."
-fi
-
-# 3. REPAIR SOL BOT (/root/bot-sol)
-if [ -d "/root/bot-sol" ]; then
+    
     echo ""
-    echo ">> [3/4] Repairing SOL BOT (/root/bot-sol)..."
-    cd /root/bot-sol
-    git stash
-    git pull
-    echo ">> Running Audit for SOL/USDT..."
+    echo ">> [3/4] Running profit recalculation for all pairs..."
+    echo ">> Running Audit for BTC/USDT..."
+    node scripts/recalculate_profit.js BTC/USDT
+    
     echo ">> Running Audit for SOL/USDT..."
     node scripts/recalculate_profit.js SOL/USDT
     
-    # VERIFICATION ON DISK
-    echo ">> [VERIFY] Checking disk content for SOL:"
-    grep -o '"totalProfit":[0-9.]*' data/sessions/VANTAGE01_SOLUSDT_state.json || echo ">> [ERROR] Could not read profit from file!"
-    
+    echo ">> Running Audit for DOGE/USDT..."
+    node scripts/recalculate_profit.js DOGE/USDT
 else
-    echo ">> ⚠️ /root/bot-sol not found. Skipping SOL repair."
+    echo ">> ⚠️ /root/arca-bot not found. Cannot proceed."
+    exit 1
 fi
 
 # 4. RESTART
 echo ""
 echo ">> [4/4] Restarting Swarm..."
-# Force flushing of any pending PM2 operations
 pm2 flush
 pm2 restart all
 
