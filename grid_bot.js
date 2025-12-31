@@ -3584,11 +3584,20 @@ async function checkGridHealth(analysis, regime, multiTF) {
 }
 
 function emitGridState() {
+    // Calculate APY metrics for dashboard
+    const apyData = calculateAccurateAPY();
+
     io.emit('grid_state', {
         entryPrice: state.entryPrice,
         currentPrice: state.currentPrice,
         orders: state.activeOrders,
-        profit: state.totalProfit
+        profit: state.totalProfit,
+        // NEW: APY Metrics for Dashboard
+        roi: parseFloat(apyData.roi),
+        projectedAPY: parseFloat(apyData.projectedAPY),
+        daysActive: parseFloat(apyData.daysActive),
+        initialCapital: parseFloat(apyData.initialCapital),
+        capitalEvents: (state.capitalHistory || []).length
     });
 }
 

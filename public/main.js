@@ -775,6 +775,31 @@ socket.on('grid_state', (data) => {
         }
     }
 
+    // NEW: Update APY Display
+    if (data.roi !== undefined) {
+        const roiEl = document.getElementById('roi-value');
+        const apyEl = document.getElementById('apy-value');
+        const daysEl = document.getElementById('days-active');
+
+        if (roiEl) {
+            roiEl.innerText = `${data.roi.toFixed(2)}%`;
+            roiEl.style.color = data.roi > 0 ? '#00ff9d' : '#ff3b3b';
+        }
+        if (apyEl) {
+            apyEl.innerText = `~${data.projectedAPY.toFixed(0)}%`;
+            apyEl.style.color = data.projectedAPY > 50 ? '#00ff9d' : '#fff';
+        }
+        if (daysEl) {
+            daysEl.innerText = `${data.daysActive.toFixed(1)}d`;
+        }
+
+        // Update APY in the Profit section header
+        const profitHeader = document.getElementById('profit-header');
+        if (profitHeader && data.roi > 0) {
+            profitHeader.innerHTML = `Profit <small style="color:#888">(ROI: ${data.roi.toFixed(2)}% | APY: ~${data.projectedAPY.toFixed(0)}%)</small>`;
+        }
+    }
+
     // Tab 5: Populate Filled Orders Table
     const filledOrdersTbody = document.getElementById('filled-orders-tbody');
     if (filledOrdersTbody && data.filledOrders) {
