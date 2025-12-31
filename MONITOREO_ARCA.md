@@ -55,6 +55,12 @@ echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD (últimas 100 líneas) ---"; \
 tail -n 100 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
 echo -e "\n🏥 --- 8. [DOGE] ACTIVIDAD (últimas 100 líneas) ---"; \
 tail -n 100 /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity.log; \
+echo -e "\n🧠 --- 9.a [AI BTC] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
+tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
+echo -e "\n🧠 --- 9.b [AI SOL] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
+tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
+echo -e "\n🧠 --- 9.c [AI DOGE] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
+tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_DOGEUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
 echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL - Última modificación] ---"; \
 ls -lh /root/arca-bot/data/sessions/*_state.json /root/arca-bot/data/sessions/*_state.json; \
 echo -e "\n🔬 --- 11. AUDITORÍA SEMANAL [OPCIONAL - Correr manualmente] ---"; \
