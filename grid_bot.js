@@ -3032,6 +3032,7 @@ async function handleOrderFill(order, fillPrice) {
     let sellSpreadPct = null;
     let sellMatchedLots = [];
     let sellTotalFees = 0; // FIX: Declare at function scope for orderRecord access
+    let sellMatchType = null; // FIX: Store match quality (EXACT/CLOSE/FALLBACK) for UI
 
     if (order.side === 'buy') {
         // INVENTORY TRACKING: Add new lot
@@ -3097,6 +3098,8 @@ async function handleOrderFill(order, fillPrice) {
                 const bestMatch = inventoryCandidates[0];
                 const priceDiff = Math.abs(bestMatch.price - expectedBuyPrice);
                 const matchQuality = priceDiff <= tolerance ? '✅ EXACT' : (priceDiff <= expectedBuyPrice * 0.02 ? '⚠️ CLOSE' : '❌ FALLBACK');
+                // Store match type for orderRecord (without emoji)
+                sellMatchType = priceDiff <= tolerance ? 'EXACT' : (priceDiff <= expectedBuyPrice * 0.02 ? 'CLOSE' : 'FALLBACK');
                 log('SPREAD_MATCH', `Sell @ $${fillPrice.toFixed(2)} → Expected Buy: $${expectedBuyPrice.toFixed(2)} | Best Lot: $${bestMatch.price.toFixed(2)} | ${matchQuality}`, matchQuality.includes('✅') ? 'success' : 'warning');
             }
         } else if (ACCOUNTING_METHOD === 'LIFO') {
@@ -3233,7 +3236,8 @@ async function handleOrderFill(order, fillPrice) {
         orderRecord.spreadPct = sellSpreadPct;
         orderRecord.matchedLots = sellMatchedLots;
         orderRecord.fees = sellTotalFees; // FIX: Use function-scoped variable
-        orderRecord.matchMethod = ACCOUNTING_METHOD; // NEW: Store method used
+        orderRecord.matchMethod = ACCOUNTING_METHOD; // Store method used
+        orderRecord.matchType = sellMatchType; // FIX: Store match quality (EXACT/CLOSE/FALLBACK) for UI
     }
     state.filledOrders.push(orderRecord);
 
