@@ -12,7 +12,7 @@
 **Vantage Quantum** es un bot de grid trading de alta frecuencia con **Inteligencia de Mercado Compuesta**. A diferencia de los grid bots "tontos", este sistema usa análisis técnico, contexto geopolítico, y presión del order book para adaptar su comportamiento en tiempo real.
 
 **Versión:** `3.0.0`  
-**Par Principal:** BTC/USDT (expandible a SOL/USDT)  
+**Pares Soportados:** BTC/USDT, SOL/USDT, DOGE/USDT  
 **Licencia:** Privada (Arca Financiera Garossa)
 
 ---
@@ -158,7 +158,7 @@ Consulta `MONITOREO_ARCA.md` para comandos completos de SSH y debugging.
 ## 📜 Changelog Reciente
 
 ### v3.0.0 (Diciembre 2024)
-- **[NEW]** Sistema multi-bot (BTC + SOL simultáneos)
+- **[NEW]** Sistema multi-bot (BTC + SOL + DOGE simultáneos)
 - **[NEW]** Weekly Metrics: Time Out of Range, Inventory Report
 - **[NEW]** USDT Floor Protection inteligente
 - **[NEW]** Contexto geopolítico con zonas macro dinámicas
@@ -189,6 +189,11 @@ module.exports = {
       name: 'bot-sol', 
       script: 'grid_bot.js',
       env: { PAIR: 'SOL/USDT', PORT: 3001 }
+    },
+    {
+      name: 'bot-doge', 
+      script: 'grid_bot.js',
+      env: { PAIR: 'DOGE/USDT', PORT: 3002 }
     }
   ]
 };

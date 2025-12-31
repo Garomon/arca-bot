@@ -179,6 +179,7 @@ grep "Matched Lots" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log | tail -n
 ```bash
 cd /root/arca-bot && node scripts/backfill_profits.js BTC/USDT
 cd /root/arca-bot && node scripts/backfill_profits.js SOL/USDT
+cd /root/arca-bot && node scripts/backfill_profits.js DOGE/USDT
 pm2 restart all
 ```
 *⚠️ Solo usar si se detectan discrepancias. Reconstruye inventario y profits.*
@@ -193,14 +194,17 @@ const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.A
     const bal = await b.fetchBalance();
     const btcPrice = (await b.fetchTicker('BTC/USDT')).last;
     const solPrice = (await b.fetchTicker('SOL/USDT')).last;
+    const dogePrice = (await b.fetchTicker('DOGE/USDT')).last;
     const usdtBal = bal.USDT?.total || 0;
     const btcBal = bal.BTC?.total || 0;
     const solBal = bal.SOL?.total || 0;
-    const total = usdtBal + (btcBal * btcPrice) + (solBal * solPrice);
+    const dogeBal = bal.DOGE?.total || 0;
+    const total = usdtBal + (btcBal * btcPrice) + (solBal * solPrice) + (dogeBal * dogePrice);
     console.log('USDT:', usdtBal.toFixed(2));
-    console.log('BTC:', btcBal.toFixed(6), '= \$' + (btcBal * btcPrice).toFixed(2));
-    console.log('SOL:', solBal.toFixed(6), '= \$' + (solBal * solPrice).toFixed(2));
-    console.log('TOTAL:', '\$' + total.toFixed(2));
+    console.log('BTC:', btcBal.toFixed(6), '= $' + (btcBal * btcPrice).toFixed(2));
+    console.log('SOL:', solBal.toFixed(6), '= $' + (solBal * solPrice).toFixed(2));
+    console.log('DOGE:', dogeBal.toFixed(2), '= $' + (dogeBal * dogePrice).toFixed(2));
+    console.log('TOTAL:', '$' + total.toFixed(2));
 })();
 " 2>/dev/null
 ```

@@ -121,3 +121,4 @@ Añadidos timestamps ISO a todos los logs de consola para mejor debugging.
 **PM2 Processes:**
 - `bot-btc` → BTC/USDT grid bot
 - `bot-sol` → SOL/USDT grid bot
+- `bot-doge` → DOGE/USDT grid bot
