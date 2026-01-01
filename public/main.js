@@ -878,7 +878,10 @@ function renderInventory() {
         return;
     }
 
-    const currentPrice = parseFloat(document.getElementById('price-display')?.innerText?.replace(/[^0-9.]/g, '')) || 0;
+    // Extract just the USD price (first number in the price display, ignoring MXN value)
+    const priceText = document.getElementById('price-display')?.innerText || '0';
+    const priceMatch = priceText.match(/\$?([\d,]+\.?\d*)/);
+    const currentPrice = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : 0;
 
     // Update Header Icons
     invHeaders.forEach((th, index) => {
