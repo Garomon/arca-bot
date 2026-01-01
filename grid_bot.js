@@ -2795,16 +2795,23 @@ async function shouldPauseBuys() {
         if (state.inventory && state.inventory.length > 0) {
             const invReport = calculateInventoryReport();
             const avgCost = invReport.avgCost;
-            const DCA_BUFFER = 1.02; // Allow buying up to 2% above avg (for grid flexibility)
+
+            // DYNAMIC DCA BUFFER: Based on pair's volatility (spacingNormal)
+            // Formula: 1 + (spacingNormal * 2.5) 
+            // BTC: 1 + (0.007 * 2.5) = 1.0175 (1.75%)
+            // SOL: 1 + (0.010 * 2.5) = 1.025 (2.5%)
+            // DOGE: 1 + (0.012 * 2.5) = 1.03 (3%)
+            const dynamicBuffer = 1 + (pairPreset.spacingNormal * 2.5);
+            const DCA_BUFFER = Math.max(1.015, Math.min(dynamicBuffer, 1.05)); // Clamp between 1.5% and 5%
 
             if (avgCost > 0 && currentPrice > avgCost * DCA_BUFFER) {
                 // We're underwater - buying now would increase avg cost (bad DCA)
-                // Only log as info, not a hard block (allow some tolerance)
                 const pctAbove = ((currentPrice / avgCost) - 1) * 100;
-                log('SMART_DCA', `⚠️ Price $${currentPrice.toFixed(2)} is ${pctAbove.toFixed(1)}% above avg cost $${avgCost.toFixed(2)} - BLOCKING NEW BUYS to protect avg cost`, 'warning');
+                const bufferPct = ((DCA_BUFFER - 1) * 100).toFixed(1);
+                log('SMART_DCA', `⚠️ Price $${currentPrice.toFixed(2)} is ${pctAbove.toFixed(1)}% above avg cost $${avgCost.toFixed(2)} (Buffer: ${bufferPct}%) - BLOCKING NEW BUYS`, 'warning');
                 return {
                     pause: true,
-                    reason: `SMART_DCA (Price ${pctAbove.toFixed(1)}% > AvgCost. Waiting for dip.)`
+                    reason: `SMART_DCA (Price ${pctAbove.toFixed(1)}% > AvgCost. Buffer: ${bufferPct}%. Waiting for dip.)`
                 };
             }
         }
