@@ -284,6 +284,17 @@ function addToBuffer(logEntry) {
     if (logBuffer.length > CONFIG.logBufferSize) logBuffer.pop();
 }
 
+// Helper to format prices with dynamic decimals for logs
+// DOGE ($0.12) needs 4 decimals, BTC ($88000) needs 2
+function formatPriceLog(price) {
+    if (price === null || price === undefined) return '0';
+    const p = parseFloat(price);
+    if (p < 1) return p.toFixed(4);      // DOGE: $0.1168
+    if (p < 10) return p.toFixed(3);     // Low alts: $1.234
+    if (p < 100) return p.toFixed(2);    // SOL: $124.52
+    return p.toFixed(2);                  // BTC: $88366.00
+}
+
 // Main logging function - writes to console, UI, and file
 function log(type, message, status = 'info') {
     const timestamp = new Date().toISOString();
@@ -2808,7 +2819,7 @@ async function shouldPauseBuys() {
                 // We're underwater - buying now would increase avg cost (bad DCA)
                 const pctAbove = ((currentPrice / avgCost) - 1) * 100;
                 const bufferPct = ((DCA_BUFFER - 1) * 100).toFixed(1);
-                log('SMART_DCA', `⚠️ Price $${currentPrice.toFixed(2)} is ${pctAbove.toFixed(1)}% above avg cost $${avgCost.toFixed(2)} (Buffer: ${bufferPct}%) - BLOCKING NEW BUYS`, 'warning');
+                log('SMART_DCA', `⚠️ Price $${formatPriceLog(currentPrice)} is ${pctAbove.toFixed(1)}% above avg cost $${formatPriceLog(avgCost)} (Buffer: ${bufferPct}%) - BLOCKING NEW BUYS`, 'warning');
                 return {
                     pause: true,
                     reason: `SMART_DCA (Price ${pctAbove.toFixed(1)}% > AvgCost. Buffer: ${bufferPct}%. Waiting for dip.)`
