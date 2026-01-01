@@ -648,8 +648,8 @@ function renderTradeHistory() {
                 <td class="text-secondary" style="vertical-align: middle;">${dateStr}</td>
                 <td class="text-muted" title="${t.id}" style="vertical-align: middle; cursor: help;">${shortId}</td>
                 <td class="text-center" style="vertical-align: middle;">${sideBadge}</td>
-                <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${parseFloat(t.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? '$' + parseFloat(t.costBasis).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-')}</td>
+                <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${formatPriceShort(t.price)}</td>
+                <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? '$' + formatPriceShort(t.costBasis) : '-')}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : (t.spreadPct > 0 ? 'text-success' : 'text-danger')}" style="vertical-align: middle;">${isBuy ? '-' : (t.spreadPct !== undefined ? t.spreadPct.toFixed(2) + '%' : '-')}</td>
                 <td class="text-end text-warning" style="vertical-align: middle; font-size: 0.7rem;">${isBuy ? '-' : (t.fees ? '$' + parseFloat(t.fees).toFixed(4) : '-')}</td>
                 <td class="text-center" style="vertical-align: middle; cursor: help;" title="${matchTooltip}">${matchIndicator}</td>
@@ -936,7 +936,7 @@ function renderInventory() {
             <tr style="background: rgba(100,100,200,0.05);">
                 <td class="text-secondary" style="font-size: 0.65rem;">${dateStr}</td>
                 <td class="text-muted" title="${lot.id}" style="cursor: help; padding-right: 15px;">${shortId}</td>
-                <td class="text-end" style="${pnlClass}">$${lot.price.toFixed(2)}</td>
+                <td class="text-end" style="${pnlClass}">$${formatPriceShort(lot.price)}</td>
                 <td class="text-end text-muted">${lot.amount.toFixed(6)}</td>
                 <td class="text-end fw-bold">${remaining.toFixed(6)}</td>
                 <td class="text-end">$${value.toFixed(2)}</td>
