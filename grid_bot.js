@@ -3125,14 +3125,43 @@ async function shouldPauseBuys() {
 
             // DYNAMIC DCA BUFFER: Based on pair's volatility (spacingNormal)
             // Formula: 1 + (spacingNormal * 2.5) 
-            // BTC: 1 + (0.007 * 2.5) = 1.0175 (1.75%)
+            // BTC: 1 + (0.005 * 2.5) = 1.0125 → clamped to 1.5%
             // SOL: 1 + (0.010 * 2.5) = 1.025 (2.5%)
             // DOGE: 1 + (0.012 * 2.5) = 1.03 (3%)
             const dynamicBuffer = 1 + (pairPreset.spacingNormal * 2.5);
-            const DCA_BUFFER = Math.max(1.015, Math.min(dynamicBuffer, 1.05)); // Clamp between 1.5% and 5%
+            let DCA_BUFFER = Math.max(1.015, Math.min(dynamicBuffer, 1.05)); // Clamp between 1.5% and 5%
 
+            // === PROGRESSIVE BUFFER RELAXATION ===
+            // In sustained bull markets, gradually relax the buffer to allow accumulation
+            // This prevents the bot from being stuck forever when price never returns to avg cost
             if (avgCost > 0 && currentPrice > avgCost * DCA_BUFFER) {
-                // We're underwater - buying now would increase avg cost (bad DCA)
+                // Initialize blocking timer if not set
+                if (!state.dcaBlockStartTime) {
+                    state.dcaBlockStartTime = Date.now();
+                }
+
+                const hoursBlocking = (Date.now() - state.dcaBlockStartTime) / (1000 * 60 * 60);
+
+                // Progressive bump: +0.5% per 12 hours of blocking, max +5% total bump
+                // 12h = +0.5%, 24h = +1%, 48h = +2%, 5 days = +5% (max)
+                const stalenessBump = Math.min(hoursBlocking / 24, 5) * 0.01;
+                DCA_BUFFER = DCA_BUFFER + stalenessBump;
+
+                // Cap effective buffer at 10% to prevent buying too high
+                DCA_BUFFER = Math.min(DCA_BUFFER, 1.10);
+
+                // Log relaxation if significant (> 0.1%)
+                if (stalenessBump > 0.001) {
+                    log('SMART_DCA', `📈 Bull market adaptation: Buffer relaxed to ${((DCA_BUFFER - 1) * 100).toFixed(1)}% after ${hoursBlocking.toFixed(1)}h blocking`, 'info');
+                }
+            } else {
+                // Price is within acceptable range - reset the blocking timer
+                state.dcaBlockStartTime = null;
+            }
+
+            // Final check with (potentially relaxed) buffer
+            if (avgCost > 0 && currentPrice > avgCost * DCA_BUFFER) {
+                // Still above threshold even with relaxation - block the buy
                 const pctAbove = ((currentPrice / avgCost) - 1) * 100;
                 const bufferPct = ((DCA_BUFFER - 1) * 100).toFixed(1);
                 log('SMART_DCA', `⚠️ Price $${formatPriceLog(currentPrice)} is ${pctAbove.toFixed(1)}% above avg cost $${formatPriceLog(avgCost)} (Buffer: ${bufferPct}%) - BLOCKING NEW BUYS`, 'warning');
@@ -3140,6 +3169,9 @@ async function shouldPauseBuys() {
                     pause: true,
                     reason: `SMART_DCA (Price ${pctAbove.toFixed(1)}% > AvgCost. Buffer: ${bufferPct}%. Waiting for dip.)`
                 };
+            } else {
+                // Price is now within the (relaxed) buffer - allow buying and reset timer
+                state.dcaBlockStartTime = null;
             }
         }
 
