@@ -223,18 +223,84 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API endpoint for Master Dashboard
 app.get('/api/status', (req, res) => {
+    // Calculate inventory metrics
+    const inventory = state.inventory || [];
+    const totalAmount = inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
+    const totalCost = inventory.reduce((sum, lot) => sum + ((lot.price || 0) * (lot.remaining || 0)), 0);
+    const avgCost = totalAmount > 0 ? totalCost / totalAmount : 0;
+    const currentValue = totalAmount * (state.currentPrice || 0);
+    const unrealizedPnL = currentValue - totalCost;
+
+    // Calculate equity (USDT balance + inventory value)
+    const usdtBalance = state.balance?.USDT || state.availableCapital || 0;
+    const totalEquity = usdtBalance + currentValue;
+
+    // Calculate ROI
+    const initialCapital = state.initialCapital || CONFIG.initialCapital || 400;
+    const totalPnL = (state.totalProfit || 0) + unrealizedPnL;
+    const roi = initialCapital > 0 ? (totalPnL / initialCapital) * 100 : 0;
+
+    // Calculate win rate from trade history
+    const tradeHistory = state.tradeHistory || [];
+    const completedSells = tradeHistory.filter(t => t.side === 'sell' && t.profit !== undefined);
+    const wins = completedSells.filter(t => t.profit > 0).length;
+    const winRate = completedSells.length > 0 ? (wins / completedSells.length) * 100 : 0;
+
+    // Get blocking reason
+    let blockingReason = null;
+    if (state.smartDcaBlocking) {
+        const priceAbovePct = avgCost > 0 ? ((state.currentPrice - avgCost) / avgCost * 100).toFixed(1) : 0;
+        blockingReason = `Price ${priceAbovePct}% above avg cost`;
+    }
+
+    // Time in range
+    const inRangeCycles = state.inRangeCycles || 0;
+    const totalCycles = state.totalCycles || 1;
+    const timeInRange = (inRangeCycles / totalCycles * 100).toFixed(1);
+
     res.json({
+        // Basic info
         pair: CONFIG.pair,
         botId: BOT_ID,
+
+        // Price data
         currentPrice: state.currentPrice || 0,
+
+        // Profit metrics
         totalProfit: state.totalProfit || 0,
+        unrealizedPnL: unrealizedPnL,
+        totalPnL: totalPnL,
+
+        // Portfolio metrics
+        totalEquity: totalEquity,
+        usdtBalance: usdtBalance,
+        initialCapital: initialCapital,
+        roi: roi,
+
+        // Trade metrics
+        winRate: winRate,
+        totalTrades: completedSells.length,
+        wins: wins,
+
+        // Orders and inventory
         activeOrders: state.activeOrders?.length || 0,
-        inventoryLots: state.inventory?.length || 0,
-        inventoryValue: state.inventory?.reduce((sum, lot) => sum + ((lot.price || 0) * (lot.remaining || 0)), 0) || 0,
+        inventoryLots: inventory.length,
+        inventoryAmount: totalAmount,
+        inventoryValue: currentValue,
+        avgCost: avgCost,
+
+        // Market analysis
         marketRegime: state.marketRegime || 'UNKNOWN',
         volatilityRegime: state.volatilityRegime || 'NORMAL',
         score: state.lastScore || 50,
+        rsi: state.lastRSI || 50,
+
+        // Status
         smartDcaBlocking: state.smartDcaBlocking || false,
+        blockingReason: blockingReason,
+        timeInRange: timeInRange,
+
+        // System
         uptime: process.uptime(),
         timestamp: Date.now()
     });
