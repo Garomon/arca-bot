@@ -253,9 +253,14 @@ app.get('/api/status', async (req, res) => {
         const totalEquity = allocatedEquity > 0 ? allocatedEquity : (usdtBalance + currentValue);
 
         // Calculate ROI
+        // Calculate ROI (Realized only, to match reports)
         const initialCapital = state.initialCapital || CONFIG.initialCapital || 400;
+        // Exclude unrealizedPnL from main ROI to prevent "inflated" look
+        const roi = initialCapital > 0 ? ((state.totalProfit || 0) / initialCapital) * 100 : 0;
+
+        // Secondary metric: Total Return (Realized + Unrealized)
         const totalPnL = (state.totalProfit || 0) + unrealizedPnL;
-        const roi = initialCapital > 0 ? (totalPnL / initialCapital) * 100 : 0;
+        const netRoi = initialCapital > 0 ? (totalPnL / initialCapital) * 100 : 0;
 
         // Calculate win rate from filled orders (same as performance metrics)
         const filledOrders = state.filledOrders || [];
