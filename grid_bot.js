@@ -912,6 +912,16 @@ async function reconcileInventoryWithExchange() {
             state.inventoryStatus = 'ESTIMATED';
             saveState();
             log('RECONCILE', `✅ Inventory Rebuilt (Strict FIFO). Holdings: ${newTotal.toFixed(6)} ${baseAsset}.`, 'success');
+
+            // --- SAFETY NET: AMNESIA BLOCKING PROTOCOL ---
+            log('CRITICAL', `⛔ COST BASIS LOST (AMNESIA DETECTED). PAUSING BOT TO PREVENT LOSS.`, 'error');
+            log('CRITICAL', `The bot has lost track of the original buy price for these coins.`, 'error');
+            log('CRITICAL', `To prevent selling at a loss (thinking it's profit), you MUST run the audit fix.`, 'error');
+
+            state.isPaused = true;
+            state.pauseReason = `SAFETY LOCK: Cost Basis Lost. Run 'node scripts/full_audit.js ${CONFIG.pair} --fix' to resume.`;
+            saveState();
+
             log('RECONCILE', `⚠️ Note: Cost Basis is ESTIMATED from recent buys. Profit accuracy will improve as new trades occur.`, 'warning');
 
             if (oldIds !== newIds) {
@@ -1178,6 +1188,13 @@ async function initializeGrid(forceReset = false) {
         log('SYSTEM', '⚠️ Rebalance skipped (already in progress)', 'warning');
         return;
     }
+
+    // SAFETY NET: Respect Pause (e.g. Amnesia Lock)
+    if (state.isPaused) {
+        log('SYSTEM', `⛔ Grid Initialization Skipped: PAUSED (${state.pauseReason || 'User Request'})`, 'warning');
+        return;
+    }
+
     if (forceReset) isRebalancing = true;
 
     try {
