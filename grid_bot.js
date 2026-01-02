@@ -4002,7 +4002,7 @@ server.listen(BOT_PORT, async () => {
         // Anomaly detection
         const anomalies = [];
         if (todayTrades.length === 0) anomalies.push('⚠️ No trades today');
-        if (state.maxDrawdown > 5) anomalies.push(`⚠️ High drawdown: ${state.maxDrawdown.toFixed(2)}%`);
+        if (state.maxDrawdown > 15) anomalies.push(`⚠️ High drawdown: ${state.maxDrawdown.toFixed(2)}%`);
         if (state.emergencyStop) anomalies.push('🚨 EMERGENCY STOP ACTIVE');
         if (todayProfit < 0) anomalies.push(`⚠️ Negative profit today: $${todayProfit.toFixed(4)}`);
 

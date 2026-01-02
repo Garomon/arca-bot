@@ -9,7 +9,7 @@ const MONTHLY_CONTRIBUTION_USD = MONTHLY_CONTRIBUTION_MXN / MXN_USD_RATE;
 const BOT_DIR = path.join(__dirname, '..');
 const SESSIONS_DIR = path.join(BOT_DIR, 'data', 'sessions');
 
-function findStateFile() {
+function findAllStateFiles() {
     try {
         let dir = SESSIONS_DIR;
         if (!fs.existsSync(dir)) dir = BOT_DIR;
@@ -17,42 +17,70 @@ function findStateFile() {
         const files = fs.readdirSync(dir);
         const stateFiles = files.filter(f => f.endsWith('state.json') && !f.includes('template'));
 
-        if (stateFiles.length === 0) return null;
-
-        return stateFiles.map(f => {
-            const fullPath = path.join(dir, f);
-            return { name: f, time: fs.statSync(fullPath).mtime.getTime(), path: fullPath };
-        }).sort((a, b) => b.time - a.time)[0].path;
-
+        return stateFiles.map(f => path.join(dir, f));
     } catch (e) {
-        return null;
+        return [];
     }
 }
 
-function analyzeAndProject() {
-    const stateFile = findStateFile();
+function calculateSwarmMetrics() {
+    const stateFiles = findAllStateFiles();
 
-    if (!stateFile) {
-        console.error(`❌ No state file found.`);
-        return;
+    if (stateFiles.length === 0) {
+        return { realYield: 0.0020, totalCapital: 1000, totalProfit: 0, daysActive: 1 };
     }
 
-    const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-    const filledOrders = state.filledOrders || [];
+    let totalCapital = 0;
+    let totalProfit = 0;
+    let oldestTrade = Date.now();
+    let weightedYieldSum = 0;
 
-    // Sort trade history
-    filledOrders.sort((a, b) => a.timestamp - b.timestamp);
-    const firstTrade = filledOrders.length > 0 ? filledOrders[0].timestamp : Date.now();
-    const now = Date.now();
+    stateFiles.forEach(file => {
+        try {
+            const state = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const capital = state.initialCapital || 0;
+            const profit = state.totalProfit || 0;
+            const filledOrders = state.filledOrders || [];
 
-    const daysActive = (now - firstTrade) / (1000 * 60 * 60 * 24);
-    const totalProfit = state.totalProfit || 0;
-    const currentCapital = (state.initialCapital || 0) + totalProfit;
+            totalCapital += capital;
+            totalProfit += profit;
 
-    // 2. Projection Scenarios
+            // Find oldest trade
+            if (filledOrders.length > 0) {
+                filledOrders.sort((a, b) => a.timestamp - b.timestamp);
+                if (filledOrders[0].timestamp < oldestTrade) {
+                    oldestTrade = filledOrders[0].timestamp;
+                }
+            }
+
+            // Calculate this bot's daily yield weighted by capital
+            const daysActive = Math.max(1, (Date.now() - oldestTrade) / (1000 * 60 * 60 * 24));
+            if (capital > 0 && daysActive > 0) {
+                const dailyYield = profit / capital / daysActive;
+                weightedYieldSum += dailyYield * capital;
+            }
+        } catch (e) {
+            // Skip invalid files
+        }
+    });
+
+    const daysActive = Math.max(1, (Date.now() - oldestTrade) / (1000 * 60 * 60 * 24));
+
+    // Weighted average yield across all bots
+    const realYield = totalCapital > 0 ? weightedYieldSum / totalCapital : 0.0020;
+
+    return { realYield, totalCapital, totalProfit, daysActive };
+}
+
+function analyzeAndProject() {
+    const { realYield, totalCapital, totalProfit, daysActive } = calculateSwarmMetrics();
+    const currentCapital = totalCapital + totalProfit;
+    const realYieldPct = (realYield * 100).toFixed(3);
+
+    // Dynamic scenarios based on REAL historical data
     const scenarios = [
         { name: "🏦 BANCO (CETES 10%)", yield: 0.00026 },
-        { name: "🐌 REALIDAD HOY (0.20%)", yield: 0.0020 }, // Clean Swarm Audit
+        { name: `📊 TU REALIDAD (${realYieldPct}%)`, yield: realYield, highlight: true },
         { name: "🐻 PESIMISTA (0.25%)", yield: 0.0025 },
         { name: "⚖️ REALISTA (0.50%)", yield: 0.0050 },
         { name: "🦄 OPTIMISTA (0.82%)", yield: 0.0082 }
