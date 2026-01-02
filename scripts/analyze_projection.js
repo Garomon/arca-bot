@@ -15,7 +15,7 @@ function findAllStateFiles() {
         let dir = SESSIONS_DIR;
         if (!fs.existsSync(dir)) dir = BOT_DIR;
         const files = fs.readdirSync(dir);
-        const stateFiles = files.filter(f => f.endsWith('state.json') && !f.includes('template'));
+        const stateFiles = files.filter(f => f.endsWith('state.json') && f.startsWith('VANTAGE01_') && !f.includes('template') && !f.includes('backup'));
         return stateFiles.map(f => path.join(dir, f));
     } catch (e) {
         return [];
