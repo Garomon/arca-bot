@@ -1491,7 +1491,15 @@ function checkSafetyNet(level) {
     if (level.side !== 'sell') return { safe: true };
 
     // 2. If no inventory, we have nothing to protect (or it's a naked short)
-    if (!state.inventory || state.inventory.length === 0) return { safe: true };
+    // CRITICAL: AMNESIA PROTECTION
+    // If we are selling but have no inventory records, we MUST block.
+    // This happens if state is lost/corrupted. We cannot assume it's "Zero Cost".
+    if (!state.inventory || state.inventory.length === 0) {
+        return {
+            safe: false,
+            reason: 'AMNESIA DETECTED: Selling with NO tracked inventory. State mismatch likely. Run: node scripts/full_audit.js PAIR --fix'
+        };
+    }
 
     try {
         const sellPrice = parseFloat(level.price);
