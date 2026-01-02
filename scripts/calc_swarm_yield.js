@@ -111,8 +111,9 @@ function calculateSwarmYield() {
             let inventoryQty = 0;
             let inventoryCost = 0;
             inventory.forEach(lot => {
-                inventoryQty += lot.qty || 0;
-                inventoryCost += (lot.qty || 0) * (lot.price || 0);
+                const qty = lot.qty || lot.amount || lot.remaining || 0;
+                inventoryQty += qty;
+                inventoryCost += qty * (lot.price || 0);
             });
 
             const inventoryValue = inventoryQty * price;
