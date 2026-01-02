@@ -99,12 +99,35 @@
             margin-top: 10px;
         }
 
-        .header .live-dot {
+        .header .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .header .status-dot {
             width: 8px;
             height: 8px;
-            background: var(--accent-green);
             border-radius: 50%;
             animation: pulse 2s infinite;
+        }
+
+        .header .status-dot.positive {
+            background: var(--accent-green);
+        }
+
+        .header .status-dot.warning {
+            background: var(--accent-orange);
+        }
+
+        .header .status-dot.negative {
+            background: var(--accent-red);
         }
 
         @keyframes pulse {
@@ -618,8 +641,8 @@
             <h1>🚀 ARCA BOT SWARM</h1>
             <p class="subtitle">Master Control Dashboard</p>
             <div class="live-indicator">
-                <div class="live-dot"></div>
-                <span>LIVE MONITORING</span>
+                <div class="status-dot positive" id="status-dot"></div>
+                <span id="bots-status-header">0 / 3 BOTS ONLINE</span>
             </div>
         </div>
 
@@ -654,11 +677,6 @@
                 <div class="label">Active Orders</div>
                 <div class="value neutral" id="total-orders">0</div>
                 <div class="subvalue">Across all bots</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Status</div>
-                <div class="value positive" id="bots-status">0 / 3</div>
-                <div class="subvalue">Bots online</div>
             </div>
         </div>
 
@@ -834,7 +852,20 @@
             roiEl.className = `value ${avgROI >= 0 ? 'positive' : 'negative'}`;
 
             document.getElementById('total-orders').textContent = totalOrders;
-            document.getElementById('bots-status').textContent = `${botsOnline} / 3`;
+
+            // Header Status Update
+            const statusHeader = document.getElementById('bots-status-header');
+            const statusDot = document.getElementById('status-dot');
+            statusHeader.textContent = `${botsOnline} / 3 BOTS ONLINE`;
+
+            if (botsOnline === 3) {
+                statusDot.className = 'status-dot positive';
+            } else if (botsOnline > 0) {
+                statusDot.className = 'status-dot warning';
+            } else {
+                statusDot.className = 'status-dot negative';
+            }
+
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
 
             // Update Recent Activity logs
