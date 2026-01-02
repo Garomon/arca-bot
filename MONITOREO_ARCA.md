@@ -31,24 +31,21 @@ pm2 list; \
 echo -e "\n💻 --- 2. SALUD DEL SERVIDOR (Disco/RAM) [TIEMPO REAL] ---"; \
 df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
 echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? [HOY] ---"; \
-ls -lh /root/arca-bot/logs/VANTAGE* 2>/dev/null | grep "$(date +%Y-%m-%d)"; \
+ls -lh /root/arca-bot/logs/VANTAGE* 2>/dev/null | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)"; \
 echo -e "\n🚨 --- 4. ERRORES DE HOY [HOY] ---"; \
-grep "ERROR" /root/arca-bot/logs/VANTAGE01_*_activity.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
+grep "ERROR" /root/arca-bot/logs/VANTAGE01_*_activity.log 2>/dev/null | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
 echo -e "\n☠️ --- 4.b CRASH LOGS [HISTÓRICO - desde último borrado] ---"; \
 cat /root/arca-bot/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (¡Bien!)"; \
 echo -e "\n💰 --- 5. REPORTE DE AYER [AYER] ---"; \
-cat /root/arca-bot/reports/daily_report_*_BTCUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
+cat /root/arca-bot/reports/daily_report_*_BTCUSDT_$(TZ='America/Mexico_City' date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
 echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) [AYER] ---"; \
-cat /root/arca-bot/reports/daily_report_*_SOLUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
+cat /root/arca-bot/reports/daily_report_*_SOLUSDT_$(TZ='America/Mexico_City' date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
 echo -e "\n💰 --- 5.c REPORTE DE AYER (DOGE) [AYER] ---"; \
-cat /root/arca-bot/reports/daily_report_*_DOGEUSDT_$(date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de DOGE de ayer."; \
-TODAY=$(date +%Y-%m-%d); \
-echo -e "\n📈 --- 5.d TRADES DE HOY [HOY] ---"; \
-echo "BTC:  Buys=$(grep -h \"BUY FILLED\" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l) | Sells=$(grep -h \"PROFIT\" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l)"; \
-echo "SOL:  Buys=$(grep -h \"BUY FILLED\" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l) | Sells=$(grep -h \"PROFIT\" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l)"; \
-echo "DOGE: Buys=$(grep -h \"BUY FILLED\" /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l) | Sells=$(grep -h \"PROFIT\" /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity*.log 2>/dev/null | grep \"\[$TODAY\" | wc -l)"; \
-echo -e "\n🧬 --- 5.d TRAZABILIDAD DE LOTES (HOY) ---"; \
-grep -h "Matched Lots" /root/arca-bot/logs/VANTAGE01_*_activity*.log 2>/dev/null | grep "\[$TODAY" | tail -n 5; \
+cat /root/arca-bot/reports/daily_report_*_DOGEUSDT_$(TZ='America/Mexico_City' date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de DOGE de ayer."; \
+echo -e "\n📈 --- 5.d TRADES DE HOY [CDMX - TIMEZONE AWARE] ---"; \
+node /root/arca-bot/scripts/count_trades_today.js; \
+echo -e "\n🧬 --- 5.e TRAZABILIDAD DE LOTES (ÚLTIMOS 5) ---"; \
+grep -h "Matched Lots" /root/arca-bot/logs/VANTAGE01_*_activity*.log 2>/dev/null | tail -n 5; \
 echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD (últimas 100 líneas) ---"; \
 tail -n 100 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
 echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD (últimas 100 líneas) ---"; \
@@ -62,13 +59,23 @@ tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-
 echo -e "\n🧠 --- 9.c [AI DOGE] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_DOGEUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
 echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL - Última modificación] ---"; \
-ls -lh /root/arca-bot/data/sessions/*_state.json /root/arca-bot/data/sessions/*_state.json; \
+ls -lh /root/arca-bot/data/sessions/*_state.json; \
 echo -e "\n🔬 --- 11. AUDITORÍA SEMANAL [OPCIONAL - Correr manualmente] ---"; \
 echo "Para verificar profit real vs state file, ejecuta:"; \
 echo "  node scripts/full_audit.js BTC/USDT"; \
 echo "  node scripts/full_audit.js SOL/USDT"; \
 echo "  node scripts/full_audit.js DOGE/USDT"; \
 echo "Si hay ⚠️ discrepancias, agrega --fix al final."
+
+echo -e "\n🦅 --- 12. SWARM INTELLIGENCE (AUDITORÍA & FUTURO) ---"; \
+echo "1. VERDAD FINANCIERA (Yield Real + Equity + Bags):"; \
+echo "   node scripts/calc_swarm_yield.js"; \
+echo ""; \
+echo "2. PROYECCIÓN DE RIQUEZA (¿Cuándo me retiro?):"; \
+echo "   node scripts/analyze_projection.js"; \
+echo ""; \
+echo "3. CAZAFANTASMAS (Borrar archivos duplicados/viejos):"; \
+echo "   node scripts/check_ghosts.js"; \
 ```
 
 ---
