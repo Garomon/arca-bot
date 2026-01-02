@@ -131,7 +131,7 @@ const PAIR_PRESETS = {
         spacingLow: 0.008,       // 0.8% low volatility
         bandwidthHigh: 0.10,     // 10% bollinger bandwidth = high vol
         bandwidthLow: 0.03,      // 3% = low vol
-        toleranceMultiplier: 12  // Reduced from 20→12 for faster rebalancing (P0: Fix low time-in-range)
+        toleranceMultiplier: 20  // More tolerance for DOGE price swings
     }
     // ETH/BTC Removed temporarily (requires non-USDT safety guard bypass)
     // 'ETH/BTC': { ... }
