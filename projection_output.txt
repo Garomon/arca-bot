@@ -1,0 +1,28 @@
+
+💰 VS BANK COMPARISON (5000 MXN/mo)
+---------------------------------------------------------------
+
+👉 🏦 BANCO (CETES 10%)
+   💵 Tú Haz Puesto:  $309,675 MXN
+   💎 Valor Total:    $396,509 MXN
+   📈 Tu Ganancia:    $86,833 MXN
+   🔥 ROI Total:      28%
+   ⚠️ NOTA: Apenas cubres inflación.
+
+👉 🐻 PESIMISTA (0.25%)
+   💵 Tú Haz Puesto:  $309,675 MXN
+   💎 Valor Total:    $6,555,782 MXN
+   📈 Tu Ganancia:    $6,246,107 MXN
+   🔥 ROI Total:      2017%
+
+👉 ⚖️ REALISTA (0.50%)
+   💵 Tú Haz Puesto:  $309,675 MXN
+   💎 Valor Total:    $322,087,826 MXN
+   📈 Tu Ganancia:    $321,778,150 MXN
+   🔥 ROI Total:      103908%
+
+👉 🦄 OPTIMISTA (0.82%)
+   💵 Tú Haz Puesto:  $309,675 MXN
+   💎 Valor Total:    $67,035,059,587 MXN
+   📈 Tu Ganancia:    $67,034,749,912 MXN
+   🔥 ROI Total:      21646791%
