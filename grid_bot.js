@@ -220,6 +220,26 @@ const io = new Server(server);
 
 // SECURITY UPDATE: Serve only the public folder
 app.use(express.static(path.join(__dirname, 'public')));
+
+// API endpoint for Master Dashboard
+app.get('/api/status', (req, res) => {
+    res.json({
+        pair: CONFIG.pair,
+        botId: BOT_ID,
+        currentPrice: state.currentPrice || 0,
+        totalProfit: state.totalProfit || 0,
+        activeOrders: state.activeOrders?.length || 0,
+        inventoryLots: state.inventory?.length || 0,
+        inventoryValue: state.inventory?.reduce((sum, lot) => sum + ((lot.price || 0) * (lot.remaining || 0)), 0) || 0,
+        marketRegime: state.marketRegime || 'UNKNOWN',
+        volatilityRegime: state.volatilityRegime || 'NORMAL',
+        score: state.lastScore || 50,
+        smartDcaBlocking: state.smartDcaBlocking || false,
+        uptime: process.uptime(),
+        timestamp: Date.now()
+    });
+});
+
 // --- BINANCE CONNECTION ---
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,

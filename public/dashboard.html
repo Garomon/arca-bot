@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCA SWARM - Master Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --accent-green: #00ff9d;
+            --accent-red: #ff3b3b;
+            --accent-blue: #00d4ff;
+            --accent-yellow: #ffd700;
+            --accent-purple: #9945ff;
+            --text-primary: #ffffff;
+            --text-secondary: #8892b0;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(153, 69, 255, 0.1), rgba(0, 212, 255, 0.1));
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .portfolio-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .summary-card .label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .summary-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .summary-card .value.positive {
+            color: var(--accent-green);
+        }
+
+        .summary-card .value.negative {
+            color: var(--accent-red);
+        }
+
+        .summary-card .value.neutral {
+            color: var(--accent-blue);
+        }
+
+        .bots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .bot-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bot-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .bot-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .bot-card.btc::before {
+            background: linear-gradient(90deg, #f7931a, #ff9500);
+        }
+
+        .bot-card.sol::before {
+            background: linear-gradient(90deg, #9945ff, #14f195);
+        }
+
+        .bot-card.doge::before {
+            background: linear-gradient(90deg, #c2a633, #dfc670);
+        }
+
+        .bot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .bot-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bot-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .bot-icon.btc {
+            background: rgba(247, 147, 26, 0.2);
+        }
+
+        .bot-icon.sol {
+            background: rgba(153, 69, 255, 0.2);
+        }
+
+        .bot-icon.doge {
+            background: rgba(194, 166, 51, 0.2);
+        }
+
+        .bot-title h2 {
+            font-size: 1.2rem;
+            margin-bottom: 3px;
+        }
+
+        .bot-title .pair {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.online {
+            background: rgba(0, 255, 157, 0.15);
+            color: var(--accent-green);
+        }
+
+        .status-badge.blocked {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--accent-yellow);
+        }
+
+        .status-badge.offline {
+            background: rgba(255, 59, 59, 0.15);
+            color: var(--accent-red);
+        }
+
+        .bot-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .metric .label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .metric .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .score-bar {
+            margin-top: 15px;
+        }
+
+        .score-bar .bar-container {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .score-bar .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .score-bar .bar-fill.bullish {
+            background: linear-gradient(90deg, var(--accent-green), #00cc7a);
+        }
+
+        .score-bar .bar-fill.neutral {
+            background: linear-gradient(90deg, var(--accent-yellow), #ffaa00);
+        }
+
+        .score-bar .bar-fill.bearish {
+            background: linear-gradient(90deg, var(--accent-red), #ff6b6b);
+        }
+
+        .bot-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(153, 69, 255, 0.3);
+        }
+
+        .last-update {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bots-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🚀 ARCA BOT SWARM</h1>
+        <p class="subtitle">Master Dashboard - Real-Time Monitoring</p>
+    </div>
+
+    <div class="portfolio-summary">
+        <div class="summary-card">
+            <div class="label">Total Profit</div>
+            <div class="value positive" id="total-profit">$0.00</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Total Equity</div>
+            <div class="value neutral" id="total-equity">$0.00</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Active Orders</div>
+            <div class="value neutral" id="total-orders">0</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">Bots Online</div>
+            <div class="value positive" id="bots-online">0 / 3</div>
+        </div>
+    </div>
+
+    <div class="bots-grid" id="bots-container">
+        <div class="loading">
+            <div class="spinner"></div>
+            <span>Connecting to bots...</span>
+        </div>
+    </div>
+
+    <div class="last-update">
+        Last update: <span id="last-update-time">-</span>
+    </div>
+
+    <script src="socket.io.min.js"></script>
+    <script>
+        // Bot configurations - adjust ports as needed
+        const BOTS = [
+            { id: 'btc', name: 'Bitcoin', pair: 'BTC/USDT', icon: '₿', url: '/', class: 'btc' },
+            { id: 'sol', name: 'Solana', pair: 'SOL/USDT', icon: '◎', url: '/sol/', class: 'sol' },
+            { id: 'doge', name: 'Dogecoin', pair: 'DOGE/USDT', icon: '🐕', url: '/doge/', class: 'doge' }
+        ];
+
+        // State for each bot
+        const botState = {};
+        const sockets = {};
+
+        // Initialize
+        function init() {
+            renderBots();
+            connectToBots();
+            setInterval(updateTotals, 1000);
+        }
+
+        function renderBots() {
+            const container = document.getElementById('bots-container');
+            container.innerHTML = BOTS.map(bot => `
+                <div class="bot-card ${bot.class}" id="card-${bot.id}">
+                    <div class="bot-header">
+                        <div class="bot-name">
+                            <div class="bot-icon ${bot.class}">${bot.icon}</div>
+                            <div class="bot-title">
+                                <h2>${bot.name}</h2>
+                                <span class="pair">${bot.pair}</span>
+                            </div>
+                        </div>
+                        <span class="status-badge offline" id="status-${bot.id}">Connecting...</span>
+                    </div>
+                    <div class="bot-metrics">
+                        <div class="metric">
+                            <div class="label">Price</div>
+                            <div class="value" id="price-${bot.id}">-</div>
+                        </div>
+                        <div class="metric">
+                            <div class="label">Profit</div>
+                            <div class="value" id="profit-${bot.id}" style="color: var(--accent-green)">$0.00</div>
+                        </div>
+                        <div class="metric">
+                            <div class="label">Orders</div>
+                            <div class="value" id="orders-${bot.id}">0</div>
+                        </div>
+                        <div class="metric">
+                            <div class="label">Inventory</div>
+                            <div class="value" id="inventory-${bot.id}">0 lots</div>
+                        </div>
+                    </div>
+                    <div class="score-bar">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                            <span>Score</span>
+                            <span id="score-${bot.id}">- / 100</span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-fill neutral" id="score-bar-${bot.id}" style="width: 50%"></div>
+                        </div>
+                    </div>
+                    <div class="bot-actions">
+                        <a href="${bot.url}" target="_blank" class="btn btn-primary">Open Dashboard →</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function connectToBots() {
+            BOTS.forEach(bot => {
+                try {
+                    // Connect using relative paths (nginx handles routing)
+                    const socketPath = bot.url === '/' ? '/socket.io' : `${bot.url}socket.io`;
+                    const socket = io({
+                        path: socketPath,
+                        transports: ['websocket', 'polling']
+                    });
+
+                    sockets[bot.id] = socket;
+                    botState[bot.id] = { connected: false };
+
+                    socket.on('connect', () => {
+                        console.log(`Connected to ${bot.name}`);
+                        botState[bot.id].connected = true;
+                        updateBotStatus(bot.id, 'online');
+                    });
+
+                    socket.on('disconnect', () => {
+                        console.log(`Disconnected from ${bot.name}`);
+                        botState[bot.id].connected = false;
+                        updateBotStatus(bot.id, 'offline');
+                    });
+
+                    socket.on('state', (data) => {
+                        botState[bot.id] = { ...botState[bot.id], ...data, connected: true };
+                        updateBotUI(bot.id, data);
+                    });
+
+                    socket.on('price', (data) => {
+                        if (data && data.price) {
+                            botState[bot.id].price = data.price;
+                            document.getElementById(`price-${bot.id}`).textContent = formatPrice(data.price);
+                        }
+                    });
+
+                    socket.on('composite', (data) => {
+                        if (data) {
+                            botState[bot.id].score = data.score;
+                            botState[bot.id].regime = data.regime;
+                            updateScore(bot.id, data.score, data.regime);
+
+                            // Update status based on regime
+                            if (data.regime?.includes('BEAR') || data.smartDcaBlocking) {
+                                updateBotStatus(bot.id, 'blocked');
+                            } else {
+                                updateBotStatus(bot.id, 'online');
+                            }
+                        }
+                    });
+
+                } catch (err) {
+                    console.error(`Failed to connect to ${bot.name}:`, err);
+                    botState[bot.id] = { connected: false };
+                    updateBotStatus(bot.id, 'offline');
+                }
+            });
+
+            // Fallback: Try direct fetch for state
+            setTimeout(() => fetchBotStates(), 2000);
+            setInterval(fetchBotStates, 10000);
+        }
+
+        async function fetchBotStates() {
+            // Fetch status from each bot's API endpoint
+            for (const bot of BOTS) {
+                try {
+                    const apiUrl = bot.url === '/' ? '/api/status' : `${bot.url}api/status`;
+                    const response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        botState[bot.id] = {
+                            ...botState[bot.id],
+                            ...data,
+                            connected: true,
+                            totalProfit: data.totalProfit,
+                            activeOrders: data.activeOrders,
+                            inventoryLots: data.inventoryLots,
+                            score: data.score,
+                            currentPrice: data.currentPrice
+                        };
+                        updateBotUI(bot.id, {
+                            currentPrice: data.currentPrice,
+                            totalProfit: data.totalProfit,
+                            activeOrders: data.activeOrders,
+                            inventory: data.inventoryLots
+                        });
+                        updateScore(bot.id, data.score, data.marketRegime);
+
+                        // Update status based on blocking
+                        if (data.smartDcaBlocking || data.marketRegime?.includes('BEAR')) {
+                            updateBotStatus(bot.id, 'blocked');
+                        } else {
+                            updateBotStatus(bot.id, 'online');
+                        }
+                    } else {
+                        botState[bot.id].connected = false;
+                        updateBotStatus(bot.id, 'offline');
+                    }
+                } catch (e) {
+                    console.error(`Error fetching ${bot.name}:`, e);
+                    botState[bot.id].connected = false;
+                    updateBotStatus(bot.id, 'offline');
+                }
+            }
+        }
+
+        function updateBotUI(botId, data) {
+            if (data.currentPrice) {
+                document.getElementById(`price-${botId}`).textContent = formatPrice(data.currentPrice);
+            }
+            if (data.totalProfit !== undefined) {
+                document.getElementById(`profit-${botId}`).textContent = `$${data.totalProfit.toFixed(2)}`;
+            }
+            if (data.activeOrders !== undefined) {
+                document.getElementById(`orders-${botId}`).textContent = Array.isArray(data.activeOrders) ? data.activeOrders.length : data.activeOrders;
+            }
+            if (data.inventory !== undefined) {
+                document.getElementById(`inventory-${botId}`).textContent = `${Array.isArray(data.inventory) ? data.inventory.length : data.inventory} lots`;
+            }
+        }
+
+        function updateScore(botId, score, regime) {
+            document.getElementById(`score-${botId}`).textContent = `${score} / 100`;
+            const bar = document.getElementById(`score-bar-${botId}`);
+            bar.style.width = `${score}%`;
+
+            bar.classList.remove('bullish', 'neutral', 'bearish');
+            if (score >= 70) {
+                bar.classList.add('bullish');
+            } else if (score >= 40) {
+                bar.classList.add('neutral');
+            } else {
+                bar.classList.add('bearish');
+            }
+        }
+
+        function updateBotStatus(botId, status) {
+            const badge = document.getElementById(`status-${botId}`);
+            badge.className = `status-badge ${status}`;
+            badge.textContent = status === 'online' ? '● Online' :
+                status === 'blocked' ? '⚠ Blocked' : '○ Offline';
+        }
+
+        function updateTotals() {
+            let totalProfit = 0;
+            let totalOrders = 0;
+            let botsOnline = 0;
+
+            BOTS.forEach(bot => {
+                const state = botState[bot.id];
+                if (state) {
+                    if (state.totalProfit) totalProfit += state.totalProfit;
+                    if (state.activeOrders) {
+                        totalOrders += Array.isArray(state.activeOrders) ? state.activeOrders.length : state.activeOrders;
+                    }
+                    if (state.connected) botsOnline++;
+                }
+            });
+
+            document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
+            document.getElementById('total-orders').textContent = totalOrders;
+            document.getElementById('bots-online').textContent = `${botsOnline} / 3`;
+            document.getElementById('last-update-time').textContent = new Date().toLocaleTimeString();
+        }
+
+        function formatPrice(price) {
+            if (!price) return '-';
+            if (price < 1) return `$${price.toFixed(4)}`;
+            if (price < 10) return `$${price.toFixed(3)}`;
+            if (price < 1000) return `$${price.toFixed(2)}`;
+            return `$${price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>
