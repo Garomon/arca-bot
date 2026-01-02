@@ -1,5 +1,5 @@
-# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v4.0
-*(Actualizado: 2025-12-30 - Soporte para 3 bots + SPREAD_MATCH Accounting)*
+# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v5.0
+*(Actualizado: 2026-01-02 - Timezone-Aware CDMX + Swarm Intelligence)*
 
 **IP VPS:** `167.71.1.124`  ssh root@167.71.1.124       
 **Usuario:** `root`
@@ -13,19 +13,12 @@ Copia y pega TODO el bloque gris en tu terminal SSH:
 
 ```bash
 clear; \
-echo -e "\n� ═══════════════════════════════════════════════════════════════"; \
-echo -e "                    RESUMEN EJECUTIVO [HOY]"; \
+echo -e "\n🦅 ═══════════════════════════════════════════════════════════════"; \
+echo -e "                    RESUMEN EJECUTIVO [HOY - CDMX]"; \
 echo -e "═══════════════════════════════════════════════════════════════\n"; \
-BTC_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
-SOL_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
-DOGE_JSON=$(tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_DOGEUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null); \
-BTC_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
-SOL_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
-DOGE_PROFIT_TODAY=$(grep -h "PROFIT" /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity*.log 2>/dev/null | grep "$(date +%Y-%m-%d)" | grep -oP '\$[0-9.]+$' | tr -d '$' | awk '{s+=$1} END {printf "%.4f", s}'); \
-echo "BTC:  Profit HOY \$${BTC_PROFIT_TODAY:-0} | Lotes: $(echo $BTC_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $BTC_JSON | jq -r '.decision_score // "?"') | $(echo $BTC_JSON | jq -r '.market_regime // "?"')"; \
-echo "SOL:  Profit HOY \$${SOL_PROFIT_TODAY:-0} | Lotes: $(echo $SOL_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $SOL_JSON | jq -r '.decision_score // "?"') | $(echo $SOL_JSON | jq -r '.market_regime // "?"')"; \
-echo "DOGE: Profit HOY \$${DOGE_PROFIT_TODAY:-0} | Lotes: $(echo $DOGE_JSON | jq -r '.inventory_lots // "?"') | Score: $(echo $DOGE_JSON | jq -r '.decision_score // "?"') | $(echo $DOGE_JSON | jq -r '.market_regime // "?"')"; \
-echo -e "\n═══════════════════════════════════════════════════════════════\n"; \
+cd /root/arca-bot; \
+node scripts/count_trades_today.js; \
+echo -e "═══════════════════════════════════════════════════════════════\n"; \
 echo -e "\n🚦 --- 1. STATUS DE PROCESOS (PM2) [TIEMPO REAL] ---"; \
 pm2 list; \
 echo -e "\n💻 --- 2. SALUD DEL SERVIDOR (Disco/RAM) [TIEMPO REAL] ---"; \
@@ -42,40 +35,31 @@ echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) [AYER] ---"; \
 cat /root/arca-bot/reports/daily_report_*_SOLUSDT_$(TZ='America/Mexico_City' date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de SOL de ayer."; \
 echo -e "\n💰 --- 5.c REPORTE DE AYER (DOGE) [AYER] ---"; \
 cat /root/arca-bot/reports/daily_report_*_DOGEUSDT_$(TZ='America/Mexico_City' date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de DOGE de ayer."; \
-echo -e "\n📈 --- 5.d TRADES DE HOY [CDMX - TIMEZONE AWARE] ---"; \
-node /root/arca-bot/scripts/count_trades_today.js; \
-echo -e "\n🧬 --- 5.e TRAZABILIDAD DE LOTES (ÚLTIMOS 5) ---"; \
+echo -e "\n🧬 --- 5.d TRAZABILIDAD DE LOTES (ÚLTIMOS 5) ---"; \
 grep -h "Matched Lots" /root/arca-bot/logs/VANTAGE01_*_activity*.log 2>/dev/null | tail -n 5; \
-echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD (últimas 100 líneas) ---"; \
-tail -n 100 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
-echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD (últimas 100 líneas) ---"; \
-tail -n 100 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
-echo -e "\n🏥 --- 8. [DOGE] ACTIVIDAD (últimas 100 líneas) ---"; \
-tail -n 100 /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity.log; \
-echo -e "\n🧠 --- 9.a [AI BTC] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
+echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD (últimas 50 líneas) ---"; \
+tail -n 50 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
+echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD (últimas 50 líneas) ---"; \
+tail -n 50 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
+echo -e "\n🏥 --- 8. [DOGE] ACTIVIDAD (últimas 50 líneas) ---"; \
+tail -n 50 /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity.log; \
+echo -e "\n🧠 --- 9.a [AI BTC] ENTRENAMIENTO [TIEMPO REAL] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
-echo -e "\n🧠 --- 9.b [AI SOL] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
+echo -e "\n🧠 --- 9.b [AI SOL] ENTRENAMIENTO [TIEMPO REAL] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_SOLUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
-echo -e "\n🧠 --- 9.c [AI DOGE] ENTRENAMIENTO [TIEMPO REAL - Último Dato] ---"; \
+echo -e "\n🧠 --- 9.c [AI DOGE] ENTRENAMIENTO [TIEMPO REAL] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_DOGEUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
-echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL - Última modificación] ---"; \
+echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL] ---"; \
 ls -lh /root/arca-bot/data/sessions/*_state.json; \
-echo -e "\n🔬 --- 11. AUDITORÍA SEMANAL [OPCIONAL - Correr manualmente] ---"; \
-echo "Para verificar profit real vs state file, ejecuta:"; \
+echo -e "\n🦅 --- 11. SWARM YIELD AUDIT [TIEMPO REAL] ---"; \
+node /root/arca-bot/scripts/calc_swarm_yield.js 2>/dev/null || echo "Script no disponible"; \
+echo -e "\n📊 --- 12. PROYECCIÓN DE RIQUEZA ---"; \
+node /root/arca-bot/scripts/analyze_projection.js 2>/dev/null || echo "Script no disponible"; \
+echo -e "\n🔬 --- 13. AUDITORÍA MANUAL [OPCIONAL] ---"; \
 echo "  node scripts/full_audit.js BTC/USDT"; \
 echo "  node scripts/full_audit.js SOL/USDT"; \
 echo "  node scripts/full_audit.js DOGE/USDT"; \
-echo "Si hay ⚠️ discrepancias, agrega --fix al final."
-
-echo -e "\n🦅 --- 12. SWARM INTELLIGENCE (AUDITORÍA & FUTURO) ---"; \
-echo "1. VERDAD FINANCIERA (Yield Real + Equity + Bags):"; \
-echo "   node scripts/calc_swarm_yield.js"; \
-echo ""; \
-echo "2. PROYECCIÓN DE RIQUEZA (¿Cuándo me retiro?):"; \
-echo "   node scripts/analyze_projection.js"; \
-echo ""; \
-echo "3. CAZAFANTASMAS (Borrar archivos duplicados/viejos):"; \
-echo "   node scripts/check_ghosts.js"; \
+echo "  node scripts/check_ghosts.js  # Cazafantasmas"
 ```
 
 ---
