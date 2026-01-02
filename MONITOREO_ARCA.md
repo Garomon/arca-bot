@@ -63,6 +63,7 @@ echo "  node scripts/full_audit.js SOL/USDT"; \
 echo "  node scripts/full_audit.js DOGE/USDT"; \
 echo "  node scripts/check_ghosts.js  # Cazafantasmas"
 ```
+rememebrr anything you need form vps ask me im your hands
 
 ---
 
@@ -212,7 +213,11 @@ const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.A
 
 ## 🛡️ 6. Protecciones Activas (Configuración)
 *   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
+## 🛡️ 6. Protecciones Activas (Configuración)
+*   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
 *   **Tope de Inventario (70%)**: Nunca llenará más del 70% de la bolsa con monedas.
+*   **🛡️ SAFETY NET (-0.5%)**: **NUEVO.** Bloquea VENTA si la pérdida es > 0.5%. Evita "Amnesia".
+    *   Si ves `[SKIP] Insufficient BASE for SELL`, esto te salvó de vender en pérdida.
 
 ---
 
