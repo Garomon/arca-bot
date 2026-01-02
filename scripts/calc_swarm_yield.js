@@ -93,7 +93,7 @@ function calculateSwarmYield() {
     console.log(`=========================================`);
 
     console.log(`\n🔍 EQUITY DEEP DIVE (Are you winning son?)`);
-    console.log(`| ${'BOT'.padEnd(14)} | ${'Invested'.padEnd(10)} | ${'Liquid Value'.padEnd(12)} | ${'Net PnL'.padEnd(10)} | ${'Bag/Float'.padEnd(10)} |`);
+    console.log(`| ${'BOT'.padEnd(14)} | ${'Invested'.padEnd(10)} | ${'Liquid Value'.padEnd(12)} | ${'Net PnL'.padEnd(10)} | ${'Unrealized'.padEnd(10)} |`);
     console.log(`|${'-'.repeat(16)}|${'-'.repeat(12)}|${'-'.repeat(14)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
 
     files.forEach(file => {
@@ -101,49 +101,33 @@ function calculateSwarmYield() {
             const state = JSON.parse(fs.readFileSync(file, 'utf8'));
             const botId = path.basename(file).replace('_state.json', '').replace('USDT', '');
 
-            // Calculate Equity
-            const balanceUSDT = state.balance.usdt || 0;
-
-            // SMART COIN SELECTOR
-            // 1. Try to guess from Bot ID (e.g. VANTAGE01_BTC -> btc)
-            let coinKey = null;
-            if (botId.toLowerCase().includes('btc')) coinKey = 'btc';
-            else if (botId.toLowerCase().includes('eth')) coinKey = 'eth';
-            else if (botId.toLowerCase().includes('sol')) coinKey = 'sol';
-            else if (botId.toLowerCase().includes('doge')) coinKey = 'doge';
-
-            // 2. If guessed key exists in balance, use it.
-            if (coinKey && state.balance[coinKey] !== undefined) {
-                // Good match
-            } else {
-                // 3. Fallback: Find anything that is NOT usdt, total, free, used
-                coinKey = Object.keys(state.balance).find(k =>
-                    !['usdt', 'total', 'free', 'used', 'locked'].includes(k.toLowerCase())
-                );
-            }
-
-            let balanceCoin = state.balance[coinKey] || 0;
+            // === FIXED: Use INVENTORY data, not balance ===
+            const inventory = state.inventory || [];
             const price = state.currentPrice || 0;
-
-            // Sanity Check for Atomic Units
-            let rawBalance = balanceCoin;
-            if (balanceCoin * price > (state.initialCapital * 20) && state.initialCapital > 0) {
-                if (coinKey.includes('btc') || coinKey.includes('sat')) balanceCoin = balanceCoin / 1e8;
-                if (coinKey.includes('sol') || coinKey.includes('lam')) balanceCoin = balanceCoin / 1e9;
-            }
-
-            const liquidationValue = balanceUSDT + (balanceCoin * price);
             const invested = state.initialCapital || 0;
-            const totalNetPnL = liquidationValue - invested;
             const realized = state.totalProfit || 0;
-            const floatingPnL = totalNetPnL - realized;
 
-            console.log(`| ${botId.padEnd(14)} | $${invested.toFixed(0).padEnd(9)} | $${liquidationValue.toFixed(0).padEnd(11)} | $${totalNetPnL.toFixed(2).padEnd(9)} | $${floatingPnL.toFixed(2).padEnd(9)} |`);
+            // Calculate inventory value at current price
+            let inventoryQty = 0;
+            let inventoryCost = 0;
+            inventory.forEach(lot => {
+                inventoryQty += lot.qty || 0;
+                inventoryCost += (lot.qty || 0) * (lot.price || 0);
+            });
+
+            const inventoryValue = inventoryQty * price;
+            const unrealizedPnL = inventoryValue - inventoryCost;
+
+            // Liquid Value = Initial Capital + Realized Profit + Unrealized PnL
+            const liquidationValue = invested + realized + unrealizedPnL;
+            const totalNetPnL = realized + unrealizedPnL;
+
+            console.log(`| ${botId.padEnd(14)} | $${invested.toFixed(0).padEnd(9)} | $${liquidationValue.toFixed(0).padEnd(11)} | $${totalNetPnL.toFixed(2).padEnd(9)} | $${unrealizedPnL.toFixed(2).padEnd(9)} |`);
 
         } catch (e) { }
     });
-    console.log(`\n* Net PnL = (Liquid Value - Invested). If Positive, you are truly winning.`);
-    console.log(`* Bag/Float = Impact of holding coins. if Negative, price dropped since entry.`);
+    console.log(`\n* Net PnL = Realized + Unrealized. If Positive, you are truly winning.`);
+    console.log(`* Unrealized = (Current Price - Avg Cost) × Qty. Green = price went UP since you bought.`);
     console.log(`=========================================\n`);
 }
 
