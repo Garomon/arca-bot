@@ -542,6 +542,11 @@
                 <div class="subvalue">Realized gains</div>
             </div>
             <div class="stat-card">
+                <div class="label">Daily Profit</div>
+                <div class="value positive" id="daily-profit">$0.00</div>
+                <div class="subvalue" id="daily-trades">0 trades today</div>
+            </div>
+            <div class="stat-card">
                 <div class="label">Unrealized PnL</div>
                 <div class="value" id="total-unrealized">$0.00</div>
                 <div class="subvalue">Open positions</div>
@@ -664,7 +669,9 @@
             let botsOnline = 0;
             let totalROI = 0;
             let botCount = 0;
-            let globalEquity = 0;  // From BTC bot (shared Binance account)
+            let globalEquity = 0;
+            let dailyProfit = 0;
+            let dailyTrades = 0;
 
             for (const bot of BOTS) {
                 try {
@@ -680,10 +687,11 @@
                         totalUnrealized += data.unrealizedPnL || 0;
                         totalOrders += data.activeOrders || 0;
                         totalROI += data.roi || 0;
+                        dailyProfit += data.dailyProfit || 0;
+                        dailyTrades += data.dailyTrades || 0;
                         botsOnline++;
                         botCount++;
 
-                        // Get global equity from first bot (BTC) - they all share same Binance account
                         if (bot.id === 'btc' && data.globalEquity > 0) {
                             globalEquity = data.globalEquity;
                         }
@@ -698,6 +706,11 @@
 
             // Update totals
             document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
+
+            const dailyEl = document.getElementById('daily-profit');
+            dailyEl.textContent = `$${dailyProfit.toFixed(2)}`;
+            dailyEl.className = `value ${dailyProfit >= 0 ? 'positive' : 'negative'}`;
+            document.getElementById('daily-trades').textContent = `${dailyTrades} trades today`;
 
             const unrealizedEl = document.getElementById('total-unrealized');
             unrealizedEl.textContent = `$${totalUnrealized.toFixed(2)}`;
