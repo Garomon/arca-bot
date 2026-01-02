@@ -276,7 +276,7 @@ async function fullAudit() {
         }
 
         // ==================== PHASE 3: GENERATE REPORT ====================
-        const remainingInventory = inventory.reduce((s, l) => s + l.remaining, 0);
+        let remainingInventory = inventory.reduce((s, l) => s + l.remaining, 0);
         const avgInvCost = inventory.length > 0
             ? inventory.reduce((s, l) => s + (l.remaining * l.price), 0) / remainingInventory
             : 0;
