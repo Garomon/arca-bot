@@ -608,6 +608,36 @@
             color: var(--text-primary);
         }
 
+        /* Alert & Text Styles */
+        .bot-card-alert {
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.2);
+            border: 1px solid var(--accent-orange) !important;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.1);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+            }
+
+            100% {
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.1);
+            }
+        }
+
+        .positive-text {
+            color: var(--accent-green);
+        }
+
+        .muted-text {
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .portfolio-grid {
@@ -918,8 +948,17 @@
             document.getElementById(`price-${botId}`).textContent = formatPrice(data.currentPrice);
 
             // Profit
-            document.getElementById(`profit-${botId}`).textContent = `$${(data.totalProfit || 0).toFixed(2)}`;
-            document.getElementById(`roi-${botId}`).textContent = `ROI: ${(data.roi || 0).toFixed(2)}%`;
+            const profitVal = data.totalProfit || 0;
+            document.getElementById(`profit-${botId}`).textContent = `$${profitVal.toFixed(2)}`;
+
+            // Daily Profit (Individual)
+            const dailyVal = data.dailyProfit || 0;
+            const dailyText = dailyVal > 0 ? `+$${dailyVal.toFixed(2)} today` : '$0.00 today';
+            const dailyClass = dailyVal > 0 ? 'positive-text' : 'muted-text';
+
+            // ROI + Daily Profit combo
+            const roiVal = (data.roi || 0).toFixed(2);
+            document.getElementById(`roi-${botId}`).innerHTML = `ROI: ${roiVal}% <br> <span class="${dailyClass}" style="font-weight:600; font-size: 0.75rem">${dailyText}</span>`;
 
             // Orders
             document.getElementById(`orders-${botId}`).textContent = data.activeOrders || 0;
@@ -938,13 +977,19 @@
             scoreBar.style.width = `${score}%`;
             scoreBar.className = `score-fill ${score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low'}`;
 
-            // Blocking reason
+            // Blocking reason & Alert Styling
             const blockingEl = document.getElementById(`blocking-${botId}`);
+            const cardEl = document.getElementById(`bot-card-${botId}`);
+
             if (data.blockingReason) {
                 blockingEl.classList.remove('hidden');
                 document.getElementById(`blocking-text-${botId}`).textContent = data.blockingReason;
+                // Add Visual Alert
+                cardEl.classList.add('bot-card-alert');
             } else {
                 blockingEl.classList.add('hidden');
+                // Remove Visual Alert
+                cardEl.classList.remove('bot-card-alert');
             }
 
             // Last trade update
