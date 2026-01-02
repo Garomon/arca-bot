@@ -1482,7 +1482,92 @@ async function initializeGrid(forceReset = false) {
     }
 }
 
-async function placeOrder(level) {
+// ==========================================
+// SAFETY NET: PREVENT AMNESIA SELLS
+// Checks if a SELL order would realize a significant loss
+// ==========================================
+function checkSafetyNet(level) {
+    // 1. SafetyNet only applies to SELLS
+    if (level.side !== 'sell') return { safe: true };
+
+    // 2. If no inventory, we have nothing to protect (or it's a naked short)
+    if (!state.inventory || state.inventory.length === 0) return { safe: true };
+
+    try {
+        const sellPrice = parseFloat(level.price);
+        let remainingToSell = parseFloat(level.amount);
+        let costBasis = 0;
+        let consumedAmount = 0;
+
+        // 3. Simulate Consumption (Clone to avoid mutating real state)
+        // Use the same logic as handleOrderFill (SPREAD_MATCH preferred)
+        const candidates = state.inventory
+            .filter(lot => lot.remaining > 0.00000001)
+            .map(lot => ({ ...lot })); // Shallow copy
+
+        if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
+            const spacing = level.spacing || CONFIG.gridSpacing || 0.01;
+            const expectedBuyPrice = sellPrice / (1 + spacing);
+            // Sort by proximity to expected buy price
+            candidates.sort((a, b) => Math.abs(a.price - expectedBuyPrice) - Math.abs(b.price - expectedBuyPrice));
+        } else if (ACCOUNTING_METHOD === 'LIFO') {
+            candidates.sort((a, b) => b.timestamp - a.timestamp); // Newest first
+        } else {
+            candidates.sort((a, b) => a.timestamp - b.timestamp); // FIFO (Oldest first)
+        }
+
+        // 4. Calculate Weighted Average Cost
+        for (const lot of candidates) {
+            if (remainingToSell <= 0.00000001) break;
+            const take = Math.min(remainingToSell, lot.remaining);
+            costBasis += (take * lot.price);
+            remainingToSell -= take;
+            consumedAmount += take;
+        }
+
+        // If we couldn't match enough inventory, we can't fully judge.
+        // Assume the rest is "at market" or safe? 
+        // Safer to judge based on what we matched.
+        if (consumedAmount === 0) return { safe: true };
+
+        const avgCost = costBasis / consumedAmount;
+        const profitPct = ((sellPrice - avgCost) / avgCost) * 100;
+
+        // 5. DECISION: Block if loss > 3% (Allow slight slippage/rebalance)
+        // Grid bot should NEVER sell at -3% unless it's a Stop Loss (handled separately)
+        const LOSS_TOLERANCE = -3.0;
+
+        if (profitPct < LOSS_TOLERANCE) {
+            // EXCEPTION: IF price is WAY above entry (e.g. we missed the top), maybe we want to sell?
+            // No, grid bot sells are for profit. If we are selling below cost, it's wrong.
+            // Unless it's a "Stop Loss" - in that case, the caller should bypass this check.
+            // But placeOrder doesn't have a bypass flag yet. 
+            // We assume standard grid operations here.
+
+            return {
+                safe: false,
+                reason: `AMNESIA PREVENTED: Selling @ $${sellPrice.toFixed(2)} would realize ${profitPct.toFixed(2)}% loss (AvgCost: $${avgCost.toFixed(2)}).`
+            };
+        }
+
+        return { safe: true };
+
+    } catch (e) {
+        console.error('SafetyNet Error:', e);
+        return { safe: true }; // Fail open if logic crashes, don't freeze bot
+    }
+}
+
+async function placeOrder(level, skipBudgetCheck = false) {
+    // PHASE 31: SAFETY NET CHECK
+    // Prevent "Amnesia Sells" (Selling below cost because we forgot we bought high)
+    const safety = checkSafetyNet(level);
+    if (!safety.safe) {
+        log('GUARD', `🛡️ SAFETY NET: ${safety.reason}`, 'error');
+        logDecision('BLOCKED_BY_SAFETY_NET', [safety.reason], { level });
+        return;
+    }
+
     // Circuit Breaker
     if (state.activeOrders.length >= CONFIG.maxOpenOrders) {
         console.warn('>> [WARN] MAX ORDERS REACHED. SKIPPING.');
