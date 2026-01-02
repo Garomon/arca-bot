@@ -42,8 +42,8 @@ function calculateSwarmYield() {
     let botCount = 0;
 
     // Table Header
-    console.log(`| ${'BOT ID'.padEnd(10)} | ${'Active'.padEnd(8)} | ${'Capital'.padEnd(10)} | ${'Profit'.padEnd(10)} | ${'Yield/Day'.padEnd(10)} |`);
-    console.log(`|${'-'.repeat(12)}|${'-'.repeat(10)}|${'-'.repeat(12)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
+    console.log(`| ${'BOT ID'.padEnd(14)} | ${'Active'.padEnd(8)} | ${'Capital'.padEnd(10)} | ${'Profit'.padEnd(10)} | ${'Yield/Day'.padEnd(10)} |`);
+    console.log(`|${'-'.repeat(16)}|${'-'.repeat(10)}|${'-'.repeat(12)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
 
     files.forEach(file => {
         try {
@@ -63,7 +63,7 @@ function calculateSwarmYield() {
             const dailyYield = (profit / capital) / daysActive;
 
             // Log Row
-            console.log(`| ${botId.padEnd(10)} | ${daysActive.toFixed(1).padEnd(8)} | $${capital.toFixed(0).padEnd(9)} | $${profit.toFixed(2).padEnd(9)} | ${(dailyYield * 100).toFixed(3)}%    |`);
+            console.log(`| ${botId.padEnd(14)} | ${daysActive.toFixed(1).padEnd(8)} | $${capital.toFixed(0).padEnd(9)} | $${profit.toFixed(2).padEnd(9)} | ${(dailyYield * 100).toFixed(3)}%    |`);
 
             // Accumulate for Swarm Average (Weighted by Capital)
             if (daysActive > 1 && capital > 0) {
@@ -93,8 +93,8 @@ function calculateSwarmYield() {
     console.log(`=========================================`);
 
     console.log(`\n🔍 EQUITY DEEP DIVE (Are you winning son?)`);
-    console.log(`| ${'BOT'.padEnd(10)} | ${'Invested'.padEnd(10)} | ${'Liquid Value'.padEnd(12)} | ${'Net PnL'.padEnd(10)} | ${'Bag/Float'.padEnd(10)} |`);
-    console.log(`|${'-'.repeat(12)}|${'-'.repeat(12)}|${'-'.repeat(14)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
+    console.log(`| ${'BOT'.padEnd(14)} | ${'Invested'.padEnd(10)} | ${'Liquid Value'.padEnd(12)} | ${'Net PnL'.padEnd(10)} | ${'Bag/Float'.padEnd(10)} |`);
+    console.log(`|${'-'.repeat(16)}|${'-'.repeat(12)}|${'-'.repeat(14)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
 
     files.forEach(file => {
         try {
@@ -103,19 +103,33 @@ function calculateSwarmYield() {
 
             // Calculate Equity
             const balanceUSDT = state.balance.usdt || 0;
-            // Find coin balance (key != usdt)
-            const coinKey = Object.keys(state.balance).find(k => k !== 'usdt');
+
+            // SMART COIN SELECTOR
+            // 1. Try to guess from Bot ID (e.g. VANTAGE01_BTC -> btc)
+            let coinKey = null;
+            if (botId.toLowerCase().includes('btc')) coinKey = 'btc';
+            else if (botId.toLowerCase().includes('eth')) coinKey = 'eth';
+            else if (botId.toLowerCase().includes('sol')) coinKey = 'sol';
+            else if (botId.toLowerCase().includes('doge')) coinKey = 'doge';
+
+            // 2. If guessed key exists in balance, use it.
+            if (coinKey && state.balance[coinKey] !== undefined) {
+                // Good match
+            } else {
+                // 3. Fallback: Find anything that is NOT usdt, total, free, used
+                coinKey = Object.keys(state.balance).find(k =>
+                    !['usdt', 'total', 'free', 'used', 'locked'].includes(k.toLowerCase())
+                );
+            }
+
             let balanceCoin = state.balance[coinKey] || 0;
             const price = state.currentPrice || 0;
 
-            // Sanity Check for Atomic Units (Heuristic)
-            // If we have > 1000 coins while invested < 10000, likely atomic units
-            // Or if balanceCoin * price is > 10x Invested
+            // Sanity Check for Atomic Units
             let rawBalance = balanceCoin;
-            if (balanceCoin * price > (state.initialCapital * 5) && state.initialCapital > 0) {
+            if (balanceCoin * price > (state.initialCapital * 20) && state.initialCapital > 0) {
                 if (coinKey.includes('btc') || coinKey.includes('sat')) balanceCoin = balanceCoin / 1e8;
                 if (coinKey.includes('sol') || coinKey.includes('lam')) balanceCoin = balanceCoin / 1e9;
-                // Fallback for general madness (if neither, assume 1e18 or just keep raw as finding)
             }
 
             const liquidationValue = balanceUSDT + (balanceCoin * price);
@@ -124,11 +138,7 @@ function calculateSwarmYield() {
             const realized = state.totalProfit || 0;
             const floatingPnL = totalNetPnL - realized;
 
-            console.log(`| ${botId.padEnd(10)} | $${invested.toFixed(0).padEnd(9)} | $${liquidationValue.toFixed(0).padEnd(11)} | $${totalNetPnL.toFixed(2).padEnd(9)} | $${floatingPnL.toFixed(2).padEnd(9)} |`);
-
-            if (liquidationValue > invested * 5) {
-                console.log(`  > ⚠️ ANOMALY FIXED? Raw Bal: ${rawBalance} ${coinKey} -> Used: ${balanceCoin}`);
-            }
+            console.log(`| ${botId.padEnd(14)} | $${invested.toFixed(0).padEnd(9)} | $${liquidationValue.toFixed(0).padEnd(11)} | $${totalNetPnL.toFixed(2).padEnd(9)} | $${floatingPnL.toFixed(2).padEnd(9)} |`);
 
         } catch (e) { }
     });
