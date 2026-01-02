@@ -37,25 +37,28 @@
             background: var(--bg-dark);
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 15px;
+            padding: 20px;
             background-image:
                 radial-gradient(ellipse at top, rgba(153, 69, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(ellipse at bottom right, rgba(0, 212, 255, 0.08) 0%, transparent 50%);
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
+        /* Header */
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            padding: 20px;
+            margin-bottom: 30px;
+            padding: 30px;
             background: linear-gradient(135deg, rgba(153, 69, 255, 0.15), rgba(0, 212, 255, 0.1));
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
             position: relative;
+            overflow: hidden;
         }
 
         .header::before {
@@ -69,35 +72,35 @@
         }
 
         .header h1 {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: 800;
             background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .header .subtitle {
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
-        .live-indicator {
+        .header .live-indicator {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             background: rgba(0, 255, 157, 0.1);
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--accent-green);
-            margin-top: 8px;
+            margin-top: 10px;
         }
 
-        .live-dot {
-            width: 6px;
-            height: 6px;
+        .header .live-dot {
+            width: 8px;
+            height: 8px;
             background: var(--accent-green);
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -117,39 +120,51 @@
             }
         }
 
-        /* Stats Grid */
-        .stats-grid {
+        /* Portfolio Summary */
+        .portfolio-grid {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .stat-card {
             background: var(--bg-card);
-            border-radius: 12px;
-            padding: 15px 12px;
+            border-radius: 16px;
+            padding: 20px;
             border: 1px solid var(--border-color);
             text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(153, 69, 255, 0.3);
         }
 
         .stat-card .label {
             color: var(--text-muted);
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
         .stat-card .value {
-            font-size: 1.3rem;
+            font-size: 1.6rem;
             font-weight: 700;
         }
 
         .stat-card .subvalue {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
-            margin-top: 2px;
+            margin-top: 4px;
+        }
+
+        .stat-card .change {
+            font-size: 0.8rem;
+            margin-top: 4px;
         }
 
         .positive {
@@ -168,27 +183,28 @@
             color: var(--accent-yellow);
         }
 
-        /* Main Content */
-        .main-content {
+        /* Bots Grid */
+        .bots-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-        }
-
-        /* Bot Cards */
-        .bots-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            margin-bottom: 25px;
         }
 
         .bot-card {
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 25px;
             border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bot-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
         .bot-card::before {
@@ -216,23 +232,23 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .bot-identity {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .bot-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.8rem;
         }
 
         .bot-icon.btc {
@@ -248,29 +264,30 @@
         }
 
         .bot-info h2 {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             margin-bottom: 2px;
         }
 
         .bot-info .pair {
             color: var(--text-secondary);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
 
         .status-group {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 4px;
+            gap: 6px;
         }
 
         .status-badge {
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 0.65rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .status-badge.online {
@@ -289,9 +306,9 @@
         }
 
         .regime-badge {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.6rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.65rem;
             font-weight: 500;
         }
 
@@ -310,54 +327,65 @@
             color: var(--accent-yellow);
         }
 
-        .metrics-row {
+        /* Bot Metrics Grid */
+        .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-            margin-bottom: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
-        .metric-box {
+        .metric-item {
             background: var(--glass-bg);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
+            padding: 14px;
+            border-radius: 12px;
         }
 
-        .metric-box .label {
+        .metric-item .label {
             color: var(--text-muted);
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
         }
 
-        .metric-box .value {
-            font-size: 0.95rem;
+        .metric-item .value {
+            font-size: 1.15rem;
             font-weight: 600;
         }
 
-        .metric-box .sub {
-            font-size: 0.65rem;
+        .metric-item .subtext {
+            font-size: 0.7rem;
             color: var(--text-secondary);
+            margin-top: 2px;
         }
 
-        .score-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        /* Score Display */
+        .score-section {
             background: var(--glass-bg);
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .score-label {
             font-size: 0.75rem;
             color: var(--text-secondary);
-            min-width: 80px;
+        }
+
+        .score-value {
+            font-size: 1.3rem;
+            font-weight: 700;
         }
 
         .score-bar {
-            flex: 1;
             height: 6px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
@@ -382,167 +410,58 @@
             background: linear-gradient(90deg, var(--accent-red), #ff6b6b);
         }
 
-        .score-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            min-width: 40px;
-            text-align: right;
-        }
-
-        .blocking-alert {
+        /* Blocking Reason */
+        .blocking-reason {
             background: rgba(255, 215, 0, 0.08);
             border: 1px solid rgba(255, 215, 0, 0.2);
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 0.7rem;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 0.75rem;
             color: var(--accent-yellow);
-            margin-top: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blocking-reason.hidden {
             display: none;
         }
 
-        .blocking-alert.visible {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .bot-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .last-trade {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-        }
-
-        .last-trade span {
-            color: var(--text-primary);
-        }
-
-        .btn-dashboard {
-            padding: 8px 16px;
+        /* Action Button */
+        .bot-action {
+            display: block;
+            width: 100%;
+            padding: 12px;
             background: linear-gradient(135deg, rgba(153, 69, 255, 0.2), rgba(0, 212, 255, 0.2));
             border: 1px solid rgba(153, 69, 255, 0.3);
-            border-radius: 8px;
-            color: white;
-            font-size: 0.75rem;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-dashboard:hover {
-            transform: scale(1.02);
-            background: linear-gradient(135deg, rgba(153, 69, 255, 0.3), rgba(0, 212, 255, 0.3));
-        }
-
-        /* Sidebar */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .panel {
-            background: var(--bg-card);
             border-radius: 12px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
         }
 
-        .panel-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .bot-action:hover {
+            background: linear-gradient(135deg, rgba(153, 69, 255, 0.3), rgba(0, 212, 255, 0.3));
+            transform: scale(1.02);
         }
 
-        .log-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .log-item {
-            padding: 8px 10px;
-            background: var(--glass-bg);
-            border-radius: 6px;
-            margin-bottom: 6px;
-            font-size: 0.7rem;
-        }
-
-        .log-item .log-type {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.6rem;
-            font-weight: 600;
-            margin-right: 6px;
-        }
-
-        .log-item .log-type.trade {
-            background: rgba(0, 255, 157, 0.15);
-            color: var(--accent-green);
-        }
-
-        .log-item .log-type.system {
-            background: rgba(0, 212, 255, 0.15);
-            color: var(--accent-blue);
-        }
-
-        .log-item .log-type.warning {
-            background: rgba(255, 215, 0, 0.15);
-            color: var(--accent-yellow);
-        }
-
-        .log-item .log-type.error {
-            background: rgba(255, 71, 87, 0.15);
-            color: var(--accent-red);
-        }
-
-        .log-item .log-msg {
-            color: var(--text-secondary);
-        }
-
-        .log-item .log-time {
-            color: var(--text-muted);
-            font-size: 0.6rem;
-            display: block;
-            margin-top: 4px;
-        }
-
-        .summary-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-        }
-
-        .summary-row .label {
-            color: var(--text-secondary);
-        }
-
-        .summary-row .value {
-            font-weight: 600;
-        }
-
+        /* Footer */
         .footer {
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
         }
 
+        .footer .update-time {
+            color: var(--text-secondary);
+        }
+
+        /* Loading */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -563,8 +482,8 @@
         }
 
         .loader {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border: 3px solid var(--border-color);
             border-top-color: var(--accent-purple);
             border-radius: 50%;
@@ -577,27 +496,24 @@
             }
         }
 
+        /* Responsive */
         @media (max-width: 1200px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .metrics-row {
+            .portfolio-grid {
                 grid-template-columns: repeat(3, 1fr);
+            }
+
+            .bots-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 768px) {
-            .stats-grid {
+            .portfolio-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .metrics-row {
-                grid-template-columns: repeat(2, 1fr);
+            .bots-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -618,16 +534,12 @@
             </div>
         </div>
 
-        <div class="stats-grid">
+        <!-- Portfolio Summary -->
+        <div class="portfolio-grid">
             <div class="stat-card">
                 <div class="label">Total Profit</div>
                 <div class="value positive" id="total-profit">$0.00</div>
-                <div class="subvalue">All-time</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Daily Profit</div>
-                <div class="value positive" id="daily-profit">$0.00</div>
-                <div class="subvalue" id="daily-trades">0 trades</div>
+                <div class="subvalue">Realized gains</div>
             </div>
             <div class="stat-card">
                 <div class="label">Unrealized PnL</div>
@@ -636,84 +548,46 @@
             </div>
             <div class="stat-card">
                 <div class="label">Total Equity</div>
-                <div class="value neutral" id="total-equity">$0</div>
-                <div class="subvalue">USDT + Crypto</div>
+                <div class="value neutral" id="total-equity">$0.00</div>
+                <div class="subvalue">USDT + Inventory</div>
             </div>
             <div class="stat-card">
                 <div class="label">Portfolio ROI</div>
                 <div class="value" id="total-roi">0.00%</div>
-                <div class="subvalue">All-time</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">APY</div>
-                <div class="value" id="total-apy">0%</div>
-                <div class="subvalue">Projected</div>
+                <div class="subvalue">All-time return</div>
             </div>
             <div class="stat-card">
                 <div class="label">Active Orders</div>
                 <div class="value neutral" id="total-orders">0</div>
-                <div class="subvalue">All bots</div>
+                <div class="subvalue">Across all bots</div>
             </div>
             <div class="stat-card">
                 <div class="label">Status</div>
-                <div class="value positive" id="bots-status">0/3</div>
-                <div class="subvalue">Online</div>
+                <div class="value positive" id="bots-status">0 / 3</div>
+                <div class="subvalue">Bots online</div>
             </div>
         </div>
 
-        <div class="main-content">
-            <div class="bots-section" id="bots-container"></div>
+        <!-- Bot Cards -->
+        <div class="bots-grid" id="bots-container"></div>
 
-            <div class="sidebar">
-                <div class="panel">
-                    <div class="panel-title">📊 Portfolio Summary</div>
-                    <div class="summary-list">
-                        <div class="summary-row">
-                            <span class="label">Total Trades</span>
-                            <span class="value" id="summary-trades">0</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="label">Avg Win Rate</span>
-                            <span class="value" id="summary-winrate">0%</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="label">Days Active</span>
-                            <span class="value" id="summary-days">0</span>
-                        </div>
-                        <div class="summary-row">
-                            <span class="label">Avg Daily Profit</span>
-                            <span class="value positive" id="summary-daily">$0.00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-title">📋 Recent Activity</div>
-                    <div class="log-list" id="log-list">
-                        <div class="log-item">
-                            <span class="log-type system">SYS</span>
-                            <span class="log-msg">Waiting for data...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- Footer -->
         <div class="footer">
-            Last update: <span id="last-update">-</span> · Refreshes every 5 seconds
+            Last update: <span class="update-time" id="last-update">-</span>
+            <br>
+            <span style="opacity: 0.5; font-size: 0.7rem;">Refreshes every 5 seconds</span>
         </div>
     </div>
 
     <script>
         const BOTS = [
-            { id: 'btc', name: 'Bitcoin', pair: 'BTC/USDT', icon: '₿', url: '/', class: 'btc' },
-            { id: 'sol', name: 'Solana', pair: 'SOL/USDT', icon: '◎', url: '/sol/', class: 'sol' },
-            { id: 'doge', name: 'Dogecoin', pair: 'DOGE/USDT', icon: '🐕', url: '/doge/', class: 'doge' }
+            { id: 'btc', name: 'Bitcoin', pair: 'BTC/USDT', icon: '₿', url: '/', class: 'btc', color: '#f7931a' },
+            { id: 'sol', name: 'Solana', pair: 'SOL/USDT', icon: '◎', url: '/sol/', class: 'sol', color: '#9945ff' },
+            { id: 'doge', name: 'Dogecoin', pair: 'DOGE/USDT', icon: '🐕', url: '/doge/', class: 'doge', color: '#c2a633' }
         ];
 
         const botState = {};
         let isFirstLoad = true;
-        let allLogs = [];
 
         function init() {
             renderBotCards();
@@ -739,66 +613,58 @@
                         </div>
                     </div>
 
-                    <div class="metrics-row">
-                        <div class="metric-box">
+                    <div class="metrics-grid">
+                        <div class="metric-item">
                             <div class="label">Price</div>
                             <div class="value" id="price-${bot.id}">-</div>
                         </div>
-                        <div class="metric-box">
+                        <div class="metric-item">
                             <div class="label">Profit</div>
                             <div class="value positive" id="profit-${bot.id}">$0.00</div>
-                            <div class="sub" id="roi-${bot.id}">0% ROI</div>
+                            <div class="subtext" id="roi-${bot.id}">ROI: 0%</div>
                         </div>
-                        <div class="metric-box">
-                            <div class="label">Daily</div>
-                            <div class="value positive" id="daily-${bot.id}">$0.00</div>
-                            <div class="sub" id="daily-trades-${bot.id}">0 trades</div>
-                        </div>
-                        <div class="metric-box">
-                            <div class="label">Win Rate</div>
-                            <div class="value" id="winrate-${bot.id}">0%</div>
-                            <div class="sub" id="trades-${bot.id}">0 trades</div>
-                        </div>
-                        <div class="metric-box">
+                        <div class="metric-item">
                             <div class="label">Orders</div>
                             <div class="value" id="orders-${bot.id}">0</div>
-                            <div class="sub" id="lots-${bot.id}">0 lots</div>
+                            <div class="subtext" id="lots-${bot.id}">0 lots</div>
                         </div>
-                        <div class="metric-box">
-                            <div class="label">APY</div>
-                            <div class="value" id="apy-${bot.id}">0%</div>
-                            <div class="sub">projected</div>
+                        <div class="metric-item">
+                            <div class="label">Win Rate</div>
+                            <div class="value" id="winrate-${bot.id}">-</div>
+                            <div class="subtext" id="trades-${bot.id}">0 trades</div>
                         </div>
                     </div>
 
-                    <div class="score-row">
-                        <span class="score-label">Decision Score</span>
+                    <div class="score-section">
+                        <div class="score-header">
+                            <span class="score-label">Decision Score</span>
+                            <span class="score-value" id="score-${bot.id}">50</span>
+                        </div>
                         <div class="score-bar">
                             <div class="score-fill medium" id="score-bar-${bot.id}" style="width: 50%"></div>
                         </div>
-                        <span class="score-value" id="score-${bot.id}">50</span>
                     </div>
 
-                    <div class="blocking-alert" id="blocking-${bot.id}">
+                    <div class="blocking-reason hidden" id="blocking-${bot.id}">
                         <span>⚠️</span>
                         <span id="blocking-text-${bot.id}"></span>
                     </div>
 
-                    <div class="bot-footer">
-                        <div class="last-trade" id="last-trade-${bot.id}">
-                            Last trade: <span>-</span>
-                        </div>
-                        <a href="${bot.url}" target="_blank" class="btn-dashboard">Open Dashboard →</a>
-                    </div>
+                    <a href="${bot.url}" target="_blank" class="bot-action">
+                        Open Full Dashboard →
+                    </a>
                 </div>
             `).join('');
         }
 
         async function fetchAllData() {
-            let totalProfit = 0, totalUnrealized = 0, totalOrders = 0, botsOnline = 0;
-            let totalROI = 0, totalAPY = 0, botCount = 0, globalEquity = 0;
-            let dailyProfit = 0, dailyTrades = 0, totalTrades = 0, totalWinRate = 0;
-            let maxDaysActive = 0;
+            let totalProfit = 0;
+            let totalUnrealized = 0;
+            let totalOrders = 0;
+            let botsOnline = 0;
+            let totalROI = 0;
+            let botCount = 0;
+            let globalEquity = 0;  // From BTC bot (shared Binance account)
 
             for (const bot of BOTS) {
                 try {
@@ -814,26 +680,12 @@
                         totalUnrealized += data.unrealizedPnL || 0;
                         totalOrders += data.activeOrders || 0;
                         totalROI += data.roi || 0;
-                        totalAPY += data.apy || 0;
-                        dailyProfit += data.dailyProfit || 0;
-                        dailyTrades += data.dailyTrades || 0;
-                        totalTrades += data.totalTrades || 0;
-                        totalWinRate += data.winRate || 0;
-                        if (data.daysActive > maxDaysActive) maxDaysActive = data.daysActive;
                         botsOnline++;
                         botCount++;
 
+                        // Get global equity from first bot (BTC) - they all share same Binance account
                         if (bot.id === 'btc' && data.globalEquity > 0) {
                             globalEquity = data.globalEquity;
-                        }
-
-                        // Collect logs
-                        if (data.recentLogs) {
-                            data.recentLogs.forEach(log => {
-                                if (!allLogs.find(l => l.timestamp === log.timestamp && l.message === log.message)) {
-                                    allLogs.push({ ...log, bot: bot.id });
-                                }
-                            });
                         }
                     } else {
                         updateBotOffline(bot.id);
@@ -844,15 +696,14 @@
                 }
             }
 
-            // Update header stats
+            // Update totals
             document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
-            document.getElementById('daily-profit').textContent = `$${dailyProfit.toFixed(2)}`;
-            document.getElementById('daily-trades').textContent = `${dailyTrades} trades`;
 
             const unrealizedEl = document.getElementById('total-unrealized');
             unrealizedEl.textContent = `$${totalUnrealized.toFixed(2)}`;
             unrealizedEl.className = `value ${totalUnrealized >= 0 ? 'positive' : 'negative'}`;
 
+            // Use global equity from Binance (via BTC bot)
             document.getElementById('total-equity').textContent = `$${globalEquity > 0 ? globalEquity.toFixed(0) : '...'}`;
 
             const avgROI = botCount > 0 ? totalROI / botCount : 0;
@@ -860,25 +711,11 @@
             roiEl.textContent = `${avgROI.toFixed(2)}%`;
             roiEl.className = `value ${avgROI >= 0 ? 'positive' : 'negative'}`;
 
-            const avgAPY = botCount > 0 ? totalAPY / botCount : 0;
-            const apyEl = document.getElementById('total-apy');
-            apyEl.textContent = `${avgAPY.toFixed(0)}%`;
-            apyEl.className = `value ${avgAPY >= 0 ? 'positive' : 'negative'}`;
-
             document.getElementById('total-orders').textContent = totalOrders;
-            document.getElementById('bots-status').textContent = `${botsOnline}/3`;
-
-            // Sidebar summary
-            document.getElementById('summary-trades').textContent = totalTrades;
-            document.getElementById('summary-winrate').textContent = `${(totalWinRate / Math.max(1, botCount)).toFixed(0)}%`;
-            document.getElementById('summary-days').textContent = maxDaysActive.toFixed(0);
-            document.getElementById('summary-daily').textContent = `$${(totalProfit / Math.max(1, maxDaysActive)).toFixed(2)}`;
-
-            // Update logs
-            updateLogs();
-
+            document.getElementById('bots-status').textContent = `${botsOnline} / 3`;
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
 
+            // Hide loading on first successful load
             if (isFirstLoad && botsOnline > 0) {
                 document.getElementById('loading').classList.add('hidden');
                 isFirstLoad = false;
@@ -886,50 +723,49 @@
         }
 
         function updateBotCard(botId, data) {
+            // Status
             const status = data.smartDcaBlocking ? 'blocked' : 'online';
             const statusEl = document.getElementById(`status-${botId}`);
             statusEl.className = `status-badge ${status}`;
             statusEl.textContent = status === 'online' ? '● Online' : '⚠ Blocked';
 
+            // Regime
             const regimeEl = document.getElementById(`regime-${botId}`);
             const regime = data.marketRegime || 'UNKNOWN';
             regimeEl.textContent = regime;
             regimeEl.className = `regime-badge ${regime.includes('BULL') ? 'bull' : regime.includes('BEAR') ? 'bear' : 'neutral'}`;
 
+            // Price
             document.getElementById(`price-${botId}`).textContent = formatPrice(data.currentPrice);
+
+            // Profit
             document.getElementById(`profit-${botId}`).textContent = `$${(data.totalProfit || 0).toFixed(2)}`;
-            document.getElementById(`roi-${botId}`).textContent = `${(data.roi || 0).toFixed(2)}% ROI`;
-            document.getElementById(`daily-${botId}`).textContent = `$${(data.dailyProfit || 0).toFixed(2)}`;
-            document.getElementById(`daily-trades-${botId}`).textContent = `${data.dailyTrades || 0} trades`;
+            document.getElementById(`roi-${botId}`).textContent = `ROI: ${(data.roi || 0).toFixed(2)}%`;
 
-            const winRateEl = document.getElementById(`winrate-${botId}`);
-            winRateEl.textContent = `${(data.winRate || 0).toFixed(0)}%`;
-            winRateEl.className = `value ${data.winRate >= 50 ? 'positive' : data.winRate >= 30 ? 'warning' : 'negative'}`;
-            document.getElementById(`trades-${botId}`).textContent = `${data.totalTrades || 0} trades`;
-
+            // Orders
             document.getElementById(`orders-${botId}`).textContent = data.activeOrders || 0;
             document.getElementById(`lots-${botId}`).textContent = `${data.inventoryLots || 0} lots`;
-            document.getElementById(`apy-${botId}`).textContent = `${(data.apy || 0).toFixed(0)}%`;
 
+            // Win Rate
+            const winRateEl = document.getElementById(`winrate-${botId}`);
+            winRateEl.textContent = `${(data.winRate || 0).toFixed(0)}%`;
+            winRateEl.className = `value ${data.winRate >= 70 ? 'positive' : data.winRate >= 50 ? 'warning' : 'negative'}`;
+            document.getElementById(`trades-${botId}`).textContent = `${data.totalTrades || 0} trades`;
+
+            // Score
             const score = data.score || 50;
-            document.getElementById(`score-${botId}`).textContent = score.toFixed(0);
+            document.getElementById(`score-${botId}`).textContent = score;
             const scoreBar = document.getElementById(`score-bar-${botId}`);
             scoreBar.style.width = `${score}%`;
-            scoreBar.className = `score-fill ${score >= 60 ? 'high' : score >= 40 ? 'medium' : 'low'}`;
+            scoreBar.className = `score-fill ${score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low'}`;
 
+            // Blocking reason
             const blockingEl = document.getElementById(`blocking-${botId}`);
             if (data.blockingReason) {
-                blockingEl.classList.add('visible');
+                blockingEl.classList.remove('hidden');
                 document.getElementById(`blocking-text-${botId}`).textContent = data.blockingReason;
             } else {
-                blockingEl.classList.remove('visible');
-            }
-
-            const lastTradeEl = document.getElementById(`last-trade-${botId}`);
-            if (data.lastTrade) {
-                const tradeTime = new Date(data.lastTrade.timestamp).toLocaleTimeString();
-                const profit = data.lastTrade.profit ? ` (+$${data.lastTrade.profit.toFixed(4)})` : '';
-                lastTradeEl.innerHTML = `Last trade: <span>${data.lastTrade.side.toUpperCase()} @ ${formatPrice(data.lastTrade.price)}${profit} · ${tradeTime}</span>`;
+                blockingEl.classList.add('hidden');
             }
         }
 
@@ -939,30 +775,9 @@
             statusEl.textContent = '○ Offline';
         }
 
-        function updateLogs() {
-            const logList = document.getElementById('log-list');
-            const sorted = allLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
-
-            if (sorted.length === 0) return;
-
-            logList.innerHTML = sorted.map(log => {
-                const typeClass = log.type?.toLowerCase().includes('trade') || log.type?.toLowerCase().includes('sell') || log.type?.toLowerCase().includes('buy') ? 'trade' :
-                    log.type?.toLowerCase().includes('error') ? 'error' :
-                        log.type?.toLowerCase().includes('warn') ? 'warning' : 'system';
-                const time = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '-';
-                return `
-                    <div class="log-item">
-                        <span class="log-type ${typeClass}">${log.bot?.toUpperCase() || 'SYS'}</span>
-                        <span class="log-msg">${log.message || '-'}</span>
-                        <span class="log-time">${time}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
         function formatPrice(price) {
             if (!price) return '-';
-            if (price < 0.01) return `$${price.toFixed(5)}`;
+            if (price < 0.01) return `$${price.toFixed(6)}`;
             if (price < 1) return `$${price.toFixed(4)}`;
             if (price < 10) return `$${price.toFixed(3)}`;
             if (price < 1000) return `$${price.toFixed(2)}`;
