@@ -16,7 +16,7 @@ const ARGS = process.argv.slice(2);
 const PAIR = ARGS[0] || 'BTC/USDT';
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 const BASE_ASSET = PAIR.split('/')[0];
-const FEE_RATE = 0.001; // 0.1% per trade
+const FEE_RATE = parseFloat(process.env.TRADING_FEE) || 0.001; // Use env or default 0.1%
 
 // Grid spacing varies by pair (must match CONFIG in grid_bot.js)
 const PAIR_PRESETS = {
@@ -217,32 +217,52 @@ async function backfillProfits() {
         // ==================== PHASE 4: UPDATE STATE ====================
         console.log(`║  [4/5] Updating state with correct data...                       ║`);
 
-        // Update filledOrders with correct profits
-        let updatedCount = 0;
+        // FIX: Rebuild filledOrders from scratch using tradeResults to ensure NO history is lost
+        // This fixes the issue where a crash/restart wipes recent history from the state file.
+        const newFilledOrders = [];
         let profitSum = 0;
 
-        if (state.filledOrders && state.filledOrders.length > 0) {
-            for (const order of state.filledOrders) {
-                const orderId = String(order.id);
-                const result = tradeResults.get(orderId);
+        // Iterate through all tradeResults (sorted by orderId/time effectively via trades loop)
+        // We use trades array to ensure time-order
+        for (const trade of trades) {
+            const orderId = String(trade.order || trade.orderId || trade.id);
+            const result = tradeResults.get(orderId);
 
-                if (result) {
-                    order.profit = result.profit;
-                    order.costBasis = result.costBasis;
-                    order.spreadPct = result.spreadPct;
-                    order.fees = result.fees; // FIX: Include fees for UI display
-                    order.matchType = result.matchType;
-                    order.matchedLots = result.lotsUsed; // FIX: Include lot IDs for traceability
-                    order.isNetProfit = true;
-                    order.accountingMethod = 'SPREAD_MATCH';
-                    updatedCount++;
+            if (result) {
+                // Construct the order object
+                const order = {
+                    id: orderId,
+                    side: trade.side,
+                    price: parseFloat(trade.price),
+                    amount: parseFloat(trade.amount),
+                    value: parseFloat(trade.cost) || (parseFloat(trade.price) * parseFloat(trade.amount)),
+                    timestamp: trade.timestamp,
+                    status: 'closed', // Implied by it being in trade history
+                    filled: parseFloat(trade.amount),
 
-                    if (order.side === 'sell' && result.profit !== null) {
-                        profitSum += result.profit;
-                    }
+                    // Enriched Data
+                    profit: result.profit,
+                    costBasis: result.costBasis,
+                    spreadPct: result.spreadPct,
+                    fees: result.fees,
+                    matchType: result.matchType,
+                    matchedLots: result.lotsUsed,
+                    isNetProfit: true,
+                    accountingMethod: 'SPREAD_MATCH'
+                };
+
+                newFilledOrders.push(order);
+
+                if (order.side === 'sell' && result.profit !== null) {
+                    profitSum += result.profit;
                 }
             }
         }
+
+        // Replace state.filledOrders with the trusted rebuilt version
+        const oldCount = state.filledOrders ? state.filledOrders.length : 0;
+        state.filledOrders = newFilledOrders;
+        console.log(`║  >> History Restored: ${oldCount} -> ${newFilledOrders.length} orders                    ║`);
 
         // Update inventory
         state.inventory = inventory.map(lot => ({
