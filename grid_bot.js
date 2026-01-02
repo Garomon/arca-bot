@@ -299,6 +299,15 @@ app.get('/api/status', async (req, res) => {
         const dailyProfit = todayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
         const dailyTrades = todayOrders.length;
 
+        // Calculate Yesterday's Profit (UTC-6)
+        const startOfYesterdayCDMX = startOfDayCDMX - (24 * 60 * 60 * 1000);
+        const yesterdayOrders = filledOrders.filter(o =>
+            o.timestamp &&
+            o.timestamp >= startOfYesterdayCDMX &&
+            o.timestamp < startOfDayCDMX
+        );
+        const yesterdayProfit = yesterdayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
+
         // Calculate APY from ROI and days active
         const startTime = state.firstTradeTime || state.startTime || Date.now();
         const daysActive = Math.max(1, (Date.now() - startTime) / (1000 * 60 * 60 * 24));
@@ -328,6 +337,7 @@ app.get('/api/status', async (req, res) => {
             unrealizedPnL: unrealizedPnL,
             totalPnL: totalPnL,
             dailyProfit: dailyProfit,
+            yesterdayProfit: yesterdayProfit,
             dailyTrades: dailyTrades,
 
             // Portfolio metrics

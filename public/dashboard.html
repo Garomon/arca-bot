@@ -821,6 +821,7 @@
             let globalEquity = 0;
             let dailyProfit = 0;
             let dailyTrades = 0;
+            let totalYesterday = 0;
             let allLogs = [];
 
             for (const bot of BOTS) {
@@ -839,6 +840,9 @@
                         totalROI += data.roi || 0;
                         dailyProfit += data.dailyProfit || 0;
                         dailyTrades += data.dailyTrades || 0;
+                        // Track global yesterday profit
+                        if (data.yesterdayProfit) totalYesterday += data.yesterdayProfit;
+
                         botsOnline++;
                         botCount++;
 
@@ -867,7 +871,11 @@
             const dailyEl = document.getElementById('daily-profit');
             dailyEl.textContent = `$${dailyProfit.toFixed(2)}`;
             dailyEl.className = `value ${dailyProfit >= 0 ? 'positive' : 'negative'}`;
-            document.getElementById('daily-trades').textContent = `${dailyTrades} trades today`;
+
+            // Daily Profit Subtext with Yesterday comparison
+            const yestText = totalYesterday !== 0 ? `Yesterday: $${totalYesterday.toFixed(2)}` : '';
+            const yestHtml = yestText ? `<span style="opacity:0.6; font-size: 0.9em"> · ${yestText}</span>` : '';
+            document.getElementById('daily-trades').innerHTML = `${dailyTrades} trades today${yestHtml}`;
 
             const unrealizedEl = document.getElementById('total-unrealized');
             unrealizedEl.textContent = `$${totalUnrealized.toFixed(2)}`;
@@ -956,9 +964,12 @@
             const dailyText = dailyVal > 0 ? `+$${dailyVal.toFixed(2)} today` : '$0.00 today';
             const dailyClass = dailyVal > 0 ? 'positive-text' : 'muted-text';
 
-            // ROI + Daily Profit combo
+            // ROI + Daily Profit combo with Yesterday
             const roiVal = (data.roi || 0).toFixed(2);
-            document.getElementById(`roi-${botId}`).innerHTML = `ROI: ${roiVal}% <br> <span class="${dailyClass}" style="font-weight:600; font-size: 0.75rem">${dailyText}</span>`;
+            const yestVal = data.yesterdayProfit || 0;
+            const yestText = yestVal !== 0 ? `<br><span style="opacity:0.6; font-size:0.75em; letter-spacing:0.5px">Yest: $${yestVal.toFixed(2)}</span>` : '';
+
+            document.getElementById(`roi-${botId}`).innerHTML = `ROI: ${roiVal}% <br> <span class="${dailyClass}" style="font-weight:600; font-size: 0.75rem">${dailyText}</span>${yestText}`;
 
             // Orders
             document.getElementById(`orders-${botId}`).textContent = data.activeOrders || 0;
