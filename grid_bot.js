@@ -296,7 +296,7 @@ app.get('/api/status', async (req, res) => {
         const lastTrade = filledOrders.length > 0 ? filledOrders[filledOrders.length - 1] : null;
 
         // Recent logs (last 5)
-        const recentLogs = (global.logBuffer || []).slice(-5).map(l => ({
+        const recentLogs = (logBuffer || []).slice(-5).map(l => ({
             type: l.type,
             message: l.message?.substring(0, 100),
             timestamp: l.timestamp
