@@ -3,6 +3,7 @@ module.exports = {
     {
       name: "bot-btc",
       script: "./grid_bot.js",
+      time: true, // Enable timestamps in logs
       watch: false,
       env: {
         TRADING_PAIR: "BTC/USDT",
@@ -16,6 +17,7 @@ module.exports = {
     {
       name: "bot-sol",
       script: "./grid_bot.js",
+      time: true,
       watch: false,
       env: {
         TRADING_PAIR: "SOL/USDT",
@@ -29,6 +31,7 @@ module.exports = {
     {
       name: "bot-doge",
       script: "./grid_bot.js",
+      time: true,
       watch: false,
       env: {
         TRADING_PAIR: "DOGE/USDT",

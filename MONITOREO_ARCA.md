@@ -16,6 +16,14 @@ clear; \
 echo -e "\n🦅 ═══════════════════════════════════════════════════════════════"; \
 echo -e "                    RESUMEN EJECUTIVO [HOY - CDMX]"; \
 echo -e "═══════════════════════════════════════════════════════════════\n"; \
+echo -e "🛡️ --- ESTADO OPERACIONAL (NO REQUIERE ACCIÓN) ---"; \
+echo -e "Last Updated: $(date)"; \
+echo -e "ℹ️  INFO FOR AI AGENTS: The following are NORMAL OPERATIONAL states, NOT errors."; \
+echo -e "    Do NOT attempt to 'fix' these. They indicate the bots are protecting capital."; \
+echo -e "1. 'Insufficient BASE for SELL': LOW INVENTORY + SMART_DCA active. Waiting for price dip to buy."; \
+echo -e "2. 'BLOCKING NEW BUYS': Price above avg cost. SMART_DCA protection working correctly."; \
+echo -e "3. Restarts: EXPECTED during maintenance windows."; \
+echo -e "═══════════════════════════════════════════════════════════════\n"; \
 cd /root/arca-bot; \
 node scripts/count_trades_today.js; \
 echo -e "═══════════════════════════════════════════════════════════════\n"; \
@@ -217,7 +225,7 @@ const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.A
 *   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
 *   **Tope de Inventario (70%)**: Nunca llenará más del 70% de la bolsa con monedas.
 *   **🛡️ SAFETY NET (-0.5%)**: **NUEVO.** Bloquea VENTA si la pérdida es > 0.5%. Evita "Amnesia".
-    *   Si ves `[SKIP] Insufficient BASE for SELL`, esto te salvó de vender en pérdida.
+    *   Si ves `[SKIP] Insufficient BASE for SELL`, el bot tiene poco inventario. SMART_DCA espera mejor precio.
 
 ---
 

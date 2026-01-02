@@ -1,0 +1,718 @@
+{
+  "pair": "DOGE/USDT",
+  "balance": {
+    "total": 939.5264089,
+    "usdt": 74.66305060912003,
+    "base": 109,
+    "btc": 109,
+    "locked": 75.51393999999999
+  },
+  "currentPrice": 0.14463,
+  "entryPrice": 0.14039,
+  "activeOrders": [
+    {
+      "id": "13340137568",
+      "side": "buy",
+      "price": 0.13763,
+      "amount": 137,
+      "level": -1,
+      "status": "open",
+      "timestamp": 1767390496393,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_b6b4833c",
+      "spacing": 0.019653391963960296
+    },
+    {
+      "id": "13340137578",
+      "side": "buy",
+      "price": 0.13487,
+      "amount": 140,
+      "level": -2,
+      "status": "open",
+      "timestamp": 1767390496786,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_d8e3922c",
+      "spacing": 0.019653391963960296
+    },
+    {
+      "id": "13340137986",
+      "side": "buy",
+      "price": 0.13211,
+      "amount": 143,
+      "level": -3,
+      "status": "open",
+      "timestamp": 1767390497185,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_999143bf",
+      "spacing": 0.019653391963960296
+    },
+    {
+      "id": "13340138007",
+      "side": "buy",
+      "price": 0.12935,
+      "amount": 146,
+      "level": -4,
+      "status": "open",
+      "timestamp": 1767390497575,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_1289ff06",
+      "spacing": 0.019653391963960296
+    },
+    {
+      "id": "13340138034",
+      "side": "sell",
+      "price": 0.14591,
+      "amount": 129,
+      "level": 2,
+      "status": "open",
+      "timestamp": 1767390498811,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_f38b58c5",
+      "spacing": 0.019653391963960296
+    },
+    {
+      "id": "13340138038",
+      "side": "sell",
+      "price": 0.14867,
+      "amount": 127,
+      "level": 3,
+      "status": "open",
+      "timestamp": 1767390499216,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_c8f7aa86",
+      "spacing": 0.019653391963960296
+    },
+    {
+      "id": "13340138042",
+      "side": "sell",
+      "price": 0.15143,
+      "amount": 124,
+      "level": 4,
+      "status": "open",
+      "timestamp": 1767390499610,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_bfe8876e",
+      "spacing": 0.019653391963960296
+    }
+  ],
+  "filledOrders": [
+    {
+      "id": "13340097942",
+      "side": "buy",
+      "price": 0.14007,
+      "amount": 8,
+      "timestamp": 1767389828169,
+      "profit": 0,
+      "status": "filled",
+      "isEstimated": true,
+      "isNetProfit": false
+    },
+    {
+      "id": "13328169923",
+      "side": "sell",
+      "price": 0.12876,
+      "amount": 89,
+      "value": 11.45964,
+      "timestamp": 1767325277018,
+      "status": "closed",
+      "filled": 89,
+      "profit": 1.0505311242857172,
+      "costBasis": 0.11682741573033707,
+      "spreadPct": 10.213856221219448,
+      "fees": 0.011468875714285716,
+      "matchType": "FALLBACK",
+      "matchedLots": [
+        {
+          "lotId": "13320587698",
+          "price": 0.11684,
+          "amount": 33
+        },
+        {
+          "lotId": "13319826666",
+          "price": 0.11682,
+          "amount": 56
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13323525339",
+      "side": "sell",
+      "price": 0.12512,
+      "amount": 91,
+      "value": 11.38592,
+      "timestamp": 1767282387142,
+      "status": "closed",
+      "filled": 91,
+      "profit": 0.742084826363636,
+      "costBasis": 0.11684000000000001,
+      "spreadPct": 7.086614173228342,
+      "fees": 0.011395173636363637,
+      "matchType": "FALLBACK",
+      "matchedLots": [
+        {
+          "lotId": "13320587698",
+          "price": 0.11684,
+          "amount": 91
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13323525333",
+      "side": "sell",
+      "price": 0.12417,
+      "amount": 92,
+      "value": 11.42364,
+      "timestamp": 1767282375772,
+      "status": "closed",
+      "filled": 92,
+      "profit": 0.60340680308559,
+      "costBasis": 0.11748695652173913,
+      "spreadPct": 5.688328029013402,
+      "fees": 0.01143319691441089,
+      "matchType": "FALLBACK",
+      "matchedLots": [
+        {
+          "lotId": "13319826274",
+          "price": 0.1178,
+          "amount": 62
+        },
+        {
+          "lotId": "13320587698",
+          "price": 0.11684,
+          "amount": 30
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13323525196",
+      "side": "sell",
+      "price": 0.12321,
+      "amount": 93,
+      "value": 11.45853,
+      "timestamp": 1767282098235,
+      "status": "closed",
+      "filled": 93,
+      "profit": 0.1727016208413296,
+      "costBasis": 0.12122967741935485,
+      "spreadPct": 1.6335295307227986,
+      "fees": 0.011468379158668572,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "13317892782",
+          "price": 0.12223,
+          "amount": 72
+        },
+        {
+          "lotId": "13319826274",
+          "price": 0.1178,
+          "amount": 21
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13323525183",
+      "side": "sell",
+      "price": 0.12226,
+      "amount": 94,
+      "value": 11.49244,
+      "timestamp": 1767282077764,
+      "status": "closed",
+      "filled": 94,
+      "profit": 0.06379761292372918,
+      "costBasis": 0.12145893617021276,
+      "spreadPct": 0.6595346995832546,
+      "fees": 0.011502387076271187,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "13319824729",
+          "price": 0.12072,
+          "amount": 48
+        },
+        {
+          "lotId": "13317892782",
+          "price": 0.12223,
+          "amount": 46
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13323525171",
+      "side": "sell",
+      "price": 0.1213,
+      "amount": 94,
+      "value": 11.4022,
+      "timestamp": 1767281515173,
+      "status": "closed",
+      "filled": 94,
+      "profit": 0.056827892500001184,
+      "costBasis": 0.12057404255319149,
+      "spreadPct": 0.602084355335654,
+      "fees": 0.011412107500000001,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "13319825085",
+          "price": 0.11974,
+          "amount": 14
+        },
+        {
+          "lotId": "13319824729",
+          "price": 0.12072,
+          "amount": 80
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13323525166",
+      "side": "sell",
+      "price": 0.12035,
+      "amount": 150,
+      "value": 18.0525,
+      "timestamp": 1767257922635,
+      "status": "closed",
+      "filled": 150,
+      "profit": 0.15297174999999785,
+      "costBasis": 0.11920973333333333,
+      "spreadPct": 0.9565214473538518,
+      "fees": 0.018068249999999998,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "13319825736",
+          "price": 0.11877,
+          "amount": 82
+        },
+        {
+          "lotId": "13319825085",
+          "price": 0.11974,
+          "amount": 68
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13320587698",
+      "side": "buy",
+      "price": 0.11684,
+      "amount": 154,
+      "value": 17.99336,
+      "timestamp": 1767211526999,
+      "status": "closed",
+      "filled": 154,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13319826666",
+      "side": "buy",
+      "price": 0.11682,
+      "amount": 84,
+      "value": 9.81288,
+      "timestamp": 1767199352207,
+      "status": "closed",
+      "filled": 84,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13319826274",
+      "side": "buy",
+      "price": 0.1178,
+      "amount": 83,
+      "value": 9.7774,
+      "timestamp": 1767199349482,
+      "status": "closed",
+      "filled": 83,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13319825736",
+      "side": "buy",
+      "price": 0.11877,
+      "amount": 82,
+      "value": 9.73914,
+      "timestamp": 1767199347000,
+      "status": "closed",
+      "filled": 82,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13319825085",
+      "side": "buy",
+      "price": 0.11974,
+      "amount": 82,
+      "value": 9.81868,
+      "timestamp": 1767199343316,
+      "status": "closed",
+      "filled": 82,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13319824729",
+      "side": "buy",
+      "price": 0.12072,
+      "amount": 128,
+      "value": 15.45216,
+      "timestamp": 1767195188518,
+      "status": "closed",
+      "filled": 128,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13317892782",
+      "side": "buy",
+      "price": 0.12223,
+      "amount": 118,
+      "value": 14.42314,
+      "timestamp": 1767193928080,
+      "status": "closed",
+      "filled": 118,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "13340138031",
+      "side": "sell",
+      "price": 0.14315,
+      "amount": 131,
+      "level": 1,
+      "status": "open",
+      "timestamp": 1767391511344,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_aced03b2",
+      "spacing": 0.019653391963960296,
+      "fillPrice": 0.14315,
+      "profit": 0.3756536350000018,
+      "isNetProfit": true,
+      "costBasis": 0.14006999999999997,
+      "spreadPct": 2.198900549725157,
+      "matchedLots": [
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 8,
+          "remainingAfter": 0,
+          "timestamp": 1767389828169
+        },
+        {
+          "lotId": "13340097942",
+          "buyPrice": 0.14007,
+          "amountTaken": 43,
+          "remainingAfter": 461,
+          "timestamp": 1767389828169
+        }
+      ],
+      "fees": 0.027826365,
+      "matchMethod": "SPREAD_MATCH",
+      "matchType": "EXACT"
+    }
+  ],
+  "totalProfit": 3.217975265000003,
+  "volatilityRegime": "HIGH",
+  "isPaused": true,
+  "pauseUntil": null,
+  "pauseReason": "SAFETY LOCK: Cost Basis Lost. Run 'node scripts/full_audit.js DOGE/USDT --fix' to resume.",
+  "initialCapital": 236.83148467701994,
+  "capitalHistory": [
+    {
+      "amount": 203.41934678078,
+      "timestamp": 1767350115000,
+      "reason": "INITIAL_CAPITAL"
+    },
+    {
+      "amount": 203.65558583996,
+      "timestamp": 1767365447322,
+      "reason": "USDT_DEPOSIT",
+      "delta": 5.044690560000004,
+      "rawUSDT": 25.223452800000018
+    },
+    {
+      "amount": 203.69641954578003,
+      "timestamp": 1767389665516,
+      "reason": "USDT_DEPOSIT",
+      "delta": 16.6,
+      "rawUSDT": 83
+    },
+    {
+      "amount": 220.27144128070006,
+      "timestamp": 1767389830786,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -16.584287999999994,
+      "rawUSDT": -82.92143999999996
+    },
+    {
+      "type": "DEPOSIT",
+      "amount": 16.60063365681998,
+      "timestamp": 1767390234914,
+      "equityBefore": 203.69641954578003,
+      "equityAfter": 220.2970532026
+    },
+    {
+      "type": "DEPOSIT",
+      "amount": 16.811504239419975,
+      "timestamp": 1767390799880,
+      "equityBefore": 203.69641954578003,
+      "equityAfter": 220.5079237852
+    },
+    {
+      "amount": 220.93716579365997,
+      "timestamp": 1767394053180,
+      "reason": "USDT_DEPOSIT",
+      "delta": 7.953471680000007,
+      "rawUSDT": 39.767358400000035
+    }
+  ],
+  "firstTradeTime": 1767257922635,
+  "isLive": true,
+  "startTime": 1767389907425,
+  "marketRegime": "STRONG_BULL",
+  "emergencyStop": false,
+  "maxDrawdown": 0,
+  "lastRebalance": {
+    "timestamp": 1767372792016,
+    "triggers": [
+      "VOLATILITY"
+    ]
+  },
+  "lastFillTime": 1767391511344,
+  "lastVolatility": "NORMAL",
+  "lastRegime": "STRONG_BULL",
+  "metrics": {
+    "ticksInRange": 783,
+    "ticksOutOfRange": 0,
+    "buyHoldStartPrice": 0.1404,
+    "metricsStartTime": 1767390502513
+  },
+  "lastKnownEquity": 220.92160610416,
+  "lastEquityCheck": 1767394099884,
+  "inventory": [
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 8,
+      "remaining": 8,
+      "fee": 0.00084042,
+      "timestamp": 1767389828169,
+      "recovered": true
+    },
+    {
+      "id": "13340097942",
+      "price": 0.14007,
+      "amount": 401,
+      "remaining": 401,
+      "fee": 0.0421260525,
+      "timestamp": 1767389828169,
+      "recovered": true
+    }
+  ],
+  "inventoryStatus": "ESTIMATED",
+  "_lastTrackedUSDT": 939.5264089,
+  "lastSyncTime": 1767394145724,
+  "lastGridReset": 1767389907425,
+  "accumulatedProfit": 3.217975265000003,
+  "estimatedProfit": 0,
+  "feeCorrectionApplied": true,
+  "accountingMethod": "SPREAD_MATCH",
+  "lastBackfill": "2026-01-02T20:30:06.651Z",
+  "dcaBlockStartTime": 1767391784208,
+  "smartDcaBlocking": false
+}

@@ -1,0 +1,2792 @@
+{
+  "pair": "SOL/USDT",
+  "balance": {
+    "total": 939.5264089,
+    "usdt": 411.50274915004,
+    "base": 0.01525006,
+    "btc": 0.01525006,
+    "locked": 0
+  },
+  "currentPrice": 132.71,
+  "entryPrice": 132.72,
+  "activeOrders": [],
+  "filledOrders": [
+    {
+      "id": "15763331910",
+      "side": "buy",
+      "price": 136.55,
+      "amount": 0.153,
+      "value": 20.89215,
+      "timestamp": 1765553179554,
+      "status": "closed",
+      "filled": 0.153,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15766793212",
+      "side": "buy",
+      "price": 135.09,
+      "amount": 0.149,
+      "value": 20.12841,
+      "timestamp": 1765553661146,
+      "status": "closed",
+      "filled": 0.149,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15766793520",
+      "side": "buy",
+      "price": 133.63,
+      "amount": 0.109,
+      "value": 14.56567,
+      "timestamp": 1765555086701,
+      "status": "closed",
+      "filled": 0.109,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15766794362",
+      "side": "buy",
+      "price": 132.18,
+      "amount": 0.11,
+      "value": 14.5398,
+      "timestamp": 1765556478094,
+      "status": "closed",
+      "filled": 0.11,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15766795426",
+      "side": "buy",
+      "price": 130.72,
+      "amount": 0.111,
+      "value": 14.50992,
+      "timestamp": 1765568752038,
+      "status": "closed",
+      "filled": 0.111,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15777625570",
+      "side": "buy",
+      "price": 132.47,
+      "amount": 0.116,
+      "value": 15.36652,
+      "timestamp": 1765645843416,
+      "status": "closed",
+      "filled": 0.116,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15778115136",
+      "side": "buy",
+      "price": 132.01,
+      "amount": 0.116,
+      "value": 15.31316,
+      "timestamp": 1765661509506,
+      "status": "closed",
+      "filled": 0.116,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15778115189",
+      "side": "sell",
+      "price": 133.49,
+      "amount": 0.115,
+      "value": 15.35135,
+      "timestamp": 1765672429217,
+      "status": "closed",
+      "filled": 0.115,
+      "profit": 0.08671460000000196,
+      "costBasis": 132.47,
+      "spreadPct": 0.769985657129924,
+      "fees": 0.030585400000000002,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15777625570",
+          "price": 132.47,
+          "amount": 0.115
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779813249",
+      "side": "sell",
+      "price": 133.49,
+      "amount": 0.084,
+      "value": 11.21316,
+      "timestamp": 1765700710499,
+      "status": "closed",
+      "filled": 0.084,
+      "profit": 0.08743343000000178,
+      "costBasis": 132.1834523809524,
+      "spreadPct": 0.9884350843569688,
+      "fees": 0.02231657,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15777625570",
+          "price": 132.47,
+          "amount": 0.001
+        },
+        {
+          "lotId": "15766794362",
+          "price": 132.18,
+          "amount": 0.083
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15780289348",
+      "side": "buy",
+      "price": 132.42,
+      "amount": 0.084,
+      "value": 11.12328,
+      "timestamp": 1765704647358,
+      "status": "closed",
+      "filled": 0.084,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293299",
+      "side": "buy",
+      "price": 131.83,
+      "amount": 0.081,
+      "value": 10.67823,
+      "timestamp": 1765707221489,
+      "status": "closed",
+      "filled": 0.081,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779813150",
+      "side": "buy",
+      "price": 131.07,
+      "amount": 0.086,
+      "value": 11.27202,
+      "timestamp": 1765707241171,
+      "status": "closed",
+      "filled": 0.086,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15780602997",
+      "side": "sell",
+      "price": 132.12,
+      "amount": 0.086,
+      "value": 11.36232,
+      "timestamp": 1765707888394,
+      "status": "closed",
+      "filled": 0.086,
+      "profit": 0.06766566000000093,
+      "costBasis": 131.07,
+      "spreadPct": 0.801098649576571,
+      "fees": 0.02263434,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15779813150",
+          "price": 131.07,
+          "amount": 0.086
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15780739075",
+      "side": "buy",
+      "price": 131.06,
+      "amount": 0.086,
+      "value": 11.27116,
+      "timestamp": 1765712294772,
+      "status": "closed",
+      "filled": 0.086,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293378",
+      "side": "buy",
+      "price": 130.48,
+      "amount": 0.058,
+      "value": 7.56784,
+      "timestamp": 1765712682350,
+      "status": "closed",
+      "filled": 0.058,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15781471458",
+      "side": "sell",
+      "price": 131.76,
+      "amount": 0.08,
+      "value": 10.5408,
+      "timestamp": 1765714751254,
+      "status": "closed",
+      "filled": 0.08,
+      "profit": 0.06220159999999972,
+      "costBasis": 130.72,
+      "spreadPct": 0.795593635250912,
+      "fees": 0.0209984,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15766795426",
+          "price": 130.72,
+          "amount": 0.08
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480466",
+      "side": "buy",
+      "price": 130.08,
+      "amount": 0.083,
+      "value": 10.79664,
+      "timestamp": 1765732432027,
+      "status": "closed",
+      "filled": 0.083,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293402",
+      "side": "buy",
+      "price": 129.14,
+      "amount": 0.058,
+      "value": 7.49012,
+      "timestamp": 1765754847056,
+      "status": "closed",
+      "filled": 0.058,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480485",
+      "side": "buy",
+      "price": 128.79,
+      "amount": 0.058,
+      "value": 7.46982,
+      "timestamp": 1765755151442,
+      "status": "closed",
+      "filled": 0.058,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480876",
+      "side": "sell",
+      "price": 132.68,
+      "amount": 0.081,
+      "value": 10.74708,
+      "timestamp": 1765765088033,
+      "status": "closed",
+      "filled": 0.081,
+      "profit": 0.04742468999999941,
+      "costBasis": 131.83,
+      "spreadPct": 0.6447697792611653,
+      "fees": 0.021425310000000003,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15779293299",
+          "price": 131.83,
+          "amount": 0.081
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480902",
+      "side": "sell",
+      "price": 133.97,
+      "amount": 0.056,
+      "value": 7.50232,
+      "timestamp": 1765808114226,
+      "status": "closed",
+      "filled": 0.056,
+      "profit": 0.004054400000000388,
+      "costBasis": 133.63,
+      "spreadPct": 0.25443388460675254,
+      "fees": 0.014985600000000002,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15766793520",
+          "price": 133.63,
+          "amount": 0.056
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293589",
+      "side": "sell",
+      "price": 134.51,
+      "amount": 0.08,
+      "value": 10.7608,
+      "timestamp": 1765808207060,
+      "status": "closed",
+      "filled": 0.08,
+      "profit": 0.08165147000000067,
+      "costBasis": 133.221625,
+      "spreadPct": 0.9670914913400899,
+      "fees": 0.021418529999999998,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15766793520",
+          "price": 133.63,
+          "amount": 0.053
+        },
+        {
+          "lotId": "15780289348",
+          "price": 132.42,
+          "amount": 0.027
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480922",
+      "side": "sell",
+      "price": 135.27,
+      "amount": 0.055,
+      "value": 7.43985,
+      "timestamp": 1765808213812,
+      "status": "closed",
+      "filled": 0.055,
+      "profit": -0.004969799999999094,
+      "costBasis": 135.09,
+      "spreadPct": 0.1332445036642289,
+      "fees": 0.014869800000000002,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15766793212",
+          "price": 135.09,
+          "amount": 0.055
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293506",
+      "side": "buy",
+      "price": 127.8,
+      "amount": 0.059,
+      "value": 7.5402,
+      "timestamp": 1765812038764,
+      "status": "closed",
+      "filled": 0.059,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480502",
+      "side": "buy",
+      "price": 127.49,
+      "amount": 0.059,
+      "value": 7.52191,
+      "timestamp": 1765812039486,
+      "status": "closed",
+      "filled": 0.059,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293557",
+      "side": "buy",
+      "price": 126.45,
+      "amount": 0.06,
+      "value": 7.587,
+      "timestamp": 1765814230971,
+      "status": "closed",
+      "filled": 0.06,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480735",
+      "side": "buy",
+      "price": 126.2,
+      "amount": 0.059,
+      "value": 7.4458,
+      "timestamp": 1765815168950,
+      "status": "closed",
+      "filled": 0.059,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293565",
+      "side": "buy",
+      "price": 125.11,
+      "amount": 0.06,
+      "value": 7.5066,
+      "timestamp": 1765821063303,
+      "status": "closed",
+      "filled": 0.06,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15782480751",
+      "side": "buy",
+      "price": 124.9,
+      "amount": 0.06,
+      "value": 7.494,
+      "timestamp": 1765821071807,
+      "status": "closed",
+      "filled": 0.06,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15779293577",
+      "side": "buy",
+      "price": 123.77,
+      "amount": 0.061,
+      "value": 7.54997,
+      "timestamp": 1765823730001,
+      "status": "closed",
+      "filled": 0.061,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15806189010",
+      "side": "sell",
+      "price": 127.06,
+      "amount": 0.127,
+      "value": 16.13662,
+      "timestamp": 1765881330554,
+      "status": "closed",
+      "filled": 0.127,
+      "profit": 0.07076970000000025,
+      "costBasis": 126.24944881889763,
+      "spreadPct": 0.6420235404473636,
+      "fees": 0.0321703,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15782480735",
+          "price": 126.2,
+          "amount": 0.059
+        },
+        {
+          "lotId": "15779293557",
+          "price": 126.45,
+          "amount": 0.06
+        },
+        {
+          "lotId": "15779293565",
+          "price": 125.11,
+          "amount": 0.008
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15806189144",
+      "side": "sell",
+      "price": 128.42,
+      "amount": 0.092,
+      "value": 11.81464,
+      "timestamp": 1765881838879,
+      "status": "closed",
+      "filled": 0.092,
+      "profit": 0.051776049999999234,
+      "costBasis": 127.60119565217391,
+      "spreadPct": 0.6416901845167968,
+      "fees": 0.023553949999999997,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15782480502",
+          "price": 127.49,
+          "amount": 0.059
+        },
+        {
+          "lotId": "15779293506",
+          "price": 127.8,
+          "amount": 0.033
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15806189160",
+      "side": "sell",
+      "price": 129.78,
+      "amount": 0.091,
+      "value": 11.80998,
+      "timestamp": 1765891819905,
+      "status": "closed",
+      "filled": 0.091,
+      "profit": 0.054998580000000276,
+      "costBasis": 128.91692307692307,
+      "spreadPct": 0.6694830302162462,
+      "fees": 0.02354142,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15782480485",
+          "price": 128.79,
+          "amount": 0.058
+        },
+        {
+          "lotId": "15779293402",
+          "price": 129.14,
+          "amount": 0.033
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15825253022",
+      "side": "buy",
+      "price": 124.87,
+      "amount": 0.095,
+      "value": 11.86265,
+      "timestamp": 1765989169656,
+      "status": "closed",
+      "filled": 0.095,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15837356767",
+      "side": "sell",
+      "price": 126.33,
+      "amount": 0.082,
+      "value": 10.35906,
+      "timestamp": 1766065401242,
+      "status": "closed",
+      "filled": 0.082,
+      "profit": 0.08572821999999944,
+      "costBasis": 125.03317073170732,
+      "spreadPct": 1.0371881803072747,
+      "fees": 0.02061178,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15779293565",
+          "price": 125.11,
+          "amount": 0.052
+        },
+        {
+          "lotId": "15782480751",
+          "price": 124.9,
+          "amount": 0.03
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15837356779",
+      "side": "sell",
+      "price": 128.75,
+      "amount": 0.08,
+      "value": 10.3,
+      "timestamp": 1766071805343,
+      "status": "closed",
+      "filled": 0.08,
+      "profit": -0.04424361999999931,
+      "costBasis": 129.04525,
+      "spreadPct": -0.2287957131316418,
+      "fees": 0.020623620000000002,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15779293506",
+          "price": 127.8,
+          "amount": 0.026
+        },
+        {
+          "lotId": "15779293402",
+          "price": 129.14,
+          "amount": 0.025
+        },
+        {
+          "lotId": "15782480466",
+          "price": 130.08,
+          "amount": 0.029
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15837356702",
+      "side": "buy",
+      "price": 121.49,
+      "amount": 0.085,
+      "value": 10.32665,
+      "timestamp": 1766078599672,
+      "status": "closed",
+      "filled": 0.085,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15844406287",
+      "side": "sell",
+      "price": 123.86,
+      "amount": 0.085,
+      "value": 10.5281,
+      "timestamp": 1766081640145,
+      "status": "closed",
+      "filled": 0.085,
+      "profit": 0.04137617000000137,
+      "costBasis": 123.12623529411762,
+      "spreadPct": 0.5959450511335782,
+      "fees": 0.020993829999999998,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15779293577",
+          "price": 123.77,
+          "amount": 0.061
+        },
+        {
+          "lotId": "15837356702",
+          "price": 121.49,
+          "amount": 0.024
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15837356718",
+      "side": "buy",
+      "price": 119.07,
+      "amount": 0.087,
+      "value": 10.35909,
+      "timestamp": 1766086666375,
+      "status": "closed",
+      "filled": 0.087,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15867544618",
+      "side": "buy",
+      "price": 125.08,
+      "amount": 0.167,
+      "value": 20.88836,
+      "timestamp": 1766282331761,
+      "status": "closed",
+      "filled": 0.167,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15867544622",
+      "side": "buy",
+      "price": 123.89,
+      "amount": 0.115,
+      "value": 14.24735,
+      "timestamp": 1766323809514,
+      "status": "closed",
+      "filled": 0.115,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15872462066",
+      "side": "sell",
+      "price": 125.07,
+      "amount": 0.122,
+      "value": 15.25854,
+      "timestamp": 1766332428463,
+      "status": "closed",
+      "filled": 0.122,
+      "profit": 0.10672001999999667,
+      "costBasis": 123.94622950819674,
+      "spreadPct": 0.9066596832047559,
+      "fees": 0.03037998,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15867544622",
+          "price": 123.89,
+          "amount": 0.115
+        },
+        {
+          "lotId": "15825253022",
+          "price": 124.87,
+          "amount": 0.007
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15873233691",
+      "side": "sell",
+      "price": 126.23,
+      "amount": 0.121,
+      "value": 15.27383,
+      "timestamp": 1766337412596,
+      "status": "closed",
+      "filled": 0.121,
+      "profit": 0.10874149000000077,
+      "costBasis": 125.08,
+      "spreadPct": 0.9194115765909863,
+      "fees": 0.03040851,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15867544618",
+          "price": 125.08,
+          "amount": 0.121
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15873233705",
+      "side": "sell",
+      "price": 127.48,
+      "amount": 0.083,
+      "value": 10.58084,
+      "timestamp": 1766362453511,
+      "status": "closed",
+      "filled": 0.083,
+      "profit": 0.1851143900000004,
+      "costBasis": 124.99722891566265,
+      "spreadPct": 1.9862609002416507,
+      "fees": 0.020955610000000003,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15867544618",
+          "price": 125.08,
+          "amount": 0.046
+        },
+        {
+          "lotId": "15782480751",
+          "price": 124.9,
+          "amount": 0.03
+        },
+        {
+          "lotId": "15825253022",
+          "price": 124.87,
+          "amount": 0.007
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15875366462",
+      "side": "sell",
+      "price": 128.48,
+      "amount": 0.226,
+      "value": 29.03648,
+      "timestamp": 1766362526799,
+      "status": "closed",
+      "filled": 0.226,
+      "profit": -0.04264755000000074,
+      "costBasis": 128.41181415929202,
+      "spreadPct": 0.05309935160902385,
+      "fees": 0.05805755,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15782480466",
+          "price": 130.08,
+          "amount": 0.054
+        },
+        {
+          "lotId": "15825253022",
+          "price": 124.87,
+          "amount": 0.081
+        },
+        {
+          "lotId": "15779293378",
+          "price": 130.48,
+          "amount": 0.058
+        },
+        {
+          "lotId": "15766795426",
+          "price": 130.72,
+          "amount": 0.031
+        },
+        {
+          "lotId": "15780739075",
+          "price": 131.06,
+          "amount": 0.002
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15875362598",
+      "side": "buy",
+      "price": 126.82,
+      "amount": 0.229,
+      "value": 29.04178,
+      "timestamp": 1766362828556,
+      "status": "closed",
+      "filled": 0.229,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15876728835",
+      "side": "buy",
+      "price": 125.63,
+      "amount": 0.204,
+      "value": 25.62852,
+      "timestamp": 1766369120846,
+      "status": "closed",
+      "filled": 0.204,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15876728931",
+      "side": "buy",
+      "price": 124.91,
+      "amount": 0.157,
+      "value": 19.61087,
+      "timestamp": 1766369138283,
+      "status": "closed",
+      "filled": 0.157,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15877940677",
+      "side": "sell",
+      "price": 127.18,
+      "amount": 0.217,
+      "value": 27.59806,
+      "timestamp": 1766391664530,
+      "status": "closed",
+      "filled": 0.217,
+      "profit": 0.023002000000001965,
+      "costBasis": 126.82,
+      "spreadPct": 0.28386689796563136,
+      "fees": 0.055118,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15875362598",
+          "price": 126.82,
+          "amount": 0.217
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15878901278",
+      "side": "buy",
+      "price": 126.21,
+      "amount": 0.217,
+      "value": 27.38757,
+      "timestamp": 1766393497187,
+      "status": "closed",
+      "filled": 0.217,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15881569336",
+      "side": "sell",
+      "price": 128.75,
+      "amount": 0.215,
+      "value": 27.68125,
+      "timestamp": 1766416218148,
+      "status": "closed",
+      "filled": 0.215,
+      "profit": 0.4839562799999956,
+      "costBasis": 126.24404651162793,
+      "spreadPct": 1.985007259840373,
+      "fees": 0.05482371999999999,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15875362598",
+          "price": 126.82,
+          "amount": 0.012
+        },
+        {
+          "lotId": "15878901278",
+          "price": 126.21,
+          "amount": 0.203
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15881568088",
+      "side": "buy",
+      "price": 126.77,
+      "amount": 0.218,
+      "value": 27.63586,
+      "timestamp": 1766417773169,
+      "status": "closed",
+      "filled": 0.218,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15882273042",
+      "side": "sell",
+      "price": 127.76,
+      "amount": 0.218,
+      "value": 27.85168,
+      "timestamp": 1766418925586,
+      "status": "closed",
+      "filled": 0.218,
+      "profit": 0.16033246000000434,
+      "costBasis": 126.76999999999998,
+      "spreadPct": 0.7809418632168679,
+      "fees": 0.05548754,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15881568088",
+          "price": 126.77,
+          "amount": 0.218
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15882560021",
+      "side": "buy",
+      "price": 126.77,
+      "amount": 0.218,
+      "value": 27.63586,
+      "timestamp": 1766423167147,
+      "status": "closed",
+      "filled": 0.218,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15881568370",
+      "side": "buy",
+      "price": 125.77,
+      "amount": 0.143,
+      "value": 17.98511,
+      "timestamp": 1766430437036,
+      "status": "closed",
+      "filled": 0.143,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15881568501",
+      "side": "buy",
+      "price": 124.78,
+      "amount": 0.14,
+      "value": 17.4692,
+      "timestamp": 1766433071740,
+      "status": "closed",
+      "filled": 0.14,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15886704075",
+      "side": "buy",
+      "price": 125.41,
+      "amount": 0.081,
+      "value": 10.15821,
+      "timestamp": 1766459084638,
+      "status": "closed",
+      "filled": 0.081,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15886704075",
+      "side": "buy",
+      "price": 125.41,
+      "amount": 0.24,
+      "value": 30.0984,
+      "timestamp": 1766459085421,
+      "status": "closed",
+      "filled": 0.24,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15886704075",
+      "side": "buy",
+      "price": 125.41,
+      "amount": 0.017,
+      "value": 2.13197,
+      "timestamp": 1766459085720,
+      "status": "closed",
+      "filled": 0.017,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15886704188",
+      "side": "buy",
+      "price": 124.41,
+      "amount": 0.219,
+      "value": 27.24579,
+      "timestamp": 1766470671234,
+      "status": "closed",
+      "filled": 0.219,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15886704208",
+      "side": "buy",
+      "price": 123.42,
+      "amount": 0.217,
+      "value": 26.78214,
+      "timestamp": 1766496993530,
+      "status": "closed",
+      "filled": 0.217,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15886704219",
+      "side": "buy",
+      "price": 122.42,
+      "amount": 0.219,
+      "value": 26.80998,
+      "timestamp": 1766501718347,
+      "status": "closed",
+      "filled": 0.219,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15890083106",
+      "side": "sell",
+      "price": 124.41,
+      "amount": 0.217,
+      "value": 26.99697,
+      "timestamp": 1766508074500,
+      "status": "closed",
+      "filled": 0.217,
+      "profit": 0.16105088999999564,
+      "costBasis": 123.42000000000002,
+      "spreadPct": 0.8021390374331394,
+      "fees": 0.05377911,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15886704208",
+          "price": 123.42,
+          "amount": 0.217
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15888084868",
+      "side": "sell",
+      "price": 125.39,
+      "amount": 0.219,
+      "value": 27.46041,
+      "timestamp": 1766522673968,
+      "status": "closed",
+      "filled": 0.219,
+      "profit": 0.15991380000000005,
+      "costBasis": 124.41,
+      "spreadPct": 0.7877180290973427,
+      "fees": 0.054706199999999996,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15886704188",
+          "price": 124.41,
+          "amount": 0.219
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15895393134",
+      "side": "buy",
+      "price": 123.35,
+      "amount": 0.311,
+      "value": 38.36185,
+      "timestamp": 1766540478782,
+      "status": "closed",
+      "filled": 0.311,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15895393321",
+      "side": "buy",
+      "price": 122.55,
+      "amount": 0.228,
+      "value": 27.9414,
+      "timestamp": 1766542188886,
+      "status": "closed",
+      "filled": 0.228,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15896142483",
+      "side": "buy",
+      "price": 121.41,
+      "amount": 0.338,
+      "value": 41.03658,
+      "timestamp": 1766554148169,
+      "status": "closed",
+      "filled": 0.338,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15896142557",
+      "side": "sell",
+      "price": 123.43,
+      "amount": 0.332,
+      "value": 40.97876,
+      "timestamp": 1766594035852,
+      "status": "closed",
+      "filled": 0.332,
+      "profit": 0.2240281600000024,
+      "costBasis": 122.50927710843372,
+      "spreadPct": 0.7515536074474978,
+      "fees": 0.08165184,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15895393321",
+          "price": 122.55,
+          "amount": 0.228
+        },
+        {
+          "lotId": "15886704219",
+          "price": 122.42,
+          "amount": 0.104
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15901979192",
+      "side": "buy",
+      "price": 122.22,
+      "amount": 0.325,
+      "value": 39.7215,
+      "timestamp": 1766623459057,
+      "status": "closed",
+      "filled": 0.325,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15902727433",
+      "side": "sell",
+      "price": 122.9,
+      "amount": 0.325,
+      "value": 39.9425,
+      "timestamp": 1766630409567,
+      "status": "closed",
+      "filled": 0.325,
+      "profit": 0.14133600000000363,
+      "costBasis": 122.22,
+      "spreadPct": 0.5563737522500465,
+      "fees": 0.07966400000000001,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15901979192",
+          "price": 122.22,
+          "amount": 0.325
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15901979197",
+      "side": "buy",
+      "price": 121.54,
+      "amount": 0.253,
+      "value": 30.74962,
+      "timestamp": 1766658926192,
+      "status": "closed",
+      "filled": 0.253,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15903980182",
+      "side": "sell",
+      "price": 122.21,
+      "amount": 0.253,
+      "value": 30.91913,
+      "timestamp": 1766670205407,
+      "status": "closed",
+      "filled": 0.253,
+      "profit": 0.14076414000000081,
+      "costBasis": 121.41,
+      "spreadPct": 0.6589243060703379,
+      "fees": 0.061635859999999994,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15896142483",
+          "price": 121.41,
+          "amount": 0.253
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15901979217",
+      "side": "sell",
+      "price": 123.58,
+      "amount": 0.321,
+      "value": 39.66918,
+      "timestamp": 1766677442503,
+      "status": "closed",
+      "filled": 0.321,
+      "profit": 0.1016224199999986,
+      "costBasis": 123.01682242990654,
+      "spreadPct": 0.45780533017291175,
+      "fees": 0.07915758,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15886704219",
+          "price": 122.42,
+          "amount": 0.115
+        },
+        {
+          "lotId": "15895393134",
+          "price": 123.35,
+          "amount": 0.206
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15901979230",
+      "side": "sell",
+      "price": 124.26,
+      "amount": 0.247,
+      "value": 30.69222,
+      "timestamp": 1766679900400,
+      "status": "closed",
+      "filled": 0.247,
+      "profit": -0.03991298999999493,
+      "costBasis": 124.17315789473683,
+      "spreadPct": 0.06993629439366462,
+      "fees": 0.061362990000000006,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15895393134",
+          "price": 123.35,
+          "amount": 0.105
+        },
+        {
+          "lotId": "15881568501",
+          "price": 124.78,
+          "amount": 0.14
+        },
+        {
+          "lotId": "15876728931",
+          "price": 124.91,
+          "amount": 0.002
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15905280757",
+      "side": "buy",
+      "price": 123.57,
+      "amount": 0.247,
+      "value": 30.52179,
+      "timestamp": 1766681483246,
+      "status": "closed",
+      "filled": 0.247,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15905953094",
+      "side": "buy",
+      "price": 123.32,
+      "amount": 0.377,
+      "value": 46.49164,
+      "timestamp": 1766693007246,
+      "status": "closed",
+      "filled": 0.377,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15905953106",
+      "side": "buy",
+      "price": 122.62,
+      "amount": 0.292,
+      "value": 35.80504,
+      "timestamp": 1766702497050,
+      "status": "closed",
+      "filled": 0.292,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15905953114",
+      "side": "buy",
+      "price": 121.93,
+      "amount": 0.219,
+      "value": 26.70267,
+      "timestamp": 1766702854707,
+      "status": "closed",
+      "filled": 0.219,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15905953119",
+      "side": "buy",
+      "price": 121.24,
+      "amount": 0.22,
+      "value": 26.6728,
+      "timestamp": 1766705558909,
+      "status": "closed",
+      "filled": 0.22,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15905953128",
+      "side": "buy",
+      "price": 120.54,
+      "amount": 0.221,
+      "value": 26.63934,
+      "timestamp": 1766705794707,
+      "status": "closed",
+      "filled": 0.221,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15906955351",
+      "side": "sell",
+      "price": 121.21,
+      "amount": 0.221,
+      "value": 26.78741,
+      "timestamp": 1766714565416,
+      "status": "closed",
+      "filled": 0.221,
+      "profit": 0.09464324999999704,
+      "costBasis": 120.54,
+      "spreadPct": 0.5558320889331239,
+      "fees": 0.053426749999999995,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905953128",
+          "price": 120.54,
+          "amount": 0.221
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15906858378",
+      "side": "sell",
+      "price": 121.92,
+      "amount": 0.22,
+      "value": 26.8224,
+      "timestamp": 1766715231519,
+      "status": "closed",
+      "filled": 0.22,
+      "profit": 0.09610480000000306,
+      "costBasis": 121.24,
+      "spreadPct": 0.5608709996700816,
+      "fees": 0.05349520000000001,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905953119",
+          "price": 121.24,
+          "amount": 0.22
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15908175468",
+      "side": "sell",
+      "price": 122.84,
+      "amount": 0.352,
+      "value": 43.23968,
+      "timestamp": 1766715312168,
+      "status": "closed",
+      "filled": 0.352,
+      "profit": 0.28608282999999624,
+      "costBasis": 121.78264204545457,
+      "spreadPct": 0.8682337127739321,
+      "fees": 0.08610717000000001,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905953114",
+          "price": 121.93,
+          "amount": 0.219
+        },
+        {
+          "lotId": "15901979197",
+          "price": 121.54,
+          "amount": 0.133
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15908175522",
+      "side": "sell",
+      "price": 123.71,
+      "amount": 0.24,
+      "value": 29.6904,
+      "timestamp": 1766715686124,
+      "status": "closed",
+      "filled": 0.24,
+      "profit": 0.20248079999999782,
+      "costBasis": 122.62,
+      "spreadPct": 0.8889251345620528,
+      "fees": 0.059119200000000004,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905953106",
+          "price": 122.62,
+          "amount": 0.24
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15908175585",
+      "side": "sell",
+      "price": 124.58,
+      "amount": 0.213,
+      "value": 26.53554,
+      "timestamp": 1766756890142,
+      "status": "closed",
+      "filled": 0.213,
+      "profit": 0.1622740499999985,
+      "costBasis": 123.57,
+      "spreadPct": 0.8173504896010401,
+      "fees": 0.05285595,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905280757",
+          "price": 123.57,
+          "amount": 0.213
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15908175365",
+      "side": "buy",
+      "price": 121.1,
+      "amount": 0.357,
+      "value": 43.2327,
+      "timestamp": 1766761337957,
+      "status": "closed",
+      "filled": 0.357,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15913032397",
+      "side": "sell",
+      "price": 121.96,
+      "amount": 0.357,
+      "value": 43.53972,
+      "timestamp": 1766764022284,
+      "status": "closed",
+      "filled": 0.357,
+      "profit": 0.22024758000000141,
+      "costBasis": 121.1,
+      "spreadPct": 0.710156895127993,
+      "fees": 0.08677241999999999,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15908175365",
+          "price": 121.1,
+          "amount": 0.357
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917237737",
+      "side": "sell",
+      "price": 123.36,
+      "amount": 0.34,
+      "value": 41.9424,
+      "timestamp": 1766848427014,
+      "status": "closed",
+      "filled": 0.34,
+      "profit": -0.03383479999998863,
+      "costBasis": 123.21294117647057,
+      "spreadPct": 0.11935339106856538,
+      "fees": 0.0838348,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905953106",
+          "price": 122.62,
+          "amount": 0.052
+        },
+        {
+          "lotId": "15905953094",
+          "price": 123.32,
+          "amount": 0.288
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917237811",
+      "side": "sell",
+      "price": 123.88,
+      "amount": 0.283,
+      "value": 35.05804,
+      "timestamp": 1766869982586,
+      "status": "closed",
+      "filled": 0.283,
+      "profit": 0.36710069999999884,
+      "costBasis": 122.3366077738516,
+      "spreadPct": 1.2615947542059323,
+      "fees": 0.0696793,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15905953094",
+          "price": 123.32,
+          "amount": 0.089
+        },
+        {
+          "lotId": "15905280757",
+          "price": 123.57,
+          "amount": 0.034
+        },
+        {
+          "lotId": "15901979197",
+          "price": 121.54,
+          "amount": 0.12
+        },
+        {
+          "lotId": "15837356702",
+          "price": 121.49,
+          "amount": 0.04
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917238237",
+      "side": "sell",
+      "price": 124.41,
+      "amount": 0.226,
+      "value": 28.11666,
+      "timestamp": 1766872227314,
+      "status": "closed",
+      "filled": 0.226,
+      "profit": -0.20488181999999852,
+      "costBasis": 125.06707964601769,
+      "spreadPct": -0.5253817774249233,
+      "fees": 0.05638182,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15876728931",
+          "price": 124.91,
+          "amount": 0.155
+        },
+        {
+          "lotId": "15886704075",
+          "price": 125.41,
+          "amount": 0.071
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917238248",
+      "side": "sell",
+      "price": 124.93,
+      "amount": 0.182,
+      "value": 22.73726,
+      "timestamp": 1766873705340,
+      "status": "closed",
+      "filled": 0.182,
+      "profit": -0.13292188000000033,
+      "costBasis": 125.41,
+      "spreadPct": -0.382744597719472,
+      "fees": 0.04556188,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15886704075",
+          "price": 125.41,
+          "amount": 0.01
+        },
+        {
+          "lotId": "15886704075",
+          "price": 125.41,
+          "amount": 0.172
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15919083368",
+      "side": "buy",
+      "price": 124.4,
+      "amount": 0.182,
+      "value": 22.6408,
+      "timestamp": 1766874242575,
+      "status": "closed",
+      "filled": 0.182,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15919138928",
+      "side": "sell",
+      "price": 124.93,
+      "amount": 0.182,
+      "value": 22.73726,
+      "timestamp": 1766879230175,
+      "status": "closed",
+      "filled": 0.182,
+      "profit": 0.051081940000000436,
+      "costBasis": 124.39999999999999,
+      "spreadPct": 0.4260450160771828,
+      "fees": 0.04537806,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15919083368",
+          "price": 124.4,
+          "amount": 0.182
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15919429071",
+      "side": "buy",
+      "price": 124.4,
+      "amount": 0.182,
+      "value": 22.6408,
+      "timestamp": 1766880951552,
+      "status": "closed",
+      "filled": 0.182,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15918850142",
+      "side": "buy",
+      "price": 123.35,
+      "amount": 0.283,
+      "value": 34.90805,
+      "timestamp": 1766947628322,
+      "status": "closed",
+      "filled": 0.283,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917238257",
+      "side": "sell",
+      "price": 125.45,
+      "amount": 0.182,
+      "value": 22.8319,
+      "timestamp": 1766965782144,
+      "status": "closed",
+      "filled": 0.182,
+      "profit": 0.14562730000000226,
+      "costBasis": 124.39999999999999,
+      "spreadPct": 0.8440514469453468,
+      "fees": 0.045472700000000005,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15919429071",
+          "price": 124.4,
+          "amount": 0.182
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917238262",
+      "side": "sell",
+      "price": 125.97,
+      "amount": 0.181,
+      "value": 22.80057,
+      "timestamp": 1766967780120,
+      "status": "closed",
+      "filled": 0.181,
+      "profit": 0.03471910000000342,
+      "costBasis": 125.52668508287292,
+      "spreadPct": 0.3531638845034468,
+      "fees": 0.0455209,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15886704075",
+          "price": 125.41,
+          "amount": 0.068
+        },
+        {
+          "lotId": "15886704075",
+          "price": 125.41,
+          "amount": 0.017
+        },
+        {
+          "lotId": "15876728835",
+          "price": 125.63,
+          "amount": 0.096
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15917238273",
+      "side": "sell",
+      "price": 126.5,
+      "amount": 0.18,
+      "value": 22.77,
+      "timestamp": 1766967842926,
+      "status": "closed",
+      "filled": 0.18,
+      "profit": 0.10112651999999887,
+      "costBasis": 125.686,
+      "spreadPct": 0.647645720287059,
+      "fees": 0.04539348,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15876728835",
+          "price": 125.63,
+          "amount": 0.108
+        },
+        {
+          "lotId": "15881568370",
+          "price": 125.77,
+          "amount": 0.072
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15923576128",
+      "side": "sell",
+      "price": 127.34,
+      "amount": 0.373,
+      "value": 47.49782,
+      "timestamp": 1766968242898,
+      "status": "closed",
+      "filled": 0.373,
+      "profit": 0.43638521000000097,
+      "costBasis": 125.91680965147454,
+      "spreadPct": 1.1302623950405974,
+      "fees": 0.09446478999999999,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15878901278",
+          "price": 126.21,
+          "amount": 0.014
+        },
+        {
+          "lotId": "15882560021",
+          "price": 126.77,
+          "amount": 0.218
+        },
+        {
+          "lotId": "15881568370",
+          "price": 125.77,
+          "amount": 0.071
+        },
+        {
+          "lotId": "15918850142",
+          "price": 123.35,
+          "amount": 0.07
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15923576561",
+      "side": "sell",
+      "price": 128.01,
+      "amount": 0.292,
+      "value": 37.37892,
+      "timestamp": 1766968268064,
+      "status": "closed",
+      "filled": 0.292,
+      "profit": 0.6776237899999987,
+      "costBasis": 125.43592465753424,
+      "spreadPct": 2.052103772897198,
+      "fees": 0.07400620999999999,
+      "matchType": "FALLBACK",
+      "matchedLots": [
+        {
+          "lotId": "15918850142",
+          "price": 123.35,
+          "amount": 0.213
+        },
+        {
+          "lotId": "15780739075",
+          "price": 131.06,
+          "amount": 0.079
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15924226229",
+      "side": "buy",
+      "price": 126.29,
+      "amount": 0.368,
+      "value": 46.47472,
+      "timestamp": 1766970322396,
+      "status": "closed",
+      "filled": 0.368,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15924329130",
+      "side": "sell",
+      "price": 127.28,
+      "amount": 0.359,
+      "value": 45.69352,
+      "timestamp": 1766972346673,
+      "status": "closed",
+      "filled": 0.359,
+      "profit": 0.2643783699999991,
+      "costBasis": 126.29,
+      "spreadPct": 0.783910048301524,
+      "fees": 0.09103163,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15924226229",
+          "price": 126.29,
+          "amount": 0.359
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15924329184",
+      "side": "sell",
+      "price": 128.07,
+      "amount": 0.264,
+      "value": 33.81048,
+      "timestamp": 1766972388376,
+      "status": "closed",
+      "filled": 0.264,
+      "profit": -0.5516745300000074,
+      "costBasis": 129.90170454545455,
+      "spreadPct": -1.410069676809834,
+      "fees": 0.06810453,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15924226229",
+          "price": 126.29,
+          "amount": 0.009
+        },
+        {
+          "lotId": "15780739075",
+          "price": 131.06,
+          "amount": 0.005
+        },
+        {
+          "lotId": "15778115136",
+          "price": 132.01,
+          "amount": 0.116
+        },
+        {
+          "lotId": "15766794362",
+          "price": 132.18,
+          "amount": 0.027
+        },
+        {
+          "lotId": "15780289348",
+          "price": 132.42,
+          "amount": 0.057
+        },
+        {
+          "lotId": "15837356702",
+          "price": 121.49,
+          "amount": 0.021
+        },
+        {
+          "lotId": "15896142483",
+          "price": 121.41,
+          "amount": 0.029
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15928161672",
+      "side": "buy",
+      "price": 125.62,
+      "amount": 0.345,
+      "value": 43.3389,
+      "timestamp": 1767001675511,
+      "status": "closed",
+      "filled": 0.345,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15928476597",
+      "side": "buy",
+      "price": 124.98,
+      "amount": 0.338,
+      "value": 42.24324,
+      "timestamp": 1767009617858,
+      "status": "closed",
+      "filled": 0.338,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15928476999",
+      "side": "buy",
+      "price": 123.97,
+      "amount": 0.217,
+      "value": 26.90149,
+      "timestamp": 1767010027057,
+      "status": "closed",
+      "filled": 0.217,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15928477053",
+      "side": "buy",
+      "price": 122.96,
+      "amount": 0.218,
+      "value": 26.80528,
+      "timestamp": 1767010566007,
+      "status": "closed",
+      "filled": 0.218,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15935062225",
+      "side": "sell",
+      "price": 124.14,
+      "amount": 0.316,
+      "value": 39.22824,
+      "timestamp": 1767078430152,
+      "status": "closed",
+      "filled": 0.316,
+      "profit": 0.1957174199999976,
+      "costBasis": 123.27322784810127,
+      "spreadPct": 0.7031308963263103,
+      "fees": 0.07818258,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15928477053",
+          "price": 122.96,
+          "amount": 0.218
+        },
+        {
+          "lotId": "15928476999",
+          "price": 123.97,
+          "amount": 0.098
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15935062231",
+      "side": "sell",
+      "price": 124.88,
+      "amount": 0.236,
+      "value": 29.47168,
+      "timestamp": 1767082081344,
+      "status": "closed",
+      "filled": 0.236,
+      "profit": 0.03774322999999552,
+      "costBasis": 124.47072033898306,
+      "spreadPct": 0.3288160138402896,
+      "fees": 0.05884676999999999,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15928476999",
+          "price": 123.97,
+          "amount": 0.119
+        },
+        {
+          "lotId": "15928476597",
+          "price": 124.98,
+          "amount": 0.117
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15938392491",
+      "side": "sell",
+      "price": 125.95,
+      "amount": 0.367,
+      "value": 46.22365,
+      "timestamp": 1767111569130,
+      "status": "closed",
+      "filled": 0.367,
+      "profit": 0.1703652499999974,
+      "costBasis": 125.23460490463216,
+      "spreadPct": 0.5712439432476526,
+      "fees": 0.09218475000000001,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15928476597",
+          "price": 124.98,
+          "amount": 0.221
+        },
+        {
+          "lotId": "15928161672",
+          "price": 125.62,
+          "amount": 0.146
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15938392353",
+      "side": "buy",
+      "price": 124.45,
+      "amount": 0.372,
+      "value": 46.2954,
+      "timestamp": 1767116843124,
+      "status": "closed",
+      "filled": 0.372,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15940194959",
+      "side": "sell",
+      "price": 124.72,
+      "amount": 0.316,
+      "value": 39.41152,
+      "timestamp": 1767136890274,
+      "status": "closed",
+      "filled": 0.316,
+      "profit": 0.006582280000002938,
+      "costBasis": 124.45,
+      "spreadPct": 0.21695460024105748,
+      "fees": 0.07873772000000001,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15938392353",
+          "price": 124.45,
+          "amount": 0.316
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15940195075",
+      "side": "sell",
+      "price": 125.47,
+      "amount": 0.236,
+      "value": 29.61092,
+      "timestamp": 1767143768684,
+      "status": "closed",
+      "filled": 0.236,
+      "profit": -0.029071720000003402,
+      "costBasis": 125.34237288135594,
+      "spreadPct": 0.10182280398095178,
+      "fees": 0.059191719999999996,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15938392353",
+          "price": 124.45,
+          "amount": 0.056
+        },
+        {
+          "lotId": "15928161672",
+          "price": 125.62,
+          "amount": 0.18
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15944928830",
+      "side": "buy",
+      "price": 124.41,
+      "amount": 0.307,
+      "value": 38.19387,
+      "timestamp": 1767199383134,
+      "status": "closed",
+      "filled": 0.307,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15945148268",
+      "side": "buy",
+      "price": 124.08,
+      "amount": 0.253,
+      "value": 31.39224,
+      "timestamp": 1767212467036,
+      "status": "closed",
+      "filled": 0.253,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15946014203",
+      "side": "sell",
+      "price": 124.82,
+      "amount": 0.253,
+      "value": 31.57946,
+      "timestamp": 1767212894978,
+      "status": "closed",
+      "filled": 0.253,
+      "profit": 0.1556132599999964,
+      "costBasis": 124.08,
+      "spreadPct": 0.596389426176656,
+      "fees": 0.031606739999999994,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15945148268",
+          "price": 124.08,
+          "amount": 0.253
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15945148773",
+      "side": "sell",
+      "price": 125.58,
+      "amount": 0.25,
+      "value": 31.395,
+      "timestamp": 1767212894987,
+      "status": "closed",
+      "filled": 0.25,
+      "profit": 0.261077801302932,
+      "costBasis": 124.41,
+      "spreadPct": 0.9404388714733557,
+      "fees": 0.0314221986970684,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15944928830",
+          "price": 124.41,
+          "amount": 0.25
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15946066972",
+      "side": "buy",
+      "price": 124.73,
+      "amount": 0.25,
+      "value": 31.1825,
+      "timestamp": 1767212896745,
+      "status": "closed",
+      "filled": 0.25,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15946231303",
+      "side": "buy",
+      "price": 123.51,
+      "amount": 0.225,
+      "value": 27.78975,
+      "timestamp": 1767213274897,
+      "status": "closed",
+      "filled": 0.225,
+      "profit": 0,
+      "costBasis": null,
+      "spreadPct": null,
+      "matchType": "BUY",
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15946325246",
+      "side": "sell",
+      "price": 125.07,
+      "amount": 0.228,
+      "value": 28.51596,
+      "timestamp": 1767219903623,
+      "status": "closed",
+      "filled": 0.228,
+      "profit": 0.06721939805706337,
+      "costBasis": 124.65000000000002,
+      "spreadPct": 0.3369434416365609,
+      "fees": 0.028540601942931596,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15944928830",
+          "price": 124.41,
+          "amount": 0.057
+        },
+        {
+          "lotId": "15946066972",
+          "price": 124.73,
+          "amount": 0.171
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15948034021",
+      "side": "sell",
+      "price": 125.64,
+      "amount": 0.245,
+      "value": 30.7818,
+      "timestamp": 1767288631637,
+      "status": "closed",
+      "filled": 0.245,
+      "profit": 0.35218704424000136,
+      "costBasis": 124.06702040816326,
+      "spreadPct": 1.2678466740491205,
+      "fees": 0.033192955760000004,
+      "matchType": "EXACT",
+      "matchedLots": [
+        {
+          "lotId": "15946066972",
+          "price": 124.73,
+          "amount": 0.079
+        },
+        {
+          "lotId": "15928161672",
+          "price": 125.62,
+          "amount": 0.019
+        },
+        {
+          "lotId": "15946231303",
+          "price": 123.51,
+          "amount": 0.147
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15950205404",
+      "side": "sell",
+      "price": 126.26,
+      "amount": 0.265,
+      "value": 33.4589,
+      "timestamp": 1767308465198,
+      "status": "closed",
+      "filled": 0.265,
+      "profit": 0.6665406764000055,
+      "costBasis": 123.5312830188679,
+      "spreadPct": 2.208927904290714,
+      "fees": 0.0565693236,
+      "matchType": "CLOSE",
+      "matchedLots": [
+        {
+          "lotId": "15946231303",
+          "price": 123.51,
+          "amount": 0.078
+        },
+        {
+          "lotId": "15896142483",
+          "price": 121.41,
+          "amount": 0.056
+        },
+        {
+          "lotId": "15837356718",
+          "price": 119.07,
+          "amount": 0.087
+        },
+        {
+          "lotId": "15766793212",
+          "price": 135.09,
+          "amount": 0.044
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    },
+    {
+      "id": "15950850200",
+      "side": "sell",
+      "price": 128.8,
+      "amount": 0.177,
+      "value": 22.7976,
+      "timestamp": 1767345108851,
+      "status": "closed",
+      "filled": 0.177,
+      "profit": -1.345643950000002,
+      "costBasis": 136.13757062146894,
+      "spreadPct": -5.389820449985164,
+      "fees": 0.046893950000000004,
+      "matchType": "FALLBACK",
+      "matchedLots": [
+        {
+          "lotId": "15766793212",
+          "price": 135.09,
+          "amount": 0.05
+        },
+        {
+          "lotId": "15763331910",
+          "price": 136.55,
+          "amount": 0.127
+        }
+      ],
+      "isNetProfit": true,
+      "accountingMethod": "SPREAD_MATCH"
+    }
+  ],
+  "totalProfit": 5.3614965599999955,
+  "volatilityRegime": "NORMAL",
+  "isPaused": false,
+  "pauseUntil": null,
+  "pauseReason": null,
+  "initialCapital": 438.5260386768,
+  "capitalHistory": [
+    {
+      "amount": 405.35201556204,
+      "timestamp": 1767350114915,
+      "reason": "INITIAL_CAPITAL"
+    },
+    {
+      "amount": 405.77367895068005,
+      "timestamp": 1767365448825,
+      "reason": "USDT_DEPOSIT",
+      "delta": 10.089381120000008,
+      "rawUSDT": 25.223452800000018
+    },
+    {
+      "amount": 405.82074024104,
+      "timestamp": 1767389665928,
+      "reason": "USDT_DEPOSIT",
+      "delta": 33.2,
+      "rawUSDT": 83
+    },
+    {
+      "type": "DEPOSIT",
+      "amount": 33.17402311476002,
+      "timestamp": 1767389724775,
+      "equityBefore": 405.81113579208005,
+      "equityAfter": 438.98515890684007
+    },
+    {
+      "amount": 405.80511971088004,
+      "timestamp": 1767389829870,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -33.16857599999999,
+      "rawUSDT": -82.92143999999996
+    },
+    {
+      "amount": 413.57871862435996,
+      "timestamp": 1767394049180,
+      "reason": "USDT_DEPOSIT",
+      "delta": 15.906943360000014,
+      "rawUSDT": 39.767358400000035
+    }
+  ],
+  "firstTradeTime": 1765672429217,
+  "isLive": true,
+  "startTime": 1767394661439,
+  "marketRegime": "BULL",
+  "emergencyStop": false,
+  "maxDrawdown": 0,
+  "lastRebalance": null,
+  "lastFillTime": null,
+  "lastVolatility": null,
+  "lastRegime": "BULL",
+  "metrics": {
+    "ticksInRange": 0,
+    "ticksOutOfRange": 0,
+    "buyHoldStartPrice": 0,
+    "metricsStartTime": 0
+  },
+  "lastKnownEquity": 413.53947383232,
+  "lastEquityCheck": 1767394599751,
+  "inventory": [
+    {
+      "id": "15946231303",
+      "price": 123.51,
+      "amount": 0.01525006,
+      "remaining": 0.01525006,
+      "fee": 0.0018835349105999998,
+      "timestamp": 1767213274897,
+      "recovered": true
+    }
+  ],
+  "inventoryStatus": "ESTIMATED",
+  "_lastTrackedUSDT": 939.5264089,
+  "lastSyncTime": 1767394396718,
+  "lastGridReset": 1767394661439,
+  "accumulatedProfit": 5.3614965599999955,
+  "estimatedProfit": 0,
+  "feeCorrectionApplied": true,
+  "accountingMethod": "SPREAD_MATCH",
+  "lastBackfill": "2026-01-02T11:07:52.642Z",
+  "smartDcaBlocking": false,
+  "dcaBlockStartTime": 1767384665839
+}
