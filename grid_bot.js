@@ -212,6 +212,8 @@ console.log(`>> [CONFIG] Port: ${BOT_PORT}`);
 console.log(`>> [CONFIG] Capital Allocation: ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%`);
 console.log(`>> [CONFIG] State File: ${CONFIG.stateFile}`);
 console.log(`>> [CONFIG] Grid Spacing: ${(CONFIG.gridSpacing * 100).toFixed(2)}%`);
+console.log(`>> [DOCTRINE] 🛡️ SAFETY NET ACTIVE: Tolerance -0.5% (Strict Profit Guard)`);
+
 
 // --- SERVER SETUP ---
 const app = express();
