@@ -87,10 +87,38 @@ function calculateSwarmYield() {
     console.log(`\n=========================================`);
     console.log(`🧠 SWARM METRICS (Weighted Average)`);
     console.log(`   Active Capital:   $${totalCapital.toFixed(2)}`);
-    console.log(`   Realized Profit:  $${totalProfit.toFixed(2)}`);
-    console.log(`   True Daily Yield: ${(averageSwarmYield * 100).toFixed(4)}%  <-- USE THIS NUMBER`);
-    console.log(`   Monthly Yield:    ${projectedMonthly.toFixed(2)}%`);
+    console.log(`   Realized Profit:  $${totalProfit.toFixed(2)} (Cashflow)`);
+    console.log(`   True Daily Yield: ${(averageSwarmYield * 100).toFixed(4)}%`);
     console.log(`   APY (Compound):   ${projectedAnnual.toFixed(0)}%`);
+    console.log(`=========================================`);
+
+    console.log(`\n🔍 EQUITY DEEP DIVE (Are you winning son?)`);
+    console.log(`| ${'BOT'.padEnd(10)} | ${'Invested'.padEnd(10)} | ${'Liquid Value'.padEnd(12)} | ${'Net PnL'.padEnd(10)} | ${'Bag/Float'.padEnd(10)} |`);
+    console.log(`|${'-'.repeat(12)}|${'-'.repeat(12)}|${'-'.repeat(14)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
+
+    files.forEach(file => {
+        try {
+            const state = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const botId = path.basename(file).replace('_state.json', '').replace('USDT', '');
+
+            // Calculate Equity
+            const balanceUSDT = state.balance.usdt || 0;
+            // Find coin balance (key != usdt)
+            const coinKey = Object.keys(state.balance).find(k => k !== 'usdt');
+            const balanceCoin = state.balance[coinKey] || 0;
+            const price = state.currentPrice || 0;
+
+            const liquidationValue = balanceUSDT + (balanceCoin * price);
+            const invested = state.initialCapital || 0;
+            const totalNetPnL = liquidationValue - invested;
+            const realized = state.totalProfit || 0;
+            const floatingPnL = totalNetPnL - realized; // The "Bag" effect
+
+            console.log(`| ${botId.padEnd(10)} | $${invested.toFixed(0).padEnd(9)} | $${liquidationValue.toFixed(0).padEnd(11)} | $${totalNetPnL.toFixed(2).padEnd(9)} | $${floatingPnL.toFixed(2).padEnd(9)} |`);
+        } catch (e) { }
+    });
+    console.log(`\n* Net PnL = (Liquid Value - Invested). If Positive, you are truly winning.`);
+    console.log(`* Bag/Float = Impact of holding coins. if Negative, price dropped since entry.`);
     console.log(`=========================================\n`);
 }
 
