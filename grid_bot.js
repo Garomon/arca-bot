@@ -257,11 +257,14 @@ app.get('/api/status', async (req, res) => {
         const totalPnL = (state.totalProfit || 0) + unrealizedPnL;
         const roi = initialCapital > 0 ? (totalPnL / initialCapital) * 100 : 0;
 
-        // Calculate win rate from trade history
-        const tradeHistory = state.tradeHistory || [];
-        const completedSells = tradeHistory.filter(t => t.side === 'sell' && t.profit !== undefined);
-        const wins = completedSells.filter(t => t.profit > 0).length;
-        const winRate = completedSells.length > 0 ? (wins / completedSells.length) * 100 : 0;
+        // Calculate win rate from filled orders (same as performance metrics)
+        const filledOrders = state.filledOrders || [];
+        const successfulTrades = filledOrders.filter(o => o.profit > 0);
+        const totalTrades = filledOrders.length;
+        const winRate = totalTrades > 0 ? (successfulTrades.length / totalTrades) * 100 : 0;
+
+        // Get decision score from composite signal
+        const decisionScore = state.compositeSignal?.score || state.marketCondition?.signalScore || 50;
 
         // Get blocking reason
         let blockingReason = null;
@@ -297,8 +300,8 @@ app.get('/api/status', async (req, res) => {
 
             // Trade metrics
             winRate: winRate,
-            totalTrades: completedSells.length,
-            wins: wins,
+            totalTrades: totalTrades,
+            wins: successfulTrades.length,
 
             // Orders and inventory
             activeOrders: state.activeOrders?.length || 0,
@@ -310,8 +313,8 @@ app.get('/api/status', async (req, res) => {
             // Market analysis
             marketRegime: state.marketRegime || 'UNKNOWN',
             volatilityRegime: state.volatilityRegime || 'NORMAL',
-            score: state.lastScore || 50,
-            rsi: state.lastRSI || 50,
+            score: decisionScore,
+            rsi: state.lastRSI || state.marketCondition?.rsi || 50,
 
             // Status
             smartDcaBlocking: state.smartDcaBlocking || false,
