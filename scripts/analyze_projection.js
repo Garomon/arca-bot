@@ -6,15 +6,38 @@ const MONTHLY_CONTRIBUTION_MXN = 10000;
 const MXN_USD_RATE = 20.5; // Approx
 const MONTHLY_CONTRIBUTION_USD = MONTHLY_CONTRIBUTION_MXN / MXN_USD_RATE;
 
-const STATE_FILE = path.join(__dirname, '..', 'grid_state.json');
+const BOT_DIR = path.join(__dirname, '..');
+
+function findStateFile() {
+    try {
+        const files = fs.readdirSync(BOT_DIR);
+        // Find any file starting with 'grid_state' and ending with '.json'
+        // Prefer one that isn't 'grid_state_template.json' if it exists
+        const stateFiles = files.filter(f => f.startsWith('grid_state') && f.endsWith('.json') && !f.includes('template'));
+
+        if (stateFiles.length === 0) return null;
+
+        // Return the most recently modified state file
+        return stateFiles.map(f => {
+            const fullPath = path.join(BOT_DIR, f);
+            return { name: f, time: fs.statSync(fullPath).mtime.getTime(), path: fullPath };
+        }).sort((a, b) => b.time - a.time)[0].path;
+
+    } catch (e) {
+        return null;
+    }
+}
 
 function analyzeAndProject() {
-    if (!fs.existsSync(STATE_FILE)) {
-        console.error("❌ No state file found. Run this from the bot directory on the VPS.");
+    const stateFile = findStateFile();
+
+    if (!stateFile) {
+        console.error(`❌ No state file found in ${BOT_DIR}. Looking for 'grid_state*.json'.`);
         return;
     }
 
-    const state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    console.log(`✅ Using state file: ${path.basename(stateFile)}`);
+    const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
 
     // 1. Calculate Real Historical Performance
     const filledOrders = state.filledOrders || [];
