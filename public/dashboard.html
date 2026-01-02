@@ -496,6 +496,90 @@
             }
         }
 
+        /* Logs Section */
+        .logs-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .logs-section h3 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .logs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            background: var(--glass-bg);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-item .log-bot {
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-right: 10px;
+        }
+
+        .log-item .log-bot.btc {
+            background: rgba(247, 147, 26, 0.2);
+            color: #f7931a;
+        }
+
+        .log-item .log-bot.sol {
+            background: rgba(153, 69, 255, 0.2);
+            color: #9945ff;
+        }
+
+        .log-item .log-bot.doge {
+            background: rgba(194, 166, 51, 0.2);
+            color: #c2a633;
+        }
+
+        .log-item .log-bot.sys {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-blue);
+        }
+
+        .log-item .log-msg {
+            flex: 1;
+        }
+
+        .log-item .log-time {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+        }
+
+        /* Last Trade in Bot Card */
+        .last-trade {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .last-trade span {
+            color: var(--text-primary);
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .portfolio-grid {
@@ -576,6 +660,14 @@
         <!-- Bot Cards -->
         <div class="bots-grid" id="bots-container"></div>
 
+        <!-- Recent Activity -->
+        <div class="logs-section" id="logs-section">
+            <h3>📋 Recent Activity</h3>
+            <div class="logs-list" id="logs-list">
+                <div class="log-item">Waiting for data...</div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="footer">
             Last update: <span class="update-time" id="last-update">-</span>
@@ -655,6 +747,10 @@
                         <span id="blocking-text-${bot.id}"></span>
                     </div>
 
+                    <div class="last-trade" id="last-trade-${bot.id}">
+                        Last trade: <span>-</span>
+                    </div>
+
                     <a href="${bot.url}" target="_blank" class="bot-action">
                         Open Full Dashboard →
                     </a>
@@ -672,6 +768,7 @@
             let globalEquity = 0;
             let dailyProfit = 0;
             let dailyTrades = 0;
+            let allLogs = [];
 
             for (const bot of BOTS) {
                 try {
@@ -694,6 +791,13 @@
 
                         if (bot.id === 'btc' && data.globalEquity > 0) {
                             globalEquity = data.globalEquity;
+                        }
+
+                        // Collect logs from this bot
+                        if (data.recentLogs && data.recentLogs.length > 0) {
+                            data.recentLogs.forEach(log => {
+                                allLogs.push({ ...log, bot: bot.id });
+                            });
                         }
                     } else {
                         updateBotOffline(bot.id);
@@ -728,11 +832,37 @@
             document.getElementById('bots-status').textContent = `${botsOnline} / 3`;
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
 
+            // Update Recent Activity logs
+            updateLogs(allLogs);
+
             // Hide loading on first successful load
             if (isFirstLoad && botsOnline > 0) {
                 document.getElementById('loading').classList.add('hidden');
                 isFirstLoad = false;
             }
+        }
+
+        function updateLogs(logs) {
+            const logsList = document.getElementById('logs-list');
+            if (!logs || logs.length === 0) {
+                logsList.innerHTML = '<div class="log-item">No recent activity</div>';
+                return;
+            }
+
+            // Sort by timestamp descending and take last 10
+            const sorted = logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 10);
+
+            logsList.innerHTML = sorted.map(log => {
+                const time = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '-';
+                const botClass = log.bot || 'sys';
+                return `
+                    <div class="log-item">
+                        <span class="log-bot ${botClass}">${(log.bot || 'SYS').toUpperCase()}</span>
+                        <span class="log-msg">${log.message || log.type || '-'}</span>
+                        <span class="log-time">${time}</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         function updateBotCard(botId, data) {
@@ -779,6 +909,16 @@
                 document.getElementById(`blocking-text-${botId}`).textContent = data.blockingReason;
             } else {
                 blockingEl.classList.add('hidden');
+            }
+
+            // Last trade update
+            const lastTradeEl = document.getElementById(`last-trade-${botId}`);
+            if (data.lastTrade) {
+                const tradeTime = new Date(data.lastTrade.timestamp).toLocaleTimeString();
+                const profit = data.lastTrade.profit ? ` <span style="color:var(--accent-green)">(+$${data.lastTrade.profit.toFixed(2)})</span>` : '';
+                lastTradeEl.innerHTML = `Last trade: <span>${data.lastTrade.side.toUpperCase()} @ ${formatPrice(data.lastTrade.price)}${profit} · ${tradeTime}</span>`;
+            } else {
+                lastTradeEl.innerHTML = `Last trade: <span>No recent trades</span>`;
             }
         }
 
