@@ -410,7 +410,16 @@ app.get('/api/balance', async (req, res) => {
         const doge = balance.DOGE?.total || 0;
 
         // Get current prices for value calculation
-        const btcPrice = state.currentPrice || 0;
+        // P0 FIX: Dashboard needs ALL prices, not just this bot's pair
+        let btcPrice = 0, solPrice = 0, dogePrice = 0;
+
+        try { const t = await binance.fetchTicker('BTC/USDT'); btcPrice = t.last; } catch (e) { }
+        try { const t = await binance.fetchTicker('SOL/USDT'); solPrice = t.last; } catch (e) { }
+        try { const t = await binance.fetchTicker('DOGE/USDT'); dogePrice = t.last; } catch (e) { }
+
+        const btcValue = btc * btcPrice;
+        const solValue = sol * solPrice;
+        const dogeValue = doge * dogePrice;
 
         res.json({
             usdt: usdt,
@@ -418,7 +427,7 @@ app.get('/api/balance', async (req, res) => {
             sol: sol,
             doge: doge,
             btcPrice: btcPrice,
-            totalEquity: usdt + (btc * btcPrice),
+            totalEquity: usdt + btcValue + solValue + dogeValue,
             timestamp: Date.now()
         });
     } catch (err) {
