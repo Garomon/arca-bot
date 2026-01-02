@@ -1541,9 +1541,9 @@ function checkSafetyNet(level) {
         const avgCost = costBasis / consumedAmount;
         const profitPct = ((sellPrice - avgCost) / avgCost) * 100;
 
-        // 5. DECISION: Block if loss > 3% (Allow slight slippage/rebalance)
-        // Grid bot should NEVER sell at -3% unless it's a Stop Loss (handled separately)
-        const LOSS_TOLERANCE = -3.0;
+        // 5. DECISION: Block if loss > 0.5% (Strict Profit Protection)
+        // Grid bot should NEVER sell below cost. We allow -0.5% only for slippage/fees buffer.
+        const LOSS_TOLERANCE = -0.5;
 
         if (profitPct < LOSS_TOLERANCE) {
             // EXCEPTION: IF price is WAY above entry (e.g. we missed the top), maybe we want to sell?
