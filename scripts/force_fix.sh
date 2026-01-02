@@ -3,6 +3,9 @@
 # Usage: ./force_fix.sh [PAIR] [PM2_ID_OR_NAME]
 # Example: ./force_fix.sh DOGE/USDT bot-doge
 
+# ENSURE CORRECT DIRECTORY
+cd /root/arca-bot || exit 1
+
 PAIR=$1
 BOT_ID=$2
 

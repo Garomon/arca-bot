@@ -2,6 +2,9 @@
 # fix_fleet.sh - Global state repair for ALL bots
 # Stops the entire fleet, repairs state for every pair, and restarts.
 
+# ENSURE CORRECT DIRECTORY
+cd /root/arca-bot || exit 1
+
 echo "🦅 ARCA FLEET MAINTENANCE PROTOCOL"
 echo "══════════════════════════════════"
 
