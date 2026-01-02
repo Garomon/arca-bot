@@ -15,7 +15,8 @@ function findAllStateFiles() {
             const f = fs.readdirSync(dir).filter(file =>
                 file.endsWith('_state.json') &&
                 !file.includes('template') &&
-                !file.includes('config')
+                !file.includes('config') &&
+                file !== 'BTCUSDT_state.json'
             );
             f.forEach(file => files.push(path.join(dir, file)));
         }
