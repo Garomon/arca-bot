@@ -278,6 +278,30 @@ app.get('/api/status', async (req, res) => {
         const totalCycles = state.totalCycles || 1;
         const timeInRange = (inRangeCycles / totalCycles * 100).toFixed(1);
 
+        // Calculate daily profit from filled orders
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayMs = today.getTime();
+        const todayOrders = filledOrders.filter(o => o.timestamp && o.timestamp >= todayMs);
+        const dailyProfit = todayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
+        const dailyTrades = todayOrders.length;
+
+        // Calculate APY from ROI and days active
+        const startTime = state.firstTradeTime || state.startTime || Date.now();
+        const daysActive = Math.max(1, (Date.now() - startTime) / (1000 * 60 * 60 * 24));
+        const dailyROI = roi / daysActive;
+        const apy = dailyROI * 365;
+
+        // Last trade info
+        const lastTrade = filledOrders.length > 0 ? filledOrders[filledOrders.length - 1] : null;
+
+        // Recent logs (last 5)
+        const recentLogs = (global.logBuffer || []).slice(-5).map(l => ({
+            type: l.type,
+            message: l.message?.substring(0, 100),
+            timestamp: l.timestamp
+        }));
+
         res.json({
             // Basic info
             pair: CONFIG.pair,
@@ -290,13 +314,16 @@ app.get('/api/status', async (req, res) => {
             totalProfit: state.totalProfit || 0,
             unrealizedPnL: unrealizedPnL,
             totalPnL: totalPnL,
+            dailyProfit: dailyProfit,
+            dailyTrades: dailyTrades,
 
             // Portfolio metrics
             totalEquity: totalEquity,
-            globalEquity: globalEquity,  // Total Binance account (for Master Dashboard)
+            globalEquity: globalEquity,
             usdtBalance: usdtBalance,
             initialCapital: initialCapital,
             roi: roi,
+            apy: apy,
 
             // Trade metrics
             winRate: winRate,
@@ -321,8 +348,20 @@ app.get('/api/status', async (req, res) => {
             blockingReason: blockingReason,
             timeInRange: timeInRange,
 
+            // Last trade
+            lastTrade: lastTrade ? {
+                side: lastTrade.side,
+                price: lastTrade.price,
+                amount: lastTrade.amount,
+                profit: lastTrade.profit,
+                timestamp: lastTrade.timestamp
+            } : null,
+
             // System
             uptime: process.uptime(),
+            startTime: startTime,
+            daysActive: daysActive,
+            recentLogs: recentLogs,
             timestamp: Date.now()
         });
     } catch (err) {
