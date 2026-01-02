@@ -32,8 +32,8 @@ function calculateSwarmMetrics() {
 
     let totalCapital = 0;
     let totalProfit = 0;
-    let oldestTrade = Date.now();
     let weightedYieldSum = 0;
+    let globalOldestTrade = Date.now();
 
     stateFiles.forEach(file => {
         try {
@@ -45,28 +45,30 @@ function calculateSwarmMetrics() {
             totalCapital += capital;
             totalProfit += profit;
 
-            // Find oldest trade
+            // Find THIS bot's oldest trade
+            let botOldestTrade = Date.now();
             if (filledOrders.length > 0) {
                 filledOrders.sort((a, b) => a.timestamp - b.timestamp);
-                if (filledOrders[0].timestamp < oldestTrade) {
-                    oldestTrade = filledOrders[0].timestamp;
+                botOldestTrade = filledOrders[0].timestamp;
+                if (botOldestTrade < globalOldestTrade) {
+                    globalOldestTrade = botOldestTrade;
                 }
             }
 
-            // Calculate this bot's daily yield weighted by capital
-            const daysActive = Math.max(1, (Date.now() - oldestTrade) / (1000 * 60 * 60 * 24));
-            if (capital > 0 && daysActive > 0) {
-                const dailyYield = profit / capital / daysActive;
-                weightedYieldSum += dailyYield * capital;
+            // Calculate THIS bot's daily yield (same logic as swarm_audit.js)
+            const botDaysActive = Math.max(1, (Date.now() - botOldestTrade) / (1000 * 60 * 60 * 24));
+            if (capital > 0 && botDaysActive > 0) {
+                const botDailyYield = profit / capital / botDaysActive;
+                weightedYieldSum += botDailyYield * capital;
             }
         } catch (e) {
             // Skip invalid files
         }
     });
 
-    const daysActive = Math.max(1, (Date.now() - oldestTrade) / (1000 * 60 * 60 * 24));
+    const daysActive = Math.max(1, (Date.now() - globalOldestTrade) / (1000 * 60 * 60 * 24));
 
-    // Weighted average yield across all bots
+    // Weighted average yield across all bots (matches swarm_audit.js)
     const realYield = totalCapital > 0 ? weightedYieldSum / totalCapital : 0.0020;
 
     return { realYield, totalCapital, totalProfit, daysActive };
