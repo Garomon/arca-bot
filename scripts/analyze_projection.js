@@ -51,7 +51,8 @@ function analyzeAndProject() {
 
     // 2. Projection Scenarios
     const scenarios = [
-        { name: "🏦 BANCO (CETES 10%)", yield: 0.00026 }, // ~10% APY / 365 = 0.026% daily
+        { name: "🏦 BANCO (CETES 10%)", yield: 0.00026 },
+        { name: "🐌 REALIDAD HOY (0.14%)", yield: 0.0014 }, // From Swarm Audit
         { name: "🐻 PESIMISTA (0.25%)", yield: 0.0025 },
         { name: "⚖️ REALISTA (0.50%)", yield: 0.0050 },
         { name: "🦄 OPTIMISTA (0.82%)", yield: 0.0082 }
