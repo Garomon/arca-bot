@@ -979,17 +979,18 @@
 
             // Blocking reason & Alert Styling
             const blockingEl = document.getElementById(`blocking-${botId}`);
-            const cardEl = document.getElementById(`bot-card-${botId}`);
+            // FIXED: ID is 'card-' not 'bot-card-'
+            const cardEl = document.getElementById(`card-${botId}`);
 
             if (data.blockingReason) {
                 blockingEl.classList.remove('hidden');
                 document.getElementById(`blocking-text-${botId}`).textContent = data.blockingReason;
                 // Add Visual Alert
-                cardEl.classList.add('bot-card-alert');
+                if (cardEl) cardEl.classList.add('bot-card-alert');
             } else {
                 blockingEl.classList.add('hidden');
                 // Remove Visual Alert
-                cardEl.classList.remove('bot-card-alert');
+                if (cardEl) cardEl.classList.remove('bot-card-alert');
             }
 
             // Last trade update
