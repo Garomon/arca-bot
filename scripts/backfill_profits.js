@@ -281,7 +281,7 @@ async function backfillProfits() {
         state.accountingMethod = 'SPREAD_MATCH';
         state.lastBackfill = new Date().toISOString();
 
-        console.log(`║  >> Updated ${updatedCount} orders                                        ║`);
+        // console.log(`║  >> Updated ${updatedCount} orders                                        ║`); // REMOVED: updatedCount invalid
         console.log(`║  >> Rebuilt inventory: ${inventory.length} lots                                ║`);
 
         // ==================== PHASE 5: SAVE ====================
