@@ -660,11 +660,26 @@
         async function fetchAllData() {
             let totalProfit = 0;
             let totalUnrealized = 0;
-            let totalEquity = 0;
             let totalOrders = 0;
             let botsOnline = 0;
             let totalROI = 0;
             let botCount = 0;
+            let realEquity = 0;
+
+            // Fetch real Binance balance (from BTC bot)
+            try {
+                const balanceRes = await fetch('/api/balance');
+                if (balanceRes.ok) {
+                    const balanceData = await balanceRes.json();
+                    // Calculate real equity: USDT + BTC value + SOL value + DOGE value
+                    const btcValue = (balanceData.btc || 0) * (balanceData.btcPrice || 0);
+                    const solValue = (balanceData.sol || 0) * (botState.sol?.currentPrice || 0);
+                    const dogeValue = (balanceData.doge || 0) * (botState.doge?.currentPrice || 0);
+                    realEquity = (balanceData.usdt || 0) + btcValue + solValue + dogeValue;
+                }
+            } catch (e) {
+                console.error('Error fetching balance:', e);
+            }
 
             for (const bot of BOTS) {
                 try {
@@ -678,7 +693,6 @@
 
                         totalProfit += data.totalProfit || 0;
                         totalUnrealized += data.unrealizedPnL || 0;
-                        totalEquity += data.totalEquity || 0;
                         totalOrders += data.activeOrders || 0;
                         totalROI += data.roi || 0;
                         botsOnline++;
@@ -699,7 +713,8 @@
             unrealizedEl.textContent = `$${totalUnrealized.toFixed(2)}`;
             unrealizedEl.className = `value ${totalUnrealized >= 0 ? 'positive' : 'negative'}`;
 
-            document.getElementById('total-equity').textContent = `$${totalEquity.toFixed(0)}`;
+            // Use real equity from Binance if available
+            document.getElementById('total-equity').textContent = `$${realEquity > 0 ? realEquity.toFixed(0) : '...'}`;
 
             const avgROI = botCount > 0 ? totalROI / botCount : 0;
             const roiEl = document.getElementById('total-roi');

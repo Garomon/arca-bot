@@ -306,6 +306,32 @@ app.get('/api/status', (req, res) => {
     });
 });
 
+// API endpoint for real Binance balance (Master Dashboard)
+app.get('/api/balance', async (req, res) => {
+    try {
+        const balance = await binance.fetchBalance();
+        const usdt = balance.USDT?.total || 0;
+        const btc = balance.BTC?.total || 0;
+        const sol = balance.SOL?.total || 0;
+        const doge = balance.DOGE?.total || 0;
+
+        // Get current prices for value calculation
+        const btcPrice = state.currentPrice || 0;
+
+        res.json({
+            usdt: usdt,
+            btc: btc,
+            sol: sol,
+            doge: doge,
+            btcPrice: btcPrice,
+            totalEquity: usdt + (btc * btcPrice),
+            timestamp: Date.now()
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- BINANCE CONNECTION ---
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,
