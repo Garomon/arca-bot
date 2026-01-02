@@ -278,11 +278,24 @@ app.get('/api/status', async (req, res) => {
         const totalCycles = state.totalCycles || 1;
         const timeInRange = (inRangeCycles / totalCycles * 100).toFixed(1);
 
-        // Calculate daily profit from filled orders
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayMs = today.getTime();
-        const todayOrders = filledOrders.filter(o => o.timestamp && o.timestamp >= todayMs);
+        // Calculate daily profit from filled orders (UTC-6 / CDMX Timezone)
+        const now = new Date();
+        // Convert current server time to UTC-6 (Mexico City)
+        // 1. Get UTC timestamp
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        // 2. Apply -6h offset
+        const cdmxTime = new Date(utcTime + (3600000 * -6));
+        // 3. Reset to midnight of that CDMX day
+        cdmxTime.setHours(0, 0, 0, 0);
+        // 4. Convert back to pure timestamp relative to UTC for comparison? 
+        // Actually, we need the timestamp of "00:00 CDMX today" in server time logic?
+        // No, simplest way: Get start of day timestamp in UTC-6
+
+        // Let's do robust ISO string method:
+        const cdmxISO = new Date(utcTime + (3600000 * -6)).toISOString().split('T')[0]; // "2026-01-02"
+        const startOfDayCDMX = new Date(`${cdmxISO}T00:00:00.000-06:00`).getTime();
+
+        const todayOrders = filledOrders.filter(o => o.timestamp && o.timestamp >= startOfDayCDMX);
         const dailyProfit = todayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
         const dailyTrades = todayOrders.length;
 
