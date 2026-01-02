@@ -343,14 +343,69 @@ async function fullAudit() {
 
             const profitNeedsFix = Math.abs(profitDiff) > 0.01;
             const invNeedsFix = Math.abs(invDiff) > 0.0001;
+            let invNeedsFix = Math.abs(invDiff) > 0.0001;
             needsFix = profitNeedsFix || invNeedsFix;
 
             console.log(`║  State File Profit:      $${stateProfit.toFixed(4).padStart(12)}                       ║`);
             console.log(`║  Audit Profit:           $${totalRealizedProfit.toFixed(4).padStart(12)}                       ║`);
             console.log(`║  DIFFERENCE:             $${profitDiff.toFixed(4).padStart(12)} ${profitNeedsFix ? '⚠️' : '✅'}                  ║`);
+            // 2026-01-02 FIX: Cap Inventory at Real Exchange Balance
+            // This prevents "Cost Basis Lost" errors on startup if Audit > Real
+            const balance = await binance.fetchBalance();
+            const baseAsset = PAIR.split('/')[0];
+            const realBalance = parseFloat(balance[baseAsset]?.total || 0);
+
+            console.log(`║  Real Exchange Balance:  ${realBalance.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
+
+            let cappedInventory = [...inventory];
+            let cappedTotal = remainingInventory;
+
+            if (remainingInventory > realBalance + 0.000001) {
+                console.log(`║  ⚠️ AUDIT > REAL: Truncating inventory to match exchange (${realBalance.toFixed(6)}) ║`);
+
+                // We must shed "Ghost Lots". Logic: Keep NEWEST lots (Likely valid). Discard OLDEST (Likely sold/lost).
+                // Inventory is currently sorted by trade order (Oldest -> Newest)?
+                // Loop above pushed trades. tradeLog is chronological?
+                // allTrades comes from fetchMyTrades without sort? Usually oldest first? 
+                // CCXT fetchMyTrades usually returns oldest first.
+                // So inventory[0] is oldest.
+
+                // To cap: Remove from START (Oldest) until we fit.
+                // Actually, let's reverse loop to pick NEWEST until we hit balance.
+
+                cappedInventory = [];
+                let currentSum = 0;
+
+                // Loop data from Newest (End) to Oldest (Start)
+                for (let i = inventory.length - 1; i >= 0; i--) {
+                    const lot = inventory[i];
+                    const spaceRemaining = realBalance - currentSum;
+
+                    if (spaceRemaining <= 0.00000001) break;
+
+                    const take = Math.min(lot.remaining, spaceRemaining);
+
+                    // Add to front of new array (to keep order)
+                    cappedInventory.unshift({
+                        ...lot,
+                        remaining: take,
+                        amount: lot.amount // Keep original amount for record, but remaining is capped
+                    });
+
+                    currentSum += take;
+                }
+
+                cappedTotal = currentSum;
+                inventory = cappedInventory; // Replace for final output
+                remainingInventory = cappedTotal;
+                invDiff = remainingInventory - stateInvTotal; // Recalculate invDiff after capping
+                invNeedsFix = Math.abs(invDiff) > 0.0001; // Recalculate invNeedsFix
+                needsFix = profitNeedsFix || invNeedsFix; // Recalculate needsFix
+            }
+
             console.log('╠══════════════════════════════════════════════════════════════════╣');
             console.log(`║  State Inventory:        ${stateInvTotal.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
-            console.log(`║  Audit Inventory:        ${remainingInventory.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
+            console.log(`║  Audit Inventory (Cap):  ${remainingInventory.toFixed(6).padStart(12)} ${BASE_ASSET}                  ║`);
             console.log(`║  DIFFERENCE:             ${invDiff.toFixed(6).padStart(12)} ${BASE_ASSET} ${invNeedsFix ? '⚠️' : '✅'}             ║`);
             console.log('╚══════════════════════════════════════════════════════════════════╝');
 
