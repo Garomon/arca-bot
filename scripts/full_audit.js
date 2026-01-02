@@ -389,6 +389,14 @@ async function fullAudit() {
                 state.entryPrice = avgInvCost;
                 console.log(`║  📊 Avg Cost: $${avgInvCost.toFixed(2).padEnd(42)}║`);
 
+                // UNPAUSE BOT (Clear Safety Locks)
+                if (state.isPaused) {
+                    state.isPaused = false;
+                    state.pauseReason = null;
+                    state.smartDcaBlocking = false;
+                    console.log(`║  🔓 SAFETY LOCK REMOVED: Bot Unpaused                            ║`);
+                }
+
                 // Save
                 fs.writeFileSync(stateFilePath, JSON.stringify(state, null, 2));
                 console.log('╠══════════════════════════════════════════════════════════════════╣');
