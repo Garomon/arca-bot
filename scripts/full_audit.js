@@ -355,56 +355,70 @@ async function fullAudit() {
             console.log('╚══════════════════════════════════════════════════════════════════╝');
 
             // ==================== AUTO-FIX LOGIC ====================
-            if (FIX_MODE && needsFix) {
+            if (FIX_MODE) {
                 console.log('\n╔══════════════════════════════════════════════════════════════════╗');
-                console.log('║  🔧 AUTO-FIX: Updating state file...                             ║');
+                console.log('║  🔧 AUTO-FIX MODE                                                ║');
                 console.log('╠══════════════════════════════════════════════════════════════════╣');
 
-                // Create backup
-                const backupPath = stateFilePath.replace('.json', `_backup_${Date.now()}.json`);
-                fs.writeFileSync(backupPath, JSON.stringify(state, null, 2));
-                console.log(`║  📁 Backup created: ${path.basename(backupPath).padEnd(35)}    ║`);
+                let stateUpdated = false;
 
-                // Update profit
-                const oldProfit = state.totalProfit || 0;
-                state.totalProfit = totalRealizedProfit;
-                state.accumulatedProfit = totalRealizedProfit;
-                console.log(`║  💰 Profit: $${oldProfit.toFixed(4)} → $${totalRealizedProfit.toFixed(4)}                           ║`);
+                // 1. Fix Stats (Profit/Inventory) if needed
+                if (needsFix) {
+                    // Create backup
+                    const backupPath = stateFilePath.replace('.json', `_backup_${Date.now()}.json`);
+                    fs.writeFileSync(backupPath, JSON.stringify(state, null, 2));
+                    console.log(`║  📁 Backup created: ${path.basename(backupPath).padEnd(35)}    ║`);
 
-                // Update inventory with audited lots
-                const oldInvCount = (state.inventory || []).length;
-                state.inventory = inventory.map(lot => ({
-                    id: lot.orderId || `AUDIT_${lot.timestamp}`,
-                    price: lot.price,
-                    amount: lot.remaining,
-                    remaining: lot.remaining,
-                    fee: lot.fee || 0,
-                    timestamp: lot.timestamp,
-                    recovered: true,
-                    auditVerified: true
-                }));
-                console.log(`║  📦 Inventory: ${oldInvCount} lots → ${state.inventory.length} lots (${remainingInventory.toFixed(6)} ${BASE_ASSET})     ║`);
+                    // Update profit
+                    const oldProfit = state.totalProfit || 0;
+                    state.totalProfit = totalRealizedProfit;
+                    state.accumulatedProfit = totalRealizedProfit;
+                    console.log(`║  💰 Profit: $${oldProfit.toFixed(4)} → $${totalRealizedProfit.toFixed(4)}                           ║`);
 
-                // Update avg cost
-                state.entryPrice = avgInvCost;
-                console.log(`║  📊 Avg Cost: $${avgInvCost.toFixed(2).padEnd(42)}║`);
+                    // Update inventory with audited lots
+                    const oldInvCount = (state.inventory || []).length;
+                    state.inventory = inventory.map(lot => ({
+                        id: lot.orderId || `AUDIT_${lot.timestamp}`,
+                        price: lot.price,
+                        amount: lot.remaining,
+                        remaining: lot.remaining,
+                        fee: lot.fee || 0,
+                        timestamp: lot.timestamp,
+                        recovered: true,
+                        auditVerified: true
+                    }));
+                    console.log(`║  📦 Inventory: ${oldInvCount} lots → ${state.inventory.length} lots (${remainingInventory.toFixed(6)} ${BASE_ASSET})     ║`);
 
-                // UNPAUSE BOT (Clear Safety Locks)
+                    // Update avg cost
+                    state.entryPrice = avgInvCost;
+                    console.log(`║  📊 Avg Cost: $${avgInvCost.toFixed(2).padEnd(42)}║`);
+
+                    stateUpdated = true;
+                } else {
+                    console.log('║  ✅ Stats (Profit/Inventory) are accurate. No changes needed.    ║');
+                }
+
+                // 2. Unpause Bot (ALWAYS CHECK THIS IN FIX MODE)
                 if (state.isPaused) {
                     state.isPaused = false;
                     state.pauseReason = null;
                     state.smartDcaBlocking = false;
                     console.log(`║  🔓 SAFETY LOCK REMOVED: Bot Unpaused                            ║`);
+                    stateUpdated = true;
+                } else {
+                    console.log('║  ✅ Bot is already unpaused.                                     ║');
                 }
 
-                // Save
-                fs.writeFileSync(stateFilePath, JSON.stringify(state, null, 2));
-                console.log('╠══════════════════════════════════════════════════════════════════╣');
-                console.log('║  ✅ STATE FILE UPDATED SUCCESSFULLY                              ║');
-                console.log('║  ⚠️  RESTART THE BOT to apply changes: pm2 restart bot-btc       ║');
-                console.log('╚══════════════════════════════════════════════════════════════════╝');
-            } else if (FIX_MODE && !needsFix) {
-                console.log('\n✅ No fixes needed - state file is accurate.');
+                // Save only if something changed
+                if (stateUpdated) {
+                    fs.writeFileSync(stateFilePath, JSON.stringify(state, null, 2));
+                    console.log('╠══════════════════════════════════════════════════════════════════╣');
+                    console.log('║  ✅ STATE FILE UPDATED SUCCESSFULLY                              ║');
+                    console.log('║  ⚠️  RESTART THE BOT to apply changes: pm2 restart bot-btc       ║');
+                    console.log('╚══════════════════════════════════════════════════════════════════╝');
+                } else {
+                    console.log('╚══════════════════════════════════════════════════════════════════╝');
+                }
             } else if (!FIX_MODE && needsFix) {
                 console.log('\n⚠️  Discrepancies found! Run with --fix to auto-correct:');
                 console.log(`   node scripts/full_audit.js ${PAIR} --fix`);
