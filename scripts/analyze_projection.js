@@ -7,19 +7,26 @@ const MXN_USD_RATE = 20.5; // Approx
 const MONTHLY_CONTRIBUTION_USD = MONTHLY_CONTRIBUTION_MXN / MXN_USD_RATE;
 
 const BOT_DIR = path.join(__dirname, '..');
+const SESSIONS_DIR = path.join(BOT_DIR, 'data', 'sessions');
 
 function findStateFile() {
     try {
-        const files = fs.readdirSync(BOT_DIR);
-        // Find any file starting with 'grid_state' and ending with '.json'
-        // Prefer one that isn't 'grid_state_template.json' if it exists
-        const stateFiles = files.filter(f => f.startsWith('grid_state') && f.endsWith('.json') && !f.includes('template'));
+        // Try SESSIONS directory first (New standard)
+        let dir = SESSIONS_DIR;
+        if (!fs.existsSync(dir)) {
+            // Fallback to root (Legacy or different setup)
+            dir = BOT_DIR;
+        }
+
+        const files = fs.readdirSync(dir);
+        // Find any file ending with 'state.json' (covers 'grid_state.json' and 'VANTAGE_state.json')
+        const stateFiles = files.filter(f => f.endsWith('state.json') && !f.includes('template'));
 
         if (stateFiles.length === 0) return null;
 
-        // Return the most recently modified state file
+        // Return match
         return stateFiles.map(f => {
-            const fullPath = path.join(BOT_DIR, f);
+            const fullPath = path.join(dir, f);
             return { name: f, time: fs.statSync(fullPath).mtime.getTime(), path: fullPath };
         }).sort((a, b) => b.time - a.time)[0].path;
 
@@ -32,7 +39,7 @@ function analyzeAndProject() {
     const stateFile = findStateFile();
 
     if (!stateFile) {
-        console.error(`❌ No state file found in ${BOT_DIR}. Looking for 'grid_state*.json'.`);
+        console.error(`❌ No state file found in ${SESSIONS_DIR} or ${BOT_DIR}. Looking for '*state.json'.`);
         return;
     }
 
@@ -49,21 +56,16 @@ function analyzeAndProject() {
     // Sort trade history to find start date
     filledOrders.sort((a, b) => a.timestamp - b.timestamp);
     const firstTrade = filledOrders[0].timestamp;
-    const lastTrade = filledOrders[filledOrders.length - 1].timestamp;
     const now = Date.now();
 
     const daysActive = (now - firstTrade) / (1000 * 60 * 60 * 24);
     const totalProfit = state.totalProfit || 0;
-    const currentCapital = state.initialCapital + totalProfit; // Simplified equity approximation or read from state if available
+    const currentCapital = (state.initialCapital || 0) + totalProfit; // Simplified equity
 
     // Average Daily Profit (Realized) based on history
-    // Simple average: Total Profit / Days
-    // Better: CAGR but let's stick to simple daily avg yield relative to avg capital
-    // Let's use: (Total Profit / Initial Capital) / Days * 100
-
     const initialCap = state.initialCapital || 400; // Fallback
     const totalROI = (totalProfit / initialCap);
-    const dailyYield = daysActive > 0 ? totalROI / daysActive : 0;
+    const dailyYield = daysActive > 1 ? totalROI / daysActive : 0; // Use > 1 day to avoid skew
     const dailyYieldPct = dailyYield * 100;
 
     console.log(`\n🦅 ARCA BOT - REAL DATA PROJECTION`);
