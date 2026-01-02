@@ -51,6 +51,8 @@ echo -e "\n🧠 --- 9.c [AI DOGE] ENTRENAMIENTO [TIEMPO REAL] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_DOGEUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
 echo -e "\n💾 --- 10. PULSO DE MEMORIA [TIEMPO REAL] ---"; \
 ls -lh /root/arca-bot/data/sessions/*_state.json; \
+echo -e "\n🔄 --- 10.b HISTORIAL DE REBALANCEO (ADAPTIVE) [HOY] ---"; \
+grep -E "Rebalance Triggered|PRICE DRIFT|Grid Health|rebalance" /root/arca-bot/logs/VANTAGE01_*_activity.log | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)" | tail -n 10 || echo "Sin rebalanceos hoy (Grid Estable)."; \
 echo -e "\n🦅 --- 11. SWARM YIELD AUDIT [TIEMPO REAL] ---"; \
 node /root/arca-bot/scripts/calc_swarm_yield.js 2>/dev/null || echo "Script no disponible"; \
 echo -e "\n📊 --- 12. PROYECCIÓN DE RIQUEZA ---"; \
