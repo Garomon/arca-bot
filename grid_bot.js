@@ -3707,9 +3707,9 @@ async function syncHistoricalTrades() {
         if (addedCount > 0) {
             // Sort by date desc
             state.filledOrders.sort((a, b) => b.timestamp - a.timestamp);
-            // Keep size manageable
-            if (state.filledOrders.length > 200) {
-                const removed = state.filledOrders.slice(200);
+            // Keep size manageable (Increased to 1000 for robust 'Yesterday' & Weekly stats)
+            if (state.filledOrders.length > 1000) {
+                const removed = state.filledOrders.slice(1000);
                 const removedProfit = removed.reduce((sum, o) => sum + (o.profit || 0), 0);
 
                 state.accumulatedProfit = (state.accumulatedProfit || 0) + removedProfit;
@@ -3717,7 +3717,7 @@ async function syncHistoricalTrades() {
                     log('SYNC', `📦 Archived ${removed.length} orders. Moved $${removedProfit.toFixed(4)} profit to Deep Storage.`);
                 }
 
-                state.filledOrders = state.filledOrders.slice(0, 200);
+                state.filledOrders = state.filledOrders.slice(0, 1000);
             }
             log('SYNC', `Imported ${addedCount} historical trades from exchange`, 'success');
             saveState();
