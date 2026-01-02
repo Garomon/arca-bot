@@ -664,22 +664,7 @@
             let botsOnline = 0;
             let totalROI = 0;
             let botCount = 0;
-            let realEquity = 0;
-
-            // Fetch real Binance balance (from BTC bot)
-            try {
-                const balanceRes = await fetch('/api/balance');
-                if (balanceRes.ok) {
-                    const balanceData = await balanceRes.json();
-                    // Calculate real equity: USDT + BTC value + SOL value + DOGE value
-                    const btcValue = (balanceData.btc || 0) * (balanceData.btcPrice || 0);
-                    const solValue = (balanceData.sol || 0) * (botState.sol?.currentPrice || 0);
-                    const dogeValue = (balanceData.doge || 0) * (botState.doge?.currentPrice || 0);
-                    realEquity = (balanceData.usdt || 0) + btcValue + solValue + dogeValue;
-                }
-            } catch (e) {
-                console.error('Error fetching balance:', e);
-            }
+            let globalEquity = 0;  // From BTC bot (shared Binance account)
 
             for (const bot of BOTS) {
                 try {
@@ -697,6 +682,11 @@
                         totalROI += data.roi || 0;
                         botsOnline++;
                         botCount++;
+
+                        // Get global equity from first bot (BTC) - they all share same Binance account
+                        if (bot.id === 'btc' && data.globalEquity > 0) {
+                            globalEquity = data.globalEquity;
+                        }
                     } else {
                         updateBotOffline(bot.id);
                     }
@@ -713,8 +703,8 @@
             unrealizedEl.textContent = `$${totalUnrealized.toFixed(2)}`;
             unrealizedEl.className = `value ${totalUnrealized >= 0 ? 'positive' : 'negative'}`;
 
-            // Use real equity from Binance if available
-            document.getElementById('total-equity').textContent = `$${realEquity > 0 ? realEquity.toFixed(0) : '...'}`;
+            // Use global equity from Binance (via BTC bot)
+            document.getElementById('total-equity').textContent = `$${globalEquity > 0 ? globalEquity.toFixed(0) : '...'}`;
 
             const avgROI = botCount > 0 ? totalROI / botCount : 0;
             const roiEl = document.getElementById('total-roi');
