@@ -3,7 +3,9 @@
  * count_trades_today.js
  * Timezone-aware trade counter for Arca Bot Swarm
  * 
- * Counts trades that occurred during "today" in Mexico City time (UTC-6/UTC-5 DST)
+ * FIXED: Now reads from filledOrders in state files (same source as dashboard)
+ * instead of log files which can rotate/get cleared.
+ * 
  * Usage: node scripts/count_trades_today.js
  */
 
@@ -14,25 +16,23 @@ const path = require('path');
 //                    CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 const TIMEZONE_OFFSET = -6; // Mexico City Standard Time (CST)
-const LOGS_DIR = path.join(__dirname, '..', 'logs');
+const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'sessions');
 const BOTS = [
-    { id: 'BTCUSDT', name: 'BTC' },
-    { id: 'SOLUSDT', name: 'SOL' },
-    { id: 'DOGEUSDT', name: 'DOGE' }
+    { id: 'BTCUSDT', name: 'BTC', stateFile: 'VANTAGE01_BTCUSDT_state.json' },
+    { id: 'SOLUSDT', name: 'SOL', stateFile: 'VANTAGE01_SOLUSDT_state.json' },
+    { id: 'DOGEUSDT', name: 'DOGE', stateFile: 'VANTAGE01_DOGEUSDT_state.json' }
 ];
 
 // ═══════════════════════════════════════════════════════════════
 //                    TIMEZONE HELPERS
 // ═══════════════════════════════════════════════════════════════
 function getLocalDate(utcTimestamp) {
-    // Convert UTC timestamp to Mexico time
     const utc = new Date(utcTimestamp);
     const localMs = utc.getTime() + (TIMEZONE_OFFSET * 60 * 60 * 1000);
     return new Date(localMs);
 }
 
 function getTodayBoundaries() {
-    // Get "today" in Mexico time as UTC boundaries
     const now = new Date();
     const localNow = getLocalDate(now.toISOString());
 
@@ -51,54 +51,43 @@ function getTodayBoundaries() {
     };
 }
 
-function isTimestampToday(isoTimestamp, boundaries) {
-    const ts = new Date(isoTimestamp);
-    return ts >= boundaries.start && ts < boundaries.end;
-}
-
 // ═══════════════════════════════════════════════════════════════
-//                    LOG PARSER
+//                    STATE FILE PARSER (FIXED!)
 // ═══════════════════════════════════════════════════════════════
-function countTradesForBot(botId, boundaries) {
-    const pattern = new RegExp(`VANTAGE01_${botId}_activity.*\\.log$`);
-
+function countTradesForBot(bot, boundaries) {
     let buys = 0;
     let sells = 0;
     let profit = 0;
 
     try {
-        const files = fs.readdirSync(LOGS_DIR).filter(f => pattern.test(f));
+        const stateFilePath = path.join(SESSIONS_DIR, bot.stateFile);
+        if (!fs.existsSync(stateFilePath)) {
+            return { buys, sells, profit };
+        }
 
-        for (const file of files) {
-            const content = fs.readFileSync(path.join(LOGS_DIR, file), 'utf8');
-            const lines = content.split('\n');
+        const state = JSON.parse(fs.readFileSync(stateFilePath, 'utf8'));
+        const filledOrders = state.filledOrders || [];
 
-            for (const line of lines) {
-                // Extract timestamp from log line: [2026-01-02T08:35:03.365Z]
-                const tsMatch = line.match(/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)\]/);
-                if (!tsMatch) continue;
+        for (const order of filledOrders) {
+            const ts = order.timestamp || order.filledAt;
+            if (!ts) continue;
 
-                const timestamp = tsMatch[1];
-                if (!isTimestampToday(timestamp, boundaries)) continue;
+            const orderDate = new Date(ts);
+            if (orderDate < boundaries.start || orderDate >= boundaries.end) continue;
 
-                // Count BUYs (Added Lot)
-                if (line.includes('Added Lot')) {
-                    buys++;
-                }
-
-                // Count SELLs and extract profit (PROFIT log)
-                if (line.includes('[PROFIT]')) {
-                    sells++;
-                    // Extract profit: Net: $0.1234
-                    const profitMatch = line.match(/Net:\s*\$(-?[\d.]+)/);
-                    if (profitMatch) {
-                        profit += parseFloat(profitMatch[1]);
-                    }
+            // Count by side
+            if (order.side === 'buy') {
+                buys++;
+            } else if (order.side === 'sell') {
+                sells++;
+                // Add profit if available
+                if (order.profit !== undefined) {
+                    profit += order.profit;
                 }
             }
         }
     } catch (e) {
-        console.error(`Error reading logs for ${botId}: ${e.message}`);
+        console.error(`Error reading state for ${bot.name}: ${e.message}`);
     }
 
     return { buys, sells, profit };
@@ -119,7 +108,7 @@ function main() {
     let totalProfit = 0;
 
     for (const bot of BOTS) {
-        const stats = countTradesForBot(bot.id, boundaries);
+        const stats = countTradesForBot(bot, boundaries);
         totalBuys += stats.buys;
         totalSells += stats.sells;
         totalProfit += stats.profit;
