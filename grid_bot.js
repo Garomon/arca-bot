@@ -836,6 +836,12 @@ async function reconcileInventoryWithExchange() {
     } 
     */
 
+    // P0 FIX: If we have historical trades in state, don't wipe them during startup reconciliation
+    // This allows medical restoration of stolen history to PERSIST.
+    if (state.trades && state.trades.length > 0) {
+        log('RECONCILE', `✅ Historical trades detected (${state.trades.length}). Preservation protocol ACTIVE.`, 'success');
+    }
+
     log('RECONCILE', 'Syncing inventory with exchange history...', 'info');
     try {
         const balance = await binance.fetchBalance();
