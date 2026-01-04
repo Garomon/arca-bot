@@ -499,10 +499,11 @@ app.get('/api/rpg', async (req, res) => {
         }
 
         // 5. Quest Status (Dynamic Progression)
+        const currentEquity = await getGlobalEquity();
         const activeQuest = {
             name: "El Cruce del Valle",
             objective: "Alcanzar $1,500 en Capital Total (Equity)",
-            status: totalProfit + (data.totalEquity || 1107) >= 1500 ? "COMPLETED" : "IN_PROGRESS",
+            status: (currentEquity >= 1500) ? "COMPLETED" : "IN_PROGRESS",
             reward: "1000 XP + Rango: Caballero del Grid"
         };
 
