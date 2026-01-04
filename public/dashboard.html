@@ -658,6 +658,82 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* START RPG STYLES */
+        .rpg-profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .player-level {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: black;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .player-title {
+            font-size: 1.5rem !important;
+            margin: 0 !important;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+        }
+
+        .xp-container {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .xp-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9945ff, #00d4ff);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .xp-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .bot-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .bot-desc {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            font-style: italic;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 8px;
+        }
+
+        /* END RPG STYLES */
     </style>
 </head>
 
@@ -667,12 +743,41 @@
     </div>
 
     <div class="container">
+        <!-- RPG HEADER SECTION -->
         <div class="header">
-            <h1>🚀 ARCA BOT SWARM</h1>
-            <p class="subtitle">Master Control Dashboard</p>
+            <div class="rpg-profile">
+                <div class="player-info">
+                    <span class="player-level">LVL 8</span>
+                    <h1 class="player-title">Garossa, Señor de la Forja</h1>
+                </div>
+                <div class="xp-container">
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: 75%"></div>
+                    </div>
+                    <span class="xp-text">2,267 / 3,000 XP (Próximo: Titán Despierto)</span>
+                </div>
+            </div>
+
             <div class="live-indicator">
                 <div class="status-dot positive" id="status-dot"></div>
-                <span id="bots-status-header">0 / 3 BOTS ONLINE</span>
+                <span id="bots-status-header">0 / 3 CONSTRUCTOS ONLINE</span>
+            </div>
+        </div>
+
+        <!-- QUEST CARD (ACTIVE MISSION) -->
+        <div class="quest-card"
+            style="background: rgba(153, 69, 255, 0.1); border: 1px solid var(--accent-purple); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+            <div class="quest-icon" style="font-size: 2rem;">🛡️</div>
+            <div class="quest-info" style="flex: 1;">
+                <h3 style="color: var(--accent-purple); margin-bottom: 5px; font-size: 1rem;">MISIÓN ACTIVA: El Rito de
+                    Fortalecimiento</h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">Optimizar el Grid Spacing de Ignis (BTC)
+                    para capturar más volatilidad.</p>
+            </div>
+            <div class="quest-status" style="text-align: right;">
+                <span class="badge"
+                    style="background: var(--accent-green); color: black; padding: 4px 10px; border-radius: 4px; font-weight: bold;">¡COMPLETADA!</span>
+                <div style="font-size: 0.75rem; color: var(--accent-green); margin-top: 5px;">+200 XP Ganados</div>
             </div>
         </div>
 
@@ -681,32 +786,32 @@
             <div class="stat-card">
                 <div class="label">Total Profit</div>
                 <div class="value positive" id="total-profit">$0.00</div>
-                <div class="subvalue">Realized gains</div>
+                <div class="subvalue">Ganancias Realizadas</div>
             </div>
             <div class="stat-card">
-                <div class="label">Daily Profit</div>
+                <div class="label">Proyección Diaria</div>
                 <div class="value positive" id="daily-profit">$0.00</div>
-                <div class="subvalue" id="daily-trades">0 trades today</div>
+                <div class="subvalue" id="daily-trades">0 trades hoy</div>
             </div>
             <div class="stat-card">
-                <div class="label">Unrealized PnL</div>
+                <div class="label">PnL No Realizado</div>
                 <div class="value" id="total-unrealized">$0.00</div>
-                <div class="subvalue">Open positions</div>
+                <div class="subvalue">Posiciones Abiertas</div>
             </div>
             <div class="stat-card">
                 <div class="label">Total Equity</div>
                 <div class="value neutral" id="total-equity">$0.00</div>
-                <div class="subvalue">USDT + Inventory</div>
+                <div class="subvalue">USDT + Inventario</div>
             </div>
             <div class="stat-card">
                 <div class="label">Portfolio ROI</div>
                 <div class="value" id="total-roi">0.00%</div>
-                <div class="subvalue">All-time return</div>
+                <div class="subvalue">Retorno Histórico</div>
             </div>
             <div class="stat-card">
-                <div class="label">Active Orders</div>
+                <div class="label">Órdenes Activas</div>
                 <div class="value neutral" id="total-orders">0</div>
-                <div class="subvalue">Across all bots</div>
+                <div class="subvalue">En la Grid</div>
             </div>
         </div>
 
@@ -715,25 +820,56 @@
 
         <!-- Recent Activity -->
         <div class="logs-section" id="logs-section">
-            <h3>📋 Recent Activity</h3>
+            <h3>� Crónicas del Sistema (Logs)</h3>
             <div class="logs-list" id="logs-list">
-                <div class="log-item">Waiting for data...</div>
+                <div class="log-item">Esperando señales del Vacio...</div>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            Last update: <span class="update-time" id="last-update">-</span>
+            <span class="update-time" id="last-update">-</span>
             <br>
-            <span style="opacity: 0.5; font-size: 0.7rem;">Refreshes every 5 seconds</span>
+            <span style="opacity: 0.5; font-size: 0.7rem;">Sincronizando con el Mainframe...</span>
         </div>
     </div>
 
     <script>
+        // CONFIGURACIÓN DE CONSTRUCTOS (Identity RPG + Technical)
         const BOTS = [
-            { id: 'btc', name: 'Bitcoin', pair: 'BTC/USDT', icon: '₿', url: '/', class: 'btc', color: '#f7931a' },
-            { id: 'sol', name: 'Solana', pair: 'SOL/USDT', icon: '◎', url: '/sol/', class: 'sol', color: '#9945ff' },
-            { id: 'doge', name: 'Dogecoin', pair: 'DOGE/USDT', icon: '🐕', url: '/doge/', class: 'doge', color: '#c2a633' }
+            {
+                id: 'btc',
+                name: 'IGNIS',
+                subtitle: 'BTC - Juggernaut',
+                pair: 'BTC/USDT',
+                icon: '🔥',
+                url: '/',
+                class: 'btc',
+                color: '#f7931a',
+                desc: 'Tanque defensivo. Lento pero imparable.'
+            },
+            {
+                id: 'sol',
+                name: 'VENTUS',
+                subtitle: 'SOL - Rogue',
+                pair: 'SOL/USDT',
+                icon: '💨',
+                url: '/sol/',
+                class: 'sol',
+                color: '#9945ff',
+                desc: 'Veloz y letal. Captura la volatilidad.'
+            },
+            {
+                id: 'doge',
+                name: 'FANG',
+                subtitle: 'DOGE - Berserker',
+                pair: 'DOGE/USDT',
+                icon: '🐾',
+                url: '/doge/',
+                class: 'doge',
+                color: '#c2a633',
+                desc: 'Agresivo y caótico. Genera alto flujo.'
+            }
         ];
 
         const botState = {};
@@ -754,18 +890,18 @@
                             <div class="bot-icon ${bot.class}">${bot.icon}</div>
                             <div class="bot-info">
                                 <h2>${bot.name}</h2>
-                                <span class="pair">${bot.pair}</span>
+                                <div class="bot-subtitle">${bot.subtitle}</div>
                             </div>
                         </div>
                         <div class="status-group">
-                            <span class="status-badge offline" id="status-${bot.id}">Connecting</span>
+                            <span class="status-badge offline" id="status-${bot.id}">Conectando</span>
                             <span class="regime-badge neutral" id="regime-${bot.id}">-</span>
                         </div>
                     </div>
 
                     <div class="metrics-grid">
                         <div class="metric-item">
-                            <div class="label">Price</div>
+                            <div class="label">Precio</div>
                             <div class="value" id="price-${bot.id}">-</div>
                         </div>
                         <div class="metric-item">
@@ -774,7 +910,7 @@
                             <div class="subtext" id="roi-${bot.id}">ROI: 0%</div>
                         </div>
                         <div class="metric-item">
-                            <div class="label">Orders</div>
+                            <div class="label">Órdenes</div>
                             <div class="value" id="orders-${bot.id}">0</div>
                             <div class="subtext" id="lots-${bot.id}">0 lots</div>
                         </div>
@@ -787,7 +923,7 @@
 
                     <div class="score-section">
                         <div class="score-header">
-                            <span class="score-label">Decision Score</span>
+                            <span class="score-label">Decisión (IA)</span>
                             <span class="score-value" id="score-${bot.id}">50</span>
                         </div>
                         <div class="score-bar">
@@ -800,13 +936,13 @@
                         <span id="blocking-text-${bot.id}"></span>
                     </div>
 
+                    <div class="bot-desc">${bot.desc}</div>
+
                     <div class="last-trade" id="last-trade-${bot.id}">
-                        Last trade: <span>-</span>
+                        Último trade: <span>-</span>
                     </div>
 
-                    <a href="${bot.url}" target="_blank" class="bot-action">
-                        Open Full Dashboard →
-                    </a>
+                    <a href="${bot.url}" class="bot-action">ACCESO TERMINAL &rarr;</a>
                 </div>
             `).join('');
         }
@@ -863,6 +999,22 @@
                     console.error(`Error fetching ${bot.name}:`, e);
                     updateBotOffline(bot.id);
                 }
+            }
+
+            // P0 FIX: Fetch accurate Global Equity from dedicated endpoint (Source of Truth)
+            try {
+                // We use the BTC bot (root path) to get the aggregated balance of the account
+                const eqRes = await fetch('/api/balance');
+                if (eqRes.ok) {
+                    const eqData = await eqRes.json();
+                    // Use the summing logic from the backend (USDT + BTC + SOL + DOGE)
+                    if (eqData.totalEquity > 0) {
+                        globalEquity = eqData.totalEquity;
+                        console.log('Global Equity Updated:', globalEquity);
+                    }
+                }
+            } catch (e) {
+                console.error('Error fetching global equity source of truth:', e);
             }
 
             // Update totals
