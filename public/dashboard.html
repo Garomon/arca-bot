@@ -7,6 +7,7 @@
     <title>ARCA SWARM - Master Dashboard</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --bg-dark: #0a0a0f;
@@ -817,6 +818,19 @@
         <!-- Bot Cards -->
         <div class="bots-grid" id="bots-container"></div>
 
+        <!-- Global Profit Chart -->
+        <div class="profit-chart-section"
+            style="margin-top: 30px; padding: 25px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1rem; color: var(--accent-green);">📈 Profit Timeline - All Bots</h3>
+                <span id="chart-days-badge"
+                    style="font-size: 0.7rem; color: var(--text-muted); background: rgba(0,255,157,0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--accent-green);">LOADING...</span>
+            </div>
+            <div style="height: 250px; position: relative;">
+                <canvas id="global-profit-chart"></canvas>
+            </div>
+        </div>
+
         <!-- Recent Activity -->
         <div class="logs-section" id="logs-section">
             <h3>� Crónicas del Sistema (Logs)</h3>
@@ -1221,6 +1235,107 @@
             if (price < 10) return `$${price.toFixed(3)}`;
             if (price < 1000) return `$${price.toFixed(2)}`;
             return `$${price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        }
+
+        // ===== GLOBAL PROFIT CHART =====
+        let globalChartInstance = null;
+
+        async function fetchProfitHistory() {
+            try {
+                const response = await fetch('/api/profit-history');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.history) {
+                        renderGlobalProfitChart(data.history);
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching profit history:', err);
+            }
+        }
+
+        function renderGlobalProfitChart(history) {
+            const canvas = document.getElementById('global-profit-chart');
+            if (!canvas || history.length === 0) return;
+
+            // Take last 30 days
+            const last30 = history.slice(-30);
+            const labels = last30.map(h => h.date.substring(5)); // MM-DD
+            const dailyData = last30.map(h => h.profit);
+
+            // Cumulative profit
+            let cumulative = 0;
+            const cumulativeData = last30.map(h => {
+                cumulative += h.profit;
+                return cumulative.toFixed(2);
+            });
+
+            // Update badge
+            const badge = document.getElementById('chart-days-badge');
+            if (badge) badge.textContent = `LAST ${last30.length} DAYS`;
+
+            // Destroy old chart
+            if (globalChartInstance) globalChartInstance.destroy();
+
+            const ctx = canvas.getContext('2d');
+            globalChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Daily Profit',
+                            data: dailyData,
+                            backgroundColor: 'rgba(0, 255, 157, 0.6)',
+                            borderColor: '#00ff9d',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            order: 2
+                        },
+                        {
+                            label: 'Cumulative',
+                            data: cumulativeData,
+                            type: 'line',
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#00d4ff',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: true, labels: { color: '#888', font: { size: 11 } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.85)',
+                            titleColor: '#fff',
+                            bodyColor: '#00ff9d',
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: $${parseFloat(ctx.raw).toFixed(2)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666', font: { size: 9 } } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666', font: { size: 9 }, callback: v => '$' + v } }
+                    }
+                }
+            });
+        }
+
+        // Enhanced init to include chart
+        async function init() {
+            renderBotCards();
+            await fetchAllData();
+            await fetchProfitHistory(); // Fetch and render chart
+            setInterval(fetchAllData, 15000);
+            setInterval(fetchProfitHistory, 60000); // Refresh chart every minute
         }
 
         init();

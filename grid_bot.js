@@ -534,6 +534,52 @@ app.get('/api/rpg', async (req, res) => {
     }
 });
 
+// --- GLOBAL PROFIT HISTORY API ---
+// Aggregates daily profit from ALL bots for the RPG Dashboard chart
+app.get('/api/profit-history', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        const profitByDay = {};
+
+        if (fs.existsSync(sessionsDir)) {
+            const stateFiles = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+
+            for (const file of stateFiles) {
+                try {
+                    const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+
+                    // Aggregate from tradeHistory if available
+                    if (data.tradeHistory && Array.isArray(data.tradeHistory)) {
+                        data.tradeHistory.forEach(trade => {
+                            if (trade.side === 'sell' && trade.profit > 0) {
+                                const date = new Date(trade.timestamp).toISOString().split('T')[0];
+                                profitByDay[date] = (profitByDay[date] || 0) + parseFloat(trade.profit);
+                            }
+                        });
+                    }
+                } catch (e) { /* Ignore malformed files */ }
+            }
+        }
+
+        // Sort and format for chart
+        const sortedDates = Object.keys(profitByDay).sort();
+        const history = sortedDates.map(date => ({
+            date: date,
+            profit: parseFloat(profitByDay[date].toFixed(4))
+        }));
+
+        res.json({
+            success: true,
+            totalDays: history.length,
+            history: history
+        });
+
+    } catch (err) {
+        console.error('[API] /api/profit-history error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // BOT_ID and PAIR_ID defined at top of file
 // (Removed duplicate definition)
 
