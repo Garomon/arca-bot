@@ -333,8 +333,10 @@ app.get('/api/status', async (req, res) => {
         const dailyROI = roi / daysActive;
         const apy = dailyROI * 365;
 
-        // Last trade info
-        const lastTrade = filledOrders.length > 0 ? filledOrders[filledOrders.length - 1] : null;
+        // Last trade info (robustly pick latest by timestamp regardless of array order)
+        const lastTrade = filledOrders.length > 0
+            ? [...filledOrders].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))[0]
+            : null;
 
         // Recent logs (last 5)
         const recentLogs = (logBuffer || []).slice(-5).map(l => ({
