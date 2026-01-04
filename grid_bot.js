@@ -451,6 +451,80 @@ app.get('/api/balance', async (req, res) => {
     }
 });
 
+// --- RPG GAMIFICATION API ---
+app.get('/api/rpg', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        let totalProfit = 0;
+        let daysActive = 32; // Fallback default
+        const LAUNCH_DATE = new Date('2025-12-03T00:00:00Z');
+
+        // 1. Calculate Global Profit from all state files
+        if (fs.existsSync(sessionsDir)) {
+            const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+            files.forEach(file => {
+                try {
+                    const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+                    if (data.totalProfit) totalProfit += parseFloat(data.totalProfit);
+                } catch (e) { }
+            });
+        }
+
+        // 2. Calculate Days Active
+        const now = new Date();
+        const diffTime = Math.abs(now - LAUNCH_DATE);
+        daysActive = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // 3. XP Calculation
+        const BASE_XP_MANUAL_BONUS = 350; // Achievements unlocked manually
+        const xpFromProfit = Math.round(totalProfit * 10);
+        const xpFromDays = daysActive * 50;
+        const totalXp = xpFromProfit + xpFromDays + BASE_XP_MANUAL_BONUS;
+
+        // 4. Level Calculation
+        const LEVEL_THRESHOLDS = [
+            { level: 1, xp: 0 }, { level: 2, xp: 100 }, { level: 3, xp: 300 },
+            { level: 4, xp: 600 }, { level: 5, xp: 1000 }, { level: 6, xp: 1500 },
+            { level: 7, xp: 2200 }, { level: 8, xp: 3000 }, { level: 9, xp: 4500 },
+            { level: 10, xp: 6000 }, { level: 11, xp: 8000 }, { level: 50, xp: 150000 }
+        ];
+
+        let currentLevel = LEVEL_THRESHOLDS[0];
+        let nextLevel = LEVEL_THRESHOLDS[1];
+        for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+            if (totalXp >= LEVEL_THRESHOLDS[i].xp) {
+                currentLevel = LEVEL_THRESHOLDS[i];
+                nextLevel = LEVEL_THRESHOLDS[i + 1] || { level: 99, xp: 99999999 };
+            }
+        }
+
+        // 5. Quest Status (Static for now, can be dynamic later)
+        const activeQuest = {
+            name: "El Rito de Fortalecimiento",
+            objective: "Optimizar BTC APY > 0.05%",
+            status: "COMPLETED", // Hardcoded based on recent success
+            reward: "500 XP"
+        };
+
+        res.json({
+            level: currentLevel.level,
+            title: "Mercader Errante", // Dynamic based on level ranges?
+            xp: totalXp,
+            nextLevelXp: nextLevel.xp,
+            xpProgress: Math.round(((totalXp - currentLevel.xp) / (nextLevel.xp - currentLevel.xp)) * 100),
+            stats: {
+                profit: totalProfit,
+                days: daysActive
+            },
+            quest: activeQuest
+        });
+
+    } catch (err) {
+        console.error('[API] /api/rpg error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // BOT_ID and PAIR_ID defined at top of file
 // (Removed duplicate definition)
 

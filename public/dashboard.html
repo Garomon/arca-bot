@@ -1001,6 +1001,38 @@
                 }
             }
 
+            // RPG Data Fetch (Zero Friction)
+            try {
+                const rpgRes = await fetch('/api/rpg');
+                if (rpgRes.ok) {
+                    const rpg = await rpgRes.json();
+
+                    // Update Level & Title
+                    document.querySelector('.player-level').textContent = `LVL ${rpg.level}`;
+                    document.querySelector('.player-title').textContent = `Garossa, ${rpg.title}`;
+
+                    // Update XP Bar
+                    document.querySelector('.xp-fill').style.width = `${rpg.xpProgress}%`;
+                    document.querySelector('.xp-text').textContent = `${rpg.xp.toLocaleString()} / ${rpg.nextLevelXp.toLocaleString()} XP`;
+
+                    // Update Quest (if active)
+                    if (rpg.quest) {
+                        const qc = document.querySelector('.quest-card');
+                        if (qc) {
+                            qc.querySelector('h3').textContent = `MISION ACTIVA: ${rpg.quest.name}`;
+                            qc.querySelector('p').textContent = rpg.quest.objective;
+                            const statusBadge = qc.querySelector('.badge');
+                            if (statusBadge) {
+                                statusBadge.textContent = rpg.quest.status === 'COMPLETED' ? '¡COMPLETADA!' : 'EN PROGRESO';
+                                statusBadge.style.background = rpg.quest.status === 'COMPLETED' ? 'var(--accent-green)' : 'var(--accent-yellow)';
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error fetching RPG stats:', e);
+            }
+
             // P0 FIX: Fetch accurate Global Equity from dedicated endpoint (Source of Truth)
             try {
                 // We use the BTC bot (root path) to get the aggregated balance of the account
