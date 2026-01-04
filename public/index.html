@@ -16,6 +16,9 @@
     <!-- Hardened Socket.IO Load (Local with CDN Fallback) -->
     <script src="socket.io.min.js" onerror="this.src='https://cdn.socket.io/4.7.2/socket.io.min.js'"></script>
 
+    <!-- Chart.js for Profit Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <!-- ANTI-FREEZE DEBUGGER -->
     <script>
         window.onerror = function (msg, url, line) {
@@ -777,6 +780,22 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+
+                <!-- PROFIT CHART -->
+                <div class="profit-chart-panel mt-3 p-3"
+                    style="background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(20,20,40,0.5)); border-radius: 12px; border: 1px solid rgba(100,200,100,0.15); box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-uppercase fw-bold mb-0"
+                            style="letter-spacing: 1px; font-size: 0.75rem; color: #00ff9d;">
+                            📈 Daily Profit Chart
+                        </h6>
+                        <span class="badge bg-dark text-muted border border-success" style="font-size: 0.65rem;"
+                            id="chart-days-label">LAST 30 DAYS</span>
+                    </div>
+                    <div style="height: 200px; position: relative;">
+                        <canvas id="profit-chart-canvas"></canvas>
                     </div>
                 </div>
             </div>

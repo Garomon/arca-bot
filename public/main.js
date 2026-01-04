@@ -720,8 +720,111 @@ socket.on('debug_trades', (trades) => {
     if (trades && Array.isArray(trades)) {
         tradeHistory = trades;
         renderTradeHistory();
+        renderProfitChart(); // NEW: Update profit chart
     }
 });
+
+// ===== PROFIT CHART LOGIC =====
+let profitChartInstance = null;
+
+function renderProfitChart() {
+    if (!tradeHistory || tradeHistory.length === 0) return;
+
+    const canvas = document.getElementById('profit-chart-canvas');
+    if (!canvas) return;
+
+    // 1. Aggregate Profit by Day
+    const profitByDay = {};
+    tradeHistory.forEach(t => {
+        if (t.side === 'sell' && t.profit > 0) {
+            const date = new Date(t.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
+            profitByDay[date] = (profitByDay[date] || 0) + parseFloat(t.profit);
+        }
+    });
+
+    // 2. Sort dates and take last 30 days
+    const sortedDates = Object.keys(profitByDay).sort();
+    const last30Days = sortedDates.slice(-30);
+    const labels = last30Days.map(d => d.substring(5)); // MM-DD format
+    const data = last30Days.map(d => profitByDay[d].toFixed(2));
+
+    // 3. Cumulative Profit for Area Fill
+    let cumulative = 0;
+    const cumulativeData = last30Days.map(d => {
+        cumulative += profitByDay[d];
+        return cumulative.toFixed(2);
+    });
+
+    // Update badge label
+    const badgeEl = document.getElementById('chart-days-label');
+    if (badgeEl) badgeEl.innerText = `LAST ${last30Days.length} DAYS`;
+
+    // 4. Destroy previous chart if exists
+    if (profitChartInstance) {
+        profitChartInstance.destroy();
+    }
+
+    // 5. Create Chart
+    const ctx = canvas.getContext('2d');
+    profitChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Daily Profit ($)',
+                    data: data,
+                    backgroundColor: 'rgba(0, 255, 157, 0.6)',
+                    borderColor: '#00ff9d',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    order: 2
+                },
+                {
+                    label: 'Cumulative ($)',
+                    data: cumulativeData,
+                    type: 'line',
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#888', font: { size: 10 } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#00ff9d'
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#666', font: { size: 9 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#666', font: { size: 9 }, callback: v => '$' + v }
+                }
+            }
+        }
+    });
+}
 
 // ULTIMATE INTELLIGENCE - Composite Signal Display
 socket.on('composite_signal', (data) => {
