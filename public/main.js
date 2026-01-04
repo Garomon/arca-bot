@@ -31,15 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContents = document.querySelectorAll('.tab-content');
 
     // UX: Restrict Personal Finance Tabs on Sub-Bots (SOL, DOGE, etc.)
-    // Only show Fintech/Debt on the main Command Center
+    // Only show these tabs on the main Command Center (Root)
     const isMainInstance = window.location.pathname === '/' || window.location.pathname === '/index.html';
     if (!isMainInstance) {
-        const restrictedTabs = ['fintech', 'debt'];
+        const restrictedTabs = ['command', 'fintech', 'debt', 'portfolio', 'doctrine', 'guia'];
         restrictedTabs.forEach(tab => {
             const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
             if (btn) btn.style.display = 'none';
         });
-        console.log('>> [UX] Sub-instance detected: Hiding Personal Finance tabs.');
+        console.log('>> [UX] Sub-instance detected: Showing only Bot tab.');
     }
 
     tabBtns.forEach(btn => {
