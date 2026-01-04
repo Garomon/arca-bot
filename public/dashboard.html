@@ -690,6 +690,7 @@
             margin: 0 !important;
             background: linear-gradient(90deg, #fff, #aaa);
             -webkit-background-clip: text;
+            background-clip: text;
         }
 
         .xp-container {
@@ -1263,12 +1264,16 @@
             const labels = last30.map(h => h.date.substring(5)); // MM-DD
             const dailyData = last30.map(h => h.profit);
 
-            // Calculate total from chart data for reference
-            const chartTotal = dailyData.reduce((a, b) => a + b, 0).toFixed(2);
+            // Cumulative profit
+            let cumulative = 0;
+            const cumulativeData = last30.map(h => {
+                cumulative += h.profit;
+                return cumulative.toFixed(2);
+            });
 
             // Update badge
             const badge = document.getElementById('chart-days-badge');
-            if (badge) badge.textContent = `${last30.length} DAYS · $${chartTotal} REALIZED`;
+            if (badge) badge.textContent = `LAST ${last30.length} DAYS`;
 
             // Destroy old chart
             if (globalChartInstance) globalChartInstance.destroy();
@@ -1280,13 +1285,25 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Daily Profit ($)',
+                            label: 'Daily Profit',
                             data: dailyData,
-                            backgroundColor: dailyData.map(v => v >= 1 ? 'rgba(0, 255, 157, 0.7)' : 'rgba(0, 255, 157, 0.4)'),
+                            backgroundColor: 'rgba(0, 255, 157, 0.6)',
                             borderColor: '#00ff9d',
                             borderWidth: 1,
-                            borderRadius: 6,
-                            hoverBackgroundColor: '#00ff9d'
+                            borderRadius: 4,
+                            order: 2
+                        },
+                        {
+                            label: 'Cumulative',
+                            data: cumulativeData,
+                            type: 'line',
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#00d4ff',
+                            order: 1
                         }
                     ]
                 },
