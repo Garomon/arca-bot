@@ -846,8 +846,8 @@ async function reconcileInventoryWithExchange() {
         const realBalance = parseFloat(balance[baseAsset]?.total || 0);
 
         // 1. Fetch History (Newest First)
-        // We only fetch enough to verify the balance. 100 trades is safe.
-        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 100);
+        // INCREASED: 500 trades to better handle long-term holders and frequent grid activity
+        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
         const buyTrades = trades.filter(t => t.side === 'buy').sort((a, b) => b.timestamp - a.timestamp); // DESC
 
         // PROTECTION: If API returns empty history but we have balance, ABORT to prevent wiping state.
@@ -943,9 +943,16 @@ async function reconcileInventoryWithExchange() {
 
             // --- SAFETY NET: AMNESIA BLOCKING PROTOCOL ---
             // SELF-HEALING: If total balance is below DUST_THRESHOLD, don't pause!
-            // This prevents "Amnesia Loops" on negligible remainders.
+            // Also skip if we already have AUDIT_VERIFIED lots (prevents overwriting full_audit.js results)
+            const hasAuditedLots = state.inventory && state.inventory.some(l => l.auditVerified);
+
             if (newTotal < dustThreshold) {
                 log('RECONCILE', `🧹 Self-Healing: Amnesia detected but balance (${newTotal.toFixed(6)}) is below DUST_THRESHOLD (${dustThreshold}). Skipping Pause.`, 'success');
+                state.isPaused = false;
+                state.pauseReason = null;
+                saveState();
+            } else if (hasAuditedLots && Math.abs(currentTotal - newTotal) < 0.0001) {
+                log('RECONCILE', `✅ Audited Inventory preserved. Skipping Amnesia Lock.`, 'success');
                 state.isPaused = false;
                 state.pauseReason = null;
                 saveState();
