@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCA FINANCIERA GAROSSA</title>
+    <title>VISION ELITE • Garossa</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css_patch.css">
     <link
@@ -43,27 +43,54 @@
         <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="brand">
-                <div class="logo-glitch">ARCA</div>
-                <div class="version">FINANCIERA GAROSSA</div>
+                <div class="logo-glitch" style="font-family: 'Cinzel', serif;">VISION</div>
+                <div class="version" style="color: #ffd700;">ELITE • GAROSSA</div>
             </div>
-            <div class="doctrine-quote">
-                "Acumular cuando todos dudan, mantener cuando todos temen"
+            <div class="doctrine-quote" style="border-left: 2px solid #ffd700; color: #ffe066;">
+                "Nací en cuna de paja. Moriré en trono de oro."
             </div>
-            <a href="dashboard.html" class="rpg-link" style="
-                display: block;
-                margin: 20px;
-                padding: 10px;
-                background: linear-gradient(45deg, #9945ff, #14F195);
-                color: black;
-                text-align: center;
-                text-decoration: none;
-                font-weight: bold;
-                border-radius: 8px;
-                box-shadow: 0 0 15px rgba(153, 69, 255, 0.4);
-                transition: all 0.3s ease;
+
+            <!-- RPG PROFILE INTEGRATED -->
+            <div class="rpg-sidebar" id="rpg-sidebar" style="
+                margin: 15px;
+                padding: 15px;
+                background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 0, 0, 0.3));
+                border: 1px solid rgba(255, 215, 0, 0.2);
+                border-radius: 12px;
             ">
-                🚀 RPG DASHBOARD
-            </a>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span class="player-level" style="
+                        background: linear-gradient(135deg, #ffd700, #b8860b);
+                        color: black;
+                        font-weight: 800;
+                        padding: 3px 8px;
+                        border-radius: 4px;
+                        font-size: 0.75rem;
+                    " id="sidebar-level">LVL -</span>
+                    <span style="color: #ffd700; font-weight: 600; font-size: 0.85rem;"
+                        id="sidebar-title">Cargando...</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                        <div id="sidebar-xp-bar"
+                            style="height: 100%; width: 0%; background: linear-gradient(90deg, #ffd700, #ffe066); transition: width 0.5s;">
+                        </div>
+                    </div>
+                    <div style="font-size: 0.65rem; color: #b8860b; margin-top: 4px;" id="sidebar-xp-text">-- XP</div>
+                </div>
+                <div id="sidebar-quest" style="
+                    font-size: 0.7rem;
+                    color: #ffe066;
+                    padding: 8px;
+                    background: rgba(255, 215, 0, 0.05);
+                    border-radius: 6px;
+                    border-left: 2px solid #ffd700;
+                ">
+                    <div style="font-weight: 600;">📜 Misión Activa</div>
+                    <div id="sidebar-quest-name" style="color: #fff; margin-top: 3px;">Buscando...</div>
+                </div>
+            </div>
+
             <div class="log-feed" id="log-feed"></div>
         </aside>
 

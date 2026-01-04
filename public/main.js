@@ -1,6 +1,6 @@
 /**
- * VANTAGE // QUANTUM CLIENT - COMPLETE
- * Version: 2.0 - All Features Working
+ * VISION ELITE - Wealth Command Dashboard
+ * Version: 4.0 - "Nací en cuna de paja. Moriré en trono de oro."
  */
 
 // --- SOCKET CONNECTION (MULTI-BOT AWARE) ---
@@ -24,6 +24,40 @@ if (pathName.startsWith('/sol')) {
 }
 
 const socket = io(socketOptions);
+
+// ===== RPG SIDEBAR INTEGRATION =====
+async function loadRPGSidebar() {
+    try {
+        const res = await fetch('/api/rpg');
+        if (!res.ok) return;
+        const rpg = await res.json();
+
+        // Update sidebar elements
+        const levelEl = document.getElementById('sidebar-level');
+        const titleEl = document.getElementById('sidebar-title');
+        const xpBarEl = document.getElementById('sidebar-xp-bar');
+        const xpTextEl = document.getElementById('sidebar-xp-text');
+        const questNameEl = document.getElementById('sidebar-quest-name');
+
+        if (levelEl) levelEl.textContent = `LVL ${rpg.level}`;
+        if (titleEl) titleEl.textContent = rpg.title || 'Fundador';
+        if (xpBarEl) xpBarEl.style.width = `${rpg.xpProgress || 0}%`;
+        if (xpTextEl) xpTextEl.textContent = `${rpg.xp?.toLocaleString() || 0} / ${rpg.nextLevelXp?.toLocaleString() || 0} XP`;
+        if (questNameEl && rpg.quest) {
+            questNameEl.textContent = rpg.quest.name || 'Sin misión activa';
+        }
+
+        console.log('>> [RPG] Sidebar loaded:', rpg.level, rpg.title);
+    } catch (e) {
+        console.log('>> [RPG] Could not load sidebar:', e.message);
+    }
+}
+
+// Load RPG on page load and refresh every 60s
+document.addEventListener('DOMContentLoaded', () => {
+    loadRPGSidebar();
+    setInterval(loadRPGSidebar, 60000);
+});
 
 // ===== TAB SWITCHING =====
 document.addEventListener('DOMContentLoaded', () => {
