@@ -733,12 +733,15 @@ function renderProfitChart() {
     const canvas = document.getElementById('profit-chart-canvas');
     if (!canvas) return;
 
-    // 1. Aggregate Profit by Day
+    // 1. Aggregate NET Profit by Day (UTC-6 Central Time)
     const profitByDay = {};
     tradeHistory.forEach(t => {
-        if (t.side === 'sell' && t.profit > 0) {
-            const date = new Date(t.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD
-            profitByDay[date] = (profitByDay[date] || 0) + parseFloat(t.profit);
+        if (t.side === 'sell' && typeof t.profit === 'number') {
+            // Convert to UTC-6 (Central Time) for date grouping
+            const utcDate = new Date(t.timestamp);
+            const centralDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
+            const date = centralDate.toISOString().split('T')[0]; // YYYY-MM-DD
+            profitByDay[date] = (profitByDay[date] || 0) + t.profit;
         }
     });
 
