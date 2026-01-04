@@ -111,11 +111,11 @@ const INVENTORY_CAP_PERCENT = 0.70;   // Max 70% of equity can be in BASE_ASSET 
 const PAIR_PRESETS = {
     'BTC/USDT': {
         minOrderSize: 0.00001,
-        gridSpacing: 0.003,      // OPTIMIZED: 0.3% base (data shows 0.19% avg spread)
+        gridSpacing: 0.005,      // OPTIMIZED v2: 0.5% base (was 0.3% - too tight for stable BTC)
         gridCount: 16,           // Fewer but wider grids
-        spacingNormal: 0.005,    // OPTIMIZED: 0.5% normal (was 0.7%)
-        spacingHigh: 0.008,      // OPTIMIZED: 0.8% high volatility (was 1.0%)
-        spacingLow: 0.003,       // OPTIMIZED: 0.3% low volatility (was 0.5%)
+        spacingNormal: 0.007,    // OPTIMIZED v2: 0.7% normal (was 0.5%)
+        spacingHigh: 0.010,      // OPTIMIZED v2: 1.0% high volatility (was 0.8%)
+        spacingLow: 0.005,       // OPTIMIZED v2: 0.5% low volatility (was 0.3% - BOTTLENECK FIXED)
         bandwidthHigh: 0.04,
         bandwidthLow: 0.015,
         toleranceMultiplier: 10,
