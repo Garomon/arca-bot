@@ -665,6 +665,12 @@ function loadState() {
             // This prevents old saved values from overwriting the "reborn" logic above
             state = { ...state, ...saved };
 
+            // P1 FIX: Ensure filledOrders is RECOGNIZED if present in saved file
+            if (saved.filledOrders && saved.filledOrders.length > 0) {
+                state.filledOrders = saved.filledOrders;
+                console.log(`>> [RECOVERY] Loaded ${state.filledOrders.length} historical orders.`);
+            }
+
             // P0 FIX: UNIFY PROFIT ARCHITECTURE (Professional Grade)
             // Ensure totalProfit is ALWAYS at least the value of accumulated (audited) profit
             const acc = saved.accumulatedProfit || 0;
@@ -1406,6 +1412,12 @@ async function initializeGrid(forceReset = false) {
         if (!state.initialCapital) {
             state.initialCapital = dynamicCapital;
             log('CAPITAL', `Initial Capital Set: $${state.initialCapital.toFixed(2)}`, 'info');
+        }
+
+        // P0 FIX: Force totalProfit to be persistent and match state.accumulatedProfit if higher
+        // (Ensures the Restored data is actually USED by the ROI/Dashboard logic)
+        if (state.accumulatedProfit > state.totalProfit) {
+            state.totalProfit = state.accumulatedProfit;
         }
 
         // PHASE 2: Dynamic Grid Count (adapt to capital and volatility)
