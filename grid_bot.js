@@ -17,6 +17,15 @@ const adaptiveHelpers = require('./adaptive_helpers');
 const DataCollector = require('./data_collector');
 const crypto = require('crypto');
 
+// --- BINANCE CONNECTION (GLOBAL SCOPE) ---
+const binance = new ccxt.binance({
+    apiKey: process.env.BINANCE_API_KEY,
+    secret: process.env.BINANCE_SECRET,
+    timeout: 60000,
+    enableRateLimit: true,
+    options: { 'adjustForTimeDifference': true }
+});
+
 // --- DEBUG HELPER ---
 function logDebugFinancials(tag, data) {
     try {
@@ -109,7 +118,8 @@ const PAIR_PRESETS = {
         spacingLow: 0.003,       // OPTIMIZED: 0.3% low volatility (was 0.5%)
         bandwidthHigh: 0.04,
         bandwidthLow: 0.015,
-        toleranceMultiplier: 10
+        toleranceMultiplier: 10,
+        dustThreshold: 0.00005   // Ignore balances < $4.50
     },
     'SOL/USDT': {
         minOrderSize: 0.01,
@@ -120,7 +130,8 @@ const PAIR_PRESETS = {
         spacingLow: 0.006,
         bandwidthHigh: 0.08,
         bandwidthLow: 0.02,
-        toleranceMultiplier: 15
+        toleranceMultiplier: 15,
+        dustThreshold: 0.05      // Ignore balances < $6.50 (Fixes SOL Block)
     },
     'DOGE/USDT': {
         minOrderSize: 10,        // ~$3.50 minimum order (DOGE trades in whole coins)
@@ -131,7 +142,8 @@ const PAIR_PRESETS = {
         spacingLow: 0.008,       // 0.8% low volatility
         bandwidthHigh: 0.10,     // 10% bollinger bandwidth = high vol
         bandwidthLow: 0.03,      // 3% = low vol
-        toleranceMultiplier: 15  // Tightened from 20 to 15 per user request
+        toleranceMultiplier: 15, // Tightened from 20 to 15 per user request
+        dustThreshold: 50.0      // Ignore balances < $7.00
     }
     // ETH/BTC Removed temporarily (requires non-USDT safety guard bypass)
     // 'ETH/BTC': { ... }
@@ -400,6 +412,9 @@ app.get('/api/status', async (req, res) => {
     }
 });
 
+// --- BINANCE CONNECTION (MOVED TO TOP) ---
+// const binance = ...
+
 // API endpoint for real Binance balance (Master Dashboard)
 app.get('/api/balance', async (req, res) => {
     try {
@@ -409,17 +424,15 @@ app.get('/api/balance', async (req, res) => {
         const sol = balance.SOL?.total || 0;
         const doge = balance.DOGE?.total || 0;
 
-        // Get current prices for value calculation
-        // P0 FIX: Dashboard needs ALL prices, not just this bot's pair
-        let btcPrice = 0, solPrice = 0, dogePrice = 0;
+        // Use the global equity source of truth for the total
+        const total = await getGlobalEquity();
 
-        try { const t = await binance.fetchTicker('BTC/USDT'); btcPrice = t.last; } catch (e) { }
-        try { const t = await binance.fetchTicker('SOL/USDT'); solPrice = t.last; } catch (e) { }
-        try { const t = await binance.fetchTicker('DOGE/USDT'); dogePrice = t.last; } catch (e) { }
-
-        const btcValue = btc * btcPrice;
-        const solValue = sol * solPrice;
-        const dogeValue = doge * dogePrice;
+        // Get prices for breakdown (optional: could also use equityCache if available)
+        let btcPrice = 0;
+        try {
+            if (CONFIG.pair === 'BTC/USDT') btcPrice = state.currentPrice;
+            else { const t = await binance.fetchTicker('BTC/USDT'); btcPrice = t.last; }
+        } catch (e) { }
 
         res.json({
             usdt: usdt,
@@ -427,21 +440,13 @@ app.get('/api/balance', async (req, res) => {
             sol: sol,
             doge: doge,
             btcPrice: btcPrice,
-            totalEquity: usdt + btcValue + solValue + dogeValue,
+            totalEquity: total,
             timestamp: Date.now()
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[API] /api/balance CRITICAL ERROR:', err.message);
+        res.status(500).json({ error: err.message, equity: 0 });
     }
-});
-
-// --- BINANCE CONNECTION ---
-const binance = new ccxt.binance({
-    apiKey: process.env.BINANCE_API_KEY,
-    secret: process.env.BINANCE_SECRET,
-    timeout: 60000, // 60 seconds (Engineer Fix)
-    enableRateLimit: true,
-    options: { 'adjustForTimeDifference': true }
 });
 
 // BOT_ID and PAIR_ID defined at top of file
@@ -853,31 +858,43 @@ async function reconcileInventoryWithExchange() {
 
         // 2. Rebuild Ideal Inventory (Strict FIFO)
         // Principle: "My holdings are the sum of my most recent buys."
+        // P0 FIX: Ignore DUST balances to prevent safety lock on negligible remainder
+        const dustThreshold = pairPreset.dustThreshold || 0;
+        const netBalance = realBalance < dustThreshold ? 0 : realBalance;
+
+        if (realBalance > 0 && realBalance < dustThreshold) {
+            log('RECONCILE', `🧹 Ignoring DUST balance: ${realBalance.toFixed(6)} ${baseAsset} (Threshold: ${dustThreshold})`, 'info');
+        }
+
         const newInventory = [];
-        let remainingBalanceToFill = realBalance;
+        let remainingBalanceToFill = netBalance;
         const TOLERANCE = 0.000001;
 
-        for (const trade of buyTrades) {
-            if (remainingBalanceToFill <= TOLERANCE) break;
+        if (netBalance <= TOLERANCE) {
+            log('RECONCILE', `✅ Inventory is EMPTY (or below dust threshold).`, 'success');
+        } else {
+            for (const trade of buyTrades) {
+                if (remainingBalanceToFill <= TOLERANCE) break;
 
-            const amountToTake = Math.min(remainingBalanceToFill, trade.amount);
-            // Pro-rate fee
-            // P0 FIX: Normalize Fee to USDT (Ignore mixed currency from Trade)
-            const originalFee = estimateFeeUSDT(trade.price, trade.amount);
-            const fee = originalFee * (amountToTake / trade.amount);
+                const amountToTake = Math.min(remainingBalanceToFill, trade.amount);
+                // Pro-rate fee
+                // P0 FIX: Normalize Fee to USDT (Ignore mixed currency from Trade)
+                const originalFee = estimateFeeUSDT(trade.price, trade.amount);
+                const fee = originalFee * (amountToTake / trade.amount);
 
-            newInventory.push({
-                // FIX: Use Order ID to match Live Logic/History (Fallback to Trade ID)
-                id: trade.order || trade.id,
-                price: trade.price,
-                amount: amountToTake, // FIX: Use the VIRTUAL amount (the slice we own), so calculations use this as denominator
-                remaining: amountToTake,
-                fee: fee,
-                timestamp: trade.timestamp,
-                recovered: true
-            });
+                newInventory.push({
+                    // FIX: Use Order ID to match Live Logic/History (Fallback to Trade ID)
+                    id: trade.order || trade.id,
+                    price: trade.price,
+                    amount: amountToTake, // FIX: Use the VIRTUAL amount (the slice we own), so calculations use this as denominator
+                    remaining: amountToTake,
+                    fee: fee,
+                    timestamp: trade.timestamp,
+                    recovered: true
+                });
 
-            remainingBalanceToFill -= amountToTake;
+                remainingBalanceToFill -= amountToTake;
+            }
         }
 
         // 2b. Handle Legacy/HODL Stack (The "Remainder")
@@ -925,13 +942,22 @@ async function reconcileInventoryWithExchange() {
             log('RECONCILE', `✅ Inventory Rebuilt (Strict FIFO). Holdings: ${newTotal.toFixed(6)} ${baseAsset}.`, 'success');
 
             // --- SAFETY NET: AMNESIA BLOCKING PROTOCOL ---
-            log('CRITICAL', `⛔ COST BASIS LOST (AMNESIA DETECTED). PAUSING BOT TO PREVENT LOSS.`, 'error');
-            log('CRITICAL', `The bot has lost track of the original buy price for these coins.`, 'error');
-            log('CRITICAL', `To prevent selling at a loss (thinking it's profit), you MUST run the audit fix.`, 'error');
+            // SELF-HEALING: If total balance is below DUST_THRESHOLD, don't pause!
+            // This prevents "Amnesia Loops" on negligible remainders.
+            if (newTotal < dustThreshold) {
+                log('RECONCILE', `🧹 Self-Healing: Amnesia detected but balance (${newTotal.toFixed(6)}) is below DUST_THRESHOLD (${dustThreshold}). Skipping Pause.`, 'success');
+                state.isPaused = false;
+                state.pauseReason = null;
+                saveState();
+            } else {
+                log('CRITICAL', `⛔ COST BASIS LOST (AMNESIA DETECTED). PAUSING BOT TO PREVENT LOSS.`, 'error');
+                log('CRITICAL', `The bot has lost track of the original buy price for these coins.`, 'error');
+                log('CRITICAL', `To prevent selling at a loss (thinking it's profit), you MUST run the audit fix.`, 'error');
 
-            state.isPaused = true;
-            state.pauseReason = `SAFETY LOCK: Cost Basis Lost. Run 'node scripts/full_audit.js ${CONFIG.pair} --fix' to resume.`;
-            saveState();
+                state.isPaused = true;
+                state.pauseReason = `SAFETY LOCK: Cost Basis Lost. Run 'node scripts/full_audit.js ${CONFIG.pair} --fix' to resume.`;
+                saveState();
+            }
 
             log('RECONCILE', `⚠️ Note: Cost Basis is ESTIMATED from recent buys. Profit accuracy will improve as new trades occur.`, 'warning');
 
@@ -2415,19 +2441,27 @@ async function getGlobalEquity() {
         let total = balance.USDT?.total || 0;
 
         // P0 FIX: Universal Equity (Dynamic Asset Verification)
-        const assetsToValue = new Set(['BTC', 'ETH', 'SOL', BASE_ASSET]);
+        const assetsToValue = new Set(['BTC', 'ETH', 'SOL', 'DOGE', BASE_ASSET]);
 
         for (const asset of assetsToValue) {
-            if (asset === 'USDT') continue;
+            if (asset === 'USDT' || !asset) continue;
             const qty = balance[asset]?.total || 0;
-            if (!qty) continue;
+            if (qty <= 0) continue;
 
-            const px = await adaptiveHelpers.resilientAPICall(
-                () => binance.fetchTicker(`${asset}/USDT`).then(t => t.last || 0),
-                3,
-                `Fetch ${asset} Price`
-            );
-            total += qty * px;
+            try {
+                const px = await adaptiveHelpers.resilientAPICall(
+                    () => binance.fetchTicker(`${asset}/USDT`).then(t => t.last || 0),
+                    3,
+                    `Fetch ${asset} Price`
+                );
+                total += qty * px;
+            } catch (err) {
+                console.error(`>> [WARN] Could not value asset ${asset}:`, err.message);
+                // Fallback to state price if it's the bot's own asset
+                if (asset === BASE_ASSET && state.currentPrice > 0) {
+                    total += qty * state.currentPrice;
+                }
+            }
         }
 
 
@@ -3108,13 +3142,20 @@ async function shouldPauseBuys() {
 
         const freeUSDT = fin.freeUSDT; // Allocated Free USDT
         const baseValueUSDT = fin.btcValueUSDT; // Allocated Base Value
+        const realBaseTotal = fin.btcTotal;      // Total coins on exchange
+        const dustThreshold = pairPreset.dustThreshold || 0;
 
         // Guard 1: USDT Floor - Ensure we don't run out of ammo (Dynamic)
         if (freeUSDT < equity * effectiveFloor) {
-            return {
-                pause: true,
-                reason: `USDT_FLOOR_DYNAMIC (Free: $${freeUSDT.toFixed(2)} < Floor: $${(equity * effectiveFloor).toFixed(2)} [${(effectiveFloor * 100).toFixed(0)}% @ Def:${defenseLevel}])`
-            };
+            // P0 DUST EXCEPTION: If we have NO inventory (or just dust), we SHOULD buy even if USDT is low.
+            if (realBaseTotal <= dustThreshold) {
+                log('STRATEGY', `⚠️ USDT below floor, but inventory is DUST (${realBaseTotal.toFixed(6)}). Allowing BUY to resume cycle.`, 'warning');
+            } else {
+                return {
+                    pause: true,
+                    reason: `USDT_FLOOR_DYNAMIC (Free: $${freeUSDT.toFixed(2)} < Floor: $${(equity * effectiveFloor).toFixed(2)} [${(effectiveFloor * 100).toFixed(0)}% @ Def:${defenseLevel}])`
+                };
+            }
         }
 
         // Guard 2: Inventory Cap - Limit exposure to BASE_ASSET (Dynamic)
@@ -3127,8 +3168,8 @@ async function shouldPauseBuys() {
 
         // Guard 3: SMART DCA - Prevent buying above average cost when underwater
         // Only applies when we have inventory AND price is higher than our avg cost
-        // This prevents "buying expensive" when we're already in the red
-        if (state.inventory && state.inventory.length > 0) {
+        // P0 FIX: Ignore if we only have dust (Fixes SOL Block during rallies)
+        if (state.inventory && state.inventory.length > 0 && realBaseTotal > dustThreshold) {
             const invReport = calculateInventoryReport();
             const avgCost = invReport.avgCost;
 
@@ -3151,13 +3192,13 @@ async function shouldPauseBuys() {
 
                 const hoursBlocking = (Date.now() - state.dcaBlockStartTime) / (1000 * 60 * 60);
 
-                // Progressive bump: +0.5% per 12 hours of blocking, max +5% total bump
-                // 12h = +0.5%, 24h = +1%, 48h = +2%, 5 days = +5% (max)
-                const stalenessBump = Math.min(hoursBlocking / 24, 5) * 0.01;
+                // Progressive bump: +0.5% per 6 hours of blocking, max +5% total bump
+                // 6h = +0.5%, 12h = +1%, 24h = +2%, 2.5 days = +5% (max)
+                const stalenessBump = Math.min(hoursBlocking / 12, 5) * 0.01;
                 DCA_BUFFER = DCA_BUFFER + stalenessBump;
 
-                // Cap effective buffer at 10% to prevent buying too high
-                DCA_BUFFER = Math.min(DCA_BUFFER, 1.10);
+                // Cap effective buffer at 12% to allow entry in strong rallies
+                DCA_BUFFER = Math.min(DCA_BUFFER, 1.12);
 
                 // Log relaxation if significant (> 0.1%)
                 if (stalenessBump > 0.001) {
