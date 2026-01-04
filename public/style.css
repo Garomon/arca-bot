@@ -1,58 +1,43 @@
-/* VISION ELITE - Wealth Command Dashboard v4.0 */
-/* "Nací en cuna de paja. Moriré en trono de oro." — Garossa */
+/* VANTAGE QUANTUM - Premium Trading Dashboard v3.0 */
+/* Glassmorphic, Neon, and Ultra-Premium Design */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Elite Color Palette - Black & Gold */
-    --bg-deep: #050508;
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #101015;
-    --bg-elevated: rgba(15, 15, 20, 0.9);
-    --bg-glass: rgba(20, 18, 15, 0.5);
+    /* Premium Color Palette */
+    --bg-deep: #0a0a0f;
+    --bg-primary: #0d0d15;
+    --bg-secondary: #12121c;
+    --bg-elevated: rgba(20, 20, 32, 0.8);
+    --bg-glass: rgba(25, 25, 45, 0.4);
 
-    /* Elite Accent Colors */
-    --neon-green: #ffd700;
-    /* Gold replaces green as primary */
-    --neon-blue: #ffe066;
-    /* Light gold */
-    --neon-purple: #b8860b;
-    /* Dark gold */
+    /* Neon Accent Colors */
+    --neon-green: #00ff9d;
+    --neon-blue: #00d4ff;
+    --neon-purple: #bd00ff;
     --neon-red: #ff3b5c;
-    /* Keep red for danger */
-    --neon-orange: #daa520;
-    /* Goldenrod */
-    --neon-pink: #f4e4bc;
-    /* Cream gold */
+    --neon-orange: #ff9500;
+    --neon-pink: #ff006e;
 
-    /* Elite Gold Palette (new) */
-    --elite-gold: #ffd700;
-    --elite-gold-light: #ffe066;
-    --elite-gold-dark: #b8860b;
-    --elite-cream: #f4e4bc;
-    --elite-bronze: #cd7f32;
-
-    /* Gradient Presets - Gold Theme */
-    --gradient-primary: linear-gradient(135deg, #ffd700 0%, #b8860b 50%, #8b6914 100%);
-    --gradient-bullish: linear-gradient(135deg, #ffd700, #ffe066);
-    --gradient-bearish: linear-gradient(135deg, #ff3b5c, #8b0000);
-    --gradient-glass: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
-    --gradient-elite: linear-gradient(135deg, #ffd700 0%, #fff8dc 25%, #ffd700 50%, #b8860b 100%);
+    /* Gradient Presets */
+    --gradient-primary: linear-gradient(135deg, #00ff9d 0%, #00d4ff 50%, #bd00ff 100%);
+    --gradient-bullish: linear-gradient(135deg, #00ff9d, #00d4ff);
+    --gradient-bearish: linear-gradient(135deg, #ff3b5c, #bd00ff);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
 
     /* Text */
     --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-muted: rgba(255, 215, 0, 0.4);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.35);
 
-    /* Border & Shadows - Gold Glow */
-    --border-color: rgba(255, 215, 0, 0.15);
-    --border-glow: rgba(255, 215, 0, 0.4);
-    --shadow-glow: 0 0 40px rgba(255, 215, 0, 0.15);
+    /* Border & Shadows */
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(0, 255, 157, 0.3);
+    --shadow-glow: 0 0 40px rgba(0, 255, 157, 0.15);
 
     /* Typography */
     --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-    --font-elite: 'Cinzel', serif;
 
     /* Spacing */
     --radius-sm: 8px;
@@ -88,9 +73,9 @@ body::before {
     position: fixed;
     inset: 0;
     background:
-        radial-gradient(ellipse at 20% 20%, rgba(255, 215, 0, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(184, 134, 11, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.03) 0%, transparent 60%);
+        radial-gradient(ellipse at 20% 20%, rgba(0, 255, 157, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(189, 0, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
 }
@@ -101,11 +86,11 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(255, 215, 0, 0.02);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--elite-gold), var(--elite-gold-dark));
+    background: linear-gradient(180deg, var(--neon-green), var(--neon-blue));
 }
 
 .app-container {
