@@ -39,7 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
             if (btn) btn.style.display = 'none';
         });
-        console.log('>> [UX] Sub-instance detected: Showing only Bot tab.');
+
+        // Auto-activate Bot tab on sub-instances
+        const botTabBtn = document.querySelector('.tab-btn[data-tab="bot"]');
+        const botTabContent = document.getElementById('bot');
+        if (botTabBtn && botTabContent) {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            botTabBtn.classList.add('active');
+            botTabContent.classList.add('active');
+        }
+
+        console.log('>> [UX] Sub-instance detected: Redirected to Bot tab.');
     }
 
     tabBtns.forEach(btn => {
