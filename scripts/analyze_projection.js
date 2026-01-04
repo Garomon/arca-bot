@@ -206,6 +206,40 @@ async function analyzeAndProject() {
     });
 
     // ═══════════════════════════════════════════════════════════
+    // 🛡️ PERFIL DEL TECNOMANTE (RPG STATUS)
+    // ═══════════════════════════════════════════════════════════
+    const currentLevel = 8;
+    const title = "Señor de la Forja";
+    const xpHit_Profit = totalProfit * 50; // 50 XP por cada $1 de profit
+    const xpHit_Time = daysActive * 20;            // 20 XP por cada día activo
+    const baseXP = 810;                            // XP base para sincronizar con Codex
+    const currentXP = Math.floor(baseXP + xpHit_Profit + xpHit_Time);
+    const nextLevelXP = 3000;
+
+    // Quest System
+    const activeQuest = "El Rito de Fortalecimiento";
+    const questStatus = "COMPLETADA (Esperando Recompensa)";
+
+    // ASCII XP Bar
+    const barLength = 20;
+    const fillPercent = Math.min(1, currentXP / nextLevelXP);
+    const filledChars = Math.floor(barLength * fillPercent);
+    const emptyChars = barLength - filledChars;
+    const xpBar = "█".repeat(filledChars) + "░".repeat(emptyChars);
+
+    log("");
+    log("🛡️  PERFIL DEL TECNOMANTE (RPG STATUS)");
+    log("   ═════════════════════════════════════════════");
+    log(`   👤 Jugador:      Garossa`);
+    log(`   🏅 Nivel:        ${currentLevel} [${title}]`);
+    log(`   ✨ XP Actual:    ${currentXP} / ${nextLevelXP}`);
+    log(`      Progreso:     [${xpBar}] ${(fillPercent * 100).toFixed(1)}%`);
+    log("   ═════════════════════════════════════════════");
+    log(`   📜 Misión Activa: ${activeQuest}`);
+    log(`   ✅ Estado:        ${questStatus}`);
+    log("   ═════════════════════════════════════════════");
+
+    // ═══════════════════════════════════════════════════════════
     // DISCLAIMER
     // ═══════════════════════════════════════════════════════════
     log(`\n⚠️ DISCLAIMER:`);
