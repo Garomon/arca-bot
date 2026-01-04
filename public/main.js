@@ -30,6 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
+    // UX: Restrict Personal Finance Tabs on Sub-Bots (SOL, DOGE, etc.)
+    // Only show Fintech/Debt on the main Command Center
+    const isMainInstance = window.location.pathname === '/' || window.location.pathname === '/index.html';
+    if (!isMainInstance) {
+        const restrictedTabs = ['fintech', 'debt'];
+        restrictedTabs.forEach(tab => {
+            const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+            if (btn) btn.style.display = 'none';
+        });
+        console.log('>> [UX] Sub-instance detected: Hiding Personal Finance tabs.');
+    }
+
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             tabBtns.forEach(b => b.classList.remove('active'));
