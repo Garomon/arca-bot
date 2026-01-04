@@ -548,12 +548,16 @@ app.get('/api/profit-history', async (req, res) => {
                 try {
                     const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
 
-                    // Aggregate from filledOrders (the actual trade history)
+                    // Aggregate NET profit from ALL sell trades (filledOrders)
                     if (data.filledOrders && Array.isArray(data.filledOrders)) {
                         data.filledOrders.forEach(trade => {
-                            if (trade.side === 'sell' && trade.profit > 0) {
-                                const date = new Date(trade.timestamp).toISOString().split('T')[0];
-                                profitByDay[date] = (profitByDay[date] || 0) + parseFloat(trade.profit);
+                            if (trade.side === 'sell' && typeof trade.profit === 'number') {
+                                // Convert to UTC-6 (Central Time) for date grouping
+                                const utcDate = new Date(trade.timestamp);
+                                const centralDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
+                                const date = centralDate.toISOString().split('T')[0];
+
+                                profitByDay[date] = (profitByDay[date] || 0) + trade.profit;
                             }
                         });
                     }
