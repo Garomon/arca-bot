@@ -548,9 +548,9 @@ app.get('/api/profit-history', async (req, res) => {
                 try {
                     const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
 
-                    // Aggregate from tradeHistory if available
-                    if (data.tradeHistory && Array.isArray(data.tradeHistory)) {
-                        data.tradeHistory.forEach(trade => {
+                    // Aggregate from filledOrders (the actual trade history)
+                    if (data.filledOrders && Array.isArray(data.filledOrders)) {
+                        data.filledOrders.forEach(trade => {
                             if (trade.side === 'sell' && trade.profit > 0) {
                                 const date = new Date(trade.timestamp).toISOString().split('T')[0];
                                 profitByDay[date] = (profitByDay[date] || 0) + parseFloat(trade.profit);
