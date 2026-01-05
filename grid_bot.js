@@ -459,9 +459,14 @@ app.get('/api/rpg', async (req, res) => {
         let daysActive = 32; // Fallback default
         const LAUNCH_DATE = new Date('2025-12-03T00:00:00Z');
 
-        // 1. Calculate Global Profit from all state files
+        // 1. Calculate Global Profit from all state files (only VANTAGE01 bots)
         if (fs.existsSync(sessionsDir)) {
-            const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+            const files = fs.readdirSync(sessionsDir).filter(f =>
+                f.endsWith('_state.json') &&
+                f.startsWith('VANTAGE01_') &&
+                !f.includes('template') &&
+                !f.includes('backup')
+            );
             files.forEach(file => {
                 try {
                     const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
@@ -475,52 +480,67 @@ app.get('/api/rpg', async (req, res) => {
         const diffTime = Math.abs(now - LAUNCH_DATE);
         daysActive = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // 3. XP Calculation
-        const BASE_XP_MANUAL_BONUS = 350; // Achievements unlocked manually
-        const xpFromProfit = Math.round(totalProfit * 10);
-        const xpFromDays = daysActive * 50;
-        const totalXp = xpFromProfit + xpFromDays + BASE_XP_MANUAL_BONUS;
+        // 3. XP Calculation (SYNCED with analyze_projection.js)
+        const BASE_XP = 810;                           // Base XP to sync with Codex
+        const xpFromProfit = Math.floor(totalProfit * 50); // 50 XP per $1 profit
+        const xpFromDays = Math.floor(daysActive * 20);    // 20 XP per day active
+        const totalXp = BASE_XP + xpFromProfit + xpFromDays;
 
-        // 4. Level Calculation
-        const LEVEL_THRESHOLDS = [
-            { level: 1, xp: 0 }, { level: 2, xp: 100 }, { level: 3, xp: 300 },
-            { level: 4, xp: 600 }, { level: 5, xp: 1000 }, { level: 6, xp: 1500 },
-            { level: 7, xp: 2200 }, { level: 8, xp: 3000 }, { level: 9, xp: 4500 },
-            { level: 10, xp: 6000 }, { level: 11, xp: 8000 }, { level: 50, xp: 150000 }
+        // 4. Level & Title System (Dynamic)
+        const LEVEL_DATA = [
+            { level: 1, xp: 0, title: "Novato del Grid" },
+            { level: 2, xp: 100, title: "Aprendiz de Trading" },
+            { level: 3, xp: 300, title: "Explorador de Mercados" },
+            { level: 4, xp: 600, title: "Comerciante Audaz" },
+            { level: 5, xp: 1000, title: "Estratega del Spread" },
+            { level: 6, xp: 1500, title: "Domador de Volatilidad" },
+            { level: 7, xp: 2200, title: "Mercader Errante" },
+            { level: 8, xp: 3000, title: "Señor de la Forja" },
+            { level: 9, xp: 4500, title: "Maestro del Grid" },
+            { level: 10, xp: 6000, title: "Arcano Financiero" },
+            { level: 11, xp: 8000, title: "Leyenda Cripto" },
+            { level: 50, xp: 150000, title: "Dios del Trading" }
         ];
 
-        let currentLevel = LEVEL_THRESHOLDS[0];
-        let nextLevel = LEVEL_THRESHOLDS[1];
-        for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-            if (totalXp >= LEVEL_THRESHOLDS[i].xp) {
-                currentLevel = LEVEL_THRESHOLDS[i];
-                nextLevel = LEVEL_THRESHOLDS[i + 1] || { level: 99, xp: 99999999 };
+        let currentLevelData = LEVEL_DATA[0];
+        let nextLevelData = LEVEL_DATA[1];
+        for (let i = 0; i < LEVEL_DATA.length; i++) {
+            if (totalXp >= LEVEL_DATA[i].xp) {
+                currentLevelData = LEVEL_DATA[i];
+                nextLevelData = LEVEL_DATA[i + 1] || { level: 99, xp: 99999999, title: "Ascendido" };
             }
         }
 
         // 5. Quest Status (Dynamic Progression)
-        const currentEquity = await getGlobalEquity();
-        const activeQuest = {
-            name: "El Cruce del Valle",
-            objective: "Alcanzar $1,500 en Capital Total (Equity)",
-            status: (currentEquity >= 1500) ? "COMPLETED" : "IN_PROGRESS",
-            reward: "1000 XP + Rango: Caballero del Grid"
-        };
-
-        // P0 FIX: Get Real Equity for Quest Tracking
+        let currentEquity = 0;
         try {
-            // We need global equity here. Since we are INSIDE grid_bot.js, we can use the same logic as /api/balance or cache
-            // For now, let's use a hardcoded estimate fallback if globalEquity isn't available in this scope, 
-            // but ideally getting it via function if possible.
-            // Simplification: The frontend creates the friction. We return the quest definition here.
+            currentEquity = await getGlobalEquity();
         } catch (e) { }
 
+        // Define quests based on progression
+        let activeQuest;
+        if (currentEquity >= 1500) {
+            activeQuest = {
+                name: "El Rito de Fortalecimiento",
+                objective: "Mantener el sistema 30 días sin intervención manual",
+                status: daysActive >= 30 ? "COMPLETED" : "IN_PROGRESS",
+                reward: "1500 XP + Título: Maestro Autonomista"
+            };
+        } else {
+            activeQuest = {
+                name: "El Cruce del Valle",
+                objective: "Alcanzar $1,500 en Capital Total (Equity)",
+                status: "IN_PROGRESS",
+                reward: "1000 XP + Rango: Caballero del Grid"
+            };
+        }
+
         res.json({
-            level: currentLevel.level,
-            title: "Mercader Errante", // Dynamic based on level ranges?
+            level: currentLevelData.level,
+            title: currentLevelData.title,
             xp: totalXp,
-            nextLevelXp: nextLevel.xp,
-            xpProgress: Math.round(((totalXp - currentLevel.xp) / (nextLevel.xp - currentLevel.xp)) * 100),
+            nextLevelXp: nextLevelData.xp,
+            xpProgress: Math.round(((totalXp - currentLevelData.xp) / (nextLevelData.xp - currentLevelData.xp)) * 100),
             stats: {
                 profit: totalProfit,
                 days: daysActive
