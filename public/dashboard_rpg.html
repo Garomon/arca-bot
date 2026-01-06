@@ -320,23 +320,27 @@
             const dot = document.getElementById(`dot-${id}`);
             const statusLbl = document.getElementById(`status-label-${id}`);
 
-            // Use broader definition of online to match stable dashboard
-            // If data exists, it's effectively online
+            // ALIGNMENT WITH STABLE DASHBOARD:
+            // If we have data, we are effectively ONLINE.
+            // Only 'smartDcaBlocking' changes the status text to BLOCKED.
+
             dot.style.background = 'var(--emerald-life)';
             dot.style.boxShadow = '0 0 10px var(--emerald-life)';
 
-            if (data.status === 'running') {
-                if (data.smartDcaBlocking) {
-                    statusLbl.innerText = "BLOCKED";
-                    statusLbl.style.color = "var(--gold-primary)";
-                } else {
-                    statusLbl.innerText = "ONLINE";
-                    statusLbl.style.color = "var(--emerald-life)";
-                }
-            } else {
-                statusLbl.innerText = data.status ? data.status.toUpperCase() : "STANDBY";
+            if (data.smartDcaBlocking) {
+                statusLbl.innerText = "BLOCKED";
                 statusLbl.style.color = "var(--gold-primary)";
+            } else if (data.isPaused) {
+                // Keep Paused visual just in case, though stable dash might ignore it
+                statusLbl.innerText = "PAUSED";
+                statusLbl.style.color = "var(--ruby-danger)";
+                dot.style.background = 'var(--ruby-danger)';
+                dot.style.boxShadow = 'none';
+            } else {
+                statusLbl.innerText = "ONLINE";
+                statusLbl.style.color = "var(--emerald-life)";
             }
+
             // Clear debug
             document.getElementById(`debug-${id}`).innerText = "";
 
