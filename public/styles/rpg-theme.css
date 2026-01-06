@@ -414,3 +414,119 @@ h3,
     color: #444;
     font-size: 0.8rem;
 }
+
+/* === SYSTEM LOGS (HOLOGRAPHIC TERMINAL) === */
+.logs-section {
+    background: linear-gradient(180deg, rgba(8, 8, 12, 0.98), rgba(0, 0, 0, 0.98));
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 50px rgba(0, 240, 255, 0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+/* "Scanline" Header Decoration */
+.logs-section::before {
+    content: "SYSTEM DIAGNOSTIC // REAL-TIME FEED";
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.6rem;
+    color: var(--cyan-holo);
+    opacity: 0.6;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--cyan-glow);
+    pointer-events: none;
+}
+
+.logs-list {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+/* Custom Scrollbar */
+.logs-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.logs-list::-webkit-scrollbar-track {
+    background: #050508;
+}
+
+.logs-list::-webkit-scrollbar-thumb {
+    background: var(--cyan-holo);
+    border-radius: 2px;
+    box-shadow: 0 0 5px var(--cyan-holo);
+}
+
+.log-item {
+    display: flex;
+    gap: 15px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.log-item:hover {
+    background: rgba(0, 240, 255, 0.03);
+    padding-left: 5px;
+}
+
+.log-time {
+    color: #444;
+    font-size: 0.7rem;
+    min-width: 60px;
+    text-align: right;
+}
+
+.log-bot {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    min-width: 55px;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+/* Bot Colors (Neon) */
+.log-bot.btc {
+    background: rgba(247, 147, 26, 0.1);
+    color: #ffa742;
+    border: 1px solid rgba(247, 147, 26, 0.4);
+    box-shadow: 0 0 5px rgba(247, 147, 26, 0.1);
+}
+
+.log-bot.sol {
+    background: rgba(153, 69, 255, 0.1);
+    color: #c07aff;
+    border: 1px solid rgba(153, 69, 255, 0.4);
+    box-shadow: 0 0 5px rgba(153, 69, 255, 0.1);
+}
+
+.log-bot.doge {
+    background: rgba(194, 166, 51, 0.1);
+    color: #ebd45b;
+    border: 1px solid rgba(194, 166, 51, 0.4);
+    box-shadow: 0 0 5px rgba(194, 166, 51, 0.1);
+}
+
+.log-bot.sys {
+    background: rgba(0, 240, 255, 0.05);
+    color: var(--cyan-holo);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.log-msg {
+    color: #bbb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.75rem;
+}
