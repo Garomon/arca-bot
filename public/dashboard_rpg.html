@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LA FORJA DEL TECNOMANTE - Dashboard</title>
+    <title>NEXUS ELITE - Dashboard</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link href="styles/rpg-theme.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -12,131 +12,120 @@
 
 <body>
 
-    <div class="loading-overlay" id="loading">
-        <div class="loader"></div>
+    <div class="loading-overlay" id="loading"
+        style="position:fixed; inset:0; background:#050508; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s;">
+        <div class="loader"
+            style="width:50px; height:50px; border:3px solid #333; border-top-color:var(--gold-primary); border-radius:50%; animation:spin 1s infinite linear;">
+        </div>
     </div>
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 
     <div class="container" style="max-width: 1400px; margin: 0 auto;">
 
-        <!-- PLAYER PROFILE CARD -->
-        <div class="player-profile-card">
-            <div class="player-profile-inner">
-                <div class="player-avatar-frame">
-                    <img src="assets/avatar.png" alt="Player Avatar">
-                    <div class="level-badge-circle" id="player-lvl">1</div>
-                </div>
+        <!-- HERO PROFILE -->
+        <div class="elite-card profile-hero">
+            <div class="avatar-hex">
+                <div class="level-badge" id="player-lvl">LVL 1</div>
+                <img src="assets/avatar.png" alt="Commander" class="avatar-img">
+            </div>
 
-                <div class="player-info">
-                    <div class="player-name">GAROSSA</div>
-                    <div class="player-title-rank" id="player-title">Iniciado</div>
+            <div class="hero-stats">
+                <span class="hero-rank" id="player-title">INICIADO</span>
+                <h1 class="hero-name">GAROSSA</h1>
 
-                    <div class="xp-container">
-                        <div class="xp-bar-frame">
-                            <div class="xp-fill-gold" id="xp-fill" style="width: 0%"></div>
-                        </div>
-                        <div class="xp-text-detail">
-                            <span id="xp-val">0 / 0 XP</span>
-                            <span id="next-lvl-progress">0%</span>
+                <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+                    <div
+                        style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; position: relative;">
+                        <div id="xp-fill"
+                            style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--gold-primary), var(--purple-aether)); box-shadow: 0 0 10px var(--gold-glow);">
                         </div>
                     </div>
+                    <span style="font-size: 0.75rem; color: #888;" id="xp-text">0 / 0 XP</span>
                 </div>
+            </div>
 
-                <div class="status-summary" style="text-align: right;">
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 5px;">ESTADO DEL SISTEMA
-                    </div>
-                    <div class="live-indicator"
-                        style="background: rgba(0,255,157,0.1); padding: 5px 10px; border-radius: 20px; color: var(--accent-emerald); display: inline-flex; align-items: center; gap: 8px;">
-                        <span class="companion-status-dot active"></span>
-                        <span id="bots-status-header">EN LÍNEA</span>
-                    </div>
+            <div style="text-align: right;">
+                <div
+                    style="display: flex; align-items: center; gap: 8px; justify-content: flex-end; margin-bottom: 5px;">
+                    <div class="pulse-dot"></div>
+                    <span style="color: var(--emerald-life); font-weight: 600; font-size: 0.9rem;">SISTEMA ACTIVO</span>
                 </div>
+                <div style="font-size: 0.7rem; color: #666;" id="last-update">Sincronizando...</div>
             </div>
         </div>
 
-        <!-- QUEST SCROLL -->
-        <div class="quest-scroll-panel">
-            <div class="quest-icon-glow">🛡️</div>
-            <div class="quest-content">
-                <div class="quest-header-flex">
-                    <h3 class="quest-name" id="quest-name">Buscando Misión...</h3>
-                    <span class="quest-reward-pill" id="quest-status">Sincronizando</span>
+        <!-- QUEST PLATE -->
+        <div class="elite-card quest-plate">
+            <div class="quest-glow-icon">📜</div>
+            <div class="quest-details" style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 id="quest-name">Buscando Misión...</h3>
+                    <span id="quest-status"
+                        style="font-size: 0.7rem; padding: 2px 8px; border: 1px solid #444; border-radius: 4px; color: #888;">SYNC</span>
                 </div>
-                <p class="quest-objective" id="quest-desc">Analizando datos del servidor...</p>
-                <div style="margin-top: 8px; color: var(--accent-gold); font-size: 0.85rem;" id="quest-reward">
-                    <!-- Reward goes here -->
-                </div>
+                <p id="quest-desc">Analizando flujos del mercado...</p>
+                <div id="quest-reward" style="margin-top: 5px; font-size: 0.8rem; color: var(--gold-primary);"></div>
             </div>
         </div>
 
-        <!-- TREASURY (STATS) -->
-        <div class="treasury-grid">
-            <div class="treasury-card">
-                <span class="treasury-icon">💰</span>
-                <div class="treasury-val" id="total-profit">$0.00</div>
-                <div class="treasury-label">Tesoro Acumulado</div>
+        <!-- STATS HEX GRID -->
+        <div class="stats-hex-grid">
+            <div class="stat-cell">
+                <span class="stat-label">Total Realizado</span>
+                <span class="stat-val gold" id="total-profit">$0.00</span>
             </div>
-            <div class="treasury-card">
-                <span class="treasury-icon">⏳</span>
-                <div class="treasury-val" id="daily-profit">$0.00</div>
-                <div class="treasury-label">Botín Diario</div>
+            <div class="stat-cell">
+                <span class="stat-label">Botín Diario</span>
+                <span class="stat-val" id="daily-profit">$0.00</span>
             </div>
-            <div class="treasury-card">
-                <span class="treasury-icon">📉</span>
-                <div class="treasury-val" id="unrealized-pnl" style="color: var(--text-secondary);">$0.00</div>
-                <div class="treasury-label">PnL Latente</div>
+            <div class="stat-cell">
+                <span class="stat-label">Flotante (PnL)</span>
+                <span class="stat-val" id="unrealized-pnl">$0.00</span>
             </div>
-            <div class="treasury-card">
-                <span class="treasury-icon">🔮</span>
-                <div class="treasury-val" id="global-roi">0%</div>
-                <div class="treasury-label">Retorno Histórico</div>
+            <div class="stat-cell">
+                <span class="stat-label">Valor Imperio</span>
+                <span class="stat-val cyan" id="global-equity">$0.00</span>
             </div>
-            <div class="treasury-card">
-                <span class="treasury-icon">⚔️</span>
-                <div class="treasury-val" id="active-orders">0</div>
-                <div class="treasury-label">Órdenes en Grid</div>
+            <div class="stat-cell">
+                <span class="stat-label">Retorno (ROI)</span>
+                <span class="stat-val" id="global-roi">0%</span>
             </div>
-            <div class="treasury-card">
-                <span class="treasury-icon">🏛️</span>
-                <div class="treasury-val" id="global-equity">$0.00</div>
-                <div class="treasury-label">Valor del Imperio</div>
+            <div class="stat-cell">
+                <span class="stat-label">Órdenes Activas</span>
+                <span class="stat-val" id="active-orders">0</span>
             </div>
         </div>
 
-        <!-- COMPANIONS (BOTS) -->
-        <h2 style="margin-bottom: 20px; color: white;">🛡️ COMPAÑEROS DE BATALLA</h2>
+        <!-- COMPANION GRID -->
+        <h2 style="margin-bottom: 25px; color: #fff; font-size: 1.2rem;">🛡️ ESCUADRÓN DE COMBATE</h2>
         <div class="companion-grid" id="bot-grid">
-            <!-- Bot cards will be injected here -->
+            <!-- INJECTED BY JS -->
         </div>
 
-        <!-- CHART (MAP) -->
-        <h2 style="margin-bottom: 20px; color: white;">🗺️ MAPA DE CONQUISTA</h2>
-        <div class="player-profile-card" style="padding: 2px;">
-            <div class="player-profile-inner" style="display: block; min-height: 350px;">
+        <div class="elite-card" style="margin-top: 40px; padding: 20px; min-height: 300px;">
+            <h3 style="color: #666; font-size: 0.8rem; margin-bottom: 20px;">MAPA DE CONQUISTA (PROFIT)</h3>
+            <div style="height: 300px; position: relative;">
                 <canvas id="global-profit-chart"></canvas>
             </div>
         </div>
 
-        <!-- BATTLE CHRONICLE -->
-        <h2 style="margin-bottom: 20px; marginTop: 40px; color: white;">📜 CRÓNICA DE BATALLA</h2>
-        <div class="battle-log-panel">
-            <div class="logs-list" id="logs-feed">
-                <!-- Logs injected here -->
-                <div class="log-entry">Esperando reportes del frente...</div>
-            </div>
-        </div>
-
         <div class="footer">
-            <p>"La fortuna favorece a los audaces"</p>
-            <div class="update-time" id="last-update">-</div>
+            NEXUS ELITE OPERATIONS TERMINAL v2.0
         </div>
     </div>
 
     <script>
-        // CONFIGURATION
+        // === CONFIG ===
         const BOTS = [
-            { id: 'btc', name: 'IGNIS', role: 'Espíritu de Fuego (BTC)', icon: '🔥', url: '/' },
-            { id: 'sol', name: 'VENTUS', role: 'Espíritu de Viento (SOL)', icon: '🌬️', url: '/sol/' },
-            { id: 'doge', name: 'FANG', role: 'Espíritu de Manada (DOGE)', icon: '🐺', url: '/doge/' }
+            { id: 'btc', name: 'IGNIS', role: 'Espíritu de Fuego', icon: '🔥', url: '/' },
+            { id: 'sol', name: 'VENTUS', role: 'Espíritu de Aire', icon: '🌬️', url: '/sol/' },
+            { id: 'doge', name: 'FANG', role: 'Espíritu de Manada', icon: '🐺', url: '/doge/' }
         ];
 
         const ASSETS = {
@@ -145,296 +134,258 @@
             'doge': 'assets/spirit-doge.png'
         };
 
-        let botState = {};
-
-        // INITIAL RENDER
-        function renderCompanionCards() {
+        // === RENDER ===
+        function renderCompanions() {
             const grid = document.getElementById('bot-grid');
             grid.innerHTML = BOTS.map(bot => `
                 <div class="companion-card ${bot.id}">
-                    <div class="companion-header">
-                        <div class="companion-avatar-circle">
-                            <img src="${ASSETS[bot.id]}" alt="${bot.name}">
-                        </div>
-                        <div class="companion-info">
-                            <div class="companion-name">${bot.name}</div>
-                            <div class="companion-role">${bot.role}</div>
-                        </div>
-                        <div class="companion-status-dot loading" id="status-dot-${bot.id}"></div>
+                    <div class="c-banner">
+                        <span class="c-regime-badge" id="regime-${bot.id}">ANALIZANDO</span>
+                        <div class="pulse-dot" id="dot-${bot.id}" style="background:#555; box-shadow:none; animation:none;"></div>
+                    </div>
+                    <div class="c-avatar">
+                        <img src="${ASSETS[bot.id]}" alt="${bot.name}">
                     </div>
                     
-                    <div class="companion-body">
-                        <div class="stat-row">
-                            <span class="stat-label">Estado</span>
-                            <span class="stat-val" id="status-${bot.id}">Conectando...</span>
+                    <div class="c-body">
+                        <div class="c-header">
+                            <h2 class="c-name">${bot.name}</h2>
+                            <span class="c-role">${bot.role}</span>
                         </div>
-                        <div class="stat-row">
-                            <span class="stat-label">Botín (Profit)</span>
-                            <span class="stat-val" style="color: var(--accent-gold);" id="profit-${bot.id}">-</span>
+
+                        <div class="c-metrics">
+                            <div class="c-metric">
+                                <span class="c-val" id="price-${bot.id}">-</span>
+                                <div class="c-lbl">Precio Actual</div>
+                            </div>
+                            <div class="c-metric">
+                                <span class="c-val gold" id="profit-${bot.id}">-</span>
+                                <div class="c-lbl">Profit Total</div>
+                            </div>
+                            <div class="c-metric">
+                                <span class="c-val" id="roi-${bot.id}">-</span>
+                                <div class="c-lbl">ROI Histórico</div>
+                            </div>
+                            <div class="c-metric">
+                                <span class="c-val" id="winrate-${bot.id}">-</span>
+                                <div class="c-lbl">Win Rate</div>
+                            </div>
                         </div>
-                        <div class="stat-row">
-                            <span class="stat-label">Órdenes Activas</span>
-                            <span class="stat-val" id="orders-${bot.id}">-</span>
+
+                        <div style="margin-bottom: 15px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#888; margin-bottom:4px;">
+                                <span>CONFIANZA (IA)</span>
+                                <span id="score-val-${bot.id}">50</span>
+                            </div>
+                            <div class="c-score-bar">
+                                <div class="c-score-fill" id="score-bar-${bot.id}" style="width: 50%"></div>
+                            </div>
                         </div>
-                         <div class="stat-row">
-                            <span class="stat-label">Última Acción</span>
-                            <span class="stat-val" id="last-trade-${bot.id}" style="font-size: 0.8rem;">-</span>
+
+                        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#666; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">
+                            <span id="orders-${bot.id}">0 Órdenes</span>
+                            <span id="lots-${bot.id}">0 Lots</span>
                         </div>
                         
-                        <div id="blocking-reason-${bot.id}" style="margin-top: 15px; font-size: 0.75rem; color: var(--accent-amber); padding: 8px; border: 1px solid rgba(255, 149, 0, 0.3); border-radius: 6px; display: none;"></div>
-                        
-                        <div style="margin-top: 20px;">
-                            <a href="${bot.url}" style="display: block; width: 100%; text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; font-size: 0.8rem; transition: background 0.2s;">
-                                ENTRAR AL NEXO &rarr;
-                            </a>
-                        </div>
+                        <div id="status-text-${bot.id}" style="margin-top: 10px; font-size: 0.7rem; color: var(--gold-dim); display:none;"></div>
+
+                        <a href="${bot.url}" style="display:block; margin-top:15px; text-align:center; padding:8px; opacity:0; transition:opacity 0.2s;" class="hover-show">
+                            <span style="font-size:0.7rem; color:var(--purple-aether);">ACCESO NEURONAL ></span>
+                        </a>
                     </div>
                 </div>
             `).join('');
+
+            // Hover effect for link
+            document.querySelectorAll('.companion-card').forEach(card => {
+                card.addEventListener('mouseenter', () => card.querySelector('a').style.opacity = 1);
+                card.addEventListener('mouseleave', () => card.querySelector('a').style.opacity = 0);
+            });
         }
 
-        // DATA FETCHING (Fixed)
-        async function fetchAllData() {
-            let totalProfit = 0;
-            let totalUnrealized = 0;
-            let totalOrders = 0;
-            let globalEquity = 0;
-            let dailyProfit = 0;
-            let botCount = 0;
-            let botsOnline = 0;
-            let totalYesterday = 0;
+        // === LOGIC ===
+        async function updateDashboard() {
+            let tProfit = 0, tDaily = 0, tUnreal = 0, tOrders = 0, tEquity = 0;
+            let botsActive = 0;
 
             for (const bot of BOTS) {
                 try {
-                    const apiUrl = bot.url === '/' ? '/api/status' : `${bot.url}api/status`;
-                    const response = await fetch(apiUrl);
+                    const url = bot.url === '/' ? '/api/status' : `${bot.url}api/status`;
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        updateBotUI(bot.id, data);
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        botState[bot.id] = data;
-                        updateCompanionCard(bot.id, data);
+                        tProfit += data.totalProfit || 0;
+                        tDaily += data.dailyProfit || 0;
+                        tUnreal += data.unrealizedPnL || 0;
+                        tOrders += data.activeOrders || 0;
 
-                        totalProfit += data.totalProfit || 0;
-                        totalUnrealized += data.unrealizedPnL || 0;
-                        totalOrders += data.activeOrders || 0;
-                        dailyProfit += data.dailyProfit || 0;
-                        if (data.yesterdayProfit) totalYesterday += data.yesterdayProfit;
+                        // Equity fallback logic
+                        if (bot.id === 'btc' && data.globalEquity) tEquity = data.globalEquity;
 
-                        // Fallback logic for equity
-                        if (bot.id === 'btc' && data.globalEquity) globalEquity = data.globalEquity;
-
-                        botCount++;
-                        if (data.status === 'running') botsOnline++;
-                    } else {
-                        throw new Error('Response not OK');
+                        if (data.status === 'running') botsActive++;
                     }
-                } catch (e) {
-                    console.error(`Error fetching ${bot.name}:`, e);
-                    document.getElementById(`status-${bot.id}`).textContent = 'OFFLINE';
-                    document.getElementById(`status-${bot.id}`).style.color = 'var(--accent-crimson)';
-                    document.getElementById(`status-dot-${bot.id}`).className = 'companion-status-dot blocked';
-                }
+                } catch (e) { console.warn(bot.id, e); }
             }
 
-            // P0 FIX: Fetch accurate Global Equity from dedicated endpoint (Source of Truth)
+            // Equity Source of Truth
             try {
                 const eqRes = await fetch('/api/balance');
                 if (eqRes.ok) {
                     const eqData = await eqRes.json();
-                    if (eqData.totalEquity > 0) {
-                        globalEquity = eqData.totalEquity;
-                        console.log('Global Equity Updated:', globalEquity);
+                    if (eqData.totalEquity) tEquity = eqData.totalEquity;
+                }
+            } catch (e) { }
+
+            // Update Globals
+            document.getElementById('total-profit').innerText = `$${tProfit.toFixed(2)}`;
+            document.getElementById('daily-profit').innerText = `$${tDaily.toFixed(2)}`;
+            document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
+            document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`; // Make red if neg
+            document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
+            document.getElementById('active-orders').innerText = tOrders;
+
+            if (tEquity > tProfit) {
+                const roi = (tProfit / (tEquity - tProfit)) * 100;
+                document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
+            }
+
+            document.getElementById('loading').style.opacity = 0;
+            setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
+
+            document.getElementById('last-update').innerText = 'ACTUALIZADO: ' + new Date().toLocaleTimeString();
+        }
+
+        function updateBotUI(id, data) {
+            // Regime
+            const regimeEl = document.getElementById(`regime-${id}`);
+            regimeEl.innerText = data.marketRegime || 'NEUTRAL';
+            regimeEl.style.color = data.marketRegime && data.marketRegime.includes('BULL') ? 'var(--emerald-life)' :
+                data.marketRegime && data.marketRegime.includes('BEAR') ? 'var(--ruby-danger)' : '#888';
+
+            // Dot
+            const dot = document.getElementById(`dot-${id}`);
+            if (data.status === 'running') {
+                dot.style.background = 'var(--emerald-life)';
+                dot.style.boxShadow = '0 0 10px var(--emerald-life)';
+                dot.style.animation = 'pulse 2s infinite';
+            } else {
+                dot.style.background = 'var(--ruby-danger)';
+                dot.style.boxShadow = 'none';
+                dot.style.animation = 'none';
+            }
+
+            // Metrics
+            document.getElementById(`profit-${id}`).innerText = `$${(data.totalProfit || 0).toFixed(2)}`;
+
+            const price = data.currentPrice || 0;
+            document.getElementById(`price-${id}`).innerText = price > 1000 ? `$${price.toFixed(0)}` : price > 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(4)}`;
+
+            document.getElementById(`roi-${id}`).innerText = `${(data.roi || 0).toFixed(2)}%`;
+
+            document.getElementById(`winrate-${id}`).innerText = `${(data.winRate || 0).toFixed(0)}%`;
+
+            // Score
+            document.getElementById(`score-val-${id}`).innerText = data.score || 50;
+            const bar = document.getElementById(`score-bar-${id}`);
+            bar.style.width = `${data.score || 50}%`;
+            if ((data.score || 50) > 60) bar.classList.add('high');
+            else bar.classList.remove('high');
+
+            // Footer
+            document.getElementById(`orders-${id}`).innerText = `${data.activeOrders || 0} Órd.`;
+            document.getElementById(`lots-${id}`).innerText = `${data.inventoryLots || 0} Lots`;
+
+            // Status Text (Blocking)
+            const statusTxt = document.getElementById(`status-text-${id}`);
+            if (data.blockingReason || data.isPaused) {
+                statusTxt.style.display = 'block';
+                statusTxt.innerText = `⚠️ ${data.blockingReason || 'PAUSADO'}`;
+            } else {
+                statusTxt.style.display = 'none';
+            }
+        }
+
+        async function fetchRPG() {
+            try {
+                const res = await fetch('/api/rpg');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('player-lvl').innerText = `LVL ${data.level || 1}`;
+                    document.getElementById('player-title').innerText = data.title || 'INICIADO';
+                    document.getElementById('xp-text').innerText = `${data.xp} / ${data.nextLevelXp} XP`;
+                    document.getElementById('xp-fill').style.width = `${data.xpProgress}%`;
+
+                    if (data.quest) {
+                        document.getElementById('quest-name').innerText = data.quest.name;
+                        document.getElementById('quest-desc').innerText = data.quest.objective;
+                        const st = document.getElementById('quest-status');
+                        st.innerText = data.quest.status === 'COMPLETED' ? 'COMPLETADA' : 'EN PROGRESO';
+                        st.style.color = data.quest.status === 'COMPLETED' ? 'var(--emerald-life)' : 'var(--gold-primary)';
+                        st.style.borderColor = data.quest.status === 'COMPLETED' ? 'var(--emerald-life)' : 'var(--gold-primary)';
+
+                        if (data.quest.reward) document.getElementById('quest-reward').innerText = `🏆 RECOMPENSA: ${data.quest.reward}`;
                     }
                 }
-            } catch (e) {
-                console.error('Error fetching global equity source of truth:', e);
-            }
-
-            // Global Updates
-            document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
-
-            // Daily Profit with Yesterday Context
-            document.getElementById('daily-profit').textContent = `$${dailyProfit.toFixed(2)}`;
-            const treasuryLabel = document.querySelector('.treasury-card:nth-child(2) .treasury-label');
-            if (treasuryLabel) {
-                treasuryLabel.innerHTML = `Botín Diario <span style="opacity:0.6; font-size:0.8em">($${totalYesterday.toFixed(0)} ayer)</span>`;
-            }
-
-            document.getElementById('unrealized-pnl').textContent = `$${totalUnrealized.toFixed(2)}`;
-            document.getElementById('active-orders').textContent = totalOrders;
-            document.getElementById('global-equity').textContent = `$${globalEquity.toFixed(2)}`;
-
-            // Calculate Global ROI
-            const totalInvested = globalEquity - totalProfit; // Approx
-            if (totalInvested > 0) {
-                const roi = (totalProfit / totalInvested) * 100;
-                document.getElementById('global-roi').textContent = `${roi.toFixed(1)}%`;
-            }
-
-            // Hide Loading
-            document.getElementById('loading').classList.add('hidden');
+            } catch (e) { }
         }
 
-        function updateCompanionCard(id, data) {
-            const statusEl = document.getElementById(`status-${id}`);
-            const dotEl = document.getElementById(`status-dot-${id}`);
-            const profitEl = document.getElementById(`profit-${id}`);
-            const ordersEl = document.getElementById(`orders-${id}`);
-            const lastTradeEl = document.getElementById(`last-trade-${id}`);
-            const blockEl = document.getElementById(`blocking-reason-${id}`);
-
-            statusEl.textContent = data.status === 'running' ? 'EN COMBATE' : 'DESCANSANDO';
-            statusEl.style.color = data.status === 'running' ? 'var(--accent-emerald)' : 'var(--text-secondary)';
-
-            dotEl.className = `companion-status-dot ${data.status === 'running' ? 'active' : 'blocked'}`;
-
-            profitEl.textContent = `$${(data.totalProfit || 0).toFixed(2)}`;
-            ordersEl.textContent = data.activeOrders || 0;
-
-            // Last Trade
-            if (data.lastTradeTime) {
-                const date = new Date(data.lastTradeTime);
-                const now = new Date();
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / 60000);
-                const diffHours = Math.floor(diffMins / 60);
-
-                if (diffMins < 60) {
-                    lastTradeEl.textContent = `Hace ${diffMins} mins`;
-                    lastTradeEl.style.color = 'var(--accent-cyan)';
-                } else if (diffHours < 24) {
-                    lastTradeEl.textContent = `Hace ${diffHours} horas`;
-                    lastTradeEl.style.color = 'var(--text-primary)';
-                } else {
-                    lastTradeEl.textContent = `Hace ${Math.floor(diffHours / 24)} días`;
-                    lastTradeEl.style.color = 'var(--text-secondary)';
-                }
-            }
-
-            // Blocking Reason
-            if (data.dcaBlocking || data.isPaused) {
-                blockEl.style.display = 'block';
-                blockEl.textContent = `🛡️ ${data.blockingReason || (data.dcaBlocking ? "Esperando caída (Smart DCA)" : "Pausado")}`;
-            } else {
-                blockEl.style.display = 'none';
-            }
-        }
-
-        async function fetchRPGData() {
+        async function fetchChart() {
             try {
-                const response = await fetch('/api/rpg');
-                if (response.ok) {
-                    const data = await response.json();
-                    updateRPGDisplay(data);
+                const res = await fetch('/api/profit-history');
+                if (res.ok) {
+                    const data = await res.json();
+                    renderChart(data.history || []);
                 }
-            } catch (err) { console.error(err); }
+            } catch (e) { }
         }
 
-        function updateRPGDisplay(data) {
-            // Level Badge
-            document.getElementById('player-lvl').textContent = data.level || 1;
-
-            // Title
-            document.getElementById('player-title').textContent = data.title || 'Iniciado';
-
-            // XP Bar
-            if (data.xpProgress !== undefined) {
-                const fill = document.getElementById('xp-fill');
-                fill.style.width = `${data.xpProgress}%`;
-                document.getElementById('next-lvl-progress').textContent = `${data.xpProgress.toFixed(1)}%`;
-            }
-            if (data.xp !== undefined && data.nextLevelXp !== undefined) {
-                document.getElementById('xp-val').textContent = `${data.xp} / ${data.nextLevelXp} XP`;
-            }
-
-            // Quest
-            if (data.quest) {
-                document.getElementById('quest-name').textContent = data.quest.name || 'Sin Misión';
-                document.getElementById('quest-desc').textContent = data.quest.objective || '';
-
-                const statusEl = document.getElementById('quest-status');
-                statusEl.textContent = data.quest.status === 'COMPLETED' ? 'COMPLETADA' : 'EN PROGRESO';
-                statusEl.style.color = data.quest.status === 'COMPLETED' ? 'var(--accent-emerald)' : 'var(--accent-gold)';
-                statusEl.style.borderColor = data.quest.status === 'COMPLETED' ? 'var(--accent-emerald)' : 'var(--accent-gold)';
-                statusEl.style.background = data.quest.status === 'COMPLETED' ? 'rgba(0,255,157,0.1)' : 'rgba(255,215,0,0.1)';
-
-                if (data.quest.reward) {
-                    document.getElementById('quest-reward').textContent = `🏆 Recompensa: ${data.quest.reward}`;
-                }
-            }
-        }
-
-        async function fetchProfitHistory() {
-            try {
-                const response = await fetch('/api/profit-history');
-                if (response.ok) {
-                    const history = await response.json();
-                    renderGlobalChart(history);
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        function renderGlobalChart(history) {
+        function renderChart(history) {
             const ctx = document.getElementById('global-profit-chart').getContext('2d');
+            const last30 = history.slice(-30);
 
-            // Transform data (last 30 days)
-            const labels = history.slice(-30).map(h => {
-                const d = new Date(h.date);
-                return `${d.getDate()}/${d.getMonth() + 1}`;
-            });
-            const data = history.slice(-30).map(h => h.dailyProfit);
-
-            // Destroy if exists
             if (window.myChart) window.myChart.destroy();
 
             window.myChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
-                    labels: labels,
+                    labels: last30.map(h => h.date.substring(5)),
                     datasets: [{
                         label: 'Botín Diario (USD)',
-                        data: data,
-                        backgroundColor: 'rgba(255, 215, 0, 0.4)',
-                        borderColor: 'rgba(255, 215, 0, 1)',
-                        borderWidth: 1,
-                        borderRadius: 4
+                        data: last30.map(h => h.dailyProfit),
+                        borderColor: '#00ff9d',
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                            gradient.addColorStop(0, 'rgba(0, 255, 157, 0.4)');
+                            gradient.addColorStop(1, 'rgba(0, 255, 157, 0)');
+                            return gradient;
+                        },
+                        fill: true,
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { color: '#a0a0b0' } }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#888' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#888' }
-                        }
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666' } }
                     }
                 }
             });
         }
 
-        async function init() {
-            renderCompanionCards();
-            await fetchAllData();
-            await fetchRPGData();
-            await fetchProfitHistory();
-
-            setInterval(fetchAllData, 15000);
-            setInterval(fetchRPGData, 60000);
-            setInterval(fetchProfitHistory, 60000);
-
-            // Last update time
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('last-update').textContent = `Actualizado: ${now.toLocaleTimeString()}`;
-            }, 1000);
+        function init() {
+            renderCompanions();
+            updateDashboard();
+            fetchRPG();
+            fetchChart();
+            setInterval(updateDashboard, 5000);
+            setInterval(fetchRPG, 60000);
+            setInterval(fetchChart, 60000);
         }
 
         init();
