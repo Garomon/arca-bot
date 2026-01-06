@@ -857,7 +857,8 @@ body::before {
     .sidebar {
         width: 100%;
         height: auto;
-        max-height: 200px;
+        max-height: none;
+        overflow-y: auto;
     }
 
     .metrics-primary,
