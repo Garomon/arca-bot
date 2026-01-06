@@ -771,14 +771,16 @@
             style="background: rgba(153, 69, 255, 0.1); border: 1px solid var(--accent-purple); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
             <div class="quest-icon" style="font-size: 2rem;">🛡️</div>
             <div class="quest-info" style="flex: 1;">
-                <h3 style="color: var(--accent-purple); margin-bottom: 5px; font-size: 1rem;">Buscando Misión Activa...
+                <h3 style="color: var(--accent-purple); margin-bottom: 5px; font-size: 1rem;">MISIÓN ACTIVA: Cargando...
                 </h3>
-                <p style="color: var(--text-secondary); font-size: 0.85rem;">...</p>
+                <p style="color: var(--text-secondary); font-size: 0.85rem;">Sincronizando con el servidor...</p>
             </div>
-            <div class="quest-status" style="text-align: right;">
+            <div class="quest-status" style="text-align: right; min-width: 140px;">
                 <span class="badge"
-                    style="background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 4px 10px; border-radius: 4px; font-weight: bold;">...</span>
-                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;"></div>
+                    style="background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 6px 12px; border-radius: 4px; font-weight: bold; display: inline-block;">⏳
+                    CARGANDO</span>
+                <div class="quest-reward" style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px;">...
+                </div>
             </div>
         </div>
 
@@ -1289,13 +1291,12 @@
 
             // Update Quest Card
             if (data.quest) {
-                const questIcon = document.querySelector('.quest-icon');
                 const questTitle = document.querySelector('.quest-info h3');
                 const questDesc = document.querySelector('.quest-info p');
                 const questBadge = document.querySelector('.quest-status .badge');
-                const questReward = document.querySelector('.quest-status div:last-child');
+                const questReward = document.querySelector('.quest-reward');
 
-                if (questTitle) questTitle.textContent = data.quest.name || 'Misión Activa';
+                if (questTitle) questTitle.textContent = `MISIÓN ACTIVA: ${data.quest.name || 'Desconocida'}`;
                 if (questDesc) questDesc.textContent = data.quest.objective || '';
 
                 // Status badge
