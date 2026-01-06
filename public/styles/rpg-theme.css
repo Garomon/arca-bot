@@ -528,5 +528,63 @@ h3,
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.75rem;
-}
+
+    /* === MOBILE RESPONSIVENESS (Vision Elite) === */
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+
+        /* Stack Profile Header */
+        .profile-hero {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .hero-stats {
+            padding-left: 0 !important;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-name {
+            font-size: 1.5rem;
+        }
+
+        /* Wrap XP bar container */
+        .hero-stats>div {
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Make Quest Plate stack nicely */
+        .quest-mini-plate {
+            min-width: 100% !important;
+            margin-top: 15px;
+            box-sizing: border-box;
+        }
+
+        /* Adjust Grid Columns for Cards */
+        .companion-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-hex-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        /* Logs compact view */
+        .log-item {
+            font-size: 0.65rem;
+            gap: 8px;
+        }
+
+        .log-bot {
+            min-width: 40px;
+            font-size: 0.6rem;
+        }
+    }

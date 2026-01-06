@@ -149,13 +149,8 @@
         };
 
         // Debug logger
-        function logDebug(msg) {
-            console.log('[RPG-DEBUG]', msg);
-            const debugEl = document.getElementById('debug-log');
-            if (debugEl) {
-                debugEl.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${msg}</div>`;
-            }
-        }
+        // Debug helper (disabled)
+        function logDebug(msg) { console.log(msg); }
 
         // === RENDER ===
         function renderCompanions() {
@@ -656,10 +651,7 @@
 
         init();
     </script>
-    <div id="debug-log"
-        style="position: fixed; bottom: 0; right: 0; background: rgba(0,0,0,0.8); color: lime; padding: 10px; font-family: monospace; font-size: 10px; max-height: 200px; overflow-y: scroll; width: 300px; z-index: 9999; pointer-events: none;">
-        <div>DEBUG CONSOLE ACTIVE v4.1</div>
-    </div>
+    <div id="debug-log" style="display: none;"></div>
 </body>
 
 </html>
