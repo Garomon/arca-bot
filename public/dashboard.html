@@ -590,12 +590,12 @@
             renderCompanions();
             // Wait a tick to ensure DOM is ready
             setTimeout(() => {
-                updateDashboard();
+                fetchAllData();
                 fetchRPG();
                 fetchChart();
             }, 100);
 
-            setInterval(updateDashboard, 5000);
+            setInterval(fetchAllData, 5000);
             setInterval(fetchRPG, 60000);
             setInterval(fetchChart, 60000);
         }
