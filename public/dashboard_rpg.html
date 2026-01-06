@@ -284,7 +284,20 @@
             } catch (e) { }
 
             document.getElementById('total-profit').innerText = `$${tProfit.toFixed(2)}`;
-            document.getElementById('daily-profit').innerHTML = `$${tDaily.toFixed(2)} <span style="font-size:0.6em; color:#666;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>`;
+
+            // Daily Profit: 3-Row Layout
+            const dailyEl = document.getElementById('daily-profit');
+            dailyEl.style.display = 'flex';
+            dailyEl.style.flexDirection = 'column';
+            dailyEl.style.alignItems = 'center';
+            dailyEl.style.lineHeight = '1.2';
+
+            dailyEl.innerHTML = `
+                <span style="font-size: 0.6rem; color: #666; letter-spacing: 1px; margin-bottom: 2px;">BOTÍN DIARIO</span>
+                <span style="font-size: 1.5rem; color: #fff;">$${tDaily.toFixed(2)}</span>
+                <span style="font-size: 0.6rem; color: #888; margin-top: 2px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
+            `;
+
             document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
             document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
             document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
