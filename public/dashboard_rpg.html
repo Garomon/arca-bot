@@ -241,8 +241,6 @@
             for (const bot of BOTS) {
                 try {
                     const url = bot.url === '/' ? '/api/status' : `${bot.url}api/status`;
-                    // logDebug(`Fetching ${bot.id} from ${url}`);
-
                     const res = await fetch(url);
                     if (res.ok) {
                         const data = await res.json();
@@ -255,10 +253,10 @@
                         tOrders += data.activeOrders || 0;
                         tDailyTrades += data.dailyTrades || 0;
 
-                        if (bot.id === 'btc' && data.globalEquity) tEquity = data.globalEquity;
+                        // Strict check: dashboard.html specific logic: If response is OK, bot is Online.
+                        botsActive++;
 
-                        // Strict check like original dash
-                        if (data.status === 'running') botsActive++;
+                        if (bot.id === 'btc' && data.globalEquity) tEquity = data.globalEquity;
                     } else {
                         updateBotOffline(bot.id, `HTTP ${res.status}`);
                     }
@@ -285,17 +283,17 @@
 
             document.getElementById('total-profit').innerText = `$${tProfit.toFixed(2)}`;
 
-            // Daily Profit: 3-Row Layout
+            // Daily Profit: 3-Row Layout (Fixed Duplication & Font Size)
             const dailyEl = document.getElementById('daily-profit');
             dailyEl.style.display = 'flex';
             dailyEl.style.flexDirection = 'column';
             dailyEl.style.alignItems = 'center';
             dailyEl.style.lineHeight = '1.2';
 
+            // REMOVED 'BOTÍN DIARIO' LABEL FROM HERE TO AVOID DUPLICATION
             dailyEl.innerHTML = `
-                <span style="font-size: 0.6rem; color: #666; letter-spacing: 1px; margin-bottom: 2px;">BOTÍN DIARIO</span>
-                <span style="font-size: 1.5rem; color: #fff;">$${tDaily.toFixed(2)}</span>
-                <span style="font-size: 0.6rem; color: #888; margin-top: 2px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
+                <span style="font-size: 1.5rem; color: #fff; margin-top: 5px;">$${tDaily.toFixed(2)}</span>
+                <span style="font-size: 0.85rem; color: #aaa; margin-top: 4px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
             `;
 
             document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
@@ -322,30 +320,25 @@
             const dot = document.getElementById(`dot-${id}`);
             const statusLbl = document.getElementById(`status-label-${id}`);
 
-            // Same logic as Stable Dashboard: Status Badge is derived from Blocking, NOT just running
-            // But 'botsActive' counter IS derived from running.
-            // For the badge, let's respect the "running" state for color, but "blocking" for text
+            // Use broader definition of online to match stable dashboard
+            // If data exists, it's effectively online
+            dot.style.background = 'var(--emerald-life)';
+            dot.style.boxShadow = '0 0 10px var(--emerald-life)';
 
             if (data.status === 'running') {
-                dot.style.background = 'var(--emerald-life)';
-                dot.style.boxShadow = '0 0 10px var(--emerald-life)';
-
                 if (data.smartDcaBlocking) {
                     statusLbl.innerText = "BLOCKED";
-                    statusLbl.style.color = "var(--gold-primary)"; // Warn color
+                    statusLbl.style.color = "var(--gold-primary)";
                 } else {
                     statusLbl.innerText = "ONLINE";
                     statusLbl.style.color = "var(--emerald-life)";
                 }
-
-                // Clear debug
-                document.getElementById(`debug-${id}`).innerText = "";
             } else {
-                dot.style.background = 'var(--ruby-danger)';
-                dot.style.boxShadow = 'none';
-                statusLbl.innerText = data.status ? data.status.toUpperCase() : "OFFLINE";
-                statusLbl.style.color = "var(--ruby-danger)";
+                statusLbl.innerText = data.status ? data.status.toUpperCase() : "STANDBY";
+                statusLbl.style.color = "var(--gold-primary)";
             }
+            // Clear debug
+            document.getElementById(`debug-${id}`).innerText = "";
 
             // Metrics
             document.getElementById(`profit-${id}`).innerText = `$${(data.totalProfit || 0).toFixed(2)}`;
