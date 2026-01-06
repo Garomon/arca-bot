@@ -134,9 +134,9 @@
     <script>
         // CONFIGURATION
         const BOTS = [
-            { id: 'btc', name: 'IGNIS', role: 'Espíritu de Fuego (BTC)', icon: '🔥', url: 'http://167.71.1.124:3001/' },
-            { id: 'sol', name: 'VENTUS', role: 'Espíritu de Viento (SOL)', icon: '🌬️', url: 'http://167.71.1.124:3002/' },
-            { id: 'doge', name: 'FANG', role: 'Espíritu de Manada (DOGE)', icon: '🐺', url: 'http://167.71.1.124:3003/' }
+            { id: 'btc', name: 'IGNIS', role: 'Espíritu de Fuego (BTC)', icon: '🔥', url: '/' },
+            { id: 'sol', name: 'VENTUS', role: 'Espíritu de Viento (SOL)', icon: '🌬️', url: '/sol/' },
+            { id: 'doge', name: 'FANG', role: 'Espíritu de Manada (DOGE)', icon: '🐺', url: '/doge/' }
         ];
 
         const ASSETS = {
@@ -184,7 +184,7 @@
                         <div id="blocking-reason-${bot.id}" style="margin-top: 15px; font-size: 0.75rem; color: var(--accent-amber); padding: 8px; border: 1px solid rgba(255, 149, 0, 0.3); border-radius: 6px; display: none;"></div>
                         
                         <div style="margin-top: 20px;">
-                            <a href="${bot.url}" target="_blank" style="display: block; width: 100%; text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; font-size: 0.8rem; transition: background 0.2s;">
+                            <a href="${bot.url}" style="display: block; width: 100%; text-align: center; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; font-size: 0.8rem; transition: background 0.2s;">
                                 ENTRAR AL NEXO &rarr;
                             </a>
                         </div>
@@ -193,7 +193,7 @@
             `).join('');
         }
 
-        // DATA FETCHING (Logic Preserved)
+        // DATA FETCHING (Fixed)
         async function fetchAllData() {
             let totalProfit = 0;
             let totalUnrealized = 0;
@@ -202,6 +202,7 @@
             let dailyProfit = 0;
             let botCount = 0;
             let botsOnline = 0;
+            let totalYesterday = 0;
 
             for (const bot of BOTS) {
                 try {
@@ -217,12 +218,15 @@
                         totalUnrealized += data.unrealizedPnL || 0;
                         totalOrders += data.activeOrders || 0;
                         dailyProfit += data.dailyProfit || 0;
-                        // For global equity, take the BTC bot's global equity which usually aggregates (or sum them if separate)
-                        // Assuming BTC bot reports global equity, or we sum. Let's sum for now if not reported globally.
+                        if (data.yesterdayProfit) totalYesterday += data.yesterdayProfit;
+
+                        // Fallback logic for equity
                         if (bot.id === 'btc' && data.globalEquity) globalEquity = data.globalEquity;
 
                         botCount++;
                         if (data.status === 'running') botsOnline++;
+                    } else {
+                        throw new Error('Response not OK');
                     }
                 } catch (e) {
                     console.error(`Error fetching ${bot.name}:`, e);
@@ -232,9 +236,30 @@
                 }
             }
 
+            // P0 FIX: Fetch accurate Global Equity from dedicated endpoint (Source of Truth)
+            try {
+                const eqRes = await fetch('/api/balance');
+                if (eqRes.ok) {
+                    const eqData = await eqRes.json();
+                    if (eqData.totalEquity > 0) {
+                        globalEquity = eqData.totalEquity;
+                        console.log('Global Equity Updated:', globalEquity);
+                    }
+                }
+            } catch (e) {
+                console.error('Error fetching global equity source of truth:', e);
+            }
+
             // Global Updates
             document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
+
+            // Daily Profit with Yesterday Context
             document.getElementById('daily-profit').textContent = `$${dailyProfit.toFixed(2)}`;
+            const treasuryLabel = document.querySelector('.treasury-card:nth-child(2) .treasury-label');
+            if (treasuryLabel) {
+                treasuryLabel.innerHTML = `Botín Diario <span style="opacity:0.6; font-size:0.8em">($${totalYesterday.toFixed(0)} ayer)</span>`;
+            }
+
             document.getElementById('unrealized-pnl').textContent = `$${totalUnrealized.toFixed(2)}`;
             document.getElementById('active-orders').textContent = totalOrders;
             document.getElementById('global-equity').textContent = `$${globalEquity.toFixed(2)}`;
