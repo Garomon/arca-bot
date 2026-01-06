@@ -527,58 +527,113 @@
                 return cumulative.toFixed(2);
             });
 
+            // CHART THEME VARIABLES
+            const COLOR_GOLD = '#ffd700';
+            const COLOR_CYAN = '#00f0ff';
+            const COLOR_EMERALD = '#00ff9d';
+            const COLOR_GRID = 'rgba(255, 255, 255, 0.05)';
+            const FONT_UI = "'Outfit', sans-serif";
+
+            // Create Gradients
+            let gradfill = null;
+            if (ctx) {
+                gradfill = ctx.createLinearGradient(0, 0, 0, 400);
+                gradfill.addColorStop(0, 'rgba(0, 240, 255, 0.2)');
+                gradfill.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+            }
+
             window.myChart = new Chart(ctx, {
-                type: 'bar', // Base type
+                type: 'bar',
                 data: {
                     labels: last30.map(h => h.date.substring(5)),
                     datasets: [
                         {
-                            label: 'Cumulative',
+                            label: 'Equity (Acumulado)',
                             data: cumulativeData,
                             type: 'line',
-                            borderColor: '#00d4ff',
-                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            borderColor: COLOR_CYAN,
+                            backgroundColor: gradfill || 'rgba(0, 240, 255, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#000',
+                            pointBorderColor: COLOR_CYAN,
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
                             fill: true,
                             tension: 0.4,
-                            pointRadius: 2,
-                            pointBackgroundColor: '#00d4ff',
-                            order: 1
+                            order: 1,
+                            yAxisID: 'y'
                         },
                         {
-                            label: 'Botín Diario (USD)',
-                            data: last30.map(h => h.profit), // Fixed field name
-                            backgroundColor: 'rgba(0, 255, 157, 0.6)',
-                            borderColor: '#00ff9d',
+                            label: 'Botín Diario',
+                            data: last30.map(h => h.profit),
+                            backgroundColor: (context) => {
+                                const val = context.raw || 0;
+                                return val >= 0 ? 'rgba(0, 255, 157, 0.7)' : 'rgba(255, 42, 109, 0.7)';
+                            },
+                            borderColor: (context) => {
+                                const val = context.raw || 0;
+                                return val >= 0 ? COLOR_EMERALD : '#ff2a6d';
+                            },
                             borderWidth: 1,
                             borderRadius: 4,
-                            order: 2
+                            hoverBackgroundColor: COLOR_GOLD,
+                            order: 2,
+                            yAxisID: 'y'
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#ccc',
+                                font: { family: FONT_UI, size: 10 },
+                                usePointStyle: true,
+                                boxWidth: 6
+                            }
+                        },
                         tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.9)',
-                            titleColor: '#fff',
-                            bodyColor: '#00ff9d',
+                            backgroundColor: 'rgba(10, 10, 16, 0.95)',
+                            titleColor: COLOR_GOLD,
+                            titleFont: { family: FONT_UI, size: 13 },
+                            bodyColor: '#e0e0e0',
+                            bodyFont: { family: FONT_UI, size: 12 },
+                            borderColor: 'rgba(255, 215, 0, 0.3)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: true,
                             callbacks: {
                                 label: function (context) {
-                                    return 'Profit: $' + context.parsed.y.toFixed(2);
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                    }
+                                    return label;
                                 }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#666', font: { size: 10 } }
+                            grid: { color: COLOR_GRID, drawBorder: false },
+                            ticks: { color: '#666', font: { family: FONT_UI, size: 10 } }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#666', callback: function (value) { return '$' + value; } }
+                            grid: { color: COLOR_GRID, borderDash: [5, 5] },
+                            ticks: {
+                                color: '#888',
+                                font: { family: FONT_UI, size: 10 },
+                                callback: function (value) { return '$' + value; }
+                            },
+                            border: { display: false }
                         }
                     }
                 }
