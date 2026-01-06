@@ -221,7 +221,7 @@
 
                         <!-- CTA -->
                         <div style="margin-top: auto; padding-top: 10px;">
-                            <a href="${bot.url}" target="_blank" style="display: block; width: 100%; box-sizing: border-box; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; text-align: center; text-decoration: none; font-size: 0.8rem; border-radius: 6px; transition: background 0.2s;">
+                            <a href="${bot.url}" style="display: block; width: 100%; box-sizing: border-box; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; text-align: center; text-decoration: none; font-size: 0.8rem; border-radius: 6px; transition: background 0.2s;">
                                 ACCESO A TERMINAL &rarr;
                             </a>
                         </div>
@@ -467,7 +467,7 @@
                     labels: last30.map(h => h.date.substring(5)),
                     datasets: [{
                         label: 'Botín Diario (USD)',
-                        data: last30.map(h => h.dailyProfit),
+                        data: last30.map(h => h.profit),
                         borderColor: '#00ff9d',
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
