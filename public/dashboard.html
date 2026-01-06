@@ -319,14 +319,13 @@
             dailyEl.style.lineHeight = '1.2';
 
             // REMOVED 'BOTÍN DIARIO' LABEL FROM HERE TO AVOID DUPLICATION
-            dailyEl.innerHTML = `
                 <span style="font-size: 1.5rem; color: #fff; margin-top: 5px;">$${tDaily.toFixed(2)}</span>
-                <span style="font-size: 0.85rem; color: #aaa; margin-top: 4px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
+                <span style="font-size: 0.65rem; color: #aaa; margin-top: 4px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
             `;
 
-            document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
-            document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
-            document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
+            document.getElementById('unrealized-pnl').innerText = `$${ tUnreal.toFixed(2) } `;
+            document.getElementById('unrealized-pnl').className = `stat - val ${ tUnreal >= 0 ? '' : 'neg' } `;
+            document.getElementById('global-equity').innerText = `$${ tEquity.toFixed(2) } `;
             document.getElementById('total-orders').innerText = tOrders;
 
             // Log Update
@@ -334,7 +333,7 @@
 
             if (tEquity > tProfit) {
                 const roi = (tProfit / (tEquity - tProfit)) * 100;
-                document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
+                document.getElementById('global-roi').innerText = `${ roi.toFixed(1) }% `;
             }
 
             document.getElementById('loading').style.opacity = 0;
@@ -345,11 +344,11 @@
 
         function updateBotUI(id, data) {
             // Regime
-            document.getElementById(`regime-${id}`).innerText = data.marketRegime || 'NEUTRAL';
+            document.getElementById(`regime - ${ id } `).innerText = data.marketRegime || 'NEUTRAL';
 
             // Dot & Status
-            const dot = document.getElementById(`dot-${id}`);
-            const statusLbl = document.getElementById(`status-label-${id}`);
+            const dot = document.getElementById(`dot - ${ id } `);
+            const statusLbl = document.getElementById(`status - label - ${ id } `);
 
             // ALIGNMENT WITH STABLE DASHBOARD:
             // If we have data, we are effectively ONLINE.
@@ -373,61 +372,61 @@
             }
 
             // Clear debug
-            document.getElementById(`debug-${id}`).innerText = "";
+            document.getElementById(`debug - ${ id } `).innerText = "";
 
             // Metrics
-            document.getElementById(`profit-${id}`).innerText = `$${(data.totalProfit || 0).toFixed(2)}`;
+            document.getElementById(`profit - ${ id } `).innerText = `$${ (data.totalProfit || 0).toFixed(2) } `;
 
             const price = data.currentPrice || 0;
-            document.getElementById(`price-${id}`).innerText = price > 1000 ? `$${price.toFixed(0)}` : price > 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(4)}`;
+            document.getElementById(`price - ${ id } `).innerText = price > 1000 ? `$${ price.toFixed(0) } ` : price > 1 ? `$${ price.toFixed(2) } ` : `$${ price.toFixed(4) } `;
 
-            document.getElementById(`roi-${id}`).innerText = `${(data.roi || 0).toFixed(2)}%`;
-            document.getElementById(`daily-${id}`).innerText = `$${(data.dailyProfit || 0).toFixed(2)}`;
+            document.getElementById(`roi - ${ id } `).innerText = `${ (data.roi || 0).toFixed(2) }% `;
+            document.getElementById(`daily - ${ id } `).innerText = `$${ (data.dailyProfit || 0).toFixed(2) } `;
 
             const winRate = data.winRate || 0;
-            const wrEl = document.getElementById(`winrate-${id}`);
-            wrEl.innerText = `${winRate.toFixed(0)}%`;
+            const wrEl = document.getElementById(`winrate - ${ id } `);
+            wrEl.innerText = `${ winRate.toFixed(0) }% `;
             wrEl.style.color = winRate >= 70 ? 'var(--emerald-life)' : winRate >= 50 ? 'var(--gold-primary)' : 'var(--ruby-danger)';
 
-            document.getElementById(`trades-${id}`).innerText = `${data.totalTrades || 0} trades`;
+            document.getElementById(`trades - ${ id } `).innerText = `${ data.totalTrades || 0 } trades`;
 
             // Score
-            document.getElementById(`score-${id}`).innerText = data.score || 50;
+            document.getElementById(`score - ${ id } `).innerText = data.score || 50;
 
             // Counts
-            document.getElementById(`orders-${id}`).innerText = data.activeOrders || 0;
-            document.getElementById(`lots-${id}`).innerText = data.inventoryLots || 0;
+            document.getElementById(`orders - ${ id } `).innerText = data.activeOrders || 0;
+            document.getElementById(`lots - ${ id } `).innerText = data.inventoryLots || 0;
 
             // Last Trade Logic
             if (data.lastTrade) {
                 const now = Date.now();
                 const tradeTime = new Date(data.lastTrade.timestamp).getTime();
                 const diffMins = Math.floor((now - tradeTime) / 60000);
-                let timeAgo = diffMins < 60 ? `${diffMins}m ago` : `${Math.floor(diffMins / 60)}h ago`;
+                let timeAgo = diffMins < 60 ? `${ diffMins }m ago` : `${ Math.floor(diffMins / 60) }h ago`;
 
                 const side = data.lastTrade.side.toUpperCase();
-                const profit = data.lastTrade.profit ? `(+$${data.lastTrade.profit.toFixed(2)})` : '';
+                const profit = data.lastTrade.profit ? `(+$${ data.lastTrade.profit.toFixed(2) })` : '';
                 const color = side === 'SELL' ? 'var(--emerald-life)' : '#fff';
 
-                document.getElementById(`last-trade-${id}`).innerHTML = `<span style="color:${color}; font-weight:bold;">${side}</span> ${profit} <span style="opacity:0.6">· ${timeAgo}</span>`;
+                document.getElementById(`last - trade - ${ id } `).innerHTML = ` < span style = "color:${color}; font-weight:bold;" > ${ side }</span > ${ profit } <span style="opacity:0.6">· ${timeAgo}</span>`;
             } else {
-                document.getElementById(`last-trade-${id}`).innerText = "Sin actividad reciente";
+                document.getElementById(`last - trade - ${ id } `).innerText = "Sin actividad reciente";
             }
 
             // Blocking
-            const blockEl = document.getElementById(`blocking-${id}`);
+            const blockEl = document.getElementById(`blocking - ${ id } `);
             if (data.blockingReason || data.isPaused) {
                 blockEl.style.display = 'block';
-                blockEl.innerText = `⚠️ ${data.blockingReason || 'PAUSADO'}`;
+                blockEl.innerText = `⚠️ ${ data.blockingReason || 'PAUSADO' } `;
             } else {
                 blockEl.style.display = 'none';
             }
         }
 
         function updateBotOffline(id, reason = "OFFLINE") {
-            const dot = document.getElementById(`dot-${id}`);
-            const statusLbl = document.getElementById(`status-label-${id}`);
-            const debugEl = document.getElementById(`debug-${id}`);
+            const dot = document.getElementById(`dot - ${ id } `);
+            const statusLbl = document.getElementById(`status - label - ${ id } `);
+            const debugEl = document.getElementById(`debug - ${ id } `);
 
             if (dot) dot.style.background = '#555';
             if (statusLbl) {
@@ -435,7 +434,7 @@
                 statusLbl.style.color = "#888";
             }
             if (debugEl) {
-                debugEl.innerText = `Conn fail: ${reason}`;
+                debugEl.innerText = `Conn fail: ${ reason } `;
             }
         }
 
@@ -453,11 +452,11 @@
                 const time = log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--';
                 const botClass = log.bot || 'sys';
                 return `
-                    <div class="log-item">
+                < div class="log-item" >
                         <span class="log-time">${time}</span>
                         <span class="log-bot ${botClass}">${(log.bot || 'SYS').toUpperCase()}</span>
                         <span class="log-msg">${log.message || log.type || '-'}</span>
-                    </div>
+                    </div >
                 `;
             }).join('');
         }
@@ -467,21 +466,21 @@
                 const res = await fetch('/api/rpg');
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('player-lvl').innerText = `LVL ${data.level || 1}`;
+                    document.getElementById('player-lvl').innerText = `LVL ${ data.level || 1 } `;
                     document.getElementById('player-title').innerText = data.title || 'INICIADO';
-                    document.getElementById('xp-text').innerText = `${data.xp} / ${data.nextLevelXp} XP`;
-                    document.getElementById('xp-fill').style.width = `${data.xpProgress}%`;
+                    document.getElementById('xp-text').innerText = `${ data.xp } / ${data.nextLevelXp} XP`;
+            document.getElementById('xp-fill').style.width = `${data.xpProgress}%`;
 
-                    if (data.quest) {
-                        document.getElementById('quest-name').innerText = data.quest.name;
-                        document.getElementById('quest-status').innerText = data.quest.status === 'COMPLETED' ? 'COMPLETADA' : 'EN PROGRESO';
-                        document.getElementById('quest-status').style.color = data.quest.status === 'COMPLETED' ? 'var(--emerald-life)' : 'var(--gold-primary)';
+            if (data.quest) {
+                document.getElementById('quest-name').innerText = data.quest.name;
+                document.getElementById('quest-status').innerText = data.quest.status === 'COMPLETED' ? 'COMPLETADA' : 'EN PROGRESO';
+                document.getElementById('quest-status').style.color = data.quest.status === 'COMPLETED' ? 'var(--emerald-life)' : 'var(--gold-primary)';
 
-                        if (data.quest.reward) {
-                            document.getElementById('quest-reward').innerText = `🏆 RECOMPENSA: ${data.quest.reward}`;
-                        }
-                    }
+                if (data.quest.reward) {
+                    document.getElementById('quest-reward').innerText = `🏆 RECOMPENSA: ${data.quest.reward}`;
                 }
+            }
+        }
             } catch (e) { }
         }
 
