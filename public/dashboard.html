@@ -324,9 +324,9 @@
                 <span style="font-size: 0.65rem; color: #aaa; margin-top: 4px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
             `;
 
-            document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)} `;
-            document.getElementById('unrealized-pnl').className = `stat - val ${tUnreal >= 0 ? '' : 'neg'} `;
-            document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)} `;
+            document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
+            document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
+            document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
             document.getElementById('total-orders').innerText = tOrders;
 
             // Log Update
@@ -334,7 +334,7 @@
 
             if (tEquity > tProfit) {
                 const roi = (tProfit / (tEquity - tProfit)) * 100;
-                document.getElementById('global-roi').innerText = `${roi.toFixed(1)}% `;
+                document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
             }
 
             document.getElementById('loading').style.opacity = 0;
@@ -345,89 +345,112 @@
 
         function updateBotUI(id, data) {
             // Regime
-            document.getElementById(`regime - ${id} `).innerText = data.marketRegime || 'NEUTRAL';
+            document.getElementById(`regime-${id}`).innerText = data.marketRegime || 'NEUTRAL';
 
             // Dot & Status
-            const dot = document.getElementById(`dot - ${id} `);
-            const statusLbl = document.getElementById(`status - label - ${id} `);
+            const dot = document.getElementById(`dot-${id}`);
+            const statusLbl = document.getElementById(`status-label-${id}`);
 
             // ALIGNMENT WITH STABLE DASHBOARD:
             // If we have data, we are effectively ONLINE.
             // Only 'smartDcaBlocking' changes the status text to BLOCKED.
 
-            dot.style.background = 'var(--emerald-life)';
-            dot.style.boxShadow = '0 0 10px var(--emerald-life)';
+            if (dot) {
+                dot.style.background = 'var(--emerald-life)';
+                dot.style.boxShadow = '0 0 10px var(--emerald-life)';
+            }
 
-            if (data.smartDcaBlocking) {
-                statusLbl.innerText = "BLOCKED";
-                statusLbl.style.color = "var(--gold-primary)";
-            } else if (data.isPaused) {
-                // Keep Paused visual just in case, though stable dash might ignore it
-                statusLbl.innerText = "PAUSED";
-                statusLbl.style.color = "var(--ruby-danger)";
-                dot.style.background = 'var(--ruby-danger)';
-                dot.style.boxShadow = 'none';
-            } else {
-                statusLbl.innerText = "ONLINE";
-                statusLbl.style.color = "var(--emerald-life)";
+            if (statusLbl) {
+                if (data.smartDcaBlocking) {
+                    statusLbl.innerText = "BLOCKED";
+                    statusLbl.style.color = "var(--gold-primary)";
+                } else if (data.isPaused) {
+                    statusLbl.innerText = "PAUSED";
+                    statusLbl.style.color = "var(--ruby-danger)";
+                    if (dot) {
+                        dot.style.background = 'var(--ruby-danger)';
+                        dot.style.boxShadow = 'none';
+                    }
+                } else {
+                    statusLbl.innerText = "ONLINE";
+                    statusLbl.style.color = "var(--emerald-life)";
+                }
             }
 
             // Clear debug
-            document.getElementById(`debug - ${id} `).innerText = "";
+            const debugEl = document.getElementById(`debug-${id}`);
+            if (debugEl) debugEl.innerText = "";
 
             // Metrics
-            document.getElementById(`profit - ${id} `).innerText = `$${(data.totalProfit || 0).toFixed(2)} `;
+            const profitEl = document.getElementById(`profit-${id}`);
+            if (profitEl) profitEl.innerText = `$${(data.totalProfit || 0).toFixed(2)}`;
 
             const price = data.currentPrice || 0;
-            document.getElementById(`price - ${id} `).innerText = price > 1000 ? `$${price.toFixed(0)} ` : price > 1 ? `$${price.toFixed(2)} ` : `$${price.toFixed(4)} `;
+            const priceEl = document.getElementById(`price-${id}`);
+            if (priceEl) priceEl.innerText = price > 1000 ? `$${price.toFixed(0)}` : price > 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(4)}`;
 
-            document.getElementById(`roi - ${id} `).innerText = `${(data.roi || 0).toFixed(2)}% `;
-            document.getElementById(`daily - ${id} `).innerText = `$${(data.dailyProfit || 0).toFixed(2)} `;
+            const roiEl = document.getElementById(`roi-${id}`);
+            if (roiEl) roiEl.innerText = `${(data.roi || 0).toFixed(2)}%`;
+
+            const dailyEl = document.getElementById(`daily-${id}`);
+            if (dailyEl) dailyEl.innerText = `$${(data.dailyProfit || 0).toFixed(2)}`;
 
             const winRate = data.winRate || 0;
-            const wrEl = document.getElementById(`winrate - ${id} `);
-            wrEl.innerText = `${winRate.toFixed(0)}% `;
-            wrEl.style.color = winRate >= 70 ? 'var(--emerald-life)' : winRate >= 50 ? 'var(--gold-primary)' : 'var(--ruby-danger)';
+            const wrEl = document.getElementById(`winrate-${id}`);
+            if (wrEl) {
+                wrEl.innerText = `${winRate.toFixed(0)}%`;
+                wrEl.style.color = winRate >= 70 ? 'var(--emerald-life)' : winRate >= 50 ? 'var(--gold-primary)' : 'var(--ruby-danger)';
+            }
 
-            document.getElementById(`trades - ${id} `).innerText = `${data.totalTrades || 0} trades`;
+            const tradesEl = document.getElementById(`trades-${id}`);
+            if (tradesEl) tradesEl.innerText = `${data.totalTrades || 0} trades`;
 
             // Score
-            document.getElementById(`score - ${id} `).innerText = data.score || 50;
+            const scoreEl = document.getElementById(`score-${id}`);
+            if (scoreEl) scoreEl.innerText = data.score || 50;
 
             // Counts
-            document.getElementById(`orders - ${id} `).innerText = data.activeOrders || 0;
-            document.getElementById(`lots - ${id} `).innerText = data.inventoryLots || 0;
+            const ordersEl = document.getElementById(`orders-${id}`);
+            if (ordersEl) ordersEl.innerText = data.activeOrders || 0;
+
+            const lotsEl = document.getElementById(`lots-${id}`);
+            if (lotsEl) lotsEl.innerText = data.inventoryLots || 0;
 
             // Last Trade Logic
-            if (data.lastTrade) {
-                const now = Date.now();
-                const tradeTime = new Date(data.lastTrade.timestamp).getTime();
-                const diffMins = Math.floor((now - tradeTime) / 60000);
-                let timeAgo = diffMins < 60 ? `${diffMins}m ago` : `${Math.floor(diffMins / 60)}h ago`;
+            const lastTradeEl = document.getElementById(`last-trade-${id}`);
+            if (lastTradeEl) {
+                if (data.lastTrade) {
+                    const now = Date.now();
+                    const tradeTime = new Date(data.lastTrade.timestamp).getTime();
+                    const diffMins = Math.floor((now - tradeTime) / 60000);
+                    let timeAgo = diffMins < 60 ? `${diffMins}m ago` : `${Math.floor(diffMins / 60)}h ago`;
 
-                const side = data.lastTrade.side.toUpperCase();
-                const profit = data.lastTrade.profit ? `(+$${data.lastTrade.profit.toFixed(2)})` : '';
-                const color = side === 'SELL' ? 'var(--emerald-life)' : '#fff';
+                    const side = data.lastTrade.side.toUpperCase();
+                    const profit = data.lastTrade.profit ? `(+$${data.lastTrade.profit.toFixed(2)})` : '';
+                    const color = side === 'SELL' ? 'var(--emerald-life)' : '#fff';
 
-                document.getElementById(`last - trade - ${id} `).innerHTML = ` < span style = "color:${color}; font-weight:bold;" > ${side}</span > ${profit} <span style="opacity:0.6">· ${timeAgo}</span>`;
-            } else {
-                document.getElementById(`last - trade - ${id} `).innerText = "Sin actividad reciente";
+                    lastTradeEl.innerHTML = `<span style="color:${color}; font-weight:bold;">${side}</span> ${profit} <span style="opacity:0.6">· ${timeAgo}</span>`;
+                } else {
+                    lastTradeEl.innerText = "Sin actividad reciente";
+                }
             }
 
             // Blocking
-            const blockEl = document.getElementById(`blocking - ${id} `);
-            if (data.blockingReason || data.isPaused) {
-                blockEl.style.display = 'block';
-                blockEl.innerText = `⚠️ ${data.blockingReason || 'PAUSADO'} `;
-            } else {
-                blockEl.style.display = 'none';
+            const blockEl = document.getElementById(`blocking-${id}`);
+            if (blockEl) {
+                if (data.blockingReason || data.isPaused) {
+                    blockEl.style.display = 'block';
+                    blockEl.innerText = `⚠️ ${data.blockingReason || 'PAUSADO'}`;
+                } else {
+                    blockEl.style.display = 'none';
+                }
             }
         }
 
         function updateBotOffline(id, reason = "OFFLINE") {
-            const dot = document.getElementById(`dot - ${id} `);
-            const statusLbl = document.getElementById(`status - label - ${id} `);
-            const debugEl = document.getElementById(`debug - ${id} `);
+            const dot = document.getElementById(`dot-${id}`);
+            const statusLbl = document.getElementById(`status-label-${id}`);
+            const debugEl = document.getElementById(`debug-${id}`);
 
             if (dot) dot.style.background = '#555';
             if (statusLbl) {
@@ -435,7 +458,7 @@
                 statusLbl.style.color = "#888";
             }
             if (debugEl) {
-                debugEl.innerText = `Conn fail: ${reason} `;
+                debugEl.innerText = `Conn fail: ${reason}`;
             }
         }
 
