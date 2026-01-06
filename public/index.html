@@ -787,403 +787,419 @@
                 <div class="profit-chart-panel mt-3 p-3"
                     style="background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(20,20,40,0.5)); border-radius: 12px; border: 1px solid rgba(100,200,100,0.15); box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="text-uppercase fw-bold mb-0"
-                            style="letter-spacing: 1px; font-size: 0.75rem; color: #00ff9d;">
-                            📈 Daily Profit Chart
-                        </h6>
-                        <span class="badge bg-dark text-muted border border-success" style="font-size: 0.65rem;"
-                            id="chart-days-label">LAST 30 DAYS</span>
-                    </div>
-                    <div style="height: 200px; position: relative;">
-                        <canvas id="profit-chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 5: ARCA PORTFOLIO -->
-            <div class="tab-content" id="portfolio">
-                <div class="hud">
-                    <span class="hud-title">PORTAFOLIO ARCA v2.1</span>
-                    <span class="separator">|</span>
-                    <span>Meta: $15,000 MXN/mes</span>
-                </div>
-
-                <div class="portfolio-header">
-                    <div class="portfolio-total">
-                        <span class="portfolio-label">Valor Total Invertido</span>
-                        <span class="portfolio-value" id="portfolio-total">$0 MXN</span>
-                    </div>
-                    <div class="portfolio-monthly">
-                        <span class="portfolio-label">Aportación Mensual</span>
-                        <input type="number" id="monthly-contribution" value="15000" class="portfolio-input">
-                    </div>
-                </div>
-
-                <div class="portfolio-grid">
-                    <div class="portfolio-card vt">
-                        <div class="portfolio-header-card">
-                            <span class="etf-name">VT</span>
-                            <span class="etf-desc">Vanguard Total World</span>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-uppercase fw-bold mb-0"
+                                style="letter-spacing: 1px; font-size: 0.75rem; color: #00ff9d;">
+                                📈 Daily Profit Chart
+                            </h6>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Timeframe">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="setChartTimeframe(7)"
+                                    style="font-size: 0.65rem; padding: 2px 8px;">7D</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm active"
+                                    onclick="setChartTimeframe(30)"
+                                    style="font-size: 0.65rem; padding: 2px 8px;">30D</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="setChartTimeframe(0)"
+                                    style="font-size: 0.65rem; padding: 2px 8px;">ALL</button>
+                            </div>
                         </div>
-                        <div class="allocation">33%</div>
-                        <div class="monthly-amount">$<span id="vt-monthly">4,950</span>/mes</div>
-                        <div class="current-value">
-                            <label>Valor Actual:</label>
-                            <input type="number" id="vt-value" value="0" class="etf-input">
-                        </div>
-                        <div class="etf-role">🌍 Núcleo Global</div>
-                    </div>
-
-                    <div class="portfolio-card qqq">
-                        <div class="portfolio-header-card">
-                            <span class="etf-name">QQQ</span>
-                            <span class="etf-desc">Invesco Nasdaq 100</span>
-                        </div>
-                        <div class="allocation">24%</div>
-                        <div class="monthly-amount">$<span id="qqq-monthly">3,600</span>/mes</div>
-                        <div class="current-value">
-                            <label>Valor Actual:</label>
-                            <input type="number" id="qqq-value" value="0" class="etf-input">
-                        </div>
-                        <div class="etf-role">🧠 Tecnología / IA</div>
-                    </div>
-
-                    <div class="portfolio-card gold">
-                        <div class="portfolio-header-card">
-                            <span class="etf-name">IAU/GLD</span>
-                            <span class="etf-desc">iShares Gold Trust</span>
-                        </div>
-                        <div class="allocation">20%</div>
-                        <div class="monthly-amount">$<span id="gold-monthly">3,000</span>/mes</div>
-                        <div class="current-value">
-                            <label>Valor Actual:</label>
-                            <input type="number" id="gold-value" value="0" class="etf-input">
-                        </div>
-                        <div class="etf-role">🥇 Refugio Monetario</div>
-                    </div>
-
-                    <div class="portfolio-card vwo">
-                        <div class="portfolio-header-card">
-                            <span class="etf-name">VWO</span>
-                            <span class="etf-desc">Vanguard Emerging Markets</span>
-                        </div>
-                        <div class="allocation">18%</div>
-                        <div class="monthly-amount">$<span id="vwo-monthly">2,700</span>/mes</div>
-                        <div class="current-value">
-                            <label>Valor Actual:</label>
-                            <input type="number" id="vwo-value" value="0" class="etf-input">
-                        </div>
-                        <div class="etf-role">🌏 Emergentes / BRICS</div>
-                    </div>
-
-                    <div class="portfolio-card crypto">
-                        <div class="portfolio-header-card">
-                            <span class="etf-name">IBIT/ETHA</span>
-                            <span class="etf-desc">Bitcoin & Ethereum ETFs</span>
-                        </div>
-                        <div class="allocation">5%</div>
-                        <div class="monthly-amount">$<span id="crypto-monthly">750</span>/mes</div>
-                        <div class="current-value">
-                            <label>Valor Actual:</label>
-                            <input type="number" id="crypto-value" value="0" class="etf-input">
-                        </div>
-                        <div class="etf-role">₿ Cripto Regulada</div>
-                    </div>
-                </div>
-
-                <div class="portfolio-contribution">
-                    <label>💰 Contribución Mensual:</label>
-                    <input type="number" id="monthly-contribution" value="15000" class="contribution-input">
-                    <span class="contribution-hint">Se distribuye según las allocaciones</span>
-                </div>
-
-
-            </div>
-
-            <!-- TAB 6: DOCTRINE CHECKLIST -->
-            <div class="tab-content" id="doctrine">
-                <div class="hud">
-                    <span class="hud-title">DOCTRINA ARCA GAROSSA</span>
-                    <span class="separator">|</span>
-                    <span>Documento Vivo - Dic 2025</span>
-                </div>
-
-                <div class="doctrine-section">
-                    <h3>📋 CHECKLIST DICIEMBRE 2025</h3>
-                    <div class="checklist">
-                        <label class="check-item urgent"><input type="checkbox" id="check-1"> 6/Dic: Liquidar RappiCard
-                            ($12,917.22) 🔴</label>
-                        <label class="check-item"><input type="checkbox" id="check-2"> 12/Dic: Pagar Nu Crédito
-                            ($15,509.30) 🟣</label>
-                        <label class="check-item"><input type="checkbox" id="check-3"> 15/Dic: Pagar Kueski ($3,513.31)
-                            🟠</label>
-                        <label class="check-item"><input type="checkbox" id="check-4"> Liquidar gastos bodas y
-                            ropa</label>
-                        <label class="check-item"><input type="checkbox" id="check-5"> Reorganizar presupuesto:
-                            $12-15k</label>
-                        <label class="check-item"><input type="checkbox" id="check-6"> Fondear cuenta GBM+ en
-                            diciembre</label>
-                        <label class="check-item"><input type="checkbox" id="check-7"> Orden inicial: VT + IAU +
-                            VWO</label>
-                    </div>
-
-                    <!-- CUSTOM/EDITABLE CHECKLIST -->
-                    <div class="custom-checklist-section">
-                        <div class="custom-header">
-                            <span>✏️ Mis Tareas</span>
-                            <button id="add-checklist-item" class="btn-add">+ Agregar</button>
-                        </div>
-                        <div class="checklist" id="custom-checklist">
-                            <!-- Populated by renderCustomChecklist() -->
+                        <div style="height: 200px; position: relative;">
+                            <canvas id="profit-chart-canvas"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="doctrine-section">
-                    <h3>📜 REGLAS OPERATIVAS</h3>
-                    <div class="rules-grid">
-                        <div class="rule-card">
-                            <div class="rule-icon">🛡️</div>
-                            <div class="rule-text">Fondo emergencia intocable en Nu + DiDi + MP</div>
+                <!-- TAB 5: ARCA PORTFOLIO -->
+                <div class="tab-content" id="portfolio">
+                    <div class="hud">
+                        <span class="hud-title">PORTAFOLIO ARCA v2.1</span>
+                        <span class="separator">|</span>
+                        <span>Meta: $15,000 MXN/mes</span>
+                    </div>
+
+                    <div class="portfolio-header">
+                        <div class="portfolio-total">
+                            <span class="portfolio-label">Valor Total Invertido</span>
+                            <span class="portfolio-value" id="portfolio-total">$0 MXN</span>
                         </div>
-                        <div class="rule-card">
-                            <div class="rule-icon">💳</div>
-                            <div class="rule-text">Rotativa a cero: liquidar tarjetas en cada corte</div>
-                        </div>
-                        <div class="rule-card">
-                            <div class="rule-icon">📅</div>
-                            <div class="rule-text">Revisión trimestral; rebalanceo anual</div>
-                        </div>
-                        <div class="rule-card">
-                            <div class="rule-icon">📈</div>
-                            <div class="rule-text">Inversión solo si saldo ≥$60k después de deudas</div>
-                        </div>
-                        <div class="rule-card">
-                            <div class="rule-icon">📊</div>
-                            <div class="rule-text">Revisión quincenal: día 6 (post-corte) y día 21</div>
-                        </div>
-                        <div class="rule-card">
-                            <div class="rule-icon">💰</div>
-                            <div class="rule-text">Caja > Rendimiento: preferir liquidez</div>
+                        <div class="portfolio-monthly">
+                            <span class="portfolio-label">Aportación Mensual</span>
+                            <input type="number" id="monthly-contribution" value="15000" class="portfolio-input">
                         </div>
                     </div>
+
+                    <div class="portfolio-grid">
+                        <div class="portfolio-card vt">
+                            <div class="portfolio-header-card">
+                                <span class="etf-name">VT</span>
+                                <span class="etf-desc">Vanguard Total World</span>
+                            </div>
+                            <div class="allocation">33%</div>
+                            <div class="monthly-amount">$<span id="vt-monthly">4,950</span>/mes</div>
+                            <div class="current-value">
+                                <label>Valor Actual:</label>
+                                <input type="number" id="vt-value" value="0" class="etf-input">
+                            </div>
+                            <div class="etf-role">🌍 Núcleo Global</div>
+                        </div>
+
+                        <div class="portfolio-card qqq">
+                            <div class="portfolio-header-card">
+                                <span class="etf-name">QQQ</span>
+                                <span class="etf-desc">Invesco Nasdaq 100</span>
+                            </div>
+                            <div class="allocation">24%</div>
+                            <div class="monthly-amount">$<span id="qqq-monthly">3,600</span>/mes</div>
+                            <div class="current-value">
+                                <label>Valor Actual:</label>
+                                <input type="number" id="qqq-value" value="0" class="etf-input">
+                            </div>
+                            <div class="etf-role">🧠 Tecnología / IA</div>
+                        </div>
+
+                        <div class="portfolio-card gold">
+                            <div class="portfolio-header-card">
+                                <span class="etf-name">IAU/GLD</span>
+                                <span class="etf-desc">iShares Gold Trust</span>
+                            </div>
+                            <div class="allocation">20%</div>
+                            <div class="monthly-amount">$<span id="gold-monthly">3,000</span>/mes</div>
+                            <div class="current-value">
+                                <label>Valor Actual:</label>
+                                <input type="number" id="gold-value" value="0" class="etf-input">
+                            </div>
+                            <div class="etf-role">🥇 Refugio Monetario</div>
+                        </div>
+
+                        <div class="portfolio-card vwo">
+                            <div class="portfolio-header-card">
+                                <span class="etf-name">VWO</span>
+                                <span class="etf-desc">Vanguard Emerging Markets</span>
+                            </div>
+                            <div class="allocation">18%</div>
+                            <div class="monthly-amount">$<span id="vwo-monthly">2,700</span>/mes</div>
+                            <div class="current-value">
+                                <label>Valor Actual:</label>
+                                <input type="number" id="vwo-value" value="0" class="etf-input">
+                            </div>
+                            <div class="etf-role">🌏 Emergentes / BRICS</div>
+                        </div>
+
+                        <div class="portfolio-card crypto">
+                            <div class="portfolio-header-card">
+                                <span class="etf-name">IBIT/ETHA</span>
+                                <span class="etf-desc">Bitcoin & Ethereum ETFs</span>
+                            </div>
+                            <div class="allocation">5%</div>
+                            <div class="monthly-amount">$<span id="crypto-monthly">750</span>/mes</div>
+                            <div class="current-value">
+                                <label>Valor Actual:</label>
+                                <input type="number" id="crypto-value" value="0" class="etf-input">
+                            </div>
+                            <div class="etf-role">₿ Cripto Regulada</div>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-contribution">
+                        <label>💰 Contribución Mensual:</label>
+                        <input type="number" id="monthly-contribution" value="15000" class="contribution-input">
+                        <span class="contribution-hint">Se distribuye según las allocaciones</span>
+                    </div>
+
+
                 </div>
 
-                <div class="doctrine-section">
-                    <h3>🏛️ MANIFIESTO ARCA</h3>
-                    <div class="philosophy-quote">
-                        "El Arca no elige bandos: extrae rentas del viejo orden (Big Tech) mientras acumula activos del
-                        nuevo (oro, emergentes, cripto). El objetivo no es ganarle al mercado, sino salirse de su
-                        dependencia."
+                <!-- TAB 6: DOCTRINE CHECKLIST -->
+                <div class="tab-content" id="doctrine">
+                    <div class="hud">
+                        <span class="hud-title">DOCTRINA ARCA GAROSSA</span>
+                        <span class="separator">|</span>
+                        <span>Documento Vivo - Dic 2025</span>
                     </div>
-                    <div class="tesis-grid">
-                        <div class="tesis-item">📉 Fin del sistema fiat y erosión del dólar</div>
-                        <div class="tesis-item">🥇 Resurgimiento del oro como activo monetario</div>
-                        <div class="tesis-item">🌏 Desdolarización impulsada por BRICS</div>
-                        <div class="tesis-item">🤖 IA como campo de batalla económico</div>
-                        <div class="tesis-item">₿ Cripto regulada como activo digital soberano</div>
+
+                    <div class="doctrine-section">
+                        <h3>📋 CHECKLIST DICIEMBRE 2025</h3>
+                        <div class="checklist">
+                            <label class="check-item urgent"><input type="checkbox" id="check-1"> 6/Dic: Liquidar
+                                RappiCard
+                                ($12,917.22) 🔴</label>
+                            <label class="check-item"><input type="checkbox" id="check-2"> 12/Dic: Pagar Nu Crédito
+                                ($15,509.30) 🟣</label>
+                            <label class="check-item"><input type="checkbox" id="check-3"> 15/Dic: Pagar Kueski
+                                ($3,513.31)
+                                🟠</label>
+                            <label class="check-item"><input type="checkbox" id="check-4"> Liquidar gastos bodas y
+                                ropa</label>
+                            <label class="check-item"><input type="checkbox" id="check-5"> Reorganizar presupuesto:
+                                $12-15k</label>
+                            <label class="check-item"><input type="checkbox" id="check-6"> Fondear cuenta GBM+ en
+                                diciembre</label>
+                            <label class="check-item"><input type="checkbox" id="check-7"> Orden inicial: VT + IAU +
+                                VWO</label>
+                        </div>
+
+                        <!-- CUSTOM/EDITABLE CHECKLIST -->
+                        <div class="custom-checklist-section">
+                            <div class="custom-header">
+                                <span>✏️ Mis Tareas</span>
+                                <button id="add-checklist-item" class="btn-add">+ Agregar</button>
+                            </div>
+                            <div class="checklist" id="custom-checklist">
+                                <!-- Populated by renderCustomChecklist() -->
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="doctrine-section">
+                        <h3>📜 REGLAS OPERATIVAS</h3>
+                        <div class="rules-grid">
+                            <div class="rule-card">
+                                <div class="rule-icon">🛡️</div>
+                                <div class="rule-text">Fondo emergencia intocable en Nu + DiDi + MP</div>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon">💳</div>
+                                <div class="rule-text">Rotativa a cero: liquidar tarjetas en cada corte</div>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon">📅</div>
+                                <div class="rule-text">Revisión trimestral; rebalanceo anual</div>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon">📈</div>
+                                <div class="rule-text">Inversión solo si saldo ≥$60k después de deudas</div>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon">📊</div>
+                                <div class="rule-text">Revisión quincenal: día 6 (post-corte) y día 21</div>
+                            </div>
+                            <div class="rule-card">
+                                <div class="rule-icon">💰</div>
+                                <div class="rule-text">Caja > Rendimiento: preferir liquidez</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doctrine-section">
+                        <h3>🏛️ MANIFIESTO ARCA</h3>
+                        <div class="philosophy-quote">
+                            "El Arca no elige bandos: extrae rentas del viejo orden (Big Tech) mientras acumula activos
+                            del
+                            nuevo (oro, emergentes, cripto). El objetivo no es ganarle al mercado, sino salirse de su
+                            dependencia."
+                        </div>
+                        <div class="tesis-grid">
+                            <div class="tesis-item">📉 Fin del sistema fiat y erosión del dólar</div>
+                            <div class="tesis-item">🥇 Resurgimiento del oro como activo monetario</div>
+                            <div class="tesis-item">🌏 Desdolarización impulsada por BRICS</div>
+                            <div class="tesis-item">🤖 IA como campo de batalla económico</div>
+                            <div class="tesis-item">₿ Cripto regulada como activo digital soberano</div>
+                        </div>
+                    </div>
+
+                    <div class="doctrine-section">
+                        <h3>🏛️ FASES DEL VANTAGE: ELITE ROADMAP</h3>
+                        <div class="phases-timeline">
+                            <!-- FASE 1 -->
+                            <div class="phase active">
+                                <div class="phase-period">Fase 1: MÁQUINA DE GUERRA (Año 0-2)</div>
+                                <div class="phase-goal">Objetivo: $1M Líquidos</div>
+                                <div class="phase-config">
+                                    <ul>
+                                        <li><strong>Motor:</strong> 3 Bots (BTC, SOL, DOGE) al 100% compuesto.</li>
+                                        <li><strong>Combustible:</strong> $500 USD/mes sin falta.</li>
+                                        <li><strong>Regla:</strong> Operador Frugal. Cero lujos.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- FASE 1.5 -->
+                            <div class="phase highlight">
+                                <div class="phase-period">Fase 1.5: EXPANSIÓN TÁCTICA (AI)</div>
+                                <div class="phase-goal">Objetivo: +$50k/mes Cashflow</div>
+                                <div class="phase-config">
+                                    <ul>
+                                        <li><strong>Narrativa:</strong> Agregar IA (TAO/RNDR).</li>
+                                        <li><strong>Gatillo:</strong> Abrir solo con $1,000 USD extras frescos.</li>
+                                        <li><strong>Riesgo:</strong> Alta volatilidad = Alto Retorno.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- FASE 2 -->
+                            <div class="phase">
+                                <div class="phase-period">Fase 2: LA FORTALEZA (Año 2-4)</div>
+                                <div class="phase-goal">Objetivo: $5M Patrimonio Neto</div>
+                                <div class="phase-config">
+                                    <ul>
+                                        <li><strong>Migración:</strong> Sacar 50% al duplicar.</li>
+                                        <li><strong>Activos Duros:</strong> Dubai/Miami (Off-plan), Tierras, Oro.</li>
+                                        <li><strong>Defensa:</strong> Inmune a colapsos de exchanges.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- FASE 3 -->
+                            <div class="phase">
+                                <div class="phase-period">Fase 3: ELITE GLOBAL (Año 5+)</div>
+                                <div class="phase-goal">Objetivo: Influencia y Acceso</div>
+                                <div class="phase-config">
+                                    <ul>
+                                        <li><strong>Lujos:</strong> Solo con excedente del excedente.</li>
+                                        <li><strong>Status:</strong> Networking, Palcos, Startups.</li>
+                                        <li><strong>Rol:</strong> El Almirante.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="doctrine-section">
+                        <h3>📜 LOS MANDAMIENTOS DEL ALMIRANTE</h3>
+                        <div class="rules-grid">
+                            <div class="rule-card gold">
+                                <div class="rule-icon">🐔</div>
+                                <div class="rule-text"><strong>Nunca mates a la gallina de los huevos de oro.</strong>
+                                    El
+                                    capital del bot es sagrado.</div>
+                            </div>
+                            <div class="rule-card neon">
+                                <div class="rule-icon">🧭</div>
+                                <div class="rule-text"><strong>El Dashboard es tu brújula.</strong> Verde = Paz. Rojo =
+                                    Acción.</div>
+                            </div>
+                            <div class="rule-card stealth">
+                                <div class="rule-icon">🤫</div>
+                                <div class="rule-text"><strong>Silencio Estratégico.</strong> Nadie sabe cuánto tienes.
+                                    Solo
+                                    ven que viajas bien.</div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
 
-                <div class="doctrine-section">
-                    <h3>🏛️ FASES DEL VANTAGE: ELITE ROADMAP</h3>
-                    <div class="phases-timeline">
-                        <!-- FASE 1 -->
-                        <div class="phase active">
-                            <div class="phase-period">Fase 1: MÁQUINA DE GUERRA (Año 0-2)</div>
-                            <div class="phase-goal">Objetivo: $1M Líquidos</div>
-                            <div class="phase-config">
+                <!-- TAB 7: GUÍA DE USO -->
+                <div class="tab-content" id="guia">
+                    <div class="hud">
+                        <span class="hud-title">GUÍA DE USO</span>
+                        <span class="separator">|</span>
+                        <span>ARCA FINANCIERA GAROSSA v2.0</span>
+                    </div>
+
+                    <div class="guide-container">
+                        <div class="guide-section">
+                            <h3>🎯 Command Center</h3>
+                            <div class="guide-card">
+                                <p><strong>Tu dashboard principal.</strong> Muestra un resumen de:</p>
                                 <ul>
-                                    <li><strong>Motor:</strong> 3 Bots (BTC, SOL, DOGE) al 100% compuesto.</li>
-                                    <li><strong>Combustible:</strong> $500 USD/mes sin falta.</li>
-                                    <li><strong>Regla:</strong> Operador Frugal. Cero lujos.</li>
+                                    <li>💰 <strong>Patrimonio Neto:</strong> Activos menos deudas</li>
+                                    <li>🛡️ <strong>Fondo de Emergencia:</strong> DiDi + Nu (meta: $60,000)</li>
+                                    <li>📈 <strong>Rendimiento Fintech:</strong> Intereses anuales proyectados</li>
+                                    <li>📉 <strong>Deuda Pendiente:</strong> Total de deudas sin pagar</li>
+                                    <li>🤖 <strong>Grid Bot:</strong> Ganancia del bot de trading</li>
                                 </ul>
+                                <p class="guide-tip">💡 Las "Próximas Acciones" se llenan automáticamente desde
+                                    Doctrina.
+                                </p>
                             </div>
                         </div>
 
-                        <!-- FASE 1.5 -->
-                        <div class="phase highlight">
-                            <div class="phase-period">Fase 1.5: EXPANSIÓN TÁCTICA (AI)</div>
-                            <div class="phase-goal">Objetivo: +$50k/mes Cashflow</div>
-                            <div class="phase-config">
+                        <div class="guide-section">
+                            <h3>💳 Fintech</h3>
+                            <div class="guide-card">
+                                <p>Gestiona tus cuentas de alto rendimiento:</p>
                                 <ul>
-                                    <li><strong>Narrativa:</strong> Agregar IA (TAO/RNDR).</li>
-                                    <li><strong>Gatillo:</strong> Abrir solo con $1,000 USD extras frescos.</li>
-                                    <li><strong>Riesgo:</strong> Alta volatilidad = Alto Retorno.</li>
+                                    <li>🟠 <strong>DiDi:</strong> 16% en los primeros $10K, 8.5% después</li>
+                                    <li>🟣 <strong>Nu:</strong> 15% en los primeros $25K, 7.25% después</li>
+                                    <li>🔵 <strong>MercadoPago:</strong> 13% hasta $25K (sin rendimiento después)</li>
                                 </ul>
+                                <p class="guide-tip">💡 Los cambios se guardan automáticamente al escribir.</p>
                             </div>
                         </div>
 
-                        <!-- FASE 2 -->
-                        <div class="phase">
-                            <div class="phase-period">Fase 2: LA FORTALEZA (Año 2-4)</div>
-                            <div class="phase-goal">Objetivo: $5M Patrimonio Neto</div>
-                            <div class="phase-config">
+                        <div class="guide-section">
+                            <h3>📉 Deudas</h3>
+                            <div class="guide-card">
+                                <p>Controla tus obligaciones financieras:</p>
                                 <ul>
-                                    <li><strong>Migración:</strong> Sacar 50% al duplicar.</li>
-                                    <li><strong>Activos Duros:</strong> Dubai/Miami (Off-plan), Tierras, Oro.</li>
-                                    <li><strong>Defensa:</strong> Inmune a colapsos de exchanges.</li>
+                                    <li>✅ Marca como "Pagada" cuando liquides una deuda</li>
+                                    <li>🔄 Usa "Reiniciar Ciclo" para nuevo mes</li>
+                                    <li>⏰ Los contadores muestran días restantes</li>
                                 </ul>
+                                <p class="guide-tip">💡 Las deudas pagadas se tachan visualmente.</p>
                             </div>
                         </div>
 
-                        <!-- FASE 3 -->
-                        <div class="phase">
-                            <div class="phase-period">Fase 3: ELITE GLOBAL (Año 5+)</div>
-                            <div class="phase-goal">Objetivo: Influencia y Acceso</div>
-                            <div class="phase-config">
+                        <div class="guide-section">
+                            <h3>🤖 Grid Bot</h3>
+                            <div class="guide-card">
+                                <p>Monitorea tu bot de trading en BTC/USDT:</p>
                                 <ul>
-                                    <li><strong>Lujos:</strong> Solo con excedente del excedente.</li>
-                                    <li><strong>Status:</strong> Networking, Palcos, Startups.</li>
-                                    <li><strong>Rol:</strong> El Almirante.</li>
+                                    <li>📊 Visualización triangular de órdenes</li>
+                                    <li>📈 Métricas de rentabilidad en tiempo real</li>
+                                    <li>⚙️ Ajustes adaptativos según volatilidad</li>
                                 </ul>
+                                <p class="guide-tip">💡 Requiere conexión activa al servidor del bot.</p>
+                            </div>
+                        </div>
+
+
+
+                        <div class="guide-section">
+                            <h3>📈 Portafolio</h3>
+                            <div class="guide-card">
+                                <p>Estrategia de inversión a largo plazo:</p>
+                                <ul>
+                                    <li>🌍 <strong>VT:</strong> 33% - Mercado global</li>
+                                    <li>💻 <strong>QQQ:</strong> 24% - Tecnología</li>
+                                    <li>🥇 <strong>IAU:</strong> 20% - Oro</li>
+                                    <li>🌏 <strong>VWO:</strong> 18% - Mercados emergentes</li>
+                                    <li>₿ <strong>Crypto:</strong> 5% - Bitcoin/altcoins</li>
+                                </ul>
+                                <p class="guide-tip">💡 Ajusta tu contribución mensual según tu flujo.</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-section">
+                            <h3>✅ Doctrina</h3>
+                            <div class="guide-card">
+                                <p>Tu lista de tareas financieras:</p>
+                                <ul>
+                                    <li>📋 Checklist de acciones pendientes</li>
+                                    <li>📜 Reglas operativas del ARCA</li>
+                                    <li>🏛️ Manifiesto y filosofía de inversión</li>
+                                    <li>🎯 Fases del plan financiero</li>
+                                </ul>
+                                <p class="guide-tip">💡 Los items desmarcados aparecen en "Próximas Acciones".</p>
+                            </div>
+                        </div>
+
+                        <div class="guide-section full-width">
+                            <h3>⚡ Tips Rápidos</h3>
+                            <div class="tips-grid">
+                                <div class="tip-card">
+                                    <span class="tip-icon">💾</span>
+                                    <span class="tip-text">Auto-guardado activo en todos los inputs</span>
+                                </div>
+                                <div class="tip-card">
+                                    <span class="tip-icon">🔄</span>
+                                    <span class="tip-text">Los datos persisten al recargar</span>
+                                </div>
+                                <div class="tip-card">
+                                    <span class="tip-icon">📱</span>
+                                    <span class="tip-text">Funciona en móvil y desktop</span>
+                                </div>
+                                <div class="tip-card">
+                                    <span class="tip-icon">🔗</span>
+                                    <span class="tip-text">Todas las pestañas están sincronizadas</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="doctrine-section">
-                    <h3>📜 LOS MANDAMIENTOS DEL ALMIRANTE</h3>
-                    <div class="rules-grid">
-                        <div class="rule-card gold">
-                            <div class="rule-icon">🐔</div>
-                            <div class="rule-text"><strong>Nunca mates a la gallina de los huevos de oro.</strong> El
-                                capital del bot es sagrado.</div>
-                        </div>
-                        <div class="rule-card neon">
-                            <div class="rule-icon">🧭</div>
-                            <div class="rule-text"><strong>El Dashboard es tu brújula.</strong> Verde = Paz. Rojo =
-                                Acción.</div>
-                        </div>
-                        <div class="rule-card stealth">
-                            <div class="rule-icon">🤫</div>
-                            <div class="rule-text"><strong>Silencio Estratégico.</strong> Nadie sabe cuánto tienes. Solo
-                                ven que viajas bien.</div>
-                        </div>
-                    </div>
-                </div>
-
-
-            </div>
-
-            <!-- TAB 7: GUÍA DE USO -->
-            <div class="tab-content" id="guia">
-                <div class="hud">
-                    <span class="hud-title">GUÍA DE USO</span>
-                    <span class="separator">|</span>
-                    <span>ARCA FINANCIERA GAROSSA v2.0</span>
-                </div>
-
-                <div class="guide-container">
-                    <div class="guide-section">
-                        <h3>🎯 Command Center</h3>
-                        <div class="guide-card">
-                            <p><strong>Tu dashboard principal.</strong> Muestra un resumen de:</p>
-                            <ul>
-                                <li>💰 <strong>Patrimonio Neto:</strong> Activos menos deudas</li>
-                                <li>🛡️ <strong>Fondo de Emergencia:</strong> DiDi + Nu (meta: $60,000)</li>
-                                <li>📈 <strong>Rendimiento Fintech:</strong> Intereses anuales proyectados</li>
-                                <li>📉 <strong>Deuda Pendiente:</strong> Total de deudas sin pagar</li>
-                                <li>🤖 <strong>Grid Bot:</strong> Ganancia del bot de trading</li>
-                            </ul>
-                            <p class="guide-tip">💡 Las "Próximas Acciones" se llenan automáticamente desde Doctrina.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="guide-section">
-                        <h3>💳 Fintech</h3>
-                        <div class="guide-card">
-                            <p>Gestiona tus cuentas de alto rendimiento:</p>
-                            <ul>
-                                <li>🟠 <strong>DiDi:</strong> 16% en los primeros $10K, 8.5% después</li>
-                                <li>🟣 <strong>Nu:</strong> 15% en los primeros $25K, 7.25% después</li>
-                                <li>🔵 <strong>MercadoPago:</strong> 13% hasta $25K (sin rendimiento después)</li>
-                            </ul>
-                            <p class="guide-tip">💡 Los cambios se guardan automáticamente al escribir.</p>
-                        </div>
-                    </div>
-
-                    <div class="guide-section">
-                        <h3>📉 Deudas</h3>
-                        <div class="guide-card">
-                            <p>Controla tus obligaciones financieras:</p>
-                            <ul>
-                                <li>✅ Marca como "Pagada" cuando liquides una deuda</li>
-                                <li>🔄 Usa "Reiniciar Ciclo" para nuevo mes</li>
-                                <li>⏰ Los contadores muestran días restantes</li>
-                            </ul>
-                            <p class="guide-tip">💡 Las deudas pagadas se tachan visualmente.</p>
-                        </div>
-                    </div>
-
-                    <div class="guide-section">
-                        <h3>🤖 Grid Bot</h3>
-                        <div class="guide-card">
-                            <p>Monitorea tu bot de trading en BTC/USDT:</p>
-                            <ul>
-                                <li>📊 Visualización triangular de órdenes</li>
-                                <li>📈 Métricas de rentabilidad en tiempo real</li>
-                                <li>⚙️ Ajustes adaptativos según volatilidad</li>
-                            </ul>
-                            <p class="guide-tip">💡 Requiere conexión activa al servidor del bot.</p>
-                        </div>
-                    </div>
-
-
-
-                    <div class="guide-section">
-                        <h3>📈 Portafolio</h3>
-                        <div class="guide-card">
-                            <p>Estrategia de inversión a largo plazo:</p>
-                            <ul>
-                                <li>🌍 <strong>VT:</strong> 33% - Mercado global</li>
-                                <li>💻 <strong>QQQ:</strong> 24% - Tecnología</li>
-                                <li>🥇 <strong>IAU:</strong> 20% - Oro</li>
-                                <li>🌏 <strong>VWO:</strong> 18% - Mercados emergentes</li>
-                                <li>₿ <strong>Crypto:</strong> 5% - Bitcoin/altcoins</li>
-                            </ul>
-                            <p class="guide-tip">💡 Ajusta tu contribución mensual según tu flujo.</p>
-                        </div>
-                    </div>
-
-                    <div class="guide-section">
-                        <h3>✅ Doctrina</h3>
-                        <div class="guide-card">
-                            <p>Tu lista de tareas financieras:</p>
-                            <ul>
-                                <li>📋 Checklist de acciones pendientes</li>
-                                <li>📜 Reglas operativas del ARCA</li>
-                                <li>🏛️ Manifiesto y filosofía de inversión</li>
-                                <li>🎯 Fases del plan financiero</li>
-                            </ul>
-                            <p class="guide-tip">💡 Los items desmarcados aparecen en "Próximas Acciones".</p>
-                        </div>
-                    </div>
-
-                    <div class="guide-section full-width">
-                        <h3>⚡ Tips Rápidos</h3>
-                        <div class="tips-grid">
-                            <div class="tip-card">
-                                <span class="tip-icon">💾</span>
-                                <span class="tip-text">Auto-guardado activo en todos los inputs</span>
-                            </div>
-                            <div class="tip-card">
-                                <span class="tip-icon">🔄</span>
-                                <span class="tip-text">Los datos persisten al recargar</span>
-                            </div>
-                            <div class="tip-card">
-                                <span class="tip-icon">📱</span>
-                                <span class="tip-text">Funciona en móvil y desktop</span>
-                            </div>
-                            <div class="tip-card">
-                                <span class="tip-icon">🔗</span>
-                                <span class="tip-text">Todas las pestañas están sincronizadas</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </main>
     </div>
 

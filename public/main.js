@@ -726,6 +726,20 @@ socket.on('debug_trades', (trades) => {
 
 // ===== PROFIT CHART LOGIC =====
 let profitChartInstance = null;
+let CURRENT_TIMEFRAME = 30; // Default 30 Days
+
+window.setChartTimeframe = function (days) {
+    CURRENT_TIMEFRAME = days;
+    // Update UI
+    const buttons = document.querySelectorAll('.btn-group button');
+    buttons.forEach(b => {
+        if (days === 0 && b.innerText === 'ALL') b.classList.add('active');
+        else if (days === 7 && b.innerText === '7D') b.classList.add('active');
+        else if (days === 30 && b.innerText === '30D') b.classList.add('active');
+        else b.classList.remove('active');
+    });
+    renderProfitChart();
+}
 
 function renderProfitChart() {
     if (!tradeHistory || tradeHistory.length === 0) return;
@@ -733,96 +747,192 @@ function renderProfitChart() {
     const canvas = document.getElementById('profit-chart-canvas');
     if (!canvas) return;
 
-    // 1. Aggregate NET Profit by Day (UTC-6 Central Time)
+    // 1. Linear Aggregation & Gap Filling
     const profitByDay = {};
+    let minDateTs = Date.now();
+    let maxDateTs = 0;
+
     tradeHistory.forEach(t => {
-        if (t.side === 'sell' && typeof t.profit === 'number') {
-            // Convert to UTC-6 (Central Time) for date grouping
-            const utcDate = new Date(t.timestamp);
-            const centralDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
-            const date = centralDate.toISOString().split('T')[0]; // YYYY-MM-DD
-            profitByDay[date] = (profitByDay[date] || 0) + t.profit;
+        if (t.side === 'sell' && typeof t.profit === 'number' && t.profit > 0) {
+            // Normalize to Local/Central Day
+            const ts = new Date(t.timestamp).getTime() - (6 * 60 * 60 * 1000);
+            const dStr = new Date(ts).toISOString().split('T')[0];
+            profitByDay[dStr] = (profitByDay[dStr] || 0) + t.profit;
+
+            if (ts < minDateTs) minDateTs = ts;
+            if (ts > maxDateTs) maxDateTs = ts;
         }
     });
 
-    // 2. Sort dates and take last 30 days
-    const sortedDates = Object.keys(profitByDay).sort();
-    const last30Days = sortedDates.slice(-30);
-    const labels = last30Days.map(d => d.substring(5)); // MM-DD format
-    const data = last30Days.map(d => profitByDay[d].toFixed(2));
+    // Ensure range covers up to Today
+    const todayTs = Date.now() - (6 * 60 * 60 * 1000);
+    if (maxDateTs < todayTs) maxDateTs = todayTs;
+    if (minDateTs > maxDateTs) minDateTs = maxDateTs - (30 * 24 * 60 * 60 * 1000); // Min 30d window if empty
 
-    // 3. Cumulative Profit for Area Fill
-    let cumulative = 0;
-    const cumulativeData = last30Days.map(d => {
-        cumulative += profitByDay[d];
-        return cumulative.toFixed(2);
-    });
-
-    // Update badge label
-    const badgeEl = document.getElementById('chart-days-label');
-    if (badgeEl) badgeEl.innerText = `LAST ${last30Days.length} DAYS`;
-
-    // 4. Destroy previous chart if exists
-    if (profitChartInstance) {
-        profitChartInstance.destroy();
+    const fullHistory = [];
+    let curr = new Date(minDateTs);
+    // iterate day by day
+    while (curr.getTime() <= maxDateTs + 86400000) {
+        const dStr = curr.toISOString().split('T')[0];
+        fullHistory.push({
+            date: dStr,
+            profit: profitByDay[dStr] || 0
+        });
+        curr.setDate(curr.getDate() + 1);
     }
 
-    // 5. Create Chart
+    // 2. Data Preparation: Equity & Cumulative
+    // Estimate History backwards from Current Equity
+    let currentEquity = window.currentEquity || 0;
+    // If we have no equity data yet, use a fallback base or sum of profits
+    if (currentEquity === 0) currentEquity = fullHistory.reduce((s, x) => s + x.profit, 1000);
+
+    // Back-calculate Equity Curve
+    const equityMap = {};
+    let runningEq = currentEquity;
+    // Loop backwards
+    for (let i = fullHistory.length - 1; i >= 0; i--) {
+        equityMap[fullHistory[i].date] = runningEq;
+        runningEq -= fullHistory[i].profit;
+    }
+
+    // Forward-calculate Cumulative Profit
+    let runningCum = 0;
+    const cumulativeMap = {};
+    fullHistory.forEach(h => {
+        runningCum += h.profit;
+        cumulativeMap[h.date] = runningCum;
+    });
+
+    // 3. Apply Timeframe filter
+    let displayData = fullHistory;
+    if (CURRENT_TIMEFRAME > 0) {
+        displayData = fullHistory.slice(-CURRENT_TIMEFRAME);
+    }
+    // If "ALL" (0) but data is huge, maybe cap? Chartjs handles it okay-ish.
+
+    const labels = displayData.map(d => d.date.substring(5)); // MM-DD
+    const profitData = displayData.map(d => d.profit);
+    const equityData = displayData.map(d => equityMap[d.date]);
+    const cumData = displayData.map(d => cumulativeMap[d.date]);
+
+    // 4. Render Chart
+    if (profitChartInstance) profitChartInstance.destroy();
+
     const ctx = canvas.getContext('2d');
+
+    // Gradients
+    let gradfill = null;
+    let gradfillGold = null;
+    if (ctx) {
+        gradfill = ctx.createLinearGradient(0, 0, 0, 300);
+        gradfill.addColorStop(0, 'rgba(0, 240, 255, 0.15)');
+        gradfill.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+
+        gradfillGold = ctx.createLinearGradient(0, 0, 0, 200);
+        gradfillGold.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
+        gradfillGold.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
+    }
+
+    const COLOR_CYAN = '#00f0ff';
+    const COLOR_GOLD = '#ffd700';
+    const COLOR_EMERALD = '#00ff9d';
+    const COLOR_GRID = 'rgba(255, 255, 255, 0.05)';
+    const FONT_UI = "'Inter', sans-serif";
+
     profitChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [
                 {
-                    label: 'Daily Profit ($)',
-                    data: data,
-                    backgroundColor: 'rgba(0, 255, 157, 0.6)',
-                    borderColor: '#00ff9d',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    order: 2
+                    label: 'Equity Total',
+                    data: equityData,
+                    type: 'line',
+                    borderColor: COLOR_CYAN,
+                    backgroundColor: gradfill,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true,
+                    tension: 0.4,
+                    order: 1,
+                    yAxisID: 'y_equity'
                 },
                 {
-                    label: 'Cumulative ($)',
-                    data: cumulativeData,
+                    label: 'Profit Acumulado',
+                    data: cumData,
                     type: 'line',
-                    borderColor: '#00d4ff',
-                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 0,
-                    order: 1
+                    borderColor: COLOR_GOLD,
+                    backgroundColor: gradfillGold,
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 2,
+                    pointHoverRadius: 5,
+                    fill: false,
+                    tension: 0.4,
+                    order: 0,
+                    yAxisID: 'y_cumulative'
+                },
+                {
+                    label: 'Botín Diario',
+                    data: profitData,
+                    backgroundColor: (c) => {
+                        const v = c.raw || 0;
+                        return v >= 0 ? 'rgba(0, 255, 157, 0.6)' : 'rgba(255, 42, 109, 0.6)';
+                    },
+                    borderColor: (c) => {
+                        const v = c.raw || 0;
+                        return v >= 0 ? COLOR_EMERALD : '#ff2a6d';
+                    },
+                    borderWidth: 1,
+                    borderRadius: 2,
+                    order: 2,
+                    yAxisID: 'y_daily'
                 }
             ]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
+            maintainAspectRatio: false, // Fits the container height
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    display: true,
-                    labels: { color: '#888', font: { size: 10 } }
-                },
+                legend: { display: true, labels: { color: '#ccc', font: { size: 9 }, usePointStyle: true, boxWidth: 6 } },
                 tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    backgroundColor: 'rgba(10, 20, 30, 0.95)',
                     titleColor: '#fff',
-                    bodyColor: '#00ff9d'
+                    bodyColor: '#ccc',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1
                 }
             },
             scales: {
                 x: {
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#666', font: { size: 9 } }
+                    grid: { color: COLOR_GRID, drawBorder: false },
+                    ticks: { color: '#666', font: { family: FONT_UI, size: 9 } }
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#666', font: { size: 9 }, callback: v => '$' + v }
+                y_daily: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    grid: { color: COLOR_GRID, borderDash: [5, 5] },
+                    ticks: { color: '#666', font: { size: 9 }, callback: (v) => '$' + v },
+                    title: { display: true, text: 'Diario', color: '#444', font: { size: 8 } }
+                },
+                y_equity: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: false, // Auto-zoom on growth
+                    grid: { drawOnChartArea: false },
+                    ticks: { color: COLOR_CYAN, font: { size: 9 }, callback: (v) => '$' + v },
+                    title: { display: true, text: 'Equity', color: COLOR_CYAN, font: { size: 8 } }
+                },
+                y_cumulative: {
+                    type: 'linear',
+                    display: false,
+                    position: 'right',
+                    beginAtZero: true
                 }
             }
         }

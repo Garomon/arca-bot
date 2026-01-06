@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCA DASHBOARD | RPG</title>
+
+    <!-- APP ICONS & MOBILE CONFIG -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#050508">
+
+    <link href="styles/rpg-theme.css?v=4.3.0" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-filter {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-family: 'Outfit', sans-serif;
+            margin-left: 5px;
+            transition: all 0.2s;
+        }
+
+        .btn-filter:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-filter.active {
+            background: var(--cyan-holo);
+            color: #000;
+            border-color: var(--cyan-holo);
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="loading-overlay" id="loading"
+        style="position:fixed; inset:0; background:#050508; display:flex; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.5s;">
+        <div class="loader"
+            style="width:50px; height:50px; border:3px solid #333; border-top-color:var(--gold-primary); border-radius:50%; animation:spin 1s infinite linear;">
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 1600px; margin: 0 auto; padding: 20px;">
+
+        <!-- HEADER / PROFILE -->
+        <div class="elite-card profile-hero" style="margin-bottom: 30px;">
+            <div class="avatar-hex" style="width: 100px; height: 100px;">
+                <div class="level-badge" id="player-lvl">LVL 1</div>
+                <img src="assets/avatar.png" alt="Commander" class="avatar-img">
+            </div>
+
+            <div class="hero-stats" style="padding-left: 20px;">
+                <span class="hero-rank" id="player-title">INICIADO</span>
+                <h1 class="hero-name" style="font-size: 1.8rem;">GAROSSA</h1>
+                <div style="display: flex; align-items: center; gap: 15px; margin-top: 5px; max-width: 400px;">
+                    <div
+                        style="flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                        <div id="xp-fill" style="width: 0%; height: 100%; background: var(--gold-primary);"></div>
+                    </div>
+                    <span style="font-size: 0.7rem; color: #888;" id="xp-text">0/0 XP</span>
+                </div>
+
+                <!-- Global Status Indicator -->
+                <div style="margin-top: 10px; font-size: 0.75rem; color: var(--emerald-life); font-weight: 600;">
+                    <span id="global-status-text">ESPERANDO SEÑAL...</span>
+                </div>
+            </div>
+
+            <div class="quest-mini-plate"
+                style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; min-width: 300px;">
+                <div style="font-size: 0.7rem; color: var(--gold-dim); margin-bottom: 5px;">📜 MISIÓN ACTIVA</div>
+                <div id="quest-name" style="color: #fff; font-weight: 600;">Sincronizando...</div>
+                <div id="quest-status" style="font-size: 0.65rem; color: #888; margin-top: 5px;">-</div>
+                <div id="quest-reward"
+                    style="font-size: 0.7rem; color: var(--gold-primary); margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- GLOBAL STATS ROW -->
+        <div class="stats-hex-grid"
+            style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 30px;">
+            <div class="stat-cell">
+                <span class="stat-label">Total Realizado</span>
+                <span class="stat-val gold" id="total-profit">$0.00</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-label">Botín Diario</span>
+                <span class="stat-val" id="daily-profit">$0.00</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-label">Flotante</span>
+                <span class="stat-val" id="unrealized-pnl">$0.00</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-label">Equity Global</span>
+                <span class="stat-val cyan" id="global-equity">$0.00</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-label">ROI Total</span>
+                <span class="stat-val" id="global-roi">0%</span>
+            </div>
+            <div class="stat-cell">
+                <span class="stat-label">Órdenes</span>
+                <span class="stat-val" id="total-orders">0</span>
+            </div>
+        </div>
+
+        <!-- COMPANION GRID (FULL SIZE) -->
+        <h2
+            style="margin-bottom: 25px; color: #fff; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 10px;">
+            🛡️ ESPÍRITUS GUARDIANES
+        </h2>
+
+        <div class="companion-grid" id="bot-grid" style="gap: 20px;">
+            <!-- INJECTED BY JS -->
+        </div>
+
+        <!-- Global Profit Chart -->
+        <div class="elite-card" style="margin-top: 30px; padding: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1rem; color: var(--emerald-life);">📈 Crecimiento de Capital (Equity)
+                </h3>
+                <div class="chart-controls">
+                    <button onclick="updateTimeframe(7, this)" class="btn-filter">7D</button>
+                    <button onclick="updateTimeframe(30, this)" class="btn-filter active">30D</button>
+                    <button onclick="updateTimeframe(90, this)" class="btn-filter">3M</button>
+                    <button onclick="updateTimeframe('ALL', this)" class="btn-filter">MAX</button>
+                </div>
+            </div>
+            <div style="height: 300px; position: relative;">
+                <canvas id="global-profit-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- LOGS SECTION (CRÓNICAS) -->
+        <div class="elite-card logs-section" style="margin-top: 30px; padding: 20px;">
+            <h3 style="color: var(--cyan-holo); margin-bottom: 20px;">📜 CRÓNICAS DEL SISTEMA</h3>
+            <div class="logs-list" id="logs-list">
+                <div class="log-item"><span class="log-msg">Sintonizando el Vacio...</span></div>
+            </div>
+        </div>
+
+        <!-- DEBUG CONSOLE -->
+        <div class="footer" style="margin-top: 30px; font-size: 0.7rem; color: #444; text-align: center;">
+            <div id="last-update">Sincronizando...</div>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIG ===
+        const BOTS = [
+            { id: 'btc', name: 'IGNIS', role: 'Espíritu de Fuego (BTC)', icon: '🔥', url: '/' },
+            { id: 'sol', name: 'VENTUS', role: 'Espíritu de Viento (SOL)', icon: '🌬️', url: '/sol/' },
+            { id: 'doge', name: 'FANG', role: 'Espíritu de Manada (DOGE)', icon: '🐺', url: '/doge/' }
+        ];
+
+        const ASSETS = {
+            'btc': 'assets/spirit-btc.png',
+            'sol': 'assets/spirit-sol.png',
+            'doge': 'assets/spirit-doge.png'
+        };
+
+        // State
+        let GLOBAL_EQUITY = 0;
+        let GLOBAL_FULL_HISTORY = [];
+        let CURRENT_TIMEFRAME = 30;
+        let LAST_RENDERED_EQUITY = -1;
+
+        function logDebug(msg) { console.log(msg); }
+
+        // === RENDER ===
+        function renderCompanions() {
+            const grid = document.getElementById('bot-grid');
+            if (!grid) return;
+
+            grid.innerHTML = BOTS.map(bot => `
+                <div class="elite-card companion-full-card ${bot.id}" id="card-${bot.id}" style="display: flex; flex-direction: column; overflow: hidden; min-height: 500px;">
+                    <!-- IMAGE HERO SECTION -->
+                    <div style="height: 220px; position: relative; overflow: hidden; background: #000;">
+                        <!-- Status Indicator -->
+                        <div style="position: absolute; top: 15px; left: 15px; z-index: 10; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div class="pulse-dot" id="dot-${bot.id}" style="width: 10px; height: 10px;"></div>
+                            <span id="status-label-${bot.id}" style="color: #fff; font-weight: bold; font-size: 0.8rem;">INIT...</span>
+                        </div>
+                        <div style="position: absolute; top: 15px; right: 15px; z-index: 10;">
+                             <span class="c-regime-badge" id="regime-${bot.id}" style="background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; color: #fff; border: 1px solid #333;">-</span>
+                        </div>
+                        <img src="${ASSETS[bot.id]}" alt="${bot.name}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9; mask-image: linear-gradient(to bottom, black 20%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);">
+                        <div style="position: absolute; bottom: 10px; left: 15px;">
+                            <h2 style="margin: 0; font-size: 2rem; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8);">${bot.name}</h2>
+                            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.8);">${bot.role}</div>
+                        </div>
+                    </div>
+
+                    <!-- DATA SECTION -->
+                    <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; background: rgba(10,10,15,0.95);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
+                                <div style="font-size: 0.65rem; color: #666;">PRECIO</div>
+                                <div id="price-${bot.id}" style="font-size: 1.1rem; color: #fff;">-</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px;">
+                                <div style="font-size: 0.65rem; color: #666;">PROFIT TOTAL</div>
+                                <div id="profit-${bot.id}" style="font-size: 1.1rem; color: var(--gold-primary);">-</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <div style="font-size: 0.65rem; color: #666;">HOY</div>
+                                <div id="daily-${bot.id}" style="font-size: 0.9rem; color: #eee;">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.65rem; color: #666;">ROI</div>
+                                <div id="roi-${bot.id}" style="font-size: 0.9rem; color: #eee;">-</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <div>
+                                <div style="font-size: 0.6rem; color: #555;">WINRATE</div>
+                                <div id="winrate-${bot.id}" style="font-size: 1rem; color: #fff;">-</div>
+                                <div id="trades-${bot.id}" style="font-size: 0.6rem; color: #444;">0 trades</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.6rem; color: #555;">ORDENES</div>
+                                <div id="orders-${bot.id}" style="font-size: 1rem; color: #fff;">-</div>
+                                <div id="lots-${bot.id}" style="font-size: 0.6rem; color: #444;">0 lots</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.6rem; color: #555;">SCORE</div>
+                                <div id="score-${bot.id}" style="font-size: 1rem; color: #fff;">-</div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; font-size: 0.75rem;">
+                            <div style="color: #666; margin-bottom: 2px;">ÚLTIMO TRADE</div>
+                            <div id="last-trade-${bot.id}" style="color: #ccc;">Sin actividad reciente</div>
+                        </div>
+                        <div id="blocking-${bot.id}" style="display: none; background: rgba(255,100,100,0.1); border: 1px solid rgba(255,100,100,0.2); color: var(--ruby-danger); padding: 8px; font-size: 0.7rem; border-radius: 4px;"></div>
+                        <div style="margin-top: auto; padding-top: 10px;">
+                            <a href="${bot.url}" style="display: block; width: 100%; box-sizing: border-box; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; text-align: center; text-decoration: none; font-size: 0.8rem; border-radius: 6px; transition: background 0.2s;">
+                                ACCESO A TERMINAL &rarr;
+                            </a>
+                        </div>
+                        <div id="debug-${bot.id}" style="font-size: 0.6rem; color: #ff2a6d; margin-top: 5px; min-height: 15px;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // === LOGIC ===
+        async function fetchAllData() {
+            let tProfit = 0, tDaily = 0, tUnreal = 0, tOrders = 0, tEquity = 0, tYesterday = 0, tDailyTrades = 0;
+            let botsActive = 0;
+            let allLogs = [];
+
+            for (const bot of BOTS) {
+                try {
+                    const url = bot.url === '/' ? '/api/status' : `${bot.url}api/status`;
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        updateBotUI(bot.id, data);
+                        if (data.status !== "stopped") botsActive++;
+
+                        tProfit += data.totalProfit || 0;
+                        tDaily += data.dailyProfit || 0;
+                        tYesterday += data.yesterdayProfit || 0;
+                        tUnreal += data.unrealizedPnL || 0;
+                        tOrders += data.activeOrders || 0;
+                        tDailyTrades += data.dailyTrades || 0;
+
+                        if (data.recentLogs && data.recentLogs.length > 0) {
+                            data.recentLogs.forEach(log => {
+                                allLogs.push({ ...log, bot: bot.id });
+                            });
+                        }
+                    } else {
+                        updateBotOffline(bot.id, "API ERROR");
+                    }
+                } catch (e) {
+                    updateBotOffline(bot.id, 'NET ERR');
+                }
+            }
+
+            const globalStatusEl = document.getElementById('global-status-text');
+            if (globalStatusEl) {
+                globalStatusEl.innerText = `SISTEMA: ${botsActive} / 3 CONSTRUCTOS ONLINE`;
+                globalStatusEl.style.color = botsActive === 3 ? 'var(--emerald-life)' : botsActive > 0 ? 'var(--gold-primary)' : 'var(--ruby-danger)';
+            }
+
+            try {
+                const eqRes = await fetch('/api/balance');
+                if (eqRes.ok) {
+                    const eqData = await eqRes.json();
+                    if (eqData.totalEquity) tEquity = eqData.totalEquity;
+                }
+            } catch (e) { }
+
+            // Store Global Equity for Chart
+            GLOBAL_EQUITY = tEquity;
+
+            document.getElementById('total-profit').innerText = `$${tProfit.toFixed(2)}`;
+
+            const dailyEl = document.getElementById('daily-profit');
+            dailyEl.style.display = 'flex';
+            dailyEl.style.flexDirection = 'column';
+            dailyEl.style.alignItems = 'center';
+            dailyEl.style.lineHeight = '1.2';
+            dailyEl.innerHTML = `
+                <span style="font-size: 1.5rem; color: #fff; margin-top: 5px;">$${tDaily.toFixed(2)}</span>
+                <span style="font-size: 0.65rem; color: #aaa; margin-top: 4px;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>
+            `;
+
+            document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
+            document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
+            document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
+            document.getElementById('total-orders').innerText = tOrders;
+
+            updateLogs(allLogs);
+
+            if (tEquity > tProfit) {
+                const roi = (tProfit / (tEquity - tProfit)) * 100;
+                document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
+            }
+
+            document.getElementById('loading').style.opacity = 0;
+            setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
+            document.getElementById('last-update').innerText = 'ACTUALIZADO: ' + new Date().toLocaleTimeString();
+
+            // Re-render chart if we have history and Equity changed significantly (fixing the 0 -> Value jump)
+            if (GLOBAL_FULL_HISTORY.length > 0 && Math.abs(GLOBAL_EQUITY - LAST_RENDERED_EQUITY) > 0.5) {
+                renderChart(GLOBAL_FULL_HISTORY);
+            }
+        }
+
+        function updateBotUI(id, data) {
+            document.getElementById(`regime-${id}`).innerText = data.marketRegime || 'NEUTRAL';
+            const dot = document.getElementById(`dot-${id}`);
+            const statusLbl = document.getElementById(`status-label-${id}`);
+
+            if (dot) {
+                dot.style.background = 'var(--emerald-life)';
+                dot.style.boxShadow = '0 0 10px var(--emerald-life)';
+            }
+
+            if (statusLbl) {
+                if (data.smartDcaBlocking) {
+                    statusLbl.innerText = "BLOCKED";
+                    statusLbl.style.color = "var(--gold-primary)";
+                } else if (data.isPaused) {
+                    statusLbl.innerText = "PAUSED";
+                    statusLbl.style.color = "var(--ruby-danger)";
+                    if (dot) { dot.style.background = 'var(--ruby-danger)'; dot.style.boxShadow = 'none'; }
+                } else {
+                    statusLbl.innerText = "ONLINE";
+                    statusLbl.style.color = "var(--emerald-life)";
+                }
+            }
+
+            const debugEl = document.getElementById(`debug-${id}`);
+            if (debugEl) debugEl.innerText = "";
+
+            const profitEl = document.getElementById(`profit-${id}`);
+            if (profitEl) profitEl.innerText = `$${(data.totalProfit || 0).toFixed(2)}`;
+
+            const price = data.currentPrice || 0;
+            const priceEl = document.getElementById(`price-${id}`);
+            if (priceEl) priceEl.innerText = price > 1000 ? `$${price.toFixed(0)}` : price > 1 ? `$${price.toFixed(2)}` : `$${price.toFixed(4)}`;
+
+            const roiEl = document.getElementById(`roi-${id}`);
+            if (roiEl) roiEl.innerText = `${(data.roi || 0).toFixed(2)}%`;
+
+            const dailyEl = document.getElementById(`daily-${id}`);
+            if (dailyEl) dailyEl.innerText = `$${(data.dailyProfit || 0).toFixed(2)}`;
+
+            const winRate = data.winRate || 0;
+            const wrEl = document.getElementById(`winrate-${id}`);
+            if (wrEl) {
+                wrEl.innerText = `${winRate.toFixed(0)}%`;
+                wrEl.style.color = winRate >= 70 ? 'var(--emerald-life)' : winRate >= 50 ? 'var(--gold-primary)' : 'var(--ruby-danger)';
+            }
+            const tradesEl = document.getElementById(`trades-${id}`);
+            if (tradesEl) tradesEl.innerText = `${data.totalTrades || 0} trades`;
+            const scoreEl = document.getElementById(`score-${id}`);
+            if (scoreEl) scoreEl.innerText = data.score || 50;
+            const ordersEl = document.getElementById(`orders-${id}`);
+            if (ordersEl) ordersEl.innerText = data.activeOrders || 0;
+            const lotsEl = document.getElementById(`lots-${id}`);
+            if (lotsEl) lotsEl.innerText = data.inventoryLots || 0;
+
+            const lastTradeEl = document.getElementById(`last-trade-${id}`);
+            if (lastTradeEl) {
+                if (data.lastTrade) {
+                    const now = Date.now();
+                    const tradeTime = new Date(data.lastTrade.timestamp).getTime();
+                    const diffMins = Math.floor((now - tradeTime) / 60000);
+                    let timeAgo = diffMins < 60 ? `${diffMins}m ago` : `${Math.floor(diffMins / 60)}h ago`;
+                    const side = data.lastTrade.side.toUpperCase();
+                    const profit = data.lastTrade.profit ? `(+$${data.lastTrade.profit.toFixed(2)})` : '';
+                    const color = side === 'SELL' ? 'var(--emerald-life)' : '#fff';
+                    lastTradeEl.innerHTML = `<span style="color:${color}; font-weight:bold;">${side}</span> ${profit} <span style="opacity:0.6">· ${timeAgo}</span>`;
+                } else {
+                    lastTradeEl.innerText = "Sin actividad reciente";
+                }
+            }
+
+            const blockEl = document.getElementById(`blocking-${id}`);
+            if (blockEl) {
+                if (data.blockingReason || data.isPaused) {
+                    blockEl.style.display = 'block';
+                    blockEl.innerText = `⚠️ ${data.blockingReason || 'PAUSADO'}`;
+                } else {
+                    blockEl.style.display = 'none';
+                }
+            }
+        }
+
+        function updateBotOffline(id, reason = "OFFLINE") {
+            const dot = document.getElementById(`dot-${id}`);
+            const statusLbl = document.getElementById(`status-label-${id}`);
+            if (dot) dot.style.background = '#555';
+            if (statusLbl) { statusLbl.innerText = reason; statusLbl.style.color = "#888"; }
+        }
+
+        function updateLogs(logs) {
+            const logsList = document.getElementById('logs-list');
+            if (!logs || logs.length === 0) {
+                logsList.innerHTML = '<div class="log-item"><span class="log-msg">Sin actividad reciente... el Vacio está en calma.</span></div>';
+                return;
+            }
+            const sorted = logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 20);
+            logsList.innerHTML = sorted.map(log => {
+                const time = log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--';
+                const botClass = log.bot || 'sys';
+                return `<div class="log-item"><span class="log-time">${time}</span><span class="log-bot ${botClass}">${(log.bot || 'SYS').toUpperCase()}</span><span class="log-msg">${log.message || log.type || '-'}</span></div>`;
+            }).join('');
+        }
+
+        async function fetchRPG() {
+            try {
+                const res = await fetch('/api/rpg');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('player-lvl').innerText = `LVL ${data.level || 1} `;
+                    document.getElementById('player-title').innerText = data.title || 'INICIADO';
+                    document.getElementById('xp-text').innerText = `${data.xp} / ${data.nextLevelXp} XP`;
+                    document.getElementById('xp-fill').style.width = `${data.xpProgress}%`;
+                    if (data.quest) {
+                        document.getElementById('quest-name').innerText = data.quest.name;
+                        document.getElementById('quest-status').innerText = data.quest.status === 'COMPLETED' ? 'COMPLETADA' : 'EN PROGRESO';
+                        document.getElementById('quest-status').style.color = data.quest.status === 'COMPLETED' ? 'var(--emerald-life)' : 'var(--gold-primary)';
+                        if (data.quest.reward) document.getElementById('quest-reward').innerText = `🏆 RECOMPENSA: ${data.quest.reward}`;
+                    }
+                }
+            } catch (e) { }
+        }
+
+        async function fetchChart() {
+            try {
+                const res = await fetch('/api/profit-history');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.history && data.history.length > 0) {
+                        GLOBAL_FULL_HISTORY = data.history;
+                        renderChart(GLOBAL_FULL_HISTORY);
+                    }
+                }
+            } catch (e) { logDebug("Chart API error: " + e.message); }
+        }
+
+        function updateTimeframe(days, btn) {
+            CURRENT_TIMEFRAME = days;
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderChart(GLOBAL_FULL_HISTORY);
+        }
+
+        function fillGaps(history) {
+            if (!history || history.length < 2) return history;
+
+            // Sort by date ascending
+            const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const filled = [];
+            const startDate = new Date(sorted[0].date);
+            const endDate = new Date(sorted[sorted.length - 1].date);
+
+            // Ensure we cover up to TODAY if the last log is old
+            const today = new Date();
+            const finalDate = today > endDate ? today : endDate;
+
+            const dateMap = new Map();
+            sorted.forEach(h => dateMap.set(h.date, h));
+
+            let current = new Date(startDate);
+            while (current <= finalDate) {
+                const dayStr = current.toISOString().split('T')[0];
+
+                if (dateMap.has(dayStr)) {
+                    filled.push(dateMap.get(dayStr));
+                } else {
+                    // Gap found: Insert 0 profit day
+                    filled.push({ date: dayStr, profit: 0, equity: 0, capital: 0, isGap: true });
+                }
+
+                // Add 1 day
+                current.setDate(current.getDate() + 1);
+            }
+            return filled;
+        }
+
+        function renderChart(historyRaw) {
+            LAST_RENDERED_EQUITY = GLOBAL_EQUITY;
+            const canvas = document.getElementById('global-profit-chart');
+            if (!canvas) return;
+            if (window.myChart instanceof Chart) window.myChart.destroy();
+
+            // 1. FILL GAPS first
+            const history = fillGaps(historyRaw);
+
+            // 2. FILTER
+            let filtered = [];
+            if (CURRENT_TIMEFRAME === 'ALL') {
+                filtered = history;
+            } else {
+                filtered = history.slice(-CURRENT_TIMEFRAME);
+            }
+
+            // DATA PREP
+            let cumulative = 0;
+            // Calculate Total Profit so far to find Base Capital
+            // Estimated Base Capital = Global Equity - Sum of All Profits (Approximation)
+
+            const totalRecordedProfit = history.reduce((sum, h) => sum + (h.profit || 0), 0);
+            const estimatedBase = GLOBAL_EQUITY > 0 ? (GLOBAL_EQUITY - totalRecordedProfit) : 0;
+
+            const cumulativeData = [];
+
+            // Calculate cumulative for FULL history first (gap-filled)
+            let runProfit = 0;
+            const fullCurve = history.map(h => {
+                runProfit += (h.profit || 0);
+                return estimatedBase + runProfit;
+            });
+
+            // Now slice
+            let startIndex = 0;
+            if (CURRENT_TIMEFRAME !== 'ALL') {
+                startIndex = Math.max(0, history.length - CURRENT_TIMEFRAME);
+            }
+
+            const slicedEquity = fullCurve.slice(startIndex);
+            const slicedProfits = filtered.map(h => h.profit);
+            const slicedLabels = filtered.map(h => h.date.substring(5)); // MM-DD
+
+            // 3. Pre-Calculate Cumulative Profit (Standalone)
+            let runningTotal = 0;
+            const cumulativeProfitData = history.map(h => {
+                runningTotal += (h.profit || 0);
+                return runningTotal;
+            });
+            // Slice it
+            const slicedCumulative = cumulativeProfitData.slice(startIndex);
+
+
+            const ctx = canvas.getContext('2d');
+            const COLOR_GOLD = '#ffd700';
+            const COLOR_CYAN = '#00f0ff';
+            const COLOR_EMERALD = '#00ff9d';
+            const COLOR_GRID = 'rgba(255, 255, 255, 0.05)';
+            const FONT_UI = "'Outfit', sans-serif";
+
+            let gradfill = null;
+            let gradfillGold = null;
+            if (ctx) {
+                gradfill = ctx.createLinearGradient(0, 0, 0, 300);
+                gradfill.addColorStop(0, 'rgba(0, 240, 255, 0.15)');
+                gradfill.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+
+                gradfillGold = ctx.createLinearGradient(0, 0, 0, 300);
+                gradfillGold.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
+                gradfillGold.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
+            }
+
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: slicedLabels,
+                    datasets: [
+                        {
+                            label: 'Equity Total',
+                            data: slicedEquity,
+                            type: 'line',
+                            borderColor: COLOR_CYAN,
+                            backgroundColor: gradfill,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: true,
+                            tension: 0.4,
+                            order: 1,
+                            yAxisID: 'y_equity'
+                        },
+                        {
+                            label: 'Profit Acumulado',
+                            data: slicedCumulative,
+                            type: 'line',
+                            borderColor: COLOR_GOLD,
+                            backgroundColor: gradfillGold,
+                            borderWidth: 2,
+                            borderDash: [5, 5], // Dashed to distinguish
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            fill: false, // Cleaner interaction
+                            tension: 0.4,
+                            order: 0, // Top most
+                            yAxisID: 'y_cumulative'
+                        },
+                        {
+                            label: 'Botín Diario',
+                            data: slicedProfits,
+                            backgroundColor: (context) => {
+                                const val = context.raw || 0;
+                                return val >= 0 ? 'rgba(0, 255, 157, 0.6)' : 'rgba(255, 42, 109, 0.6)';
+                            },
+                            borderColor: (context) => {
+                                const val = context.raw || 0;
+                                return val >= 0 ? COLOR_EMERALD : '#ff2a6d';
+                            },
+                            borderWidth: 1,
+                            borderRadius: 2,
+                            order: 2,
+                            yAxisID: 'y_daily'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: true, labels: { color: '#ccc', font: { family: FONT_UI, size: 10 }, usePointStyle: true, boxWidth: 6 } },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 10, 16, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#ccc',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) label += '$' + context.parsed.y.toFixed(2);
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: COLOR_GRID, drawBorder: false }, ticks: { color: '#666', font: { family: FONT_UI, size: 10 } } },
+                        y_daily: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: COLOR_GRID, borderDash: [5, 5] },
+                            ticks: { color: '#666', font: { family: FONT_UI, size: 9 }, callback: function (value) { return '$' + value; } },
+                            title: { display: true, text: 'Diario', color: '#444', font: { size: 8 } }
+                        },
+                        y_equity: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: false,
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: COLOR_CYAN, font: { family: FONT_UI, size: 9 }, callback: function (value) { return '$' + value; } },
+                            title: { display: true, text: 'Equity', color: COLOR_CYAN, font: { size: 8 } }
+                        },
+                        y_cumulative: {
+                            type: 'linear',
+                            display: false, // Hidden axis but exists for scaling
+                            position: 'right',
+                            beginAtZero: true, // Cumulative should start at 0 visual reference usually
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function init() {
+            renderCompanions();
+            // Wait a tick to ensure DOM is ready
+            setTimeout(() => {
+                fetchAllData();
+                fetchRPG();
+                fetchChart();
+            }, 100);
+
+            setInterval(fetchAllData, 5000);
+            setInterval(fetchRPG, 60000);
+            setInterval(fetchChart, 60000);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
