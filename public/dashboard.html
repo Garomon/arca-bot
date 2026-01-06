@@ -455,14 +455,13 @@
             const sorted = logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 20);
 
             logsList.innerHTML = sorted.map(log => {
-                const time = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '-';
+                const time = log.timestamp ? new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--';
                 const botClass = log.bot || 'sys';
-                // Determine color class or style based on message type if needed
                 return `
                     <div class="log-item">
+                        <span class="log-time">${time}</span>
                         <span class="log-bot ${botClass}">${(log.bot || 'SYS').toUpperCase()}</span>
                         <span class="log-msg">${log.message || log.type || '-'}</span>
-                        <span class="log-time">${time}</span>
                     </div>
                 `;
             }).join('');
