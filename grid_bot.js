@@ -1803,6 +1803,17 @@ async function placeOrder(level, skipBudgetCheck = false) {
     const price = new Decimal(level.price).toNumber();
     let amount = new Decimal(level.amount).toNumber();
 
+    // === BEAR MARKET ACCUMULATION (Increase size during extended dips) ===
+    // Applies logarithmically growing multiplier when price is below avg cost
+    if (level.side === 'buy') {
+        const bearMultiplier = getBearAccumulationMultiplier();
+        if (bearMultiplier > 1.0) {
+            const originalAmount = amount;
+            amount = amount * bearMultiplier;
+            log('BEAR_DCA', `📈 Buy size boosted: ${originalAmount.toFixed(6)} → ${amount.toFixed(6)} ${BASE_ASSET} (${bearMultiplier.toFixed(2)}x)`, 'info');
+        }
+    }
+
     // PRECISION ENFORCEMENT (Amount & Price)
     // MOVED UP for accuracy (P0 Fix)
     let finalPrice = price;
@@ -3372,17 +3383,16 @@ async function shouldPauseBuys() {
 
                 const hoursBlocking = (Date.now() - state.dcaBlockStartTime) / (1000 * 60 * 60);
 
-                // Progressive bump: +0.5% per 6 hours of blocking, max +5% total bump
-                // 6h = +0.5%, 12h = +1%, 24h = +2%, 2.5 days = +5% (max)
-                const stalenessBump = Math.min(hoursBlocking / 12, 5) * 0.01;
+                // === LOGARITHMIC BUFFER RELAXATION (No Hard Cap) ===
+                // Uses log10 for infinite but decelerating growth
+                // Behavior: 6h=2.6%, 24h=4.1%, 72h=5.6%, 1week=6.7%, 1month=8.6%
+                // The bot will NEVER be stuck forever - buffer keeps growing
+                const stalenessBump = Math.log10(hoursBlocking + 1) * 0.03;
                 DCA_BUFFER = DCA_BUFFER + stalenessBump;
-
-                // Cap effective buffer at 12% to allow entry in strong rallies
-                DCA_BUFFER = Math.min(DCA_BUFFER, 1.12);
 
                 // Log relaxation if significant (> 0.1%)
                 if (stalenessBump > 0.001) {
-                    log('SMART_DCA', `📈 Bull market adaptation: Buffer relaxed to ${((DCA_BUFFER - 1) * 100).toFixed(1)}% after ${hoursBlocking.toFixed(1)}h blocking`, 'info');
+                    log('SMART_DCA', `📈 Bull market adaptation: Buffer relaxed to ${((DCA_BUFFER - 1) * 100).toFixed(1)}% after ${hoursBlocking.toFixed(1)}h blocking (logarithmic)`, 'info');
                 }
             } else {
                 // Price is within acceptable range - reset the blocking timer
@@ -3410,6 +3420,49 @@ async function shouldPauseBuys() {
         console.error('>> [ERROR] shouldPauseBuys check failed:', e.message);
         return { pause: false }; // Fail open to not block trading
     }
+}
+
+// === PROGRESSIVE ACCUMULATION (Bear Market Adaptation) ===
+// When price is significantly BELOW avg cost for extended periods,
+// increase buy aggressiveness to accumulate at better prices.
+// Returns a size multiplier (1.0 = normal, grows logarithmically with no cap)
+// SYMMETRIC with Bull Market Buffer Relaxation (same logarithmic approach)
+function getBearAccumulationMultiplier() {
+    if (!state.inventory || state.inventory.length === 0) {
+        return 1.0; // No inventory, no special treatment
+    }
+
+    const invReport = calculateInventoryReport();
+    const avgCost = invReport.avgCost;
+    const currentPrice = state.currentPrice || 0;
+
+    if (avgCost <= 0 || currentPrice <= 0) return 1.0;
+
+    // Only activate if price is >5% BELOW avg cost (we're in a dip)
+    const pctBelow = ((avgCost - currentPrice) / avgCost) * 100;
+    if (pctBelow < 5) {
+        state.bearAccumulationStartTime = null;
+        return 1.0;
+    }
+
+    // Initialize timer if not set
+    if (!state.bearAccumulationStartTime) {
+        state.bearAccumulationStartTime = Date.now();
+    }
+
+    const hoursAccumulating = (Date.now() - state.bearAccumulationStartTime) / (1000 * 60 * 60);
+
+    // === LOGARITHMIC MULTIPLIER (No Hard Cap) ===
+    // Uses log10 for infinite but decelerating growth (symmetric with bull adaptation)
+    // Behavior: 6h=1.23x, 24h=1.41x, 72h=1.56x, 1week=1.67x, 1month=1.86x
+    // The multiplier keeps growing but slower over time
+    const multiplier = 1.0 + Math.log10(hoursAccumulating + 1) * 0.3;
+
+    if (multiplier > 1.05) {
+        log('BEAR_DCA', `📉 Bear accumulation: ${multiplier.toFixed(2)}x size after ${hoursAccumulating.toFixed(1)}h (Price ${pctBelow.toFixed(1)}% below avg, logarithmic)`, 'info');
+    }
+
+    return multiplier;
 }
 
 // PHASE 4: Inventory Report (Weekly Metrics)
