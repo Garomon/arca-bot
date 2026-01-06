@@ -1255,6 +1255,67 @@
             }
         }
 
+        // ===== RPG DATA FETCH =====
+        async function fetchRPGData() {
+            try {
+                const response = await fetch('/api/rpg');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateRPGDisplay(data);
+                }
+            } catch (err) {
+                console.error('Error fetching RPG data:', err);
+            }
+        }
+
+        function updateRPGDisplay(data) {
+            // Update Level Badge
+            const levelEl = document.querySelector('.player-level');
+            if (levelEl) levelEl.textContent = `LVL ${data.level || 1}`;
+
+            // Update Title
+            const titleEl = document.querySelector('.player-title');
+            if (titleEl) titleEl.textContent = data.title || 'Aventurero';
+
+            // Update XP Bar
+            const xpFill = document.querySelector('.xp-fill');
+            const xpText = document.querySelector('.xp-text');
+            if (xpFill && data.xpProgress !== undefined) {
+                xpFill.style.width = `${data.xpProgress}%`;
+            }
+            if (xpText && data.xp !== undefined && data.nextLevelXp !== undefined) {
+                xpText.textContent = `${data.xp} / ${data.nextLevelXp} XP`;
+            }
+
+            // Update Quest Card
+            if (data.quest) {
+                const questIcon = document.querySelector('.quest-icon');
+                const questTitle = document.querySelector('.quest-info h3');
+                const questDesc = document.querySelector('.quest-info p');
+                const questBadge = document.querySelector('.quest-status .badge');
+                const questReward = document.querySelector('.quest-status div:last-child');
+
+                if (questTitle) questTitle.textContent = data.quest.name || 'Misión Activa';
+                if (questDesc) questDesc.textContent = data.quest.objective || '';
+
+                // Status badge
+                if (questBadge && data.quest.status) {
+                    const statusColors = {
+                        'COMPLETED': { bg: 'rgba(0, 255, 157, 0.2)', color: '#00ff9d', text: '✅ COMPLETADA' },
+                        'IN_PROGRESS': { bg: 'rgba(255, 215, 0, 0.2)', color: '#ffd700', text: '⏳ EN PROGRESO' }
+                    };
+                    const statusInfo = statusColors[data.quest.status] || statusColors['IN_PROGRESS'];
+                    questBadge.style.background = statusInfo.bg;
+                    questBadge.style.color = statusInfo.color;
+                    questBadge.textContent = statusInfo.text;
+                }
+
+                if (questReward && data.quest.reward) {
+                    questReward.textContent = `🏆 ${data.quest.reward}`;
+                }
+            }
+        }
+
         function renderGlobalProfitChart(history) {
             const canvas = document.getElementById('global-profit-chart');
             if (!canvas || history.length === 0) return;
@@ -1330,13 +1391,15 @@
             });
         }
 
-        // Enhanced init to include chart
+        // Enhanced init to include chart and RPG
         async function init() {
             renderBotCards();
             await fetchAllData();
             await fetchProfitHistory(); // Fetch and render chart
+            await fetchRPGData(); // Fetch RPG level, XP, quest
             setInterval(fetchAllData, 15000);
             setInterval(fetchProfitHistory, 60000); // Refresh chart every minute
+            setInterval(fetchRPGData, 60000); // Refresh RPG data every minute
         }
 
         init();
