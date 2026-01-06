@@ -1302,7 +1302,7 @@
                 if (questBadge && data.quest.status) {
                     const statusColors = {
                         'COMPLETED': { bg: 'rgba(0, 255, 157, 0.2)', color: '#00ff9d', text: '✅ COMPLETADA' },
-                        'IN_PROGRESS': { bg: 'rgba(255, 215, 0, 0.2)', color: '#ffd700', text: '⏳ EN PROGRESO' }
+                        'IN_PROGRESS': { bg: 'rgba(255, 215, 0, 0.3)', color: '#1a1a1a', text: '⏳ EN PROGRESO' }
                     };
                     const statusInfo = statusColors[data.quest.status] || statusColors['IN_PROGRESS'];
                     questBadge.style.background = statusInfo.bg;

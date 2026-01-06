@@ -208,17 +208,49 @@ async function analyzeAndProject() {
     // ═══════════════════════════════════════════════════════════
     // 🛡️ PERFIL DEL TECNOMANTE (RPG STATUS)
     // ═══════════════════════════════════════════════════════════
-    const currentLevel = 8;
-    const title = "Señor de la Forja";
-    const xpHit_Profit = totalProfit * 50; // 50 XP por cada $1 de profit
-    const xpHit_Time = daysActive * 20;            // 20 XP por cada día activo
     const baseXP = 810;                            // XP base para sincronizar con Codex
+    const xpHit_Profit = totalProfit * 50;         // 50 XP por cada $1 de profit
+    const xpHit_Time = daysActive * 20;            // 20 XP por cada día activo
     const currentXP = Math.floor(baseXP + xpHit_Profit + xpHit_Time);
-    const nextLevelXP = 3000;
 
-    // Quest System
-    const activeQuest = "El Rito de Fortalecimiento";
-    const questStatus = "COMPLETADA (Esperando Recompensa)";
+    // Dynamic Level System (SAME as /api/rpg)
+    const LEVEL_DATA = [
+        { level: 1, xp: 0, title: "Novato del Grid" },
+        { level: 2, xp: 100, title: "Aprendiz de Trading" },
+        { level: 3, xp: 300, title: "Explorador de Mercados" },
+        { level: 4, xp: 600, title: "Comerciante Audaz" },
+        { level: 5, xp: 1000, title: "Estratega del Spread" },
+        { level: 6, xp: 1500, title: "Domador de Volatilidad" },
+        { level: 7, xp: 2200, title: "Mercader Errante" },
+        { level: 8, xp: 3000, title: "Señor de la Forja" },
+        { level: 9, xp: 4500, title: "Maestro del Grid" },
+        { level: 10, xp: 6000, title: "Arcano Financiero" },
+        { level: 11, xp: 8000, title: "Leyenda Cripto" },
+        { level: 50, xp: 150000, title: "Dios del Trading" }
+    ];
+
+    let currentLevelData = LEVEL_DATA[0];
+    let nextLevelData = LEVEL_DATA[1];
+    for (let i = 0; i < LEVEL_DATA.length; i++) {
+        if (currentXP >= LEVEL_DATA[i].xp) {
+            currentLevelData = LEVEL_DATA[i];
+            nextLevelData = LEVEL_DATA[i + 1] || { level: 99, xp: 99999999, title: "Ascendido" };
+        }
+    }
+
+    const currentLevel = currentLevelData.level;
+    const title = currentLevelData.title;
+    const nextLevelXP = nextLevelData.xp;
+
+    // Quest System (Dynamic based on equity/days)
+    let activeQuest, questStatus;
+    if (currentCapital >= 1500) {
+        activeQuest = "El Rito de Fortalecimiento";
+        questStatus = daysActive >= 30 ? "COMPLETADA (Esperando Recompensa)" : "EN PROGRESO";
+    } else {
+        activeQuest = "El Cruce del Valle";
+        questStatus = currentCapital >= 1500 ? "COMPLETADA" : "EN PROGRESO";
+    }
 
     // ASCII XP Bar
     const barLength = 20;
