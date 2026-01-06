@@ -227,7 +227,7 @@
                         </div>
                         
                         <!-- DEBUG FIELD -->
-                        <div id="debug-${bot.id}" style="font-size: 0.6rem; color: #444; margin-top: 5px;"></div>
+                        <div id="debug-${bot.id}" style="font-size: 0.6rem; color: #ff2a6d; margin-top: 5px; min-height: 15px;"></div>
                     </div>
                 </div>
             `).join('');
@@ -235,7 +235,7 @@
 
         // === LOGIC ===
         async function updateDashboard() {
-            let tProfit = 0, tDaily = 0, tUnreal = 0, tOrders = 0, tEquity = 0, tYesterday = 0;
+            let tProfit = 0, tDaily = 0, tUnreal = 0, tOrders = 0, tEquity = 0, tYesterday = 0, tDailyTrades = 0;
             let botsActive = 0;
 
             for (const bot of BOTS) {
@@ -253,6 +253,7 @@
                         tYesterday += data.yesterdayProfit || 0;
                         tUnreal += data.unrealizedPnL || 0;
                         tOrders += data.activeOrders || 0;
+                        tDailyTrades += data.dailyTrades || 0;
 
                         if (bot.id === 'btc' && data.globalEquity) tEquity = data.globalEquity;
 
@@ -283,7 +284,7 @@
             } catch (e) { }
 
             document.getElementById('total-profit').innerText = `$${tProfit.toFixed(2)}`;
-            document.getElementById('daily-profit').innerHTML = `$${tDaily.toFixed(2)} <span style="font-size:0.6em; color:#666;">(Ayer: $${tYesterday.toFixed(2)})</span>`;
+            document.getElementById('daily-profit').innerHTML = `$${tDaily.toFixed(2)} <span style="font-size:0.6em; color:#666;">(${tDailyTrades} trades · Ayer: $${tYesterday.toFixed(2)})</span>`;
             document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
             document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
             document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
@@ -517,6 +518,10 @@
 
         init();
     </script>
+    <div id="debug-log"
+        style="position: fixed; bottom: 0; right: 0; background: rgba(0,0,0,0.8); color: lime; padding: 10px; font-family: monospace; font-size: 10px; max-height: 200px; overflow-y: scroll; width: 300px; z-index: 9999; pointer-events: none;">
+        <div>DEBUG CONSOLE ACTIVE v4.1</div>
+    </div>
 </body>
 
 </html>
