@@ -239,7 +239,7 @@
             } catch (e) { }
 
             document.getElementById('total-profit').innerText = `$${tProfit.toFixed(2)}`;
-            document.getElementById('daily-profit').innerHTML = `$${tDaily.toFixed(2)} <span style="font-size:0.6em; color:#666;">(Ayer: $${tYesterday.toFixed(0)})</span>`;
+            document.getElementById('daily-profit').innerHTML = `$${tDaily.toFixed(2)} <span style="font-size:0.6em; color:#666;">(Ayer: $${tYesterday.toFixed(2)})</span>`;
             document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
             document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
             document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
