@@ -208,39 +208,60 @@ async function analyzeAndProject() {
     // ═══════════════════════════════════════════════════════════
     // 🛡️ PERFIL DEL TECNOMANTE (RPG STATUS)
     // ═══════════════════════════════════════════════════════════
-    const baseXP = 810;                            // XP base para sincronizar con Codex
-    const xpHit_Profit = totalProfit * 50;         // 50 XP por cada $1 de profit
-    const xpHit_Time = daysActive * 20;            // 20 XP por cada día activo
-    const currentXP = Math.floor(baseXP + xpHit_Profit + xpHit_Time);
 
-    // Dynamic Level System (SAME as /api/rpg)
-    const LEVEL_DATA = [
-        { level: 1, xp: 0, title: "Novato del Grid" },
-        { level: 2, xp: 100, title: "Aprendiz de Trading" },
-        { level: 3, xp: 300, title: "Explorador de Mercados" },
-        { level: 4, xp: 600, title: "Comerciante Audaz" },
-        { level: 5, xp: 1000, title: "Estratega del Spread" },
-        { level: 6, xp: 1500, title: "Domador de Volatilidad" },
-        { level: 7, xp: 2200, title: "Mercader Errante" },
-        { level: 8, xp: 3000, title: "Señor de la Forja" },
-        { level: 9, xp: 4500, title: "Maestro del Grid" },
-        { level: 10, xp: 6000, title: "Arcano Financiero" },
-        { level: 11, xp: 8000, title: "Leyenda Cripto" },
-        { level: 50, xp: 150000, title: "Dios del Trading" }
-    ];
-
-    let currentLevelData = LEVEL_DATA[0];
-    let nextLevelData = LEVEL_DATA[1];
-    for (let i = 0; i < LEVEL_DATA.length; i++) {
-        if (currentXP >= LEVEL_DATA[i].xp) {
-            currentLevelData = LEVEL_DATA[i];
-            nextLevelData = LEVEL_DATA[i + 1] || { level: 99, xp: 99999999, title: "Ascendido" };
+    // Fetch RPG data from running bot API for sync with dashboard UX
+    let rpgData = null;
+    try {
+        const { execSync } = require('child_process');
+        const rpgJson = execSync('curl -s http://localhost:3000/api/rpg 2>/dev/null || curl -s http://localhost:3001/api/rpg 2>/dev/null || curl -s http://localhost:3002/api/rpg 2>/dev/null', { timeout: 5000 }).toString().trim();
+        if (rpgJson && rpgJson.startsWith('{')) {
+            rpgData = JSON.parse(rpgJson);
         }
-    }
+    } catch (e) { /* Fallback to manual calculation */ }
 
-    const currentLevel = currentLevelData.level;
-    const title = currentLevelData.title;
-    const nextLevelXP = nextLevelData.xp;
+    // Use API data if available, otherwise calculate manually
+    let currentXP, currentLevel, title, nextLevelXP;
+
+    if (rpgData && rpgData.xp) {
+        // SYNCED with dashboard UX
+        currentXP = rpgData.xp;
+        currentLevel = rpgData.level;
+        title = rpgData.title;
+        nextLevelXP = rpgData.nextLevelXp;
+    } else {
+        // Fallback: manual calculation
+        const baseXP = 810;
+        const xpHit_Profit = totalProfit * 50;
+        const xpHit_Time = daysActive * 20;
+        currentXP = Math.floor(baseXP + xpHit_Profit + xpHit_Time);
+
+        const LEVEL_DATA = [
+            { level: 1, xp: 0, title: "Novato del Grid" },
+            { level: 2, xp: 100, title: "Aprendiz de Trading" },
+            { level: 3, xp: 300, title: "Explorador de Mercados" },
+            { level: 4, xp: 600, title: "Comerciante Audaz" },
+            { level: 5, xp: 1000, title: "Estratega del Spread" },
+            { level: 6, xp: 1500, title: "Domador de Volatilidad" },
+            { level: 7, xp: 2200, title: "Mercader Errante" },
+            { level: 8, xp: 3000, title: "Señor de la Forja" },
+            { level: 9, xp: 4500, title: "Maestro del Grid" },
+            { level: 10, xp: 6000, title: "Arcano Financiero" },
+            { level: 11, xp: 8000, title: "Leyenda Cripto" },
+            { level: 50, xp: 150000, title: "Dios del Trading" }
+        ];
+
+        let currentLevelData = LEVEL_DATA[0];
+        let nextLevelData = LEVEL_DATA[1];
+        for (let i = 0; i < LEVEL_DATA.length; i++) {
+            if (currentXP >= LEVEL_DATA[i].xp) {
+                currentLevelData = LEVEL_DATA[i];
+                nextLevelData = LEVEL_DATA[i + 1] || { level: 99, xp: 99999999, title: "Ascendido" };
+            }
+        }
+        currentLevel = currentLevelData.level;
+        title = currentLevelData.title;
+        nextLevelXP = nextLevelData.xp;
+    }
 
     // Quest System (Dynamic based on equity/days)
     let activeQuest, questStatus;
