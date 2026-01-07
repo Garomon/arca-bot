@@ -3496,12 +3496,21 @@ async function checkStopLoss() {
         // Calculate REAL total equity based on current holdings
         // P0 FIX: Dynamic Asset Valuation (Sum all known assets)
         // This prevents underestimating equity when running multiple bots (BTC + SOL)
+        // P0 FIX: Dynamic Asset Valuation (Auto-detect ALL assets)
+        // Iterates through all coins in wallet to match Binance Equity exactly
         let baseValue = 0;
-        const KNOWN_ASSETS = ['BTC', 'SOL', 'ETH', 'BNB', 'DOGE']; // Add others as needed
 
-        for (const asset of KNOWN_ASSETS) {
+        // Filter keys to verify they are real assets (CMD, chars) and not metadata
+        const allAssets = Object.keys(balance).filter(key =>
+            key !== 'info' && key !== 'free' && key !== 'used' && key !== 'total'
+        );
+
+        for (const asset of allAssets) {
+            if (asset === 'USDT') continue; // USDT is calculated separately above
+
             const qty = balance[asset]?.total || 0;
-            if (qty > 0) {
+            // Ignore microscopic dust (< 0.0000001) to save API calls
+            if (qty > 0.0000001) {
                 // Determine price: Use local price if it's OUR pair, else fetch ticker
                 let price = 0;
                 if (asset === BASE_ASSET) {
@@ -3510,7 +3519,10 @@ async function checkStopLoss() {
                     try {
                         const ticker = await binance.fetchTicker(`${asset}/USDT`);
                         price = ticker.last || 0;
-                    } catch (e) { console.warn(`Failed to valuate ${asset}:`, e.message); }
+                    } catch (e) {
+                        // Coin might not have USDT pair (e.g. LD tokens), skip or warn
+                        // console.warn(`Failed to valuate ${asset}:`, e.message); 
+                    }
                 }
                 baseValue += (qty * price);
             }
