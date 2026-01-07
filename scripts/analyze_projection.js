@@ -10,6 +10,7 @@ const MILLION_TARGET = 1000000;
 
 const BOT_DIR = path.join(__dirname, '..');
 const SESSIONS_DIR = path.join(BOT_DIR, 'data', 'sessions');
+const DEPOSITS_FILE = path.join(BOT_DIR, 'data', 'deposits.json');
 
 // Bot API ports to try
 const BOT_PORTS = [3000, 3001, 3002];
@@ -58,35 +59,64 @@ function findAllStateFiles() {
     }
 }
 
-// Helper to calculate REAL equity from state data (not stale initialCapital)
-function calculateRealEquity(state) {
-    const usdtBalance = state.balance?.usdt || state.availableCapital || 0;
-    const inventory = state.inventory || [];
-    const price = state.currentPrice || 0;
+// TWR Logic Ported from Dashboard/GridBot is NOT NEEDED HERE if we use simple TWR logic for projection
+// Actually, we DO need it to calculate the "Effective Capital" for Yield Accuracy
+function calculateTWRCapital(deposits, endDate = Date.now()) {
+    if (!deposits || deposits.length === 0) return 0;
 
-    let inventoryValue = 0;
-    inventory.forEach(lot => {
-        const qty = lot.qty || lot.amount || lot.remaining || 0;
-        inventoryValue += qty * price;
-    });
+    const sortedDeposits = [...deposits].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let totalWeightedCapital = 0;
+    let totalDays = 0;
+    let runningCapital = 0;
 
-    return usdtBalance + inventoryValue;
+    for (let i = 0; i < sortedDeposits.length; i++) {
+        const deposit = sortedDeposits[i];
+        const depositDate = new Date(deposit.date).getTime();
+        const nextDate = (i < sortedDeposits.length - 1) ? new Date(sortedDeposits[i + 1].date).getTime() : endDate;
+
+        runningCapital += (parseFloat(deposit.amount) || 0);
+
+        const periodDuration = Math.max(0, nextDate - depositDate);
+        const periodDays = periodDuration / (1000 * 60 * 60 * 24);
+
+        totalWeightedCapital += runningCapital * periodDays;
+        totalDays += periodDays;
+    }
+
+    return totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
 }
 
 async function calculateSwarmMetrics() {
     const stateFiles = findAllStateFiles();
+    let totalInvested = 0;
+    let twrCapital = 0;
+    let depositsList = [];
 
-    if (stateFiles.length === 0) {
-        return { realYield: 0.0020, totalCapital: 1000, totalProfit: 0, daysActive: 1 };
-    }
+    // 1. Get REAL Total Invested from deposits.json (SOURCE OF TRUTH for Capital)
+    try {
+        if (fs.existsSync(DEPOSITS_FILE)) {
+            const depositsData = JSON.parse(fs.readFileSync(DEPOSITS_FILE, 'utf8'));
+            if (depositsData.deposits && Array.isArray(depositsData.deposits)) {
+                depositsList = depositsData.deposits;
+                totalInvested = depositsList.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
 
-    // Get REAL equity from Binance API (this is the SOURCE OF TRUTH)
-    const binanceEquity = await getRealBinanceEquity();
+                // Calculate TWR Capital
+                twrCapital = calculateTWRCapital(depositsList);
+            }
+        }
+    } catch (e) { console.error("Error reading deposits.json:", e.message); }
 
-    let totalProfit = 0;
-    let weightedYieldSum = 0;
-    let globalOldestTrade = Date.now();
+    // Fallback if no deposits file
     let fallbackCapital = 0;
+    let totalProfit = 0;
+    let globalOldestTrade = Date.now();
+    let oldestDepositDate = Date.now();
+
+    // Also get oldest deposit date from deposits.json
+    if (depositsList.length > 0) {
+        const dates = depositsList.map(d => new Date(d.date).getTime());
+        oldestDepositDate = Math.min(...dates);
+    }
 
     stateFiles.forEach(file => {
         try {
@@ -99,30 +129,67 @@ async function calculateSwarmMetrics() {
             fallbackCapital += capital;
             totalProfit += profit;
 
-            let botOldestTrade = Date.now();
             if (filledOrders.length > 0) {
                 filledOrders.sort((a, b) => a.timestamp - b.timestamp);
-                botOldestTrade = filledOrders[0].timestamp;
-                if (botOldestTrade < globalOldestTrade) {
-                    globalOldestTrade = botOldestTrade;
+                const botOldest = filledOrders[0].timestamp;
+                if (botOldest < globalOldestTrade) {
+                    globalOldestTrade = botOldest;
                 }
-            }
-
-            const botDaysActive = Math.max(1, (Date.now() - botOldestTrade) / (1000 * 60 * 60 * 24));
-            if (capital > 0 && botDaysActive > 0) {
-                const botDailyYield = profit / capital / botDaysActive;
-                weightedYieldSum += botDailyYield * capital;
             }
         } catch (e) { /* Skip */ }
     });
 
-    const daysActive = Math.max(1, (Date.now() - globalOldestTrade) / (1000 * 60 * 60 * 24));
+    // If totalInvested is 0 (missing file), use fallback
+    if (totalInvested === 0) {
+        totalInvested = fallbackCapital;
+        twrCapital = fallbackCapital; // No history, assume constant
+    }
 
-    // Use Binance equity if available (REAL), otherwise fallback
-    const totalCapital = binanceEquity || fallbackCapital;
-    const realYield = fallbackCapital > 0 ? weightedYieldSum / fallbackCapital : 0.0020;
+    // Use oldest trade OR oldest deposit (whichever is earlier) for days active
+    const startTimeByTrades = globalOldestTrade;
+    const startTimeByDeposits = oldestDepositDate;
+    const effectiveStartTime = Math.min(startTimeByTrades, startTimeByDeposits);
+    const daysActive = Math.max(1, (Date.now() - effectiveStartTime) / (1000 * 60 * 60 * 24));
 
-    return { realYield, totalCapital, totalProfit, daysActive };
+    // 2. Get REAL equity from Binance API (SOURCE OF TRUTH for Current Value)
+    const binanceEquity = await getRealBinanceEquity();
+
+    // 3. Calculate metrics
+    const currentEquity = binanceEquity || (totalInvested + totalProfit);
+
+    // A) NET EQUITY YIELD (Hard Mode)
+    // Formula: (Final / TWR_Capital)^(1/days) - 1 ?? No, standard CAGR uses Initial.
+    // However, for "Yield Performance", TWR is best.
+    // If we use TWR Capital as the denominator, we get the true performance yield.
+
+    let netEquityYield = 0.0001;
+    if (twrCapital > 0 && currentEquity > 0) {
+        // Simple ROI over TWR Capital
+        const totalNetROI = (currentEquity - totalInvested) / twrCapital;
+        const dailyNetROI = totalNetROI / daysActive;
+        netEquityYield = dailyNetROI;
+
+        // Alternatively, classic TWR compounding calc:
+        // (End/Start)^(1/n) but Start varies. 
+        // We stick to: Daily Yield = (Total Profit / TWR Capital) / Days
+    }
+
+    // B) CASH FLOW YIELD (The Engine)
+    // This represents the "printing power" of the bots
+    let cashFlowYield = 0.0001;
+    if (twrCapital > 0 && daysActive > 0) {
+        cashFlowYield = totalProfit / twrCapital / daysActive;
+    }
+
+    return {
+        netEquityYield,
+        cashFlowYield,
+        totalCapital: currentEquity,
+        totalProfit,
+        daysActive,
+        totalInvested,
+        twrCapital // Export for logging
+    };
 }
 
 // Calculate time to reach target with compound interest + monthly contributions
@@ -166,11 +233,16 @@ function getProgressionTable(startBalance, dailyYield, monthlyContrib) {
 }
 
 async function analyzeAndProject() {
-    const { realYield, totalCapital, totalProfit, daysActive } = await calculateSwarmMetrics();
-    // totalCapital is now the REAL Binance balance (already includes value of holdings)
+    const { netEquityYield, cashFlowYield, totalCapital, totalProfit, daysActive, totalInvested, twrCapital } = await calculateSwarmMetrics();
+
+    // Alias for backward compatibility with rest of script
     const currentCapital = totalCapital;
-    const realYieldPct = (realYield * 100).toFixed(3);
-    const APY = ((Math.pow(1 + realYield, 365) - 1) * 100).toFixed(0);
+
+    // Format percentages
+    const netYieldPct = (netEquityYield * 100).toFixed(3);
+    const cashYieldPct = (cashFlowYield * 100).toFixed(3);
+    const netAPY = (netEquityYield * 365 * 100).toFixed(0); // Simple APR approximation for robustness
+    const cashAPY = (cashFlowYield * 365 * 100).toFixed(0);
 
     const logs = [];
     const log = (msg) => { console.log(msg); logs.push(msg); };
@@ -183,19 +255,29 @@ async function analyzeAndProject() {
     log(`═══════════════════════════════════════════════════════════`);
 
     log(`\n📊 TU SITUACIÓN ACTUAL:`);
-    log(`   Capital Actual:     $${currentCapital.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD`);
-    log(`   Profit Realizado:   $${totalProfit.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD`);
+    log(`   Capital Invertido:  $${totalInvested.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD`);
+    log(`   Capital TWR (Avg):  $${twrCapital.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD (Time-Weighted)`);
+    log(`   Capital Actual:     $${totalCapital.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD (Binance)`);
+    log(`   Profit Realizado:   $${totalProfit.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD (Cash Flow)`);
     log(`   Días Activo:        ${daysActive.toFixed(1)} días`);
-    log(`   Yield Diario:       ${realYieldPct}%`);
-    log(`   APY Proyectado:     ${APY}%`);
-    log(`   Aportes Mensuales:  $${MONTHLY_CONTRIBUTION_USD.toFixed(0)} USD (${MONTHLY_CONTRIBUTION_MXN} MXN)`);
+    log(`   -----------------------------------------------------------`);
+    log(`   🔥 CASH FLOW YIELD: ${cashYieldPct}% diario  (Tu "Motor")  -> TWR APY: ${cashAPY}%`);
+    log(`   🧊 NET EQUITY YIELD: ${netYieldPct}% diario  (Tu "Realidad") -> TWR APY: ${netAPY}%`);
+
+    // We use Cash Flow Yield for the projection table because it represents the bot's work capacity
+    // But we label it clearly.
+    const projectionYield = cashFlowYield;
+    const projectionYieldPct = cashYieldPct;
+
+    log(`\n👉 USANDO 'CASH FLOW' (${projectionYieldPct}%) PARA PROYECCIÓN:`);
+    log(`   (Asumiendo que el mercado se recupera y permite realizar ganancias)`);
 
     // Time to milestones
-    const to100k = timeToTarget(currentCapital, realYield, MONTHLY_CONTRIBUTION_USD, 100000);
-    const to500k = timeToTarget(currentCapital, realYield, MONTHLY_CONTRIBUTION_USD, 500000);
-    const to1M = timeToTarget(currentCapital, realYield, MONTHLY_CONTRIBUTION_USD, MILLION_TARGET);
+    const to100k = timeToTarget(totalCapital, projectionYield, MONTHLY_CONTRIBUTION_USD, 100000);
+    const to500k = timeToTarget(totalCapital, projectionYield, MONTHLY_CONTRIBUTION_USD, 500000);
+    const to1M = timeToTarget(totalCapital, projectionYield, MONTHLY_CONTRIBUTION_USD, MILLION_TARGET);
 
-    log(`\n⏱️ TIEMPO ESTIMADO PARA METAS:`);
+    log(`\n⏱️ TIEMPO ESTIMADO PARA METAS (Con $${MONTHLY_CONTRIBUTION_USD.toFixed(0)}/mes):`);
     if (to100k) {
         log(`   🥉 $100,000 USD:    ${to100k.years} años ${to100k.remainingMonths} meses`);
     }
@@ -209,8 +291,8 @@ async function analyzeAndProject() {
     }
 
     // Progression Table
-    const progression = getProgressionTable(currentCapital, realYield, MONTHLY_CONTRIBUTION_USD);
-    log(`\n📈 PROYECCIÓN ANUAL (con ${realYieldPct}%/día):`);
+    const progression = getProgressionTable(totalCapital, projectionYield, MONTHLY_CONTRIBUTION_USD);
+    log(`\n📈 PROYECCIÓN ANUAL (con ${projectionYieldPct}%/día):`);
     log(`   ┌────────┬─────────────────────┐`);
     log(`   │  Año   │  Balance Estimado   │`);
     log(`   ├────────┼─────────────────────┤`);
@@ -226,7 +308,7 @@ async function analyzeAndProject() {
     // ═══════════════════════════════════════════════════════════
     const scenarios = [
         { name: "🏦 BANCO (CETES 10%)", yield: 0.00026 },
-        { name: `📊 TU REALIDAD (${realYieldPct}%)`, yield: realYield, highlight: true },
+        { name: `📊 TU REALIDAD (${projectionYieldPct}%)`, yield: projectionYield, highlight: true },
         { name: "🐻 PESIMISTA (0.25%)", yield: 0.0025 },
         { name: "⚖️ REALISTA (0.50%)", yield: 0.0050 },
         { name: "🦄 OPTIMISTA (0.82%)", yield: 0.0082 }
@@ -356,11 +438,11 @@ async function analyzeAndProject() {
     // ═══════════════════════════════════════════════════════════
     log(`\n⚠️ DISCLAIMER:`);
     log(`   - Proyecciones basadas en yield histórico (${daysActive.toFixed(0)} días de datos)`);
-    log(`   - Crypto es volátil, yield puede variar significativamente`);
+    log(`   - TWR APY ajustado por peso temporal de depósitos`);
     log(`   - No es consejo financiero, es matemática compuesta 🧮`);
 
     fs.writeFileSync('projection_output.txt', logs.join('\n'));
     console.log("\n✅ Comparison saved to projection_output.txt");
 }
 
-analyzeAndProject();
+analyzeAndProject().catch(e => console.error("CRITICAL SCRIPT ERROR:", e));
