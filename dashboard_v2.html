@@ -639,56 +639,49 @@
                 startIndex = Math.max(0, history.length - limit);
             }
 
-            // 3. PREPARE DATA
-            const realHistoryMap = new Map();
-            GLOBAL_FINANCIAL_HISTORY.forEach(h => {
-                if (h.date && h.equity) realHistoryMap.set(h.date.split('T')[0], h.equity);
-            });
+            // 3. PREPARE DATA - Build deposit map first
+            const depositByDate = new Map();
+            let cumDeposit = 0;
+            if (window.DEPOSIT_DATA && window.DEPOSIT_DATA.deposits) {
+                const sortedDeposits = [...window.DEPOSIT_DATA.deposits].sort((a, b) => a.date.localeCompare(b.date));
+                sortedDeposits.forEach(d => {
+                    cumDeposit += (d.amount || 0);
+                    depositByDate.set(d.date, cumDeposit);
+                });
+            }
 
-            const totalRecordedProfit = history.reduce((sum, h) => sum + (h.profit || 0), 0);
-            let estimatedBase = GLOBAL_EQUITY > 0 ? (GLOBAL_EQUITY - totalRecordedProfit) : 0;
+            // Build both curves simultaneously: deposits cumulative and equity = deposits + profit
+            let lastKnownDeposit = 0;
+            let runningProfit = 0;
+            const depositsCumulative = [];
+            const equityCurve = [];
 
-            let currentEquityValue = estimatedBase;
-            const fullCurve = history.map(h => {
-                const dateKey = h.date;
-                if (realHistoryMap.has(dateKey)) {
-                    currentEquityValue = realHistoryMap.get(dateKey);
-                } else {
-                    currentEquityValue += (h.profit || 0);
+            history.forEach(h => {
+                // Update cumulative deposit if there's a deposit on this date
+                if (depositByDate.has(h.date)) {
+                    lastKnownDeposit = depositByDate.get(h.date);
                 }
-                return currentEquityValue;
+                // Accumulate profit
+                runningProfit += (h.profit || 0);
+
+                // Store values
+                depositsCumulative.push(lastKnownDeposit);
+                // Equity = Deposits at that point + Profit at that point
+                equityCurve.push(lastKnownDeposit + runningProfit);
             });
 
-            const slicedEquity = fullCurve.slice(startIndex);
+            const slicedEquity = equityCurve.slice(startIndex);
+            const slicedDeposits = depositsCumulative.slice(startIndex);
             const slicedProfits = filtered.map(h => h.profit);
             const slicedLabels = filtered.map(h => h.date.substring(5));
 
+            // Cumulative profit for Chart 2
             let runningTotal = 0;
             const absoluteCumulative = history.map(h => {
                 runningTotal += (h.profit || 0);
                 return runningTotal;
             });
             const slicedCumulative = absoluteCumulative.slice(startIndex);
-
-            // DEPOSITS CUMULATIVE
-            const depositsCumulative = [];
-            if (window.DEPOSIT_DATA && window.DEPOSIT_DATA.deposits) {
-                const sortedDeposits = [...window.DEPOSIT_DATA.deposits].sort((a, b) => a.date.localeCompare(b.date));
-                const depositByDate = new Map();
-                let cumDeposit = 0;
-                sortedDeposits.forEach(d => {
-                    cumDeposit += (d.amount || 0);
-                    depositByDate.set(d.date, cumDeposit);
-                });
-                let lastKnownDeposit = 0;
-                history.forEach(h => {
-                    if (depositByDate.has(h.date)) {
-                        lastKnownDeposit = depositByDate.get(h.date);
-                    }
-                    depositsCumulative.push(lastKnownDeposit);
-                });
-            }
-            const slicedDeposits = depositsCumulative.slice(startIndex);
 
             // Colors
             const COLOR_GOLD = '#ffd700';
