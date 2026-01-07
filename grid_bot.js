@@ -868,8 +868,32 @@ app.get('/api/deposits', async (req, res) => {
         const data = readDeposits();
         const totalDeposited = data.deposits.reduce((sum, d) => sum + d.amount, 0);
 
-        // Get current equity from Binance
-        const currentEquity = await getGlobalEquity();
+        // Get current equity from Binance (Dynamic dynamic)
+        const balance = await binance.fetchBalance();
+        const usdt = balance.USDT?.total || 0;
+
+        let baseValue = 0;
+        const allAssets = Object.keys(balance).filter(key =>
+            key !== 'info' && key !== 'free' && key !== 'used' && key !== 'total' && key !== 'USDT'
+        );
+
+        let allTickers = {};
+        try { allTickers = await binance.fetchTickers(); } catch (e) { }
+
+        for (const asset of allAssets) {
+            const qty = balance[asset]?.total || 0;
+            if (qty > 0.000001) {
+                let price = 0;
+                if (asset === BASE_ASSET && state.currentPrice) price = state.currentPrice;
+                else {
+                    const pairName = `${asset}/USDT`;
+                    if (allTickers[pairName]) price = allTickers[pairName].last;
+                    else if (allTickers[`${asset}USDT`]) price = allTickers[`${asset}USDT`].last;
+                }
+                baseValue += qty * price;
+            }
+        }
+        const currentEquity = usdt + baseValue;
         const profit = currentEquity - totalDeposited;
         const roi = totalDeposited > 0 ? ((profit / totalDeposited) * 100).toFixed(2) : 0;
 
