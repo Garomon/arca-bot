@@ -555,7 +555,8 @@
 /* === SPIRIT HERO SECTION === */
 .spirit-hero {
     position: relative;
-    height: 280px;
+    height: 280px !important;
+    min-height: 280px !important;
     border-radius: 16px;
     overflow: hidden;
     margin-bottom: 20px;
