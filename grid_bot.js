@@ -453,6 +453,8 @@ app.get('/api/balance', async (req, res) => {
                     const pairName = `${asset}/USDT`;
                     if (allTickers[pairName]) price = allTickers[pairName].last;
                     else if (allTickers[`${asset}USDT`]) price = allTickers[`${asset}USDT`].last;
+                    // Reverse pair check (e.g. USDT/MXN for fiat)
+                    else if (allTickers[`USDT${asset}`]) price = 1 / allTickers[`USDT${asset}`].last;
                 }
                 const val = qty * price;
                 baseValue += val;
@@ -889,6 +891,8 @@ app.get('/api/deposits', async (req, res) => {
                     const pairName = `${asset}/USDT`;
                     if (allTickers[pairName]) price = allTickers[pairName].last;
                     else if (allTickers[`${asset}USDT`]) price = allTickers[`${asset}USDT`].last;
+                    // Reverse pair check (e.g. USDT/MXN for fiat)
+                    else if (allTickers[`USDT${asset}`]) price = 1 / allTickers[`USDT${asset}`].last;
                 }
                 baseValue += qty * price;
             }
