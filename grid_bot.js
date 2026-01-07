@@ -328,11 +328,11 @@ app.get('/api/status', async (req, res) => {
         );
         const yesterdayProfit = yesterdayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
 
-        // Calculate APY from ROI and days active
-        const startTime = state.firstTradeTime || state.startTime || Date.now();
-        const daysActive = Math.max(1, (Date.now() - startTime) / (1000 * 60 * 60 * 24));
-        const dailyROI = roi / daysActive;
-        const apy = dailyROI * 365;
+
+        // Use centralized APY calculation for consistency with dashboard
+        const apyData = calculateAccurateAPY();
+        const apy = parseFloat(apyData.projectedAPY) || 0;
+        const daysActive = parseFloat(apyData.daysActive) || 1;
 
         // Last trade info (robustly pick latest by timestamp regardless of array order)
         const lastTrade = filledOrders.length > 0
