@@ -372,8 +372,8 @@ app.get('/api/status', async (req, res) => {
 
             // Trade metrics
             winRate: winRate,
-            totalTrades: totalTrades,
-            wins: successfulTrades.length,
+            totalTrades: sellOrders.length,
+            wins: successfulSells.length,
 
             // Orders and inventory
             activeOrders: state.activeOrders?.length || 0,
