@@ -47,6 +47,41 @@
             border-color: var(--cyan-holo);
             font-weight: bold;
         }
+
+        /* Deposit Form Responsive */
+        .deposit-form {
+            display: grid;
+            grid-template-columns: 150px 120px 1fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .deposit-form {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .deposit-form .note-field {
+                grid-column: span 2;
+            }
+
+            .deposit-form .submit-btn {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .deposit-form {
+                grid-template-columns: 1fr;
+            }
+
+            .deposit-form .note-field,
+            .deposit-form .submit-btn {
+                grid-column: span 1;
+            }
+        }
     </style>
 </head>
 
@@ -164,8 +199,7 @@
             </div>
 
             <!-- Add Deposit Form -->
-            <div
-                style="display: grid; grid-template-columns: 150px 120px 1fr auto; gap: 12px; align-items: end; margin-bottom: 20px;">
+            <div class="deposit-form">
                 <div>
                     <label style="font-size: 0.7rem; color: #888; display: block; margin-bottom: 4px;">📅 Fecha</label>
                     <input type="date" id="deposit-date"
@@ -176,13 +210,13 @@
                     <input type="number" id="deposit-amount" placeholder="500" step="0.01"
                         style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'Outfit', sans-serif; box-sizing: border-box;">
                 </div>
-                <div>
+                <div class="note-field">
                     <label style="font-size: 0.7rem; color: #888; display: block; margin-bottom: 4px;">📝 Nota
                         (opcional)</label>
                     <input type="text" id="deposit-note" placeholder="Depósito mensual"
                         style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'Outfit', sans-serif; box-sizing: border-box;">
                 </div>
-                <button onclick="addDeposit()"
+                <button class="submit-btn" onclick="addDeposit()"
                     style="padding: 10px 20px; background: var(--gold-primary); color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: 'Outfit', sans-serif; transition: all 0.2s; white-space: nowrap;">
                     ➕ AGREGAR
                 </button>
