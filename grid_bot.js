@@ -1518,52 +1518,65 @@ async function getCurrentPrice() {
 }
 
 // PHASE 5: Time-Weighted Average Capital (TWAC) for accurate APY calculation
-// FIXED: Now uses real deposits from deposits.json × allocation
+// TRUE TWR: Weights capital by the time each deposit was active
 function calculateTimeWeightedCapital() {
-    // Get REAL capital from deposits × this bot's allocation
     try {
         const depositData = readDeposits();
-        const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
-        const allocatedCapital = totalDeposited * CAPITAL_ALLOCATION;
+        const deposits = depositData.deposits || [];
 
-        // Debug log (infrequent - 1% of calls)
-        if (Math.random() < 0.01) {
-            console.log(`>> [APY] Deposit-Based Capital: $${allocatedCapital.toFixed(2)} (${(CAPITAL_ALLOCATION * 100).toFixed(0)}% of $${totalDeposited.toFixed(2)})`);
-        }
-
-        return allocatedCapital;
-    } catch (e) {
-        // Fallback: Use capitalHistory if deposits can't be read
-        const history = state.capitalHistory || [];
-
-        if (history.length === 0) {
+        if (deposits.length === 0) {
             return state.initialCapital || 100;
         }
 
-        if (history.length === 1) {
-            return history[0].amount;
-        }
+        // Sort deposits by date ascending
+        const sortedDeposits = [...deposits].sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
 
-        // Calculate time-weighted average from history as fallback
-        let totalWeightedCapital = 0;
-        let totalTime = 0;
         const now = Date.now();
+        let totalWeightedCapital = 0;
+        let totalDays = 0;
+        let runningCapital = 0;
 
-        for (let i = 0; i < history.length; i++) {
-            const entry = history[i];
-            const startTime = entry.timestamp;
-            const endTime = (i < history.length - 1) ? history[i + 1].timestamp : now;
-            const duration = endTime - startTime;
+        // Calculate time-weighted capital for each period
+        for (let i = 0; i < sortedDeposits.length; i++) {
+            const deposit = sortedDeposits[i];
+            const depositDate = new Date(deposit.date).getTime();
 
-            totalWeightedCapital += entry.amount * duration;
-            totalTime += duration;
+            // End of this period is either next deposit or now
+            const nextDate = (i < sortedDeposits.length - 1)
+                ? new Date(sortedDeposits[i + 1].date).getTime()
+                : now;
+
+            // Add this deposit to running capital
+            runningCapital += deposit.amount;
+
+            // Calculate days this capital level was active
+            const periodDays = Math.max(0, (nextDate - depositDate) / (1000 * 60 * 60 * 24));
+
+            // Weight by days
+            totalWeightedCapital += runningCapital * periodDays;
+            totalDays += periodDays;
         }
 
-        if (totalTime === 0) return state.initialCapital || 100;
+        // Apply this bot's allocation percentage
+        const avgCapital = totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
+        const allocatedTWR = avgCapital * CAPITAL_ALLOCATION;
 
-        const avgCapital = totalWeightedCapital / totalTime;
-        console.log(`>> [APY] Fallback Time-Weighted Capital: $${avgCapital.toFixed(2)} (Error: ${e.message})`);
-        return avgCapital;
+        // Debug log (infrequent - 1% of calls)
+        if (Math.random() < 0.01) {
+            const totalDeposited = deposits.reduce((sum, d) => sum + d.amount, 0);
+            console.log(`>> [TWR] Time-Weighted Capital: $${allocatedTWR.toFixed(2)} (avg of $${avgCapital.toFixed(2)} × ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%)`);
+            console.log(`>> [TWR] vs Simple Sum: $${(totalDeposited * CAPITAL_ALLOCATION).toFixed(2)} | Periods: ${sortedDeposits.length} | Days: ${totalDays.toFixed(1)}`);
+        }
+
+        return allocatedTWR;
+    } catch (e) {
+        // Fallback to simple calculation
+        const depositData = readDeposits();
+        const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
+        console.log(`>> [TWR] Fallback to simple: $${(totalDeposited * CAPITAL_ALLOCATION).toFixed(2)} (Error: ${e.message})`);
+        return totalDeposited * CAPITAL_ALLOCATION;
     }
 }
 
@@ -3872,24 +3885,14 @@ async function detectCapitalChange() {
 }
 
 // PHASE 5: Time-Weighted APY Calculation
-// Uses real deposits from deposits.json with allocation percentage for accuracy
+// Uses TWR (Time-Weighted Return) for accurate capital averaging
 function calculateAccurateAPY() {
     const profit = state.totalProfit || 0;
     const firstTrade = state.firstTradeTime || state.startTime;
     const daysActive = Math.max(1, (Date.now() - firstTrade) / (1000 * 60 * 60 * 24));
 
-    // Get REAL capital from deposits × this bot's allocation
-    let allocatedCapital = state.initialCapital || 100;
-    try {
-        const depositData = readDeposits();
-        const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
-        // Apply this bot's allocation percentage (e.g., 40% for BTC)
-        allocatedCapital = totalDeposited * CAPITAL_ALLOCATION;
-        console.log(`>> [APY_DEBUG] Deposits: $${totalDeposited.toFixed(2)} × ${(CAPITAL_ALLOCATION * 100).toFixed(0)}% = $${allocatedCapital.toFixed(2)}`);
-    } catch (e) {
-        // Fallback to state.initialCapital if deposits can't be read
-        console.log(`>> [APY] Using fallback capital: ${allocatedCapital} (Error: ${e.message})`);
-    }
+    // Use Time-Weighted Return capital (accounts for deposit timing)
+    const allocatedCapital = calculateTimeWeightedCapital();
 
     // ROI based on allocated capital
     const roi = allocatedCapital > 0 ? (profit / allocatedCapital) * 100 : 0;

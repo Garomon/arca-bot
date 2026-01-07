@@ -561,25 +561,46 @@
                 const roi = (tProfit / (tEquity - tProfit)) * 100;
                 document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
 
-                // Calculate Global APY
-                // Get total deposited from Capital Tracker
-                const totalDeposited = window.DEPOSIT_DATA?.totalDeposited || (tEquity - tProfit);
-                // Get earliest start date (from deposits or default 30 days)
+                // Calculate Global APY using Time-Weighted Return
                 const deposits = window.DEPOSIT_DATA?.deposits || [];
-                let earliestDate = Date.now();
                 if (deposits.length > 0) {
-                    earliestDate = Math.min(...deposits.map(d => new Date(d.date).getTime()));
-                }
-                const daysActive = Math.max(1, (Date.now() - earliestDate) / (1000 * 60 * 60 * 24));
+                    // Sort deposits by date
+                    const sortedDeposits = [...deposits].sort((a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                    );
 
-                // APY = (Profit / Deposited) / Days * 365
-                const globalROI = totalDeposited > 0 ? (tProfit / totalDeposited) * 100 : 0;
-                const globalAPY = (globalROI / daysActive) * 365;
+                    const now = Date.now();
+                    let totalWeightedCapital = 0;
+                    let totalDays = 0;
+                    let runningCapital = 0;
 
-                const apyEl = document.getElementById('global-apy');
-                if (apyEl) {
-                    apyEl.innerText = `~${globalAPY.toFixed(0)}%`;
-                    apyEl.style.color = globalAPY >= 50 ? 'var(--emerald-life)' : globalAPY >= 20 ? 'var(--gold-primary)' : '#fff';
+                    // Calculate TWR capital for each period
+                    for (let i = 0; i < sortedDeposits.length; i++) {
+                        const deposit = sortedDeposits[i];
+                        const depositDate = new Date(deposit.date).getTime();
+                        const nextDate = (i < sortedDeposits.length - 1)
+                            ? new Date(sortedDeposits[i + 1].date).getTime()
+                            : now;
+
+                        runningCapital += deposit.amount;
+                        const periodDays = Math.max(0, (nextDate - depositDate) / (1000 * 60 * 60 * 24));
+
+                        totalWeightedCapital += runningCapital * periodDays;
+                        totalDays += periodDays;
+                    }
+
+                    const twrCapital = totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
+                    const daysActive = totalDays || 1;
+
+                    // APY = (Profit / TWR Capital) / Days * 365
+                    const globalROI = twrCapital > 0 ? (tProfit / twrCapital) * 100 : 0;
+                    const globalAPY = (globalROI / daysActive) * 365;
+
+                    const apyEl = document.getElementById('global-apy');
+                    if (apyEl) {
+                        apyEl.innerText = `~${globalAPY.toFixed(0)}%`;
+                        apyEl.style.color = globalAPY >= 50 ? 'var(--emerald-life)' : globalAPY >= 20 ? 'var(--gold-primary)' : '#fff';
+                    }
                 }
             }
 
