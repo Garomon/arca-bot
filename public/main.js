@@ -3,6 +3,163 @@
  * Version: 2.0 - All Features Working
  */
 
+// ═══════════════════════════════════════════════════════════════
+// 🛡️ SPIRIT SYSTEM - Guardian Spirit Configuration
+// ═══════════════════════════════════════════════════════════════
+const SPIRITS = {
+    ignis: {
+        name: 'IGNIS',
+        type: '🔥 ESPÍRITU DE FUEGO',
+        quote: '"Del caos emerge el oro. El fuego purifica."',
+        banner: 'assets/spirit-ignis-banner.png',
+        pair: 'BTC/USDT',
+        symbol: '₿',
+        socketPath: undefined, // Default (no path = root)
+        apiPath: '/api/status'
+    },
+    ventus: {
+        name: 'VENTUS',
+        type: '🌬️ ESPÍRITU DE VIENTO',
+        quote: '"Fluye como el viento, golpea como el rayo."',
+        banner: 'assets/spirit-ventus-banner.png',
+        pair: 'SOL/USDT',
+        symbol: '◎',
+        socketPath: '/sol/socket.io',
+        apiPath: '/sol/api/status'
+    },
+    fang: {
+        name: 'FANG',
+        type: '🐺 ESPÍRITU DE MANADA',
+        quote: '"La manada sobrevive. Los lobos solitarios caen."',
+        banner: 'assets/spirit-fang-banner.png',
+        pair: 'DOGE/USDT',
+        symbol: 'Ð',
+        socketPath: '/doge/socket.io',
+        apiPath: '/doge/api/status'
+    }
+};
+
+let currentSpirit = 'ignis';
+
+// Spirit Switch Function (Called from HTML buttons)
+function switchSpirit(spiritId) {
+    if (!SPIRITS[spiritId]) return;
+
+    currentSpirit = spiritId;
+    const spirit = SPIRITS[spiritId];
+
+    // Update data attribute for CSS theming
+    document.body.setAttribute('data-spirit', spiritId);
+
+    // Update banner image
+    const bannerImg = document.getElementById('spirit-banner-img');
+    if (bannerImg) {
+        bannerImg.style.opacity = '0';
+        setTimeout(() => {
+            bannerImg.src = spirit.banner;
+            bannerImg.style.opacity = '0.9';
+        }, 200);
+    }
+
+    // Update text elements
+    const nameEl = document.getElementById('spirit-name');
+    const typeEl = document.getElementById('spirit-type');
+    const quoteEl = document.getElementById('spirit-quote');
+    const pairLabel = document.getElementById('trading-pair-label');
+    const symbolLabel = document.getElementById('pair-symbol');
+
+    if (nameEl) nameEl.textContent = spirit.name;
+    if (typeEl) typeEl.textContent = spirit.type;
+    if (quoteEl) quoteEl.textContent = spirit.quote;
+    if (pairLabel) pairLabel.textContent = spirit.pair;
+    if (symbolLabel) symbolLabel.textContent = spirit.symbol;
+
+    // Update selector buttons
+    document.querySelectorAll('.spirit-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.spirit === spiritId) btn.classList.add('active');
+    });
+
+    // Fetch data from the correct bot API
+    fetchSpiritData(spiritId);
+
+    console.log(`>> [SPIRIT] Switched to ${spirit.name} (${spirit.pair})`);
+}
+
+// Fetch data from spirit's API endpoint
+async function fetchSpiritData(spiritId) {
+    const spirit = SPIRITS[spiritId];
+    if (!spirit) return;
+
+    try {
+        const res = await fetch(spirit.apiPath);
+        if (res.ok) {
+            const data = await res.json();
+            updateBotUIFromAPI(data, spirit);
+        }
+    } catch (e) {
+        console.error(`[SPIRIT] Error fetching ${spiritId} data:`, e);
+    }
+}
+
+// Update UI from API response
+function updateBotUIFromAPI(data, spirit) {
+    // Update financial metrics
+    if (ui.freeUSDT && data.freeUSDT !== undefined) {
+        ui.freeUSDT.innerText = `$${data.freeUSDT.toFixed(2)}`;
+    }
+    if (ui.profitTotal && data.totalProfit !== undefined) {
+        ui.profitTotal.innerText = `$${data.totalProfit.toFixed(2)}`;
+        ui.profitTotal.style.color = data.totalProfit > 0 ? 'var(--spirit-primary)' : '#ff3b3b';
+    }
+    if (ui.totalEquity && data.equity !== undefined) {
+        ui.totalEquity.innerText = `$${data.equity.toFixed(2)}`;
+    }
+    if (ui.activeLoops && data.activeOrders !== undefined) {
+        ui.activeLoops.innerText = data.activeOrders;
+    }
+
+    // Update price display
+    if (ui.priceDisplay && data.currentPrice) {
+        ui.priceDisplay.innerText = formatPrice(data.currentPrice);
+    }
+    if (ui.livePrice && data.currentPrice) {
+        ui.livePrice.innerText = formatPrice(data.currentPrice);
+    }
+
+    // Update market regime
+    const regimeText = document.getElementById('regime-text');
+    if (regimeText && data.marketRegime) {
+        regimeText.innerText = data.marketRegime;
+    }
+
+    // Update signal score
+    if (ui.signalScore && data.score !== undefined) {
+        ui.signalScore.innerText = data.score;
+    }
+
+    // Update RSI
+    if (ui.rsiValue && data.rsi !== undefined) {
+        ui.rsiValue.innerText = data.rsi.toFixed(1);
+    }
+}
+
+// Initialize spirit on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Set default spirit theme
+    document.body.setAttribute('data-spirit', 'ignis');
+
+    // Detect if on a sub-path and auto-set spirit
+    const path = window.location.pathname;
+    if (path.startsWith('/sol')) {
+        switchSpirit('ventus');
+    } else if (path.startsWith('/doge')) {
+        switchSpirit('fang');
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+
 // --- SOCKET CONNECTION (MULTI-BOT AWARE) ---
 // Detect if we are on a subpath (e.g., /sol/)
 const pathName = window.location.pathname;
