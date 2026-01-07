@@ -3876,11 +3876,12 @@ function calculateAccurateAPY() {
     try {
         const depositData = readDeposits();
         const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
-        // Apply this bot's allocation percentage (e.g., 60% for BTC)
+        // Apply this bot's allocation percentage (e.g., 40% for BTC)
         allocatedCapital = totalDeposited * CAPITAL_ALLOCATION;
+        console.log(`>> [APY_DEBUG] Deposits: $${totalDeposited.toFixed(2)} × ${(CAPITAL_ALLOCATION * 100).toFixed(0)}% = $${allocatedCapital.toFixed(2)}`);
     } catch (e) {
         // Fallback to state.initialCapital if deposits can't be read
-        console.log(`>> [APY] Using fallback capital: ${allocatedCapital}`);
+        console.log(`>> [APY] Using fallback capital: ${allocatedCapital} (Error: ${e.message})`);
     }
 
     // ROI based on allocated capital
