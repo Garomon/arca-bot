@@ -204,10 +204,10 @@
             </div>
         </div>
 
-        <!-- Global Profit Chart -->
+        <!-- Chart 1: Capital vs Equity -->
         <div class="elite-card" style="margin-top: 30px; padding: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin: 0; font-size: 1rem; color: var(--emerald-life);">📈 Crecimiento de Capital (Equity)
+                <h3 style="margin: 0; font-size: 1rem; color: var(--cyan-holo);">📊 Capital vs Equity
                 </h3>
                 <div class="chart-controls">
                     <button onclick="updateTimeframe(7, this)" class="btn-filter">7D</button>
@@ -216,8 +216,19 @@
                     <button onclick="updateTimeframe('ALL', this)" class="btn-filter">MAX</button>
                 </div>
             </div>
-            <div style="height: 300px; position: relative;">
-                <canvas id="global-profit-chart"></canvas>
+            <div style="height: 250px; position: relative;">
+                <canvas id="equity-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Profit Tracking -->
+        <div class="elite-card" style="margin-top: 20px; padding: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1rem; color: var(--gold-primary);">💰 Profit Acumulado
+                </h3>
+            </div>
+            <div style="height: 200px; position: relative;">
+                <canvas id="profit-chart"></canvas>
             </div>
         </div>
 
@@ -612,9 +623,6 @@
 
         function renderChart(historyRaw) {
             LAST_RENDERED_EQUITY = GLOBAL_EQUITY;
-            const canvas = document.getElementById('global-profit-chart');
-            if (!canvas) return;
-            if (window.myChart instanceof Chart) window.myChart.destroy();
 
             // 1. FILL GAPS first
             const history = fillGaps(historyRaw);
@@ -631,27 +639,21 @@
                 startIndex = Math.max(0, history.length - limit);
             }
 
-            // 3. PREPARE DATA (Smart Equity Curve)
-
-            // Map real history by date (from integrity_guard.js)
+            // 3. PREPARE DATA
             const realHistoryMap = new Map();
             GLOBAL_FINANCIAL_HISTORY.forEach(h => {
                 if (h.date && h.equity) realHistoryMap.set(h.date.split('T')[0], h.equity);
             });
 
-            // Initial Base Estimation (Fallback if no history)
             const totalRecordedProfit = history.reduce((sum, h) => sum + (h.profit || 0), 0);
             let estimatedBase = GLOBAL_EQUITY > 0 ? (GLOBAL_EQUITY - totalRecordedProfit) : 0;
 
-            // Build Curve
             let currentEquityValue = estimatedBase;
             const fullCurve = history.map(h => {
                 const dateKey = h.date;
                 if (realHistoryMap.has(dateKey)) {
-                    // SNAP to real data (Deposits/Withdrawals/Market Moves reflected here)
                     currentEquityValue = realHistoryMap.get(dateKey);
                 } else {
-                    // Estimate move based on profit
                     currentEquityValue += (h.profit || 0);
                 }
                 return currentEquityValue;
@@ -659,10 +661,8 @@
 
             const slicedEquity = fullCurve.slice(startIndex);
             const slicedProfits = filtered.map(h => h.profit);
-            const slicedLabels = filtered.map(h => h.date.substring(5)); // MM-DD
+            const slicedLabels = filtered.map(h => h.date.substring(5));
 
-            // Cumulative Profit (Always starts at 0 for period or absolute?)
-            // Let's show Absolute Cumulative Profit
             let runningTotal = 0;
             const absoluteCumulative = history.map(h => {
                 runningTotal += (h.profit || 0);
@@ -670,167 +670,170 @@
             });
             const slicedCumulative = absoluteCumulative.slice(startIndex);
 
-            // 4. DEPOSITS CUMULATIVE LINE (Capital Invested over time)
+            // DEPOSITS CUMULATIVE
             const depositsCumulative = [];
             if (window.DEPOSIT_DATA && window.DEPOSIT_DATA.deposits) {
                 const sortedDeposits = [...window.DEPOSIT_DATA.deposits].sort((a, b) => a.date.localeCompare(b.date));
-                // Build cumulative deposit map by date
                 const depositByDate = new Map();
                 let cumDeposit = 0;
                 sortedDeposits.forEach(d => {
                     cumDeposit += (d.amount || 0);
                     depositByDate.set(d.date, cumDeposit);
                 });
-                // For each chart date, find the cumulative deposit at that point
                 let lastKnownDeposit = 0;
                 history.forEach(h => {
-                    const dateKey = h.date;
-                    if (depositByDate.has(dateKey)) {
-                        lastKnownDeposit = depositByDate.get(dateKey);
+                    if (depositByDate.has(h.date)) {
+                        lastKnownDeposit = depositByDate.get(h.date);
                     }
                     depositsCumulative.push(lastKnownDeposit);
                 });
             }
             const slicedDeposits = depositsCumulative.slice(startIndex);
 
-            // RENDER
-            const ctx = canvas.getContext('2d');
+            // Colors
             const COLOR_GOLD = '#ffd700';
             const COLOR_CYAN = '#00f0ff';
+            const COLOR_ORANGE = '#ff8c00';
             const COLOR_EMERALD = '#00ff9d';
             const COLOR_GRID = 'rgba(255, 255, 255, 0.05)';
             const FONT_UI = "'Outfit', sans-serif";
 
-            let gradfill = null;
-            let gradfillGold = null;
-            if (ctx) {
-                gradfill = ctx.createLinearGradient(0, 0, 0, 300);
-                gradfill.addColorStop(0, 'rgba(0, 240, 255, 0.15)');
-                gradfill.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+            // ========== CHART 1: Capital vs Equity ==========
+            const canvas1 = document.getElementById('equity-chart');
+            if (canvas1) {
+                if (window.equityChart instanceof Chart) window.equityChart.destroy();
+                const ctx1 = canvas1.getContext('2d');
 
-                gradfillGold = ctx.createLinearGradient(0, 0, 0, 300);
-                gradfillGold.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
-                gradfillGold.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
-            }
+                const gradfillCyan = ctx1.createLinearGradient(0, 0, 0, 250);
+                gradfillCyan.addColorStop(0, 'rgba(0, 240, 255, 0.2)');
+                gradfillCyan.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
 
-            window.myChart = new Chart(ctx, {
-                type: 'bar', // Base type
-                data: {
-                    labels: slicedLabels,
-                    datasets: [
-                        {
-                            label: 'Equity Total',
-                            data: slicedEquity,
-                            type: 'line',
-                            borderColor: COLOR_CYAN,
-                            backgroundColor: gradfill,
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            fill: true,
-                            tension: 0.4,
-                            order: 1,
-                            yAxisID: 'y_equity'
-                        },
-                        {
-                            label: 'Capital Invertido',
-                            data: slicedDeposits.length > 0 ? slicedDeposits : null,
-                            type: 'line',
-                            borderColor: '#ff8c00', // Orange
-                            backgroundColor: 'rgba(255, 140, 0, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            fill: false,
-                            stepped: 'before', // Stepped line for deposits
-                            order: 2,
-                            yAxisID: 'y_equity',
-                            hidden: slicedDeposits.length === 0
-                        },
-                        {
-                            label: 'Profit Acumulado',
-                            data: slicedCumulative,
-                            type: 'line',
-                            borderColor: COLOR_GOLD,
-                            backgroundColor: gradfillGold,
-                            borderWidth: 2,
-                            borderDash: [5, 5], // Dashed to distinguish
-                            pointRadius: 2,
-                            pointHoverRadius: 5,
-                            fill: false, // Don't fill specifically to avoid clutter
-                            tension: 0.4,
-                            order: 0, // Top most
-                            yAxisID: 'y_cumulative'
-                        },
-                        {
-                            label: 'Botín Diario',
-                            data: slicedProfits,
-                            backgroundColor: (context) => {
-                                const val = context.raw || 0;
-                                return val >= 0 ? 'rgba(0, 255, 157, 0.6)' : 'rgba(255, 42, 109, 0.6)';
+                window.equityChart = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: slicedLabels,
+                        datasets: [
+                            {
+                                label: 'Equity Total',
+                                data: slicedEquity,
+                                borderColor: COLOR_CYAN,
+                                backgroundColor: gradfillCyan,
+                                borderWidth: 2,
+                                pointRadius: 2,
+                                pointHoverRadius: 5,
+                                fill: true,
+                                tension: 0.3
                             },
-                            borderColor: (context) => {
-                                const val = context.raw || 0;
-                                return val >= 0 ? COLOR_EMERALD : '#ff2a6d';
-                            },
-                            borderWidth: 1,
-                            borderRadius: 2,
-                            order: 3,
-                            yAxisID: 'y_daily'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { display: true, labels: { color: '#ccc', font: { family: FONT_UI, size: 10 }, usePointStyle: true, boxWidth: 6 } },
-                        tooltip: {
-                            backgroundColor: 'rgba(10, 10, 16, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#ccc',
-                            borderColor: 'rgba(255, 255, 255, 0.1)',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: function (context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) label += '$' + context.parsed.y.toFixed(2);
-                                    return label;
+                            {
+                                label: 'Capital Invertido',
+                                data: slicedDeposits.length > 0 ? slicedDeposits : null,
+                                borderColor: COLOR_ORANGE,
+                                backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                fill: false,
+                                stepped: 'before'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: true, labels: { color: '#ccc', font: { family: FONT_UI, size: 10 }, usePointStyle: true } },
+                            tooltip: {
+                                backgroundColor: 'rgba(10, 10, 16, 0.95)',
+                                callbacks: {
+                                    label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`
                                 }
                             }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { color: COLOR_GRID, drawBorder: false }, ticks: { color: '#666', font: { family: FONT_UI, size: 10 } } },
-                        y_daily: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            grid: { color: COLOR_GRID, borderDash: [5, 5] },
-                            ticks: { color: '#666', font: { family: FONT_UI, size: 9 }, callback: function (value) { return '$' + value; } },
-                            title: { display: true, text: 'Diario', color: '#444', font: { size: 8 } }
                         },
-                        y_equity: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            beginAtZero: false,
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: COLOR_CYAN, font: { family: FONT_UI, size: 9 }, callback: function (value) { return '$' + value; } },
-                            title: { display: true, text: 'Equity', color: COLOR_CYAN, font: { size: 8 } }
-                        },
-                        y_cumulative: {
-                            type: 'linear',
-                            display: false, // Hidden axis but exists for scaling
-                            position: 'right',
-                            beginAtZero: true, // Cumulative should start at 0 visual reference usually
-                            grid: { drawOnChartArea: false }
+                        scales: {
+                            x: { grid: { color: COLOR_GRID }, ticks: { color: '#666', font: { size: 10 } } },
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: COLOR_GRID },
+                                ticks: { color: COLOR_CYAN, callback: v => '$' + v }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            // ========== CHART 2: Profit Tracking ==========
+            const canvas2 = document.getElementById('profit-chart');
+            if (canvas2) {
+                if (window.profitChart instanceof Chart) window.profitChart.destroy();
+                const ctx2 = canvas2.getContext('2d');
+
+                const gradfillGold = ctx2.createLinearGradient(0, 0, 0, 200);
+                gradfillGold.addColorStop(0, 'rgba(255, 215, 0, 0.2)');
+                gradfillGold.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
+
+                window.profitChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: slicedLabels,
+                        datasets: [
+                            {
+                                label: 'Profit Acumulado',
+                                data: slicedCumulative,
+                                type: 'line',
+                                borderColor: COLOR_GOLD,
+                                backgroundColor: gradfillGold,
+                                borderWidth: 2,
+                                pointRadius: 2,
+                                fill: true,
+                                tension: 0.3,
+                                yAxisID: 'y_cumulative',
+                                order: 0
+                            },
+                            {
+                                label: 'Botín Diario',
+                                data: slicedProfits,
+                                backgroundColor: ctx => (ctx.raw || 0) >= 0 ? 'rgba(0, 255, 157, 0.7)' : 'rgba(255, 42, 109, 0.7)',
+                                borderColor: ctx => (ctx.raw || 0) >= 0 ? COLOR_EMERALD : '#ff2a6d',
+                                borderWidth: 1,
+                                borderRadius: 3,
+                                yAxisID: 'y_daily',
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: true, labels: { color: '#ccc', font: { family: FONT_UI, size: 10 }, usePointStyle: true } },
+                            tooltip: {
+                                backgroundColor: 'rgba(10, 10, 16, 0.95)',
+                                callbacks: {
+                                    label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { color: COLOR_GRID }, ticks: { color: '#666', font: { size: 10 } } },
+                            y_daily: {
+                                type: 'linear',
+                                position: 'left',
+                                grid: { color: COLOR_GRID },
+                                ticks: { color: COLOR_EMERALD, callback: v => '$' + v },
+                                title: { display: true, text: 'Diario', color: '#555', font: { size: 9 } }
+                            },
+                            y_cumulative: {
+                                type: 'linear',
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: COLOR_GOLD, callback: v => '$' + v },
+                                title: { display: true, text: 'Total', color: '#555', font: { size: 9 } }
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         // ============================================
