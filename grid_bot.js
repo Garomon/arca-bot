@@ -277,11 +277,11 @@ app.get('/api/status', async (req, res) => {
         const totalPnL = (state.totalProfit || 0) + unrealizedPnL;
         const netRoi = initialCapital > 0 ? (totalPnL / initialCapital) * 100 : 0;
 
-        // Calculate win rate from filled orders (same as performance metrics)
+        // Calculate win rate from SELL orders only (grid bots should not penalize BUYs)
         const filledOrders = state.filledOrders || [];
-        const successfulTrades = filledOrders.filter(o => o.profit > 0);
-        const totalTrades = filledOrders.length;
-        const winRate = totalTrades > 0 ? (successfulTrades.length / totalTrades) * 100 : 0;
+        const sellOrders = filledOrders.filter(o => o.side === 'sell');
+        const successfulSells = sellOrders.filter(o => o.profit > 0);
+        const winRate = sellOrders.length > 0 ? (successfulSells.length / sellOrders.length) * 100 : 0;
 
         // Get decision score from composite signal
         const decisionScore = state.compositeSignal?.score || state.marketCondition?.signalScore || 50;
