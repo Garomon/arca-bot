@@ -266,6 +266,78 @@
             </div>
         </div>
 
+        <!-- PERFORMANCE ANALYTICS SECTION -->
+        <div class="elite-card" style="margin-top: 20px; padding: 25px;">
+            <h3 style="margin: 0 0 20px 0; font-size: 1rem; color: var(--emerald-life);">📈 PERFORMANCE ANALYTICS</h3>
+
+            <!-- ROI Cards Row -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                <div class="summary-card"
+                    style="background: rgba(0,255,157,0.05); border: 1px solid rgba(0,255,157,0.2);">
+                    <span class="stat-label">Hoy</span>
+                    <span class="stat-val" id="roi-today" style="color: var(--emerald-life);">0%</span>
+                </div>
+                <div class="summary-card"
+                    style="background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.2);">
+                    <span class="stat-label">7 Días</span>
+                    <span class="stat-val" id="roi-weekly" style="color: var(--cyan-holo);">0%</span>
+                </div>
+                <div class="summary-card"
+                    style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2);">
+                    <span class="stat-label">30 Días</span>
+                    <span class="stat-val" id="roi-monthly" style="color: var(--gold-primary);">0%</span>
+                </div>
+                <div class="summary-card"
+                    style="background: rgba(138,43,226,0.05); border: 1px solid rgba(138,43,226,0.2);">
+                    <span class="stat-label">Total</span>
+                    <span class="stat-val" id="roi-alltime" style="color: #ba55d3;">0%</span>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--emerald-life);" id="win-rate">0%
+                    </div>
+                    <div style="font-size: 0.65rem; color: #888;">Win Rate</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold-primary);" id="avg-daily">$0
+                    </div>
+                    <div style="font-size: 0.65rem; color: #888;">Promedio Diario</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--cyan-holo);" id="best-day">$0</div>
+                    <div style="font-size: 0.65rem; color: #888;">🏆 Mejor Día</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+                    <div style="font-size: 1rem; color: #ff6b6b;" id="max-drawdown">0%</div>
+                    <div style="font-size: 0.65rem; color: #888;">📉 Max Drawdown</div>
+                </div>
+            </div>
+
+            <!-- Streak & Bot Leaderboard -->
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+                <!-- Streak Card -->
+                <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">🔥 RACHA ACTUAL</div>
+                    <div id="streak-display" style="font-size: 1.8rem; font-weight: bold; color: var(--emerald-life);">0
+                    </div>
+                    <div id="streak-type" style="font-size: 0.7rem; color: #666;">días</div>
+                    <div style="margin-top: 10px; font-size: 0.65rem; color: #555;">
+                        Record: <span id="longest-win" style="color: var(--emerald-life);">0</span> días positivos
+                    </div>
+                </div>
+                <!-- Bot Leaderboard -->
+                <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+                    <div style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">🏅 BOT LEADERBOARD</div>
+                    <div id="bot-leaderboard" style="font-size: 0.75rem;">
+                        <div style="color: #555;">Cargando...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- LOGS SECTION (CRÓNICAS) -->
         <div class="elite-card logs-section" style="margin-top: 30px; padding: 20px;">
             <h3 style="color: var(--cyan-holo); margin-bottom: 20px;">📜 CRÓNICAS DEL SISTEMA</h3>
@@ -966,6 +1038,50 @@
             }
         }
 
+        // ============================================
+        // ANALYTICS FUNCTIONS
+        // ============================================
+        async function fetchAnalytics() {
+            try {
+                const res = await fetch('/api/analytics');
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // ROI Cards
+                    document.getElementById('roi-today').innerText = `${data.roi.daily >= 0 ? '+' : ''}${data.roi.daily}%`;
+                    document.getElementById('roi-weekly').innerText = `${data.roi.weekly >= 0 ? '+' : ''}${data.roi.weekly}%`;
+                    document.getElementById('roi-monthly').innerText = `${data.roi.monthly >= 0 ? '+' : ''}${data.roi.monthly}%`;
+                    document.getElementById('roi-alltime').innerText = `${data.roi.allTime >= 0 ? '+' : ''}${data.roi.allTime}%`;
+
+                    // Stats Row
+                    document.getElementById('win-rate').innerText = `${data.performance.winRate}%`;
+                    document.getElementById('avg-daily').innerText = `$${data.performance.avgDailyProfit}`;
+                    document.getElementById('best-day').innerText = `$${data.highlights.bestDay.profit}`;
+                    document.getElementById('max-drawdown').innerText = `${data.risk.maxDrawdownPercent}%`;
+
+                    // Streak
+                    document.getElementById('streak-display').innerText = data.streaks.current;
+                    document.getElementById('streak-display').style.color = data.streaks.currentType === 'win' ? 'var(--emerald-life)' : '#ff6b6b';
+                    document.getElementById('streak-type').innerText = data.streaks.currentType === 'win' ? 'días positivos 🔥' : 'días negativos';
+                    document.getElementById('longest-win').innerText = data.streaks.longestWin;
+
+                    // Bot Leaderboard
+                    const leaderboard = document.getElementById('bot-leaderboard');
+                    if (data.botComparison && data.botComparison.length > 0) {
+                        leaderboard.innerHTML = data.botComparison.map((b, i) => {
+                            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+                            return `<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span>${medal} ${b.name}</span>
+                                <span style="color: var(--gold-primary);">$${b.profit} <span style="color: #666; font-size: 0.65rem;">(${b.roi}%)</span></span>
+                            </div>`;
+                        }).join('');
+                    }
+                }
+            } catch (e) {
+                console.error('Analytics fetch failed:', e.message);
+            }
+        }
+
         function init() {
             renderCompanions();
             // Wait a tick to ensure DOM is ready
@@ -973,15 +1089,17 @@
                 fetchAllData();
                 fetchRPG();
                 fetchChart();
-                fetchDeposits(); // NEW: Capital Tracker
+                fetchDeposits(); // Capital Tracker
                 fetchFinancialHistory();
+                fetchAnalytics(); // NEW: Performance Analytics
             }, 100);
 
             setInterval(fetchAllData, 5000);
             setInterval(fetchRPG, 60000);
             setInterval(fetchChart, 60000);
-            setInterval(fetchDeposits, 30000); // Refresh deposits every 30s
-            setInterval(fetchFinancialHistory, 60000); // Keep synced
+            setInterval(fetchDeposits, 30000);
+            setInterval(fetchFinancialHistory, 60000);
+            setInterval(fetchAnalytics, 60000); // Refresh analytics every minute
         }
 
         init();

@@ -618,6 +618,196 @@ app.get('/api/profit-history', async (req, res) => {
 });
 
 // ============================================
+// ANALYTICS API - Performance Metrics
+// ============================================
+app.get('/api/analytics', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        const profitByDay = {};
+        const botProfits = {};
+
+        // 1. Collect profit data from all bots
+        if (fs.existsSync(sessionsDir)) {
+            const stateFiles = fs.readdirSync(sessionsDir).filter(f =>
+                f.endsWith('_state.json') &&
+                f.startsWith('VANTAGE01_') &&
+                !f.includes('template') &&
+                !f.includes('backup')
+            );
+
+            for (const file of stateFiles) {
+                try {
+                    const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+                    const botName = file.replace('VANTAGE01_', '').replace('_state.json', '').replace('_', '/');
+
+                    // Track bot total profit
+                    botProfits[botName] = {
+                        name: botName,
+                        totalProfit: data.totalProfit || 0,
+                        initialCapital: data.initialCapital || 250,
+                        trades: (data.filledOrders || []).filter(o => o.side === 'sell').length
+                    };
+
+                    // Aggregate daily profits
+                    if (data.filledOrders && Array.isArray(data.filledOrders)) {
+                        data.filledOrders.forEach(trade => {
+                            if (trade.side === 'sell' && typeof trade.profit === 'number') {
+                                const utcDate = new Date(trade.timestamp);
+                                const centralDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
+                                const date = centralDate.toISOString().split('T')[0];
+                                profitByDay[date] = (profitByDay[date] || 0) + trade.profit;
+                            }
+                        });
+                    }
+                } catch (e) { /* Skip malformed */ }
+            }
+        }
+
+        // 2. Calculate metrics
+        const days = Object.entries(profitByDay).map(([date, profit]) => ({ date, profit }));
+        days.sort((a, b) => a.date.localeCompare(b.date));
+
+        const totalDays = days.length;
+        const totalProfit = days.reduce((sum, d) => sum + d.profit, 0);
+        const profitableDays = days.filter(d => d.profit > 0).length;
+        const lossDays = days.filter(d => d.profit < 0).length;
+        const winRate = totalDays > 0 ? Math.round((profitableDays / totalDays) * 100) : 0;
+        const avgDailyProfit = totalDays > 0 ? totalProfit / totalDays : 0;
+
+        // Best and worst days
+        const sortedByProfit = [...days].sort((a, b) => b.profit - a.profit);
+        const bestDay = sortedByProfit[0] || { date: 'N/A', profit: 0 };
+        const worstDay = sortedByProfit[sortedByProfit.length - 1] || { date: 'N/A', profit: 0 };
+
+        // 3. ROI calculations (need deposits)
+        let totalDeposited = 0;
+        try {
+            const depositData = readDeposits();
+            totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
+        } catch (e) { }
+
+        const roiAllTime = totalDeposited > 0 ? (totalProfit / totalDeposited) * 100 : 0;
+
+        // Calculate period ROIs
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        const profitLast7 = days.filter(d => d.date >= weekAgo).reduce((sum, d) => sum + d.profit, 0);
+        const profitLast30 = days.filter(d => d.date >= monthAgo).reduce((sum, d) => sum + d.profit, 0);
+        const profitToday = days.find(d => d.date === today)?.profit || 0;
+
+        const roiDaily = totalDeposited > 0 ? (profitToday / totalDeposited) * 100 : 0;
+        const roiWeekly = totalDeposited > 0 ? (profitLast7 / totalDeposited) * 100 : 0;
+        const roiMonthly = totalDeposited > 0 ? (profitLast30 / totalDeposited) * 100 : 0;
+
+        // 4. Streaks
+        let currentStreak = 0;
+        let streakType = 'neutral';
+        let longestWinStreak = 0;
+        let longestLossStreak = 0;
+        let tempWinStreak = 0;
+        let tempLossStreak = 0;
+
+        for (const day of days) {
+            if (day.profit > 0) {
+                tempWinStreak++;
+                tempLossStreak = 0;
+                if (tempWinStreak > longestWinStreak) longestWinStreak = tempWinStreak;
+            } else if (day.profit < 0) {
+                tempLossStreak++;
+                tempWinStreak = 0;
+                if (tempLossStreak > longestLossStreak) longestLossStreak = tempLossStreak;
+            }
+        }
+
+        // Current streak (from most recent)
+        for (let i = days.length - 1; i >= 0; i--) {
+            if (days[i].profit > 0) {
+                if (streakType === 'neutral' || streakType === 'win') {
+                    currentStreak++;
+                    streakType = 'win';
+                } else break;
+            } else if (days[i].profit < 0) {
+                if (streakType === 'neutral' || streakType === 'loss') {
+                    currentStreak++;
+                    streakType = 'loss';
+                } else break;
+            } else break;
+        }
+
+        // 5. Max Drawdown
+        let peak = 0;
+        let maxDrawdown = 0;
+        let runningTotal = 0;
+        for (const day of days) {
+            runningTotal += day.profit;
+            if (runningTotal > peak) peak = runningTotal;
+            const drawdown = peak > 0 ? ((peak - runningTotal) / peak) * 100 : 0;
+            if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+        }
+
+        // 6. Bot comparison (leaderboard)
+        const botComparison = Object.values(botProfits)
+            .map(b => ({
+                name: b.name,
+                profit: parseFloat(b.totalProfit.toFixed(2)),
+                roi: b.initialCapital > 0 ? parseFloat(((b.totalProfit / b.initialCapital) * 100).toFixed(2)) : 0,
+                trades: b.trades
+            }))
+            .sort((a, b) => b.profit - a.profit);
+
+        // 7. Response
+        res.json({
+            success: true,
+            generated: new Date().toISOString(),
+            roi: {
+                daily: parseFloat(roiDaily.toFixed(2)),
+                weekly: parseFloat(roiWeekly.toFixed(2)),
+                monthly: parseFloat(roiMonthly.toFixed(2)),
+                allTime: parseFloat(roiAllTime.toFixed(2))
+            },
+            profit: {
+                today: parseFloat(profitToday.toFixed(2)),
+                last7Days: parseFloat(profitLast7.toFixed(2)),
+                last30Days: parseFloat(profitLast30.toFixed(2)),
+                allTime: parseFloat(totalProfit.toFixed(2))
+            },
+            performance: {
+                totalDays,
+                profitableDays,
+                lossDays,
+                winRate,
+                avgDailyProfit: parseFloat(avgDailyProfit.toFixed(2))
+            },
+            highlights: {
+                bestDay: { date: bestDay.date, profit: parseFloat(bestDay.profit.toFixed(2)) },
+                worstDay: { date: worstDay.date, profit: parseFloat(worstDay.profit.toFixed(2)) }
+            },
+            streaks: {
+                current: currentStreak,
+                currentType: streakType,
+                longestWin: longestWinStreak,
+                longestLoss: longestLossStreak
+            },
+            risk: {
+                maxDrawdownPercent: parseFloat(maxDrawdown.toFixed(2))
+            },
+            botComparison,
+            capital: {
+                totalDeposited: parseFloat(totalDeposited.toFixed(2)),
+                currentEquity: await getGlobalEquity()
+            }
+        });
+
+    } catch (err) {
+        console.error('[API] /api/analytics error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================
 // DEPOSIT TRACKING API - Capital Transparency
 // ============================================
 const DEPOSITS_FILE = path.join(__dirname, 'data', 'deposits.json');
