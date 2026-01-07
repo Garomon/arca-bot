@@ -1518,46 +1518,53 @@ async function getCurrentPrice() {
 }
 
 // PHASE 5: Time-Weighted Average Capital (TWAC) for accurate APY calculation
-// This accounts for deposits/withdrawals that happened during the trading period
+// FIXED: Now uses real deposits from deposits.json × allocation
 function calculateTimeWeightedCapital() {
-    const history = state.capitalHistory || [];
-    const now = Date.now();
+    // Get REAL capital from deposits × this bot's allocation
+    try {
+        const depositData = readDeposits();
+        const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
+        const allocatedCapital = totalDeposited * CAPITAL_ALLOCATION;
 
-    // If no history or only one entry, use initialCapital
-    if (history.length === 0) {
-        return state.initialCapital || 100;
+        // Debug log (infrequent - 1% of calls)
+        if (Math.random() < 0.01) {
+            console.log(`>> [APY] Deposit-Based Capital: $${allocatedCapital.toFixed(2)} (${(CAPITAL_ALLOCATION * 100).toFixed(0)}% of $${totalDeposited.toFixed(2)})`);
+        }
+
+        return allocatedCapital;
+    } catch (e) {
+        // Fallback: Use capitalHistory if deposits can't be read
+        const history = state.capitalHistory || [];
+
+        if (history.length === 0) {
+            return state.initialCapital || 100;
+        }
+
+        if (history.length === 1) {
+            return history[0].amount;
+        }
+
+        // Calculate time-weighted average from history as fallback
+        let totalWeightedCapital = 0;
+        let totalTime = 0;
+        const now = Date.now();
+
+        for (let i = 0; i < history.length; i++) {
+            const entry = history[i];
+            const startTime = entry.timestamp;
+            const endTime = (i < history.length - 1) ? history[i + 1].timestamp : now;
+            const duration = endTime - startTime;
+
+            totalWeightedCapital += entry.amount * duration;
+            totalTime += duration;
+        }
+
+        if (totalTime === 0) return state.initialCapital || 100;
+
+        const avgCapital = totalWeightedCapital / totalTime;
+        console.log(`>> [APY] Fallback Time-Weighted Capital: $${avgCapital.toFixed(2)} (Error: ${e.message})`);
+        return avgCapital;
     }
-
-    // If only one entry, return that capital
-    if (history.length === 1) {
-        return history[0].amount;
-    }
-
-    // Calculate time-weighted average
-    let totalWeightedCapital = 0;
-    let totalTime = 0;
-
-    for (let i = 0; i < history.length; i++) {
-        const entry = history[i];
-        const startTime = entry.timestamp;
-        const endTime = (i < history.length - 1) ? history[i + 1].timestamp : now;
-        const duration = endTime - startTime;
-
-        totalWeightedCapital += entry.amount * duration;
-        totalTime += duration;
-    }
-
-    // Avoid division by zero
-    if (totalTime === 0) return state.initialCapital || 100;
-
-    const avgCapital = totalWeightedCapital / totalTime;
-
-    // Debug log (infrequent)
-    if (Math.random() < 0.01) {
-        console.log(`>> [APY] Time-Weighted Capital: $${avgCapital.toFixed(2)} (from ${history.length} entries)`);
-    }
-
-    return avgCapital;
 }
 
 // P0 FIX: Detailed Financials (Equity & Limits)
