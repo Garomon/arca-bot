@@ -3497,7 +3497,7 @@ async function checkStopLoss() {
         // P0 FIX: Dynamic Asset Valuation (Sum all known assets)
         // This prevents underestimating equity when running multiple bots (BTC + SOL)
         let baseValue = 0;
-        const KNOWN_ASSETS = ['BTC', 'SOL', 'ETH']; // Add others as needed
+        const KNOWN_ASSETS = ['BTC', 'SOL', 'ETH', 'BNB', 'DOGE']; // Add others as needed
 
         for (const asset of KNOWN_ASSETS) {
             const qty = balance[asset]?.total || 0;
