@@ -267,9 +267,12 @@ app.get('/api/status', async (req, res) => {
         const usdtBalance = state.balance?.usdt || state.availableCapital || 0;
         const totalEquity = allocatedEquity > 0 ? allocatedEquity : (usdtBalance + currentValue);
 
-        // Calculate ROI
+        // Use centralized APY calculation for consistency (must be called first)
+        const apyData = calculateAccurateAPY();
+
         // Calculate ROI (Realized only, to match reports)
-        const initialCapital = state.initialCapital || CONFIG.initialCapital || 400;
+        // Use deposit-based capital from apyData (totalDeposited × allocation)
+        const initialCapital = parseFloat(apyData.initialCapital) || state.initialCapital || CONFIG.initialCapital || 400;
         // Exclude unrealizedPnL from main ROI to prevent "inflated" look
         const roi = initialCapital > 0 ? ((state.totalProfit || 0) / initialCapital) * 100 : 0;
 
@@ -329,8 +332,7 @@ app.get('/api/status', async (req, res) => {
         const yesterdayProfit = yesterdayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
 
 
-        // Use centralized APY calculation for consistency with dashboard
-        const apyData = calculateAccurateAPY();
+        // Extract APY metrics from earlier apyData calculation
         const apy = parseFloat(apyData.projectedAPY) || 0;
         const daysActive = parseFloat(apyData.daysActive) || 1;
         const startTime = state.firstTradeTime || state.startTime || Date.now();
