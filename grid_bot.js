@@ -3505,6 +3505,16 @@ async function checkStopLoss() {
             key !== 'info' && key !== 'free' && key !== 'used' && key !== 'total'
         );
 
+        // Fetch ALL prices once to be efficient
+        let allTickers = {};
+        try {
+            allTickers = await binance.fetchTickers();
+        } catch (e) {
+            console.warn('>> [WARN] Failed to fetch tickers:', e.message);
+        }
+
+        const debugAssets = [];
+
         for (const asset of allAssets) {
             if (asset === 'USDT') continue; // USDT is calculated separately above
 
@@ -3516,17 +3526,20 @@ async function checkStopLoss() {
                 if (asset === BASE_ASSET) {
                     price = state.currentPrice || 0;
                 } else {
-                    try {
-                        const ticker = await binance.fetchTicker(`${asset}/USDT`);
-                        price = ticker.last || 0;
-                    } catch (e) {
-                        // Coin might not have USDT pair (e.g. LD tokens), skip or warn
-                        // console.warn(`Failed to valuate ${asset}:`, e.message); 
+                    const pairName = `${asset}/USDT`;
+                    if (allTickers[pairName]) {
+                        price = allTickers[pairName].last;
+                    } else if (allTickers[`${asset}USDT`]) {
+                        price = allTickers[`${asset}USDT`].last;
                     }
                 }
-                baseValue += (qty * price);
+                const val = qty * price;
+                baseValue += val;
+                if (val > 1) debugAssets.push(`${asset}: $${val.toFixed(2)}`);
             }
         }
+
+        console.log(`>> [EQUITY AUDIT] USDT: ${totalUSDT.toFixed(2)} | Assets: ${debugAssets.join(', ')} | Total Base: ${baseValue.toFixed(2)}`);
 
         const globalEquity = totalUSDT + baseValue;
 
