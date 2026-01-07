@@ -181,6 +181,10 @@
                 <span class="stat-val" id="global-roi">0%</span>
             </div>
             <div class="stat-cell">
+                <span class="stat-label">APY Global</span>
+                <span class="stat-val gold" id="global-apy">~0%</span>
+            </div>
+            <div class="stat-cell">
                 <span class="stat-label">Órdenes</span>
                 <span class="stat-val" id="total-orders">0</span>
             </div>
@@ -436,7 +440,7 @@
                                 <div id="profit-${bot.id}" style="font-size: 1.1rem; color: var(--gold-primary);">-</div>
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                             <div>
                                 <div style="font-size: 0.65rem; color: #666;">HOY</div>
                                 <div id="daily-${bot.id}" style="font-size: 0.9rem; color: #eee;">-</div>
@@ -444,6 +448,10 @@
                             <div>
                                 <div style="font-size: 0.65rem; color: #666;">ROI</div>
                                 <div id="roi-${bot.id}" style="font-size: 0.9rem; color: #eee;">-</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.65rem; color: #666;">APY</div>
+                                <div id="apy-${bot.id}" style="font-size: 0.9rem; color: var(--gold-primary);">-</div>
                             </div>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
@@ -552,6 +560,27 @@
             if (tEquity > tProfit) {
                 const roi = (tProfit / (tEquity - tProfit)) * 100;
                 document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
+
+                // Calculate Global APY
+                // Get total deposited from Capital Tracker
+                const totalDeposited = window.DEPOSIT_DATA?.totalDeposited || (tEquity - tProfit);
+                // Get earliest start date (from deposits or default 30 days)
+                const deposits = window.DEPOSIT_DATA?.deposits || [];
+                let earliestDate = Date.now();
+                if (deposits.length > 0) {
+                    earliestDate = Math.min(...deposits.map(d => new Date(d.date).getTime()));
+                }
+                const daysActive = Math.max(1, (Date.now() - earliestDate) / (1000 * 60 * 60 * 24));
+
+                // APY = (Profit / Deposited) / Days * 365
+                const globalROI = totalDeposited > 0 ? (tProfit / totalDeposited) * 100 : 0;
+                const globalAPY = (globalROI / daysActive) * 365;
+
+                const apyEl = document.getElementById('global-apy');
+                if (apyEl) {
+                    apyEl.innerText = `~${globalAPY.toFixed(0)}%`;
+                    apyEl.style.color = globalAPY >= 50 ? 'var(--emerald-life)' : globalAPY >= 20 ? 'var(--gold-primary)' : '#fff';
+                }
             }
 
             document.getElementById('loading').style.opacity = 0;
@@ -600,6 +629,14 @@
 
             const roiEl = document.getElementById(`roi-${id}`);
             if (roiEl) roiEl.innerText = `${(data.roi || 0).toFixed(2)}%`;
+
+            // APY display
+            const apyEl = document.getElementById(`apy-${id}`);
+            if (apyEl) {
+                const apy = data.apy || 0;
+                apyEl.innerText = `~${apy.toFixed(0)}%`;
+                apyEl.style.color = apy >= 50 ? 'var(--emerald-life)' : apy >= 20 ? 'var(--gold-primary)' : '#eee';
+            }
 
             const dailyEl = document.getElementById(`daily-${id}`);
             if (dailyEl) dailyEl.innerText = `$${(data.dailyProfit || 0).toFixed(2)}`;
