@@ -430,8 +430,38 @@ app.get('/api/balance', async (req, res) => {
         const sol = balance.SOL?.total || 0;
         const doge = balance.DOGE?.total || 0;
 
-        // Use the global equity source of truth for the total
-        const total = await getGlobalEquity();
+        // Use dynamic detection (bypass elusive helper for now)
+        let baseValue = 0;
+        const allAssets = Object.keys(balance).filter(key =>
+            key !== 'info' && key !== 'free' && key !== 'used' && key !== 'total' && key !== 'USDT'
+        );
+
+        let allTickers = {};
+        try {
+            allTickers = await binance.fetchTickers();
+        } catch (e) { }
+
+        const debugAssets = [];
+
+        for (const asset of allAssets) {
+            const qty = balance[asset]?.total || 0;
+            if (qty > 0.000001) {
+                let price = 0;
+                if (asset === BASE_ASSET && state.currentPrice) {
+                    price = state.currentPrice;
+                } else {
+                    const pairName = `${asset}/USDT`;
+                    if (allTickers[pairName]) price = allTickers[pairName].last;
+                    else if (allTickers[`${asset}USDT`]) price = allTickers[`${asset}USDT`].last;
+                }
+                const val = qty * price;
+                baseValue += val;
+                if (val > 1) debugAssets.push(`${asset}: $${val.toFixed(2)}`);
+            }
+        }
+        console.log(`>> [API] /balance EQUITY AUDIT: USDT: ${usdt.toFixed(2)} | Assets: ${debugAssets.join(', ')} | Total Base: ${baseValue.toFixed(2)}`);
+
+        const total = usdt + baseValue;
 
         // Get prices for breakdown (optional: could also use equityCache if available)
         let btcPrice = 0;
