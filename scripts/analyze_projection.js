@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
 // CONFIGURATION
 const MONTHLY_CONTRIBUTION_MXN = 10000;
@@ -9,6 +10,41 @@ const MILLION_TARGET = 1000000;
 
 const BOT_DIR = path.join(__dirname, '..');
 const SESSIONS_DIR = path.join(BOT_DIR, 'data', 'sessions');
+
+// Bot API ports to try
+const BOT_PORTS = [3000, 3001, 3002];
+
+// Helper to fetch from bot API
+function fetchFromBot(port, endpoint) {
+    return new Promise((resolve, reject) => {
+        const req = http.get(`http://localhost:${port}${endpoint}`, { timeout: 3000 }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+        req.on('error', reject);
+        req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    });
+}
+
+// Get REAL total equity from Binance via bot API
+async function getRealBinanceEquity() {
+    for (const port of BOT_PORTS) {
+        try {
+            const data = await fetchFromBot(port, '/api/balance');
+            if (data && data.totalEquity > 0) {
+                return data.totalEquity;
+            }
+        } catch (e) { /* try next port */ }
+    }
+    return null;
+}
 
 function findAllStateFiles() {
     try {
@@ -22,26 +58,45 @@ function findAllStateFiles() {
     }
 }
 
-function calculateSwarmMetrics() {
+// Helper to calculate REAL equity from state data (not stale initialCapital)
+function calculateRealEquity(state) {
+    const usdtBalance = state.balance?.usdt || state.availableCapital || 0;
+    const inventory = state.inventory || [];
+    const price = state.currentPrice || 0;
+
+    let inventoryValue = 0;
+    inventory.forEach(lot => {
+        const qty = lot.qty || lot.amount || lot.remaining || 0;
+        inventoryValue += qty * price;
+    });
+
+    return usdtBalance + inventoryValue;
+}
+
+async function calculateSwarmMetrics() {
     const stateFiles = findAllStateFiles();
 
     if (stateFiles.length === 0) {
         return { realYield: 0.0020, totalCapital: 1000, totalProfit: 0, daysActive: 1 };
     }
 
-    let totalCapital = 0;
+    // Get REAL equity from Binance API (this is the SOURCE OF TRUTH)
+    const binanceEquity = await getRealBinanceEquity();
+
     let totalProfit = 0;
     let weightedYieldSum = 0;
     let globalOldestTrade = Date.now();
+    let fallbackCapital = 0;
 
     stateFiles.forEach(file => {
         try {
             const state = JSON.parse(fs.readFileSync(file, 'utf8'));
-            const capital = state.initialCapital || 0;
+
             const profit = state.totalProfit || 0;
             const filledOrders = state.filledOrders || [];
+            const capital = state.initialCapital || 100;
 
-            totalCapital += capital;
+            fallbackCapital += capital;
             totalProfit += profit;
 
             let botOldestTrade = Date.now();
@@ -62,7 +117,10 @@ function calculateSwarmMetrics() {
     });
 
     const daysActive = Math.max(1, (Date.now() - globalOldestTrade) / (1000 * 60 * 60 * 24));
-    const realYield = totalCapital > 0 ? weightedYieldSum / totalCapital : 0.0020;
+
+    // Use Binance equity if available (REAL), otherwise fallback
+    const totalCapital = binanceEquity || fallbackCapital;
+    const realYield = fallbackCapital > 0 ? weightedYieldSum / fallbackCapital : 0.0020;
 
     return { realYield, totalCapital, totalProfit, daysActive };
 }
@@ -108,8 +166,9 @@ function getProgressionTable(startBalance, dailyYield, monthlyContrib) {
 }
 
 async function analyzeAndProject() {
-    const { realYield, totalCapital, totalProfit, daysActive } = calculateSwarmMetrics();
-    const currentCapital = totalCapital + totalProfit;
+    const { realYield, totalCapital, totalProfit, daysActive } = await calculateSwarmMetrics();
+    // totalCapital is now the REAL Binance balance (already includes value of holdings)
+    const currentCapital = totalCapital;
     const realYieldPct = (realYield * 100).toFixed(3);
     const APY = ((Math.pow(1 + realYield, 365) - 1) * 100).toFixed(0);
 

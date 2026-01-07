@@ -1,0 +1,29 @@
+{
+    "deposits": [
+        {
+            "id": 1,
+            "date": "2025-12-09",
+            "amount": 500,
+            "note": "P2P Compra inicial"
+        },
+        {
+            "id": 2,
+            "date": "2025-12-22",
+            "amount": 333,
+            "note": "Compra MXN→USDT"
+        },
+        {
+            "id": 3,
+            "date": "2025-12-30",
+            "amount": 83,
+            "note": "Compra MXN→USDT"
+        },
+        {
+            "id": 4,
+            "date": "2026-01-02",
+            "amount": 83,
+            "note": "Compra MXN→USDT (3 txns)"
+        }
+    ],
+    "nextId": 5
+}

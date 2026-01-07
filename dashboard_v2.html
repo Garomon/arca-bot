@@ -125,6 +125,75 @@
             </div>
         </div>
 
+        <!-- CAPITAL TRACKER SECTION -->
+        <div class="elite-card" style="margin-bottom: 30px; padding: 25px;">
+            <h3
+                style="color: var(--gold-primary); margin-bottom: 20px; border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 10px;">
+                💰 CAPITAL TRACKER
+            </h3>
+
+            <!-- Summary Cards -->
+            <div class="stats-hex-grid" style="grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div class="stat-cell" style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2);">
+                    <span class="stat-label">💵 Total Depositado</span>
+                    <span class="stat-val" id="cap-deposited" style="color: #fff;">$0</span>
+                </div>
+                <div class="stat-cell" style="background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.2);">
+                    <span class="stat-label">📊 Valor Actual</span>
+                    <span class="stat-val cyan" id="cap-current">$0</span>
+                </div>
+                <div class="stat-cell" style="background: rgba(0,255,157,0.05); border: 1px solid rgba(0,255,157,0.2);">
+                    <span class="stat-label">📈 Ganancia Neta</span>
+                    <span class="stat-val" id="cap-profit" style="color: var(--emerald-life);">$0</span>
+                </div>
+                <div class="stat-cell"
+                    style="background: rgba(138,43,226,0.05); border: 1px solid rgba(138,43,226,0.2);">
+                    <span class="stat-label">🔥 ROI Total</span>
+                    <span class="stat-val" id="cap-roi" style="color: #ba55d3;">0%</span>
+                </div>
+            </div>
+
+            <!-- Add Deposit Form -->
+            <div style="display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px;">
+                    <label style="font-size: 0.7rem; color: #888; display: block; margin-bottom: 4px;">📅 Fecha</label>
+                    <input type="date" id="deposit-date"
+                        style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'Outfit', sans-serif;">
+                </div>
+                <div style="flex: 1; min-width: 120px;">
+                    <label style="font-size: 0.7rem; color: #888; display: block; margin-bottom: 4px;">💲 Monto
+                        USDT</label>
+                    <input type="number" id="deposit-amount" placeholder="500" step="0.01"
+                        style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'Outfit', sans-serif;">
+                </div>
+                <div style="flex: 2; min-width: 180px;">
+                    <label style="font-size: 0.7rem; color: #888; display: block; margin-bottom: 4px;">📝 Nota
+                        (opcional)</label>
+                    <input type="text" id="deposit-note" placeholder="Depósito mensual"
+                        style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-family: 'Outfit', sans-serif;">
+                </div>
+                <button onclick="addDeposit()"
+                    style="padding: 10px 20px; background: var(--gold-primary); color: #000; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: 'Outfit', sans-serif; transition: all 0.2s;">
+                    ➕ AGREGAR
+                </button>
+            </div>
+
+            <!-- Deposit History Table -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden;">
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr 2fr 60px; padding: 10px 15px; background: rgba(255,255,255,0.05); font-size: 0.7rem; color: #888; font-weight: bold;">
+                    <div>FECHA</div>
+                    <div>MONTO</div>
+                    <div>NOTA</div>
+                    <div style="text-align: center;">❌</div>
+                </div>
+                <div id="deposit-history" style="max-height: 200px; overflow-y: auto;">
+                    <div style="padding: 15px; text-align: center; color: #555; font-size: 0.8rem;">Cargando
+                        depósitos...</div>
+                </div>
+            </div>
+        </div>
+
         <!-- COMPANION GRID (FULL SIZE) -->
         <h2
             style="margin-bottom: 25px; color: #fff; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 10px;">
@@ -528,6 +597,19 @@
             return filled;
         }
 
+        let GLOBAL_FINANCIAL_HISTORY = [];
+
+        async function fetchFinancialHistory() {
+            try {
+                const res = await fetch('/api/financial-history');
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    GLOBAL_FINANCIAL_HISTORY = data;
+                    console.log("Loaded Financial History:", data.length);
+                }
+            } catch (e) { console.error("Financial History fetch failed", e); }
+        }
+
         function renderChart(historyRaw) {
             LAST_RENDERED_EQUITY = GLOBAL_EQUITY;
             const canvas = document.getElementById('global-profit-chart');
@@ -539,49 +621,56 @@
 
             // 2. FILTER
             let filtered = [];
+            let startIndex = 0;
             if (CURRENT_TIMEFRAME === 'ALL') {
                 filtered = history;
+                startIndex = 0;
             } else {
-                filtered = history.slice(-CURRENT_TIMEFRAME);
+                const limit = parseInt(CURRENT_TIMEFRAME) || 30;
+                filtered = history.slice(-limit);
+                startIndex = Math.max(0, history.length - limit);
             }
 
-            // DATA PREP
-            let cumulative = 0;
-            // Calculate Total Profit so far to find Base Capital
-            // Estimated Base Capital = Global Equity - Sum of All Profits (Approximation)
+            // 3. PREPARE DATA (Smart Equity Curve)
 
-            const totalRecordedProfit = history.reduce((sum, h) => sum + (h.profit || 0), 0);
-            const estimatedBase = GLOBAL_EQUITY > 0 ? (GLOBAL_EQUITY - totalRecordedProfit) : 0;
-
-            const cumulativeData = [];
-
-            // Calculate cumulative for FULL history first (gap-filled)
-            let runProfit = 0;
-            const fullCurve = history.map(h => {
-                runProfit += (h.profit || 0);
-                return estimatedBase + runProfit;
+            // Map real history by date (from integrity_guard.js)
+            const realHistoryMap = new Map();
+            GLOBAL_FINANCIAL_HISTORY.forEach(h => {
+                if (h.date && h.equity) realHistoryMap.set(h.date.split('T')[0], h.equity);
             });
 
-            // Now slice
-            let startIndex = 0;
-            if (CURRENT_TIMEFRAME !== 'ALL') {
-                startIndex = Math.max(0, history.length - CURRENT_TIMEFRAME);
-            }
+            // Initial Base Estimation (Fallback if no history)
+            const totalRecordedProfit = history.reduce((sum, h) => sum + (h.profit || 0), 0);
+            let estimatedBase = GLOBAL_EQUITY > 0 ? (GLOBAL_EQUITY - totalRecordedProfit) : 0;
+
+            // Build Curve
+            let currentEquityValue = estimatedBase;
+            const fullCurve = history.map(h => {
+                const dateKey = h.date;
+                if (realHistoryMap.has(dateKey)) {
+                    // SNAP to real data (Deposits/Withdrawals/Market Moves reflected here)
+                    currentEquityValue = realHistoryMap.get(dateKey);
+                } else {
+                    // Estimate move based on profit
+                    currentEquityValue += (h.profit || 0);
+                }
+                return currentEquityValue;
+            });
 
             const slicedEquity = fullCurve.slice(startIndex);
             const slicedProfits = filtered.map(h => h.profit);
             const slicedLabels = filtered.map(h => h.date.substring(5)); // MM-DD
 
-            // 3. Pre-Calculate Cumulative Profit (Standalone)
+            // Cumulative Profit (Always starts at 0 for period or absolute?)
+            // Let's show Absolute Cumulative Profit
             let runningTotal = 0;
-            const cumulativeProfitData = history.map(h => {
+            const absoluteCumulative = history.map(h => {
                 runningTotal += (h.profit || 0);
                 return runningTotal;
             });
-            // Slice it
-            const slicedCumulative = cumulativeProfitData.slice(startIndex);
+            const slicedCumulative = absoluteCumulative.slice(startIndex);
 
-
+            // RENDER
             const ctx = canvas.getContext('2d');
             const COLOR_GOLD = '#ffd700';
             const COLOR_CYAN = '#00f0ff';
@@ -602,7 +691,7 @@
             }
 
             window.myChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'bar', // Base type
                 data: {
                     labels: slicedLabels,
                     datasets: [
@@ -628,9 +717,9 @@
                             backgroundColor: gradfillGold,
                             borderWidth: 2,
                             borderDash: [5, 5], // Dashed to distinguish
-                            pointRadius: 3,
+                            pointRadius: 2,
                             pointHoverRadius: 5,
-                            fill: false, // Cleaner interaction
+                            fill: false, // Don't fill specifically to avoid clutter
                             tension: 0.4,
                             order: 0, // Top most
                             yAxisID: 'y_cumulative'
@@ -706,6 +795,106 @@
             });
         }
 
+        // ============================================
+        // CAPITAL TRACKER FUNCTIONS
+        // ============================================
+        async function fetchDeposits() {
+            try {
+                const res = await fetch('/api/deposits');
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Update summary cards
+                    document.getElementById('cap-deposited').innerText = `$${data.totalDeposited.toFixed(2)}`;
+                    document.getElementById('cap-current').innerText = `$${data.currentEquity.toFixed(2)}`;
+
+                    const profitEl = document.getElementById('cap-profit');
+                    profitEl.innerText = `${data.profit >= 0 ? '+' : ''}$${data.profit.toFixed(2)}`;
+                    profitEl.style.color = data.profit >= 0 ? 'var(--emerald-life)' : 'var(--ruby-danger)';
+
+                    const roiEl = document.getElementById('cap-roi');
+                    roiEl.innerText = `${data.roi >= 0 ? '+' : ''}${data.roi.toFixed(2)}%`;
+                    roiEl.style.color = data.roi >= 0 ? '#ba55d3' : 'var(--ruby-danger)';
+
+                    // Render history
+                    renderDeposits(data.deposits);
+                }
+            } catch (e) {
+                console.error('Deposits fetch failed:', e.message);
+            }
+        }
+
+        function renderDeposits(deposits) {
+            const container = document.getElementById('deposit-history');
+            if (!deposits || deposits.length === 0) {
+                container.innerHTML = '<div style="padding: 15px; text-align: center; color: #555; font-size: 0.8rem;">No hay depósitos registrados</div>';
+                return;
+            }
+
+            container.innerHTML = deposits.map(d => `
+                <div style="display: grid; grid-template-columns: 1fr 1fr 2fr 60px; padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center;">
+                    <div style="color: #aaa; font-size: 0.8rem;">${d.date}</div>
+                    <div style="color: var(--gold-primary); font-weight: bold;">$${d.amount.toFixed(2)}</div>
+                    <div style="color: #888; font-size: 0.8rem;">${d.note || '-'}</div>
+                    <div style="text-align: center;">
+                        <button onclick="deleteDeposit(${d.id})" style="background: rgba(255,42,109,0.2); border: none; color: var(--ruby-danger); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addDeposit() {
+            const dateInput = document.getElementById('deposit-date');
+            const amountInput = document.getElementById('deposit-amount');
+            const noteInput = document.getElementById('deposit-note');
+
+            const date = dateInput.value;
+            const amount = parseFloat(amountInput.value);
+            const note = noteInput.value;
+
+            if (!date || !amount || isNaN(amount)) {
+                alert('Por favor ingresa fecha y monto válidos');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/deposits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date, amount, note })
+                });
+
+                if (res.ok) {
+                    // Clear form
+                    dateInput.value = '';
+                    amountInput.value = '';
+                    noteInput.value = '';
+                    // Refresh
+                    fetchDeposits();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + (err.error || 'No se pudo agregar'));
+                }
+            } catch (e) {
+                alert('Error de red: ' + e.message);
+            }
+        }
+
+        async function deleteDeposit(id) {
+            if (!confirm('¿Eliminar este depósito?')) return;
+
+            try {
+                const res = await fetch(`/api/deposits/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    fetchDeposits();
+                } else {
+                    alert('Error al eliminar');
+                }
+            } catch (e) {
+                alert('Error de red: ' + e.message);
+            }
+        }
+
         function init() {
             renderCompanions();
             // Wait a tick to ensure DOM is ready
@@ -713,11 +902,15 @@
                 fetchAllData();
                 fetchRPG();
                 fetchChart();
+                fetchDeposits(); // NEW: Capital Tracker
+                fetchFinancialHistory();
             }, 100);
 
             setInterval(fetchAllData, 5000);
             setInterval(fetchRPG, 60000);
             setInterval(fetchChart, 60000);
+            setInterval(fetchDeposits, 30000); // Refresh deposits every 30s
+            setInterval(fetchFinancialHistory, 60000); // Keep synced
         }
 
         init();

@@ -1,9 +1,45 @@
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 
 // Basic Configuration
 const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'sessions');
 const ROOT_DIR = path.join(__dirname, '..');
+
+// Bot API ports to try
+const BOT_PORTS = [3000, 3001, 3002];
+
+// Helper to fetch from bot API
+function fetchFromBot(port, endpoint) {
+    return new Promise((resolve, reject) => {
+        const req = http.get(`http://localhost:${port}${endpoint}`, { timeout: 3000 }, (res) => {
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => {
+                try {
+                    resolve(JSON.parse(data));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+        req.on('error', reject);
+        req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    });
+}
+
+// Get REAL total equity from Binance via bot API
+async function getRealBinanceEquity() {
+    for (const port of BOT_PORTS) {
+        try {
+            const data = await fetchFromBot(port, '/api/balance');
+            if (data && data.totalEquity > 0) {
+                return data.totalEquity;
+            }
+        } catch (e) { /* try next port */ }
+    }
+    return null;
+}
 
 // Helper to find all state files
 function findAllStateFiles() {
@@ -24,7 +60,7 @@ function findAllStateFiles() {
     return files;
 }
 
-function calculateSwarmYield() {
+async function calculateSwarmYield() {
     const files = findAllStateFiles();
 
     if (files.length === 0) {
@@ -32,19 +68,22 @@ function calculateSwarmYield() {
         return;
     }
 
+    // Get REAL equity from Binance API
+    const binanceEquity = await getRealBinanceEquity();
+
     console.log(`\n🦅 ARCA SWARM INTELLIGENCE - AUDIT REPORT`);
     console.log(`=========================================`);
     console.log(`Found ${files.length} active neural cores (bots)...\n`);
 
-    let totalCapital = 0;
     let totalProfit = 0;
-    let totalWeightedDailyYield = 0;
+    let weightedYieldSum = 0;
     let swarmDaysActive = 0;
     let botCount = 0;
+    let totalAllocatedEquity = 0;
 
     // Table Header
-    console.log(`| ${'BOT ID'.padEnd(14)} | ${'Active'.padEnd(8)} | ${'Capital'.padEnd(10)} | ${'Profit'.padEnd(10)} | ${'Yield/Day'.padEnd(10)} |`);
-    console.log(`|${'-'.repeat(16)}|${'-'.repeat(10)}|${'-'.repeat(12)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
+    console.log(`| ${'BOT ID'.padEnd(14)} | ${'Active'.padEnd(8)} | ${'Profit'.padEnd(10)} | ${'Yield/Day'.padEnd(10)} |`);
+    console.log(`|${'-'.repeat(16)}|${'-'.repeat(10)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
 
     files.forEach(file => {
         try {
@@ -59,19 +98,18 @@ function calculateSwarmYield() {
             const firstTrade = filledOrders[0].timestamp;
             const daysActive = (Date.now() - firstTrade) / (1000 * 60 * 60 * 24);
 
-            const capital = state.initialCapital || 0;
             const profit = state.totalProfit || 0;
+            const capital = state.initialCapital || 100; // For yield calc only
             const dailyYield = (profit / capital) / daysActive;
 
             // Log Row
-            console.log(`| ${botId.padEnd(14)} | ${daysActive.toFixed(1).padEnd(8)} | $${capital.toFixed(0).padEnd(9)} | $${profit.toFixed(2).padEnd(9)} | ${(dailyYield * 100).toFixed(3)}%    |`);
+            console.log(`| ${botId.padEnd(14)} | ${daysActive.toFixed(1).padEnd(8)} | $${profit.toFixed(2).padEnd(9)} | ${(dailyYield * 100).toFixed(3)}%    |`);
 
-            // Accumulate for Swarm Average (Weighted by Capital)
-            if (daysActive > 1 && capital > 0) {
-                totalCapital += capital;
+            // Accumulate
+            if (daysActive > 1) {
                 totalProfit += profit;
-                // We sum (Yield * Capital) to weight it, later divide by TotalCapital
-                totalWeightedDailyYield += (dailyYield * capital);
+                weightedYieldSum += (dailyYield * capital);
+                totalAllocatedEquity += capital;
                 botCount++;
                 if (daysActive > swarmDaysActive) swarmDaysActive = daysActive;
             }
@@ -81,34 +119,38 @@ function calculateSwarmYield() {
         }
     });
 
-    const averageSwarmYield = totalCapital > 0 ? (totalWeightedDailyYield / totalCapital) : 0;
-    const projectedMonthly = averageSwarmYield * 30 * 100;
+    // Use Binance equity if available, otherwise fallback
+    const displayEquity = binanceEquity || totalAllocatedEquity;
+    const averageSwarmYield = totalAllocatedEquity > 0 ? (weightedYieldSum / totalAllocatedEquity) : 0;
     const projectedAnnual = ((Math.pow(1 + averageSwarmYield, 365) - 1) * 100);
 
     console.log(`\n=========================================`);
-    console.log(`🧠 SWARM METRICS (Weighted Average)`);
-    console.log(`   Active Capital:   $${totalCapital.toFixed(2)}`);
-    console.log(`   Realized Profit:  $${totalProfit.toFixed(2)} (Cashflow)`);
-    console.log(`   True Daily Yield: ${(averageSwarmYield * 100).toFixed(4)}%`);
-    console.log(`   APY (Compound):   ${projectedAnnual.toFixed(0)}%`);
+    console.log(`🧠 SWARM METRICS`);
+    if (binanceEquity) {
+        console.log(`   💰 Binance Total: $${binanceEquity.toFixed(2)} (REAL from API)`);
+    } else {
+        console.log(`   ⚠️  Could not fetch Binance balance (bots offline?)`);
+        console.log(`   💰 Est. Capital:  $${totalAllocatedEquity.toFixed(2)} (from state files)`);
+    }
+    console.log(`   📈 Realized Profit: $${totalProfit.toFixed(2)}`);
+    console.log(`   📊 Daily Yield:     ${(averageSwarmYield * 100).toFixed(4)}%`);
+    console.log(`   🚀 APY (Compound):  ${projectedAnnual.toFixed(0)}%`);
     console.log(`=========================================`);
 
-    console.log(`\n🔍 EQUITY DEEP DIVE (Are you winning son?)`);
-    console.log(`| ${'BOT'.padEnd(14)} | ${'Invested'.padEnd(10)} | ${'Liquid Value'.padEnd(12)} | ${'Net PnL'.padEnd(10)} | ${'Unrealized'.padEnd(10)} |`);
-    console.log(`|${'-'.repeat(16)}|${'-'.repeat(12)}|${'-'.repeat(14)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
+    // Equity breakdown
+    console.log(`\n🔍 EQUITY DEEP DIVE`);
+    console.log(`| ${'BOT'.padEnd(14)} | ${'Profit'.padEnd(10)} | ${'Unrealized'.padEnd(10)} | ${'Net PnL'.padEnd(10)} |`);
+    console.log(`|${'-'.repeat(16)}|${'-'.repeat(12)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
 
     files.forEach(file => {
         try {
             const state = JSON.parse(fs.readFileSync(file, 'utf8'));
             const botId = path.basename(file).replace('_state.json', '').replace('USDT', '');
 
-            // === FIXED: Use INVENTORY data, not balance ===
             const inventory = state.inventory || [];
             const price = state.currentPrice || 0;
-            const invested = state.initialCapital || 0;
             const realized = state.totalProfit || 0;
 
-            // Calculate inventory value at current price
             let inventoryQty = 0;
             let inventoryCost = 0;
             inventory.forEach(lot => {
@@ -119,17 +161,14 @@ function calculateSwarmYield() {
 
             const inventoryValue = inventoryQty * price;
             const unrealizedPnL = inventoryValue - inventoryCost;
-
-            // Liquid Value = Initial Capital + Realized Profit + Unrealized PnL
-            const liquidationValue = invested + realized + unrealizedPnL;
             const totalNetPnL = realized + unrealizedPnL;
 
-            console.log(`| ${botId.padEnd(14)} | $${invested.toFixed(0).padEnd(9)} | $${liquidationValue.toFixed(0).padEnd(11)} | $${totalNetPnL.toFixed(2).padEnd(9)} | $${unrealizedPnL.toFixed(2).padEnd(9)} |`);
+            console.log(`| ${botId.padEnd(14)} | $${realized.toFixed(2).padEnd(9)} | $${unrealizedPnL.toFixed(2).padEnd(9)} | $${totalNetPnL.toFixed(2).padEnd(9)} |`);
 
         } catch (e) { }
     });
-    console.log(`\n* Net PnL = Realized + Unrealized. If Positive, you are truly winning.`);
-    console.log(`* Unrealized = (Current Price - Avg Cost) × Qty. Green = price went UP since you bought.`);
+    console.log(`\n* Binance Total = Your REAL balance (USDT + BTC + SOL + DOGE + ETH)`);
+    console.log(`* Net PnL = Realized + Unrealized profit per bot`);
     console.log(`=========================================\n`);
 }
 

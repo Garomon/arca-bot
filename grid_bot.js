@@ -234,6 +234,7 @@ const io = new Server(server);
 
 // SECURITY UPDATE: Serve only the public folder
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json()); // Enable JSON body parsing for POST requests
 
 // API endpoint for Master Dashboard
 app.get('/api/status', async (req, res) => {
@@ -585,12 +586,24 @@ app.get('/api/profit-history', async (req, res) => {
             }
         }
 
-        // Sort and format for chart
+        // Sort and format for chart - FILL MISSING DAYS
         const sortedDates = Object.keys(profitByDay).sort();
-        const history = sortedDates.map(date => ({
-            date: date,
-            profit: parseFloat(profitByDay[date].toFixed(4))
-        }));
+
+        // Fill gaps: Generate all dates from first to today
+        const history = [];
+        if (sortedDates.length > 0) {
+            const startDate = new Date(sortedDates[0]);
+            const endDate = new Date(); // Today
+            endDate.setHours(0, 0, 0, 0);
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                history.push({
+                    date: dateStr,
+                    profit: profitByDay[dateStr] ? parseFloat(profitByDay[dateStr].toFixed(4)) : 0
+                });
+            }
+        }
 
         res.json({
             success: true,
@@ -600,6 +613,104 @@ app.get('/api/profit-history', async (req, res) => {
 
     } catch (err) {
         console.error('[API] /api/profit-history error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================
+// DEPOSIT TRACKING API - Capital Transparency
+// ============================================
+const DEPOSITS_FILE = path.join(__dirname, 'data', 'deposits.json');
+
+// Helper to read deposits
+function readDeposits() {
+    try {
+        if (fs.existsSync(DEPOSITS_FILE)) {
+            return JSON.parse(fs.readFileSync(DEPOSITS_FILE, 'utf8'));
+        }
+    } catch (e) {
+        console.error('[DEPOSITS] Error reading:', e.message);
+    }
+    return { deposits: [], nextId: 1 };
+}
+
+// Helper to write deposits
+function writeDeposits(data) {
+    fs.writeFileSync(DEPOSITS_FILE, JSON.stringify(data, null, 2));
+}
+
+// GET /api/deposits - List all deposits with summary
+app.get('/api/deposits', async (req, res) => {
+    try {
+        const data = readDeposits();
+        const totalDeposited = data.deposits.reduce((sum, d) => sum + d.amount, 0);
+
+        // Get current equity from Binance
+        const currentEquity = await getGlobalEquity();
+        const profit = currentEquity - totalDeposited;
+        const roi = totalDeposited > 0 ? ((profit / totalDeposited) * 100).toFixed(2) : 0;
+
+        res.json({
+            success: true,
+            totalDeposited,
+            currentEquity,
+            profit,
+            roi: parseFloat(roi),
+            deposits: data.deposits.sort((a, b) => new Date(a.date) - new Date(b.date))
+        });
+    } catch (err) {
+        console.error('[API] /api/deposits error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/deposits - Add a new deposit
+app.post('/api/deposits', (req, res) => {
+    try {
+        const { date, amount, note } = req.body;
+
+        if (!date || !amount || isNaN(amount)) {
+            return res.status(400).json({ error: 'Date and amount are required' });
+        }
+
+        const data = readDeposits();
+        const newDeposit = {
+            id: data.nextId,
+            date: date,
+            amount: parseFloat(amount),
+            note: note || ''
+        };
+
+        data.deposits.push(newDeposit);
+        data.nextId++;
+        writeDeposits(data);
+
+        console.log(`[DEPOSITS] Added: $${amount} on ${date}`);
+        res.json({ success: true, deposit: newDeposit });
+    } catch (err) {
+        console.error('[API] POST /api/deposits error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// DELETE /api/deposits/:id - Remove a deposit
+app.delete('/api/deposits/:id', (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const data = readDeposits();
+        const index = data.deposits.findIndex(d => d.id === id);
+
+        if (index === -1) {
+            return res.status(404).json({ error: 'Deposit not found' });
+        }
+
+        const removed = data.deposits.splice(index, 1)[0];
+        writeDeposits(data);
+
+        console.log(`[DEPOSITS] Removed: $${removed.amount} from ${removed.date}`);
+        res.json({ success: true, removed });
+    } catch (err) {
+        console.error('[API] DELETE /api/deposits error:', err.message);
         res.status(500).json({ error: err.message });
     }
 });

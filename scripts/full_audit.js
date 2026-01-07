@@ -440,6 +440,22 @@ async function fullAudit() {
                     console.log('║  ✅ Stats (Profit/Inventory) are accurate. No changes needed.    ║');
                 }
 
+                // 1.5 Fix Active Orders (Cost Basis Injection)
+                if (state.activeOrders && state.activeOrders.length > 0) {
+                    let ordersFixed = 0;
+                    state.activeOrders.forEach(order => {
+                        if (order.side === 'sell' && (!order.costBasis || order.costBasis === 0)) {
+                            // Fallback: use global avg cost from audit to satisfy safety check
+                            order.costBasis = avgInvCost;
+                            ordersFixed++;
+                        }
+                    });
+                    if (ordersFixed > 0) {
+                        console.log(`║  🔧 Fixed ${ordersFixed} active orders with missing Cost Basis (used Avg: $${avgInvCost.toFixed(2)}) ║`);
+                        stateUpdated = true;
+                    }
+                }
+
                 // 2. Unpause Bot (ALWAYS CHECK THIS IN FIX MODE)
                 if (state.isPaused) {
                     state.isPaused = false;
