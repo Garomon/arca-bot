@@ -82,6 +82,29 @@
                 grid-column: span 1;
             }
         }
+
+        /* Analytics Section Responsive */
+        .analytics-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .analytics-grid-streak {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .analytics-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analytics-grid-streak {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -271,7 +294,7 @@
             <h3 style="margin: 0 0 20px 0; font-size: 1rem; color: var(--emerald-life);">📈 PERFORMANCE ANALYTICS</h3>
 
             <!-- ROI Cards Row -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+            <div class="analytics-grid-4" style="margin-bottom: 20px;">
                 <div class="summary-card"
                     style="background: rgba(0,255,157,0.05); border: 1px solid rgba(0,255,157,0.2);">
                     <span class="stat-label">Hoy</span>
@@ -295,7 +318,7 @@
             </div>
 
             <!-- Stats Row -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+            <div class="analytics-grid-4" style="margin-bottom: 20px;">
                 <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
                     <div style="font-size: 1.5rem; font-weight: bold; color: var(--emerald-life);" id="win-rate">0%
                     </div>
@@ -317,7 +340,7 @@
             </div>
 
             <!-- Streak & Bot Leaderboard -->
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+            <div class="analytics-grid-streak">
                 <!-- Streak Card -->
                 <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
                     <div style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">🔥 RACHA ACTUAL</div>
