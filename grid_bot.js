@@ -3863,15 +3863,26 @@ async function detectCapitalChange() {
 }
 
 // PHASE 5: Time-Weighted APY Calculation
-// Considers deposits/withdrawals for accurate APY
+// Uses real deposits from deposits.json with allocation percentage for accuracy
 function calculateAccurateAPY() {
     const profit = state.totalProfit || 0;
-    const initialCapital = state.initialCapital || 100;
     const firstTrade = state.firstTradeTime || state.startTime;
     const daysActive = Math.max(1, (Date.now() - firstTrade) / (1000 * 60 * 60 * 24));
 
-    // Simple ROI
-    const roi = (profit / initialCapital) * 100;
+    // Get REAL capital from deposits × this bot's allocation
+    let allocatedCapital = state.initialCapital || 100;
+    try {
+        const depositData = readDeposits();
+        const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
+        // Apply this bot's allocation percentage (e.g., 60% for BTC)
+        allocatedCapital = totalDeposited * CAPITAL_ALLOCATION;
+    } catch (e) {
+        // Fallback to state.initialCapital if deposits can't be read
+        console.log(`>> [APY] Using fallback capital: ${allocatedCapital}`);
+    }
+
+    // ROI based on allocated capital
+    const roi = allocatedCapital > 0 ? (profit / allocatedCapital) * 100 : 0;
 
     // Annualized APY
     const dailyReturn = roi / daysActive;
@@ -3882,7 +3893,7 @@ function calculateAccurateAPY() {
         daysActive: daysActive.toFixed(1),
         dailyAvg: dailyReturn.toFixed(4),
         projectedAPY: projectedAnnual.toFixed(2),
-        initialCapital: initialCapital.toFixed(2),
+        initialCapital: allocatedCapital.toFixed(2),
         totalDeposits: (state.capitalHistory || []).filter(e => e.type === 'DEPOSIT').length,
         totalWithdrawals: (state.capitalHistory || []).filter(e => e.type === 'WITHDRAWAL').length
     };
