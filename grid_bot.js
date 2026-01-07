@@ -333,6 +333,7 @@ app.get('/api/status', async (req, res) => {
         const apyData = calculateAccurateAPY();
         const apy = parseFloat(apyData.projectedAPY) || 0;
         const daysActive = parseFloat(apyData.daysActive) || 1;
+        const startTime = state.firstTradeTime || state.startTime || Date.now();
 
         // Last trade info (robustly pick latest by timestamp regardless of array order)
         const lastTrade = filledOrders.length > 0
