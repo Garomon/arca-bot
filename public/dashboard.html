@@ -756,24 +756,38 @@
                 });
             }
 
-            // Build both curves simultaneously: deposits cumulative and equity = deposits + profit
+            // Build both curves: deposits cumulative and equity (interpolated to current)
             let lastKnownDeposit = 0;
-            let runningProfit = 0;
             const depositsCumulative = [];
-            const equityCurve = [];
 
             history.forEach(h => {
                 // Update cumulative deposit if there's a deposit on this date
                 if (depositByDate.has(h.date)) {
                     lastKnownDeposit = depositByDate.get(h.date);
                 }
-                // Accumulate profit
-                runningProfit += (h.profit || 0);
-
-                // Store values
                 depositsCumulative.push(lastKnownDeposit);
-                // Equity = Deposits at that point + Profit at that point
-                equityCurve.push(lastKnownDeposit + runningProfit);
+            });
+
+            // For equity curve: use real Binance equity for interpolation
+            // Get the real current equity from the deposits API data
+            const realCurrentEquity = window.DEPOSIT_DATA?.currentEquity || lastKnownDeposit;
+            const totalDeposits = window.DEPOSIT_DATA?.totalDeposited || lastKnownDeposit;
+
+            // Simple approach: equity tracks deposits but last point uses real value
+            // This shows the true current state
+            const equityCurve = depositsCumulative.map((dep, i) => {
+                if (i === history.length - 1) {
+                    // Last point = real equity from Binance
+                    return realCurrentEquity;
+                }
+                // Historical points: scale deposits proportionally
+                // If deposits were $500 at point X and now $1107, and current equity is $1109
+                // Then equity at point X = $500 * (1109/1107) = proportional
+                if (totalDeposits > 0) {
+                    const ratio = realCurrentEquity / totalDeposits;
+                    return dep * ratio;
+                }
+                return dep;
             });
 
             const slicedEquity = equityCurve.slice(startIndex);
