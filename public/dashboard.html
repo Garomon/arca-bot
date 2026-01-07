@@ -670,6 +670,29 @@
             });
             const slicedCumulative = absoluteCumulative.slice(startIndex);
 
+            // 4. DEPOSITS CUMULATIVE LINE (Capital Invested over time)
+            const depositsCumulative = [];
+            if (window.DEPOSIT_DATA && window.DEPOSIT_DATA.deposits) {
+                const sortedDeposits = [...window.DEPOSIT_DATA.deposits].sort((a, b) => a.date.localeCompare(b.date));
+                // Build cumulative deposit map by date
+                const depositByDate = new Map();
+                let cumDeposit = 0;
+                sortedDeposits.forEach(d => {
+                    cumDeposit += (d.amount || 0);
+                    depositByDate.set(d.date, cumDeposit);
+                });
+                // For each chart date, find the cumulative deposit at that point
+                let lastKnownDeposit = 0;
+                history.forEach(h => {
+                    const dateKey = h.date;
+                    if (depositByDate.has(dateKey)) {
+                        lastKnownDeposit = depositByDate.get(dateKey);
+                    }
+                    depositsCumulative.push(lastKnownDeposit);
+                });
+            }
+            const slicedDeposits = depositsCumulative.slice(startIndex);
+
             // RENDER
             const ctx = canvas.getContext('2d');
             const COLOR_GOLD = '#ffd700';
@@ -710,6 +733,21 @@
                             yAxisID: 'y_equity'
                         },
                         {
+                            label: 'Capital Invertido',
+                            data: slicedDeposits.length > 0 ? slicedDeposits : null,
+                            type: 'line',
+                            borderColor: '#ff8c00', // Orange
+                            backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            fill: false,
+                            stepped: 'before', // Stepped line for deposits
+                            order: 2,
+                            yAxisID: 'y_equity',
+                            hidden: slicedDeposits.length === 0
+                        },
+                        {
                             label: 'Profit Acumulado',
                             data: slicedCumulative,
                             type: 'line',
@@ -737,7 +775,7 @@
                             },
                             borderWidth: 1,
                             borderRadius: 2,
-                            order: 2,
+                            order: 3,
                             yAxisID: 'y_daily'
                         }
                     ]
@@ -803,6 +841,9 @@
                 const res = await fetch('/api/deposits');
                 if (res.ok) {
                     const data = await res.json();
+
+                    // Store globally for chart access
+                    window.DEPOSIT_DATA = data;
 
                     // Update summary cards
                     document.getElementById('cap-deposited').innerText = `$${data.totalDeposited.toFixed(2)}`;
