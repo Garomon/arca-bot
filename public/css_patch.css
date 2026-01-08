@@ -603,15 +603,6 @@
     vertical-align: middle;
 }
 
-/* === TERMINAL HEADER FIX === */
-.terminal-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    justify-content: flex-start !important;
-    flex-wrap: wrap;
-}
-
 /* === COMPACT SPIRIT SELECTOR (Orbs) === */
 .spirit-selector-compact {
     display: flex;
