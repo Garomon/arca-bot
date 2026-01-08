@@ -1,5 +1,5 @@
-# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v5.0
-*(Actualizado: 2026-01-02 - Timezone-Aware CDMX + Swarm Intelligence)*
+# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v5.2
+*(Actualizado: 2026-01-07 - Universal Equity + TWR + Dynamic Dash)*
 
 **IP VPS:** `167.71.1.124`  ssh root@167.71.1.124       
 **Usuario:** `root`
@@ -63,7 +63,7 @@ echo -e "\n🔄 --- 10.b HISTORIAL DE REBALANCEO (ADAPTIVE) [HOY] ---"; \
 grep -E "Rebalance Triggered|PRICE DRIFT|Grid Health|rebalance" /root/arca-bot/logs/VANTAGE01_*_activity.log | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)" | tail -n 10 || echo "Sin rebalanceos hoy (Grid Estable)."; \
 echo -e "\n🦅 --- 11. SWARM YIELD AUDIT [TIEMPO REAL] ---"; \
 node /root/arca-bot/scripts/calc_swarm_yield.js 2>/dev/null || echo "Script no disponible"; \
-echo -e "\n📊 --- 12. PROYECCIÓN DE RIQUEZA ---"; \
+echo -e "\n📊 --- 12. PROYECCIÓN DE RIQUEZA (HARD MODE: NET EQUITY) ---"; \
 node /root/arca-bot/scripts/analyze_projection.js 2>/dev/null || echo "Script no disponible"; \
 echo -e "\n🔬 --- 13. AUDITORÍA MANUAL [OPCIONAL] ---"; \
 echo "  node scripts/full_audit.js BTC/USDT"; \
@@ -71,7 +71,27 @@ echo "  node scripts/full_audit.js SOL/USDT"; \
 echo "  node scripts/full_audit.js DOGE/USDT"; \
 echo "  node scripts/check_ghosts.js  # Cazafantasmas"
 ```
-rememebrr anything you need form vps ask me im your hands
+```
+
+---
+
+## ⚡ 1.b SINCRONIZACIÓN (EJECUTAR EN TU PC)
+
+Antes de auditar gráficos o archivos locales, asegúrate de tener la **verdad** del VPS.
+
+### 📥 Traer datos del VPS (VPS -> PC):
+Ejecuta esto en tu terminal local (VS Code) para descargar historiales y logs frescos:
+```bash
+npm run sync:down
+```
+*Te pedirá el password del VPS.*
+
+### 📤 Subir cambios de código (PC -> VPS):
+Si mejoras la interfaz o los scripts, súbelos **sin riesgo** de borrar datos:
+```bash
+npm run sync:up
+```
+*Sube `.js`, `.html`, `.css` pero IGNORA `data/sessions` para proteger la memoria del bot.*
 
 ---
 
@@ -248,5 +268,24 @@ El reporte tiene datos de diferentes temporalidades. Aquí está la guía:
 | `Avg Cost` | `[TIEMPO REAL]` | Costo promedio de tu inventario (si estás "cargado"). |
 | `Buy & Hold Return` | `[DESDE INICIO]` | Retorno si hubieras holdeado en lugar de usar el bot. |
 | `Bot vs Hold` | `[DESDE INICIO]` | Indica quién está ganando: el bot o simplemente holdear. |
+| `APY` | `[TIEMPO REAL]` | Rendimiento Anual Proyectado usando **Time-Weighted Return**. |
+
+---
+
+## ⚡ 8. DASHBOARD DINÁMICO & TWR (NUEVO)
+
+### 🔄 Dinamismo Total
+El dashboard es ahora **100% reactivo**. No requieres recargar la página:
+1.  **Profit & Equity:** Se actualizan cada 5 segundos.
+2.  **Depósitos:** Si agregas capital en el *Capital Tracker*, el cálculo de APY se ajusta **al instante**.
+3.  **Global APY:** Calcula el rendimiento de TODA tu cartera en tiempo real.
+4.  **Detección Universal:** El Equity Global escanea CUALQUIER activo en tu wallet (BNB, SHIB, PEPE...), no solo los que tradea el bot.
+
+### ⏳ Time-Weighted Return (TWR)
+El cálculo de APY ya no es simple (`Profit / Capital Final`). Ahora usa **TWR**:
+*   Pondera cada dólar por el **tiempo exacto** que estuvo invertido.
+*   Si depositas $1000 hoy, no diluye el rendimiento de los $100 que tenías hace un año.
+*   **Fórmula:** `(Profit Total / Capital Promedio Ponderado por Días) * 365`.
+*   *Resultado:* Tu APY reflejará la verdadera eficiencia de tu dinero, no solo el volumen.
 
 > **Regla de Oro:** Si algo dice `[HISTÓRICO]` y te parece raro (ej: Drawdown alto), probablemente es un "fantasma del pasado", no un problema de hoy.

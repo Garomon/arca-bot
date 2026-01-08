@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node grid_bot.js",
     "multicore": "node orchestrator.js",
-    "dev": "node --watch grid_bot.js"
+    "dev": "node --watch grid_bot.js",
+    "sync:down": "node scripts/sync_remote.js pull",
+    "sync:up": "node scripts/sync_remote.js push"
   },
   "dependencies": {
     "ccxt": "^4.5.22",

@@ -15,6 +15,10 @@
     <meta name="theme-color" content="#050508">
 
     <link href="styles/rpg-theme.css?v=4.3.0" rel="stylesheet">
+    <link href="css_patch.css?v=4.3.0" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         @keyframes spin {
@@ -157,17 +161,40 @@
             </div>
         </div>
 
+        <!-- HERO STATS ROW (PROTAGONISTS) -->
+        <div class="hero-stats-row">
+            <!-- TOTAL REALIZADO -->
+            <div class="hero-card hero-gold">
+                <div class="hero-icon">💰</div>
+                <div class="hero-content">
+                    <span class="hero-label">TOTAL REALIZADO</span>
+                    <span class="hero-val" id="total-profit">$0.00</span>
+                </div>
+            </div>
+
+            <!-- GANANCIA NETA (MAIN) -->
+            <div class="hero-card hero-emerald main-hero">
+                <div class="hero-icon">💹</div>
+                <div class="hero-content">
+                    <span class="hero-label">GANANCIA NETA</span>
+                    <span class="hero-val" id="cap-profit">$0.00</span>
+                </div>
+            </div>
+
+            <!-- BOTÍN DIARIO -->
+            <div class="hero-card hero-blue">
+                <div class="hero-icon">💎</div>
+                <div class="hero-content">
+                    <span class="hero-label">BOTÍN DIARIO</span>
+                    <span class="hero-val" id="daily-profit">$0.00</span>
+                </div>
+            </div>
+        </div>
+
         <!-- GLOBAL STATS ROW -->
         <div class="stats-hex-grid"
             style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 30px;">
-            <div class="stat-cell">
-                <span class="stat-label">Total Realizado</span>
-                <span class="stat-val gold" id="total-profit">$0.00</span>
-            </div>
-            <div class="stat-cell">
-                <span class="stat-label">Botín Diario</span>
-                <span class="stat-val" id="daily-profit">$0.00</span>
-            </div>
+            <!-- Cells Moved to Hero Row -->
             <div class="stat-cell">
                 <span class="stat-label">Flotante</span>
                 <span class="stat-val" id="unrealized-pnl">$0.00</span>
@@ -219,7 +246,7 @@
                 </div>
                 <div class="stat-cell" style="background: rgba(0,255,157,0.05); border: 1px solid rgba(0,255,157,0.2);">
                     <span class="stat-label">📈 Ganancia Neta</span>
-                    <span class="stat-val" id="cap-profit" style="color: var(--emerald-life);">$0</span>
+                    <span class="stat-val" id="cap-profit-table" style="color: var(--emerald-life);">$0</span>
                 </div>
                 <div class="stat-cell"
                     style="background: rgba(138,43,226,0.05); border: 1px solid rgba(138,43,226,0.2);">
@@ -1049,9 +1076,20 @@
                     document.getElementById('cap-deposited').innerText = `$${data.totalDeposited.toFixed(2)}`;
                     document.getElementById('cap-current').innerText = `$${data.currentEquity.toFixed(2)}`;
 
+                    // UPDATE HERO ROW (Protagonists)
                     const profitEl = document.getElementById('cap-profit');
-                    profitEl.innerText = `${data.profit >= 0 ? '+' : ''}$${data.profit.toFixed(2)}`;
-                    profitEl.style.color = data.profit >= 0 ? 'var(--emerald-life)' : 'var(--ruby-danger)';
+                    if (profitEl) {
+                        profitEl.innerText = `${data.profit >= 0 ? '+' : ''}$${data.profit.toFixed(2)}`;
+                        profitEl.style.color = data.profit >= 0 ? 'var(--emerald-life)' : 'var(--ruby-danger)';
+                    }
+
+                    // Update Table/Tracker if exists
+                    const profitTableEl = document.getElementById('cap-profit-table');
+                    if (profitTableEl) {
+                        profitTableEl.innerText = `${data.profit >= 0 ? '+' : ''}$${data.profit.toFixed(2)}`;
+                        profitTableEl.style.color = data.profit >= 0 ? 'var(--emerald-life)' : 'var(--ruby-danger)';
+                    }
+
 
                     const roiEl = document.getElementById('cap-roi');
                     roiEl.innerText = `${data.roi >= 0 ? '+' : ''}${data.roi.toFixed(2)}%`;
