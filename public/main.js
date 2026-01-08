@@ -42,40 +42,53 @@ const SPIRITS = {
 let currentSpirit = 'ignis';
 
 // Spirit Switch Function (Called from HTML buttons)
+// Now NAVIGATES to the correct bot URL for real data
 function switchSpirit(spiritId) {
     if (!SPIRITS[spiritId]) return;
 
-    currentSpirit = spiritId;
     const spirit = SPIRITS[spiritId];
 
-    // Update data attribute for CSS theming
+    // Map spirit to URL path
+    const urlMap = {
+        ignis: '/',           // BTC bot at root
+        ventus: '/sol/',      // SOL bot
+        fang: '/doge/'        // DOGE bot
+    };
+
+    const targetPath = urlMap[spiritId];
+    const currentPath = window.location.pathname;
+
+    // Normalize current path for comparison
+    const normalizedCurrent = currentPath === '/index.html' ? '/' : currentPath;
+
+    // Only navigate if we're going to a different bot
+    if (normalizedCurrent !== targetPath) {
+        // Store spirit preference for when page loads
+        localStorage.setItem('preferredSpirit', spiritId);
+
+        // Navigate to the correct bot URL
+        window.location.href = targetPath;
+        return;
+    }
+
+    // If already on correct path, just update theme (no navigation needed)
+    currentSpirit = spiritId;
     document.body.setAttribute('data-spirit', spiritId);
 
     // Update background watermark image
     const bgImg = document.getElementById('spirit-bg-img');
     if (bgImg) {
-        bgImg.style.opacity = '0';
-        setTimeout(() => {
-            // Use the small spirit images as watermark
-            const watermarkMap = {
-                ignis: 'assets/spirit-btc.png',
-                ventus: 'assets/spirit-sol.png',
-                fang: 'assets/spirit-doge.png'
-            };
-            bgImg.src = watermarkMap[spiritId] || spirit.banner;
-            bgImg.style.opacity = '';
-        }, 150);
+        const watermarkMap = {
+            ignis: 'assets/spirit-btc.png',
+            ventus: 'assets/spirit-sol.png',
+            fang: 'assets/spirit-doge.png'
+        };
+        bgImg.src = watermarkMap[spiritId] || spirit.banner;
     }
 
     // Update spirit badge in header
     const badgeEl = document.getElementById('spirit-badge');
     if (badgeEl) badgeEl.textContent = spirit.name;
-
-    // Update trading pair
-    const pairLabel = document.getElementById('trading-pair-label');
-    const symbolLabel = document.getElementById('pair-symbol');
-    if (pairLabel) pairLabel.textContent = spirit.pair;
-    if (symbolLabel) symbolLabel.textContent = spirit.symbol;
 
     // Update orb selector buttons
     document.querySelectorAll('.spirit-orb').forEach(btn => {
@@ -83,10 +96,7 @@ function switchSpirit(spiritId) {
         if (btn.dataset.spirit === spiritId) btn.classList.add('active');
     });
 
-    // Fetch data from the correct bot API
-    fetchSpiritData(spiritId);
-
-    console.log(`>> [SPIRIT] Switched to ${spirit.name} (${spirit.pair})`);
+    console.log(`>> [SPIRIT] Active: ${spirit.name} (${spirit.pair})`);
 }
 
 // Fetch data from spirit's API endpoint
@@ -147,18 +157,44 @@ function updateBotUIFromAPI(data, spirit) {
     }
 }
 
-// Initialize spirit on page load
+// Initialize spirit on page load based on current URL
 document.addEventListener('DOMContentLoaded', () => {
-    // Set default spirit theme
-    document.body.setAttribute('data-spirit', 'ignis');
-
-    // Detect if on a sub-path and auto-set spirit
     const path = window.location.pathname;
+
+    // Detect which bot we're on and set the correct spirit
+    let detectedSpirit = 'ignis'; // Default BTC
     if (path.startsWith('/sol')) {
-        switchSpirit('ventus');
+        detectedSpirit = 'ventus';
     } else if (path.startsWith('/doge')) {
-        switchSpirit('fang');
+        detectedSpirit = 'fang';
     }
+
+    // Set the spirit (this won't navigate since we're already on correct path)
+    currentSpirit = detectedSpirit;
+    document.body.setAttribute('data-spirit', detectedSpirit);
+
+    // Update UI elements
+    const spirit = SPIRITS[detectedSpirit];
+    const badgeEl = document.getElementById('spirit-badge');
+    if (badgeEl) badgeEl.textContent = spirit.name;
+
+    const bgImg = document.getElementById('spirit-bg-img');
+    if (bgImg) {
+        const watermarkMap = {
+            ignis: 'assets/spirit-btc.png',
+            ventus: 'assets/spirit-sol.png',
+            fang: 'assets/spirit-doge.png'
+        };
+        bgImg.src = watermarkMap[detectedSpirit];
+    }
+
+    // Mark correct orb as active
+    document.querySelectorAll('.spirit-orb').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.spirit === detectedSpirit) btn.classList.add('active');
+    });
+
+    console.log(`>> [SPIRIT] Initialized as ${spirit.name} (${spirit.pair})`);
 });
 
 // ═══════════════════════════════════════════════════════════════
