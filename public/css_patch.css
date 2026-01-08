@@ -622,10 +622,11 @@
     gap: 12px;
     flex-wrap: wrap;
     flex: 1;
-    padding: 0;
-    background: none;
-    border: none;
-    border-radius: 0;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 /* === COMPACT SPIRIT SELECTOR (Orbs) === */
