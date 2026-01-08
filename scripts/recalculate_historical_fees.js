@@ -17,7 +17,6 @@ require('dotenv').config();
 const ccxt = require('ccxt');
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
 
 // === CONFIG ===
 const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'sessions');
