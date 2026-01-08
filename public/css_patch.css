@@ -609,7 +609,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 20px;
-    background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+    background: transparent;
     border: 1px solid var(--border-glow, rgba(0, 255, 157, 0.2));
     border-radius: 12px;
     margin-bottom: 15px;
