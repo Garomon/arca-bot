@@ -54,7 +54,7 @@ function findStateFiles() {
 // Initialize Binance
 const binance = new ccxt.binance({
     apiKey: process.env.BINANCE_API_KEY,
-    secret: process.env.BINANCE_API_SECRET,
+    secret: process.env.BINANCE_SECRET,
     enableRateLimit: true,
     options: { defaultType: 'spot' }
 });
