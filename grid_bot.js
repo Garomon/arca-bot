@@ -4039,7 +4039,8 @@ async function checkLiveOrders() {
                     const filledAmount = parseFloat(info.filled || order.amount);
 
                     // Merge new data with order metadata
-                    await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice);
+                    // FIX: Pass actual fee data from exchange
+                    await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice, info.fee);
                 }
             } catch (e) {
                 // Order might be gone, assume filled if not in openOrders? 
@@ -4064,7 +4065,7 @@ async function checkLiveOrders() {
     }
 }
 
-async function handleOrderFill(order, fillPrice) {
+async function handleOrderFill(order, fillPrice, actualFee) {
     if (!order) return;
 
     // P0 FIX: Strict Type Safety (Prevent NaN pollution)
@@ -4118,6 +4119,39 @@ async function handleOrderFill(order, fillPrice) {
         let entryFees = 0; // Track entry fees from consumed lots
         let consumedLots = 0;
         const matchedLots = []; // Track which lots were consumed for transparency
+        let realFeeUSDT = 0;
+        let feeCurrency = 'ESTIMATED';
+
+        // P0 FIX: Calculate ACTUAL Fee in USDT
+        if (actualFee && actualFee.cost > 0) {
+            try {
+                if (actualFee.currency === 'USDT') {
+                    realFeeUSDT = actualFee.cost;
+                    feeCurrency = 'USDT';
+                } else if (actualFee.currency === 'BNB') {
+                    // Fetch BNB Price for accurate conversion
+                    const bnbTicker = await binance.fetchTicker('BNB/USDT');
+                    const bnbPrice = bnbTicker.last;
+                    realFeeUSDT = actualFee.cost * bnbPrice;
+                    feeCurrency = 'BNB';
+                    log('FEE', `Paid ${actualFee.cost.toFixed(5)} BNB ($${realFeeUSDT.toFixed(4)} USDT)`, 'info');
+                } else if (actualFee.currency === BASE_ASSET) {
+                    // Paid in base asset (e.g. BTC)
+                    realFeeUSDT = actualFee.cost * fillPrice;
+                    feeCurrency = BASE_ASSET;
+                } else {
+                    // Fallback for other assets
+                    log('WARN', `Unknown fee currency: ${actualFee.currency}. Using estimation.`, 'warning');
+                    realFeeUSDT = fillPrice * order.amount * CONFIG.tradingFee;
+                }
+            } catch (e) {
+                log('WARN', `Fee conversion failed: ${e.message}. Using estimation.`, 'warning');
+                realFeeUSDT = fillPrice * order.amount * CONFIG.tradingFee;
+            }
+        } else {
+            // Fallback if no fee data provided (e.g. some manual fills or API quirks)
+            realFeeUSDT = fillPrice * order.amount * CONFIG.tradingFee;
+        }
 
         // Iterate mutable inventory
         // FILTER: Only consider lots with remaining balance
@@ -4219,7 +4253,9 @@ async function handleOrderFill(order, fillPrice) {
 
         // Calculate REAL FIFO Profit
         const sellRevenue = fillPrice * order.amount;
-        const sellFee = sellRevenue * CONFIG.tradingFee;
+        // Use ACTUAL fee calculated above instead of estimation
+        // const sellFee = sellRevenue * CONFIG.tradingFee; 
+        const sellFee = realFeeUSDT;
 
         // VALIDATION: Check for "Phantom Inventory" (Absurdly low cost basis)
         // If average cost per unit is < 50% of sell price, something is wrong.
@@ -4232,11 +4268,17 @@ async function handleOrderFill(order, fillPrice) {
             const spacing = order.spacing || CONFIG.gridSpacing;
             const estimatedBuyPrice = fillPrice / (1 + spacing);
             costBasis = estimatedBuyPrice * order.amount;
+            costBasis = estimatedBuyPrice * order.amount;
             entryFees = costBasis * CONFIG.tradingFee; // Estimate entry fee too
         }
 
         const grossProfit = sellRevenue - costBasis;
         const totalFees = sellFee + entryFees; // Both entry and exit fees
+
+        // P0 FIX: Ensure totalFees is never double counted if logic overlaps, 
+        // but here sellFee is the EXIT fee (actual) and entryFees is from the LOTS (historical).
+        // This is correct.
+
         profit = grossProfit - totalFees; // TRUE NET PROFIT
 
         // === SANITY CHECK: Prevent impossible profits ===
@@ -4296,6 +4338,7 @@ async function handleOrderFill(order, fillPrice) {
         orderRecord.spreadPct = sellSpreadPct;
         orderRecord.matchedLots = sellMatchedLots;
         orderRecord.fees = sellTotalFees; // FIX: Use function-scoped variable
+        orderRecord.feeCurrency = feeCurrency; // Store currency for debugging
         orderRecord.matchMethod = ACCOUNTING_METHOD; // Store method used
         orderRecord.matchType = sellMatchType; // FIX: Store match quality (EXACT/CLOSE/FALLBACK) for UI
     }
