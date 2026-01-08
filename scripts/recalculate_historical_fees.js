@@ -39,7 +39,8 @@ function findStateFiles() {
 
         for (const f of sessionFiles) {
             // Extract pair from filename: VANTAGE01_BTCUSDT_state.json -> BTC/USDT
-            const match = f.match(/VANTAGE\d+_([A-Z]+)([A-Z]+)_state\.json/);
+            // Known quote assets: USDT, USDC, BTC, ETH, etc.
+            const match = f.match(/VANTAGE\d+_([A-Z]+)(USDT|USDC|BTC|ETH|BUSD)_state\.json/);
             if (match) {
                 const pair = `${match[1]}/${match[2]}`;
                 files.push({ path: path.join(SESSIONS_DIR, f), pair });
