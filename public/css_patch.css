@@ -603,11 +603,36 @@
     vertical-align: middle;
 }
 
+/* === TERMINAL HEADER WRAPPER (Fixes layout) === */
+.terminal-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(0, 255, 157, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+    border: 1px solid var(--border-glow, rgba(0, 255, 157, 0.2));
+    border-radius: 12px;
+    margin-bottom: 15px;
+    gap: 20px;
+}
+
+.terminal-header-wrapper .terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: 1;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+}
+
 /* === COMPACT SPIRIT SELECTOR (Orbs) === */
 .spirit-selector-compact {
     display: flex;
-    gap: 6px;
-    margin-left: auto;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .spirit-orb {
