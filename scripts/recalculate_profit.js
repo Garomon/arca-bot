@@ -93,6 +93,14 @@ async function runRecalculate() {
                     fee: feeCost,
                     timestamp: trade.timestamp
                 });
+
+                // ENRICH BUY TRADE FOR UI
+                trade.fees = feeCost;
+                trade.costBasis = 0; // Buys don't have cost basis
+                trade.spreadPct = 0;
+                trade.profit = 0;
+                trade.matchType = 'INVENTORY';
+                trade.isNetProfit = false;
             } else if (side === 'sell') {
                 // SPREAD_MATCH: Find lot where buyPrice * (1+spacing) ≈ sellPrice
                 const expectedBuyPrice = price / (1 + DEFAULT_SPACING);
@@ -141,6 +149,14 @@ async function runRecalculate() {
                 const tradeProfit = revenue - costBasis - entryFees - sellFee;
                 totalProfit += tradeProfit;
                 totalFees += (entryFees + sellFee);
+
+                // ENRICH TRADE OBJECT FOR UI
+                trade.profit = tradeProfit;
+                trade.fees = entryFees + sellFee;
+                trade.costBasis = costBasis;
+                trade.spreadPct = ((price - (costBasis / amount)) / (costBasis / amount)) * 100; // Approx spread
+                trade.matchType = "SPREAD_MATCH"; // Use matchType instead of match
+                trade.isNetProfit = true;
             }
         }
 
@@ -160,6 +176,26 @@ async function runRecalculate() {
         state.totalProfit = totalProfit;
         state.accumulatedProfit = totalProfit;
         state.accountingMethod = 'SPREAD_MATCH';
+
+        // CRITICAL: Save the enriched history back to the state file so the UI Table works
+        // We must map our processed 'trades' array back to the format the bot expects
+        // 'trades' contains the CCXT objects which we just modified in-place above
+        state.filledOrders = trades.map(t => ({
+            id: t.id,
+            timestamp: t.timestamp,
+            datetime: t.datetime,
+            symbol: t.symbol,
+            side: t.side,
+            price: parseFloat(t.price),
+            amount: parseFloat(t.amount),
+            costBasis: t.costBasis || (t.price * t.amount),
+            fees: t.fees || 0,
+            feeCurrency: 'BNB', // Hardcoding as we know it's bnb mostly
+            profit: t.profit || 0,
+            status: 'filled',
+            matchType: t.matchType || (t.side === 'buy' ? 'INVENTORY' : 'UNKNOWN'),
+            spreadPct: t.spreadPct || 0
+        }));
 
         fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
         console.log(`>> State file updated with $${totalProfit.toFixed(4)} total profit`);
