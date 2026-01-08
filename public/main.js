@@ -51,31 +51,34 @@ function switchSpirit(spiritId) {
     // Update data attribute for CSS theming
     document.body.setAttribute('data-spirit', spiritId);
 
-    // Update banner image
-    const bannerImg = document.getElementById('spirit-banner-img');
-    if (bannerImg) {
-        bannerImg.style.opacity = '0';
+    // Update background watermark image
+    const bgImg = document.getElementById('spirit-bg-img');
+    if (bgImg) {
+        bgImg.style.opacity = '0';
         setTimeout(() => {
-            bannerImg.src = spirit.banner;
-            bannerImg.style.opacity = '0.9';
-        }, 200);
+            // Use the small spirit images as watermark
+            const watermarkMap = {
+                ignis: 'assets/spirit-btc.png',
+                ventus: 'assets/spirit-sol.png',
+                fang: 'assets/spirit-doge.png'
+            };
+            bgImg.src = watermarkMap[spiritId] || spirit.banner;
+            bgImg.style.opacity = '';
+        }, 150);
     }
 
-    // Update text elements
-    const nameEl = document.getElementById('spirit-name');
-    const typeEl = document.getElementById('spirit-type');
-    const quoteEl = document.getElementById('spirit-quote');
+    // Update spirit badge in header
+    const badgeEl = document.getElementById('spirit-badge');
+    if (badgeEl) badgeEl.textContent = spirit.name;
+
+    // Update trading pair
     const pairLabel = document.getElementById('trading-pair-label');
     const symbolLabel = document.getElementById('pair-symbol');
-
-    if (nameEl) nameEl.textContent = spirit.name;
-    if (typeEl) typeEl.textContent = spirit.type;
-    if (quoteEl) quoteEl.textContent = spirit.quote;
     if (pairLabel) pairLabel.textContent = spirit.pair;
     if (symbolLabel) symbolLabel.textContent = spirit.symbol;
 
-    // Update selector buttons
-    document.querySelectorAll('.spirit-btn').forEach(btn => {
+    // Update orb selector buttons
+    document.querySelectorAll('.spirit-orb').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.spirit === spiritId) btn.classList.add('active');
     });

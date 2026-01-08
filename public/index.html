@@ -494,28 +494,9 @@
 
             <!-- TAB 4: GRID BOT - PROFESSIONAL TRADING TERMINAL -->
             <div class="tab-content" id="bot">
-                <!-- 🛡️ SPIRIT HERO BANNER -->
-                <div class="spirit-hero" id="spirit-hero">
-                    <div class="spirit-banner-container">
-                        <img id="spirit-banner-img" src="assets/spirit-ignis-banner.png" alt="Spirit Banner">
-                        <div class="spirit-banner-overlay"></div>
-                    </div>
-                    <div class="spirit-info">
-                        <div class="spirit-selector">
-                            <button class="spirit-btn active" data-spirit="ignis" onclick="switchSpirit('ignis')">
-                                🔥 IGNIS
-                            </button>
-                            <button class="spirit-btn" data-spirit="ventus" onclick="switchSpirit('ventus')">
-                                🌬️ VENTUS
-                            </button>
-                            <button class="spirit-btn" data-spirit="fang" onclick="switchSpirit('fang')">
-                                🐺 FANG
-                            </button>
-                        </div>
-                        <h2 class="spirit-name" id="spirit-name">IGNIS</h2>
-                        <div class="spirit-type" id="spirit-type">🔥 ESPÍRITU DE FUEGO</div>
-                        <div class="spirit-quote" id="spirit-quote">"Del caos emerge el oro. El fuego purifica."</div>
-                    </div>
+                <!-- 🛡️ SPIRIT BACKGROUND WATERMARK (Subtle) -->
+                <div class="spirit-watermark" id="spirit-watermark">
+                    <img id="spirit-bg-img" src="assets/spirit-btc.png" alt="">
                 </div>
 
                 <div class="terminal-header">
@@ -528,6 +509,7 @@
                     <div class="terminal-pair">
                         <span class="pair-symbol" id="pair-symbol">₿</span>
                         <span class="pair-name" id="trading-pair-label">BTC/USDT</span>
+                        <span class="spirit-badge" id="spirit-badge">IGNIS</span>
                     </div>
                     <div class="terminal-regime">
                         <span class="regime-icon">📈</span>
@@ -538,6 +520,15 @@
                         style="display:none; margin-left:10px; border-color: #ff4444; color: #ff4444;">
                         <span class="regime-icon">🌍</span>
                         <span class="regime-text" id="geo-text">MIDTERM</span>
+                    </div>
+                    <!-- 🛡️ COMPACT SPIRIT SELECTOR -->
+                    <div class="spirit-selector-compact">
+                        <button class="spirit-orb active" data-spirit="ignis" onclick="switchSpirit('ignis')"
+                            title="IGNIS - Fuego">🔥</button>
+                        <button class="spirit-orb" data-spirit="ventus" onclick="switchSpirit('ventus')"
+                            title="VENTUS - Viento">🌬️</button>
+                        <button class="spirit-orb" data-spirit="fang" onclick="switchSpirit('fang')"
+                            title="FANG - Manada">🐺</button>
                     </div>
                 </div>
 
