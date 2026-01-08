@@ -492,6 +492,7 @@ socket.on('financial_update', (data) => {
     window.currentEquity = data.totalEquity;
 
     // DYNAMIC UI: Update Base Asset Label (e.g. "BTC" or "SOL")
+    // NOTE: Skip trading pair updates if user manually selected a different spirit
     if (data.pair) {
         const baseAsset = data.pair.split('/')[0]; // "BTC/USDT" -> "BTC"
         const label = document.getElementById('base-asset-label');
@@ -499,19 +500,26 @@ socket.on('financial_update', (data) => {
             label.innerText = baseAsset;
         }
 
-        // NEW: Update Main Terminal Header (e.g. "BTC/USDT")
-        const pairLabel = document.getElementById('trading-pair-label');
-        if (pairLabel) pairLabel.innerText = data.pair;
+        // Only update terminal header if NOT manually switched to different spirit
+        // The spirit system now controls the pair display
+        const socketPairMap = { 'BTC': 'ignis', 'SOL': 'ventus', 'DOGE': 'fang' };
+        const socketSpirit = socketPairMap[baseAsset] || 'ignis';
 
-        // NEW: Update Symbol (₿ for BTC, ◎ for SOL, Ð for DOGE)
-        const symbolLabel = document.getElementById('pair-symbol');
-        if (symbolLabel) {
-            if (baseAsset === 'SOL') {
-                symbolLabel.innerText = '◎';
-            } else if (baseAsset === 'DOGE') {
-                symbolLabel.innerText = 'Ð';
-            } else {
-                symbolLabel.innerText = '₿';
+        // If socket data matches current spirit, update normally
+        // If user switched to different spirit, DON'T override their selection
+        if (currentSpirit === socketSpirit) {
+            const pairLabel = document.getElementById('trading-pair-label');
+            if (pairLabel) pairLabel.innerText = data.pair;
+
+            const symbolLabel = document.getElementById('pair-symbol');
+            if (symbolLabel) {
+                if (baseAsset === 'SOL') {
+                    symbolLabel.innerText = '◎';
+                } else if (baseAsset === 'DOGE') {
+                    symbolLabel.innerText = 'Ð';
+                } else {
+                    symbolLabel.innerText = '₿';
+                }
             }
         }
     }
