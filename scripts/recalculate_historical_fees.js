@@ -17,12 +17,39 @@ require('dotenv').config();
 const ccxt = require('ccxt');
 const fs = require('fs');
 const path = require('path');
+const glob = require('glob');
 
 // === CONFIG ===
-const STATE_FILE = path.join(__dirname, '..', 'data', 'grid_state.json');
-const BACKUP_FILE = path.join(__dirname, '..', 'data', 'grid_state_backup_fees.json');
-const TRADING_PAIR = process.env.TRADING_PAIR || 'BTC/USDT';
+const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'sessions');
+const LEGACY_STATE_FILE = path.join(__dirname, '..', 'data', 'grid_state.json');
 const DRY_RUN = !process.argv.includes('--apply');
+
+// Find all state files
+function findStateFiles() {
+    const files = [];
+
+    // Check legacy path first
+    if (fs.existsSync(LEGACY_STATE_FILE)) {
+        files.push({ path: LEGACY_STATE_FILE, pair: 'BTC/USDT' });
+    }
+
+    // Check multi-bot sessions
+    if (fs.existsSync(SESSIONS_DIR)) {
+        const sessionFiles = fs.readdirSync(SESSIONS_DIR)
+            .filter(f => f.endsWith('_state.json') && !f.includes('backup'));
+
+        for (const f of sessionFiles) {
+            // Extract pair from filename: VANTAGE01_BTCUSDT_state.json -> BTC/USDT
+            const match = f.match(/VANTAGE\d+_([A-Z]+)([A-Z]+)_state\.json/);
+            if (match) {
+                const pair = `${match[1]}/${match[2]}`;
+                files.push({ path: path.join(SESSIONS_DIR, f), pair });
+            }
+        }
+    }
+
+    return files;
+}
 
 // Initialize Binance
 const binance = new ccxt.binance({
@@ -32,45 +59,39 @@ const binance = new ccxt.binance({
     options: { defaultType: 'spot' }
 });
 
-async function main() {
-    console.log('='.repeat(60));
-    console.log('📊 HISTORICAL FEE RECALCULATION SCRIPT');
-    console.log(`   Pair: ${TRADING_PAIR}`);
-    console.log(`   Mode: ${DRY_RUN ? '🔍 DRY RUN (preview only)' : '⚡ APPLY CHANGES'}`);
-    console.log('='.repeat(60));
+async function processStateFile(stateFile, tradingPair, bnbPrice) {
+    const backupFile = stateFile.replace('.json', '_backup_fees.json');
+
+    console.log(`\n${'─'.repeat(60)}`);
+    console.log(`📂 Processing: ${path.basename(stateFile)}`);
+    console.log(`   Pair: ${tradingPair}`);
+    console.log(`${'─'.repeat(60)}`);
 
     // Load state
-    if (!fs.existsSync(STATE_FILE)) {
-        console.error('❌ State file not found:', STATE_FILE);
-        process.exit(1);
-    }
-
-    const state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+    const state = JSON.parse(fs.readFileSync(stateFile, 'utf-8'));
     const filledOrders = state.filledOrders || [];
 
-    console.log(`\n📦 Found ${filledOrders.length} filled orders in state.\n`);
+    console.log(`📦 Found ${filledOrders.length} filled orders.\n`);
 
     if (filledOrders.length === 0) {
-        console.log('Nothing to process.');
-        return;
+        console.log('Nothing to process for this bot.');
+        return { updated: 0, skipped: 0, notFound: 0 };
     }
 
     // Backup before any changes
     if (!DRY_RUN) {
-        fs.writeFileSync(BACKUP_FILE, JSON.stringify(state, null, 2));
-        console.log(`💾 Backup saved to: ${BACKUP_FILE}\n`);
+        fs.writeFileSync(backupFile, JSON.stringify(state, null, 2));
+        console.log(`💾 Backup saved to: ${path.basename(backupFile)}\n`);
     }
 
-    // Fetch all trades from Binance (paginated if needed)
+    // Fetch trades for this pair
     console.log('🔄 Fetching trade history from Binance...');
     let allTrades = [];
     let since = undefined;
-    const symbol = TRADING_PAIR.replace('/', '');
 
     try {
-        // Fetch in batches (Binance limit is 1000 per request)
         while (true) {
-            const trades = await binance.fetchMyTrades(TRADING_PAIR, since, 1000);
+            const trades = await binance.fetchMyTrades(tradingPair, since, 1000);
             if (trades.length === 0) break;
 
             allTrades = allTrades.concat(trades);
@@ -78,30 +99,25 @@ async function main() {
 
             console.log(`   Fetched ${allTrades.length} trades so far...`);
 
-            // Safety: Don't fetch more than 10000 trades
             if (allTrades.length >= 10000) {
                 console.log('   (Reached 10000 trade limit)');
                 break;
             }
 
-            // Rate limit protection
             await new Promise(r => setTimeout(r, 200));
         }
     } catch (e) {
         console.error('❌ Error fetching trades:', e.message);
-        process.exit(1);
+        return { updated: 0, skipped: 0, notFound: filledOrders.length };
     }
 
-    console.log(`✅ Fetched ${allTrades.length} total trades from Binance.\n`);
+    console.log(`✅ Fetched ${allTrades.length} total trades.\n`);
 
-    // Build a map: orderId -> trade info (for quick lookup)
+    // Build trade map
     const tradeMap = new Map();
     for (const trade of allTrades) {
-        // CCXT trade structure: { id, order, info, ... }
-        // info.orderId is the Binance order ID
         const orderId = trade.order || trade.info?.orderId;
         if (orderId) {
-            // Store the trade with the most complete fee info
             if (!tradeMap.has(orderId) || trade.fee?.cost > 0) {
                 tradeMap.set(String(orderId), trade);
             }
@@ -110,43 +126,28 @@ async function main() {
 
     console.log(`📋 Mapped ${tradeMap.size} unique order IDs.\n`);
 
-    // Get current BNB price for conversions
-    let bnbPrice = 0;
-    try {
-        const ticker = await binance.fetchTicker('BNB/USDT');
-        bnbPrice = ticker.last;
-        console.log(`💰 Current BNB Price: $${bnbPrice.toFixed(2)}\n`);
-    } catch (e) {
-        console.warn('⚠️ Could not fetch BNB price. BNB fees will be estimated.');
-    }
-
-    // Process each filled order
+    // Process orders
     let updated = 0;
     let skipped = 0;
     let notFound = 0;
 
-    console.log('Processing orders...\n');
-    console.log('ID'.padEnd(12) + 'Side'.padEnd(6) + 'Old Fee'.padEnd(12) + 'New Fee'.padEnd(12) + 'Currency'.padEnd(10) + 'Status');
-    console.log('-'.repeat(70));
+    const baseAsset = tradingPair.split('/')[0];
 
     for (const order of filledOrders) {
         const orderId = String(order.id);
         const trade = tradeMap.get(orderId);
 
         if (!trade) {
-            // Order not found in Binance history (might be very old or different pair)
             notFound++;
             continue;
         }
 
-        // Extract actual fee from trade
         const actualFee = trade.fee;
         if (!actualFee || actualFee.cost === 0) {
             skipped++;
             continue;
         }
 
-        // Convert to USDT
         let feeUSDT = 0;
         const feeCurrency = actualFee.currency;
 
@@ -154,50 +155,81 @@ async function main() {
             feeUSDT = actualFee.cost;
         } else if (feeCurrency === 'BNB' && bnbPrice > 0) {
             feeUSDT = actualFee.cost * bnbPrice;
-        } else if (feeCurrency === TRADING_PAIR.split('/')[0]) {
-            // Paid in base asset (e.g., BTC)
+        } else if (feeCurrency === baseAsset) {
             feeUSDT = actualFee.cost * (order.fillPrice || order.price || 0);
         } else {
-            // Unknown currency, skip
             skipped++;
             continue;
         }
 
-        const oldFee = order.fees || 0;
-        const shortId = orderId.slice(-8);
-        const side = order.side || '?';
-
-        console.log(
-            `...${shortId}`.padEnd(12) +
-            side.toUpperCase().padEnd(6) +
-            `$${oldFee.toFixed(4)}`.padEnd(12) +
-            `$${feeUSDT.toFixed(4)}`.padEnd(12) +
-            feeCurrency.padEnd(10) +
-            (Math.abs(oldFee - feeUSDT) > 0.0001 ? '📝 Changed' : '✓ Same')
-        );
-
-        // Update the order (only if not dry run)
         if (!DRY_RUN) {
             order.fees = feeUSDT;
             order.feeCurrency = feeCurrency;
-            order.feeRaw = actualFee.cost; // Store original amount too
+            order.feeRaw = actualFee.cost;
         }
 
         updated++;
     }
 
-    console.log('-'.repeat(70));
-    console.log(`\n📊 Summary:`);
-    console.log(`   ✅ Updated: ${updated}`);
-    console.log(`   ⏭️ Skipped (no fee data): ${skipped}`);
-    console.log(`   ❓ Not found in Binance: ${notFound}`);
-
     // Save if not dry run
     if (!DRY_RUN && updated > 0) {
-        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
-        console.log(`\n💾 Changes saved to: ${STATE_FILE}`);
-        console.log(`   Backup available at: ${BACKUP_FILE}`);
-    } else if (DRY_RUN) {
+        fs.writeFileSync(stateFile, JSON.stringify(state, null, 2));
+        console.log(`💾 Saved ${updated} updates to: ${path.basename(stateFile)}`);
+    }
+
+    return { updated, skipped, notFound };
+}
+
+async function main() {
+    console.log('='.repeat(60));
+    console.log('📊 HISTORICAL FEE RECALCULATION SCRIPT (Multi-Bot)');
+    console.log(`   Mode: ${DRY_RUN ? '🔍 DRY RUN (preview only)' : '⚡ APPLY CHANGES'}`);
+    console.log('='.repeat(60));
+
+    // Find all state files
+    const stateFiles = findStateFiles();
+
+    if (stateFiles.length === 0) {
+        console.error('❌ No state files found!');
+        console.log('   Checked: data/grid_state.json');
+        console.log('   Checked: data/sessions/*.json');
+        process.exit(1);
+    }
+
+    console.log(`\n📁 Found ${stateFiles.length} bot state file(s):`);
+    stateFiles.forEach(f => console.log(`   - ${path.basename(f.path)} (${f.pair})`));
+
+    // Get BNB price once for all
+    let bnbPrice = 0;
+    try {
+        const ticker = await binance.fetchTicker('BNB/USDT');
+        bnbPrice = ticker.last;
+        console.log(`\n💰 BNB Price: $${bnbPrice.toFixed(2)}`);
+    } catch (e) {
+        console.warn('⚠️ Could not fetch BNB price. BNB fees will be estimated.');
+    }
+
+    // Process each state file
+    let totalUpdated = 0;
+    let totalSkipped = 0;
+    let totalNotFound = 0;
+
+    for (const { path: stateFile, pair } of stateFiles) {
+        const result = await processStateFile(stateFile, pair, bnbPrice);
+        totalUpdated += result.updated;
+        totalSkipped += result.skipped;
+        totalNotFound += result.notFound;
+    }
+
+    // Final summary
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 FINAL SUMMARY');
+    console.log('='.repeat(60));
+    console.log(`   ✅ Updated: ${totalUpdated}`);
+    console.log(`   ⏭️ Skipped (no fee data): ${totalSkipped}`);
+    console.log(`   ❓ Not found in Binance: ${totalNotFound}`);
+
+    if (DRY_RUN) {
         console.log(`\n🔍 DRY RUN complete. No changes made.`);
         console.log(`   Run with --apply to apply changes.`);
     }
@@ -209,3 +241,4 @@ main().catch(e => {
     console.error('Fatal error:', e);
     process.exit(1);
 });
+
