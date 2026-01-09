@@ -220,6 +220,7 @@ if (pathName.startsWith('/sol')) {
 }
 
 const socket = io(socketOptions);
+window.socket = socket; // Expose for console debugging/commands
 
 // ===== TAB SWITCHING =====
 document.addEventListener('DOMContentLoaded', () => {
@@ -854,6 +855,7 @@ function renderTradeHistory() {
                 if (t.matchType === 'EXACT') matchIndicator = '✅';
                 else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';
                 else if (t.matchType === 'FALLBACK') matchIndicator = '❌';
+                else if (t.matchType === 'ESTIMATED') matchIndicator = '☑️'; // Auto-Repaired Match
 
                 // Build tooltip with matched lots info
                 const lots = t.matchedLots || t.lotsUsed || [];
@@ -878,7 +880,14 @@ function renderTradeHistory() {
                 <td class="text-end text-light fw-bold" style="vertical-align: middle;">$${formatPriceShort(t.price)}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : 'text-info'}" style="vertical-align: middle;">${isBuy ? '-' : (t.costBasis ? '$' + formatPriceShort(t.costBasis) : '-')}</td>
                 <td class="text-end ${isBuy ? 'text-muted' : (t.spreadPct > 0 ? 'text-success' : 'text-danger')}" style="vertical-align: middle;">${isBuy ? '-' : (t.spreadPct !== undefined ? t.spreadPct.toFixed(2) + '%' : '-')}</td>
-                <td class="text-end text-warning" style="vertical-align: middle; font-size: 0.7rem;">${t.fees ? '$' + parseFloat(t.fees).toFixed(4) + (t.feeCurrency ? ' <span class="' + (t.feeCurrency === 'BNB' ? 'text-success' : 'text-muted') + '" style="font-size:0.6rem" title="Fee paid in ' + t.feeCurrency + '">' + (t.feeCurrency === 'BNB' ? '✓' : t.feeCurrency) + '</span>' : '') : '-'}</td>
+                <td class="text-end text-warning" style="vertical-align: middle; font-size: 0.7rem;">
+                    ${(() => {
+                    const val = parseFloat(t.fees || 0);
+                    if (val === 0) return '-';
+                    if (t.feeCurrency === 'BNB') return `${val.toFixed(6)} <span class="text-success" style="font-size:0.6rem">BNB</span>`;
+                    return `$${val.toFixed(4)}`;
+                })()}
+                </td>
                 <td class="text-center" style="vertical-align: middle; cursor: help;" title="${matchTooltip}">${matchIndicator}</td>
                 <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
                 <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(isBuy ? 0 : (t.profit || 0)).toFixed(4)}</td>

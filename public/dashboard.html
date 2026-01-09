@@ -798,19 +798,31 @@
             const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
 
             const filled = [];
-            const startDate = new Date(sorted[0].date);
-            const endDate = new Date(sorted[sorted.length - 1].date);
 
-            // Ensure we cover up to TODAY if the last log is old
-            const today = new Date();
-            const finalDate = today > endDate ? today : endDate;
+            // Get TODAY in CDMX timezone (UTC-6) as string
+            const nowUTC = Date.now();
+            const cdmxMs = nowUTC - (6 * 60 * 60 * 1000); // Subtract 6 hours for CDMX
+            const cdmxNow = new Date(cdmxMs);
+            const todayStr = cdmxNow.toISOString().split('T')[0];
+
+            // Use string-based date comparison to avoid timezone issues
+            const startStr = sorted[0].date;
+            const endStr = sorted[sorted.length - 1].date;
+            // NEVER show dates past today - todayStr is the absolute cap
+            const finalStr = todayStr;
+
+            console.log('[Chart Debug] Today (CDMX):', todayStr, 'EndStr:', endStr, 'Final (capped):', finalStr);
 
             const dateMap = new Map();
             sorted.forEach(h => dateMap.set(h.date, h));
 
-            let current = new Date(startDate);
-            while (current <= finalDate) {
-                const dayStr = current.toISOString().split('T')[0];
+            // Generate all dates from start to final (inclusive) using strings
+            let currentDate = new Date(startStr + 'T12:00:00Z'); // Use noon UTC to avoid edge cases
+
+            while (true) {
+                const dayStr = currentDate.toISOString().split('T')[0];
+
+                if (dayStr > finalStr) break; // Stop AFTER final date
 
                 if (dateMap.has(dayStr)) {
                     filled.push(dateMap.get(dayStr));
@@ -820,22 +832,43 @@
                 }
 
                 // Add 1 day
-                current.setDate(current.getDate() + 1);
+                currentDate.setDate(currentDate.getDate() + 1);
             }
             return filled;
         }
 
         let GLOBAL_FINANCIAL_HISTORY = [];
+        window.GLOBAL_MARKET_HISTORY = {}; // Changed to object and window scope for renderChart access
 
-        async function fetchFinancialHistory() {
+        // NOTE: /api/market-history endpoint doesn't exist - using equity-snapshots instead
+        async function fetchMarketHistory() {
+            // This endpoint doesn't exist, skip it
+            // Equity snapshots are loaded via fetchEquitySnapshots() instead
+            console.log('[Chart] Market History skipped - using equity-snapshots');
+        }
+
+        // Fetch REAL daily equity snapshots from Binance (recorded by bot)
+        async function fetchEquitySnapshots() {
             try {
-                const res = await fetch('/api/financial-history');
+                const res = await fetch('/api/equity-snapshots');
                 const data = await res.json();
-                if (Array.isArray(data)) {
-                    GLOBAL_FINANCIAL_HISTORY = data;
-                    console.log("Loaded Financial History:", data.length);
+                if (data && Array.isArray(data.snapshots)) {
+                    // Inject snapshots into window.GLOBAL_MARKET_HISTORY for chart rendering
+                    window.GLOBAL_MARKET_HISTORY.equitySnapshots = data.snapshots;
+                    console.log("Loaded Equity Snapshots:", data.snapshots.length, "days", data.snapshots);
+                    // Re-render chart with real data
+                    if (GLOBAL_FULL_HISTORY.length > 0) {
+                        renderChart(GLOBAL_FULL_HISTORY);
+                    }
                 }
-            } catch (e) { console.error("Financial History fetch failed", e); }
+            } catch (e) { console.error("Equity Snapshots fetch failed", e); }
+        }
+        fetchEquitySnapshots(); // Load on page load
+
+        // NOTE: /api/financial-history endpoint doesn't exist - not needed for chart
+        async function fetchFinancialHistory() {
+            // This endpoint doesn't exist, skip it
+            console.log('[Chart] Financial History skipped - not needed');
         }
 
         function renderChart(historyRaw) {
@@ -856,49 +889,98 @@
                 startIndex = Math.max(0, history.length - limit);
             }
 
-            // 3. PREPARE DATA - Build deposit map first
-            const depositByDate = new Map();
-            let cumDeposit = 0;
+            // 3. PREPARE DATA - Robust Deposit & Equity Calculation
+            let currentDepositSum = 0;
+            const depositsCumulative = [];
+            const equityReconstructed = [];
+
+            // Helper: Get sorted deposits
+            let sortedDeposits = [];
             if (window.DEPOSIT_DATA && window.DEPOSIT_DATA.deposits) {
-                const sortedDeposits = [...window.DEPOSIT_DATA.deposits].sort((a, b) => a.date.localeCompare(b.date));
-                sortedDeposits.forEach(d => {
-                    cumDeposit += (d.amount || 0);
-                    depositByDate.set(d.date, cumDeposit);
-                });
+                sortedDeposits = [...window.DEPOSIT_DATA.deposits].sort((a, b) => a.date.localeCompare(b.date));
             }
 
-            // Build both curves: deposits cumulative and equity (interpolated to current)
-            let lastKnownDeposit = 0;
-            const depositsCumulative = [];
-
-            history.forEach(h => {
-                // Update cumulative deposit if there's a deposit on this date
-                if (depositByDate.has(h.date)) {
-                    lastKnownDeposit = depositByDate.get(h.date);
-                }
-                depositsCumulative.push(lastKnownDeposit);
+            // A. Calculate Cumulative Profits first
+            let runningProfit = 0;
+            const profitCumulative = history.map(h => {
+                runningProfit += (h.profit || 0);
+                return runningProfit;
             });
 
-            // For equity curve: use real Binance equity for interpolation
-            // Get the real current equity from the deposits API data
-            const realCurrentEquity = window.DEPOSIT_DATA?.currentEquity || lastKnownDeposit;
-            const totalDeposits = window.DEPOSIT_DATA?.totalDeposited || lastKnownDeposit;
+            // B. Build Deposit Curve synchronous with History
+            let depIndex = 0;
 
-            // Simple approach: equity tracks deposits but last point uses real value
-            // This shows the true current state
-            const equityCurve = depositsCumulative.map((dep, i) => {
-                if (i === history.length - 1) {
-                    // Last point = real equity from Binance
-                    return realCurrentEquity;
+            // Pre-calculate deposits before history start
+            if (history.length > 0) {
+                const startDate = history[0].date;
+                while (depIndex < sortedDeposits.length && sortedDeposits[depIndex].date < startDate) {
+                    currentDepositSum += sortedDeposits[depIndex].amount;
+                    depIndex++;
                 }
-                // Historical points: scale deposits proportionally
-                // If deposits were $500 at point X and now $1107, and current equity is $1109
-                // Then equity at point X = $500 * (1109/1107) = proportional
-                if (totalDeposits > 0) {
-                    const ratio = realCurrentEquity / totalDeposits;
-                    return dep * ratio;
+            }
+
+            history.forEach((h, i) => {
+                // Add deposits for this specific day
+                while (depIndex < sortedDeposits.length && sortedDeposits[depIndex].date === h.date) {
+                    currentDepositSum += sortedDeposits[depIndex].amount;
+                    depIndex++;
                 }
-                return dep;
+
+                depositsCumulative.push(currentDepositSum);
+
+                // Reconstruct Equity: Capital + Realized Profit
+                // This gives the "floor" equity (ignoring unrealized PnL)
+                equityReconstructed.push(currentDepositSum + profitCumulative[i]);
+            });
+
+            // C. Equity Curve Scaling with Volatility (Market-Aware)
+
+            const realCurrentEquity = window.DEPOSIT_DATA?.currentEquity || currentDepositSum;
+            const lastReconstructed = equityReconstructed[equityReconstructed.length - 1];
+
+            // 1. Calculate Base Scaling (Book Value -> Book Equity)
+            let baseScalingFactor = 1;
+            if (lastReconstructed > 0 && realCurrentEquity > 0) {
+                baseScalingFactor = realCurrentEquity / lastReconstructed;
+            }
+
+            // 2. Apply Price Volatility using GLOBAL_MARKET_HISTORY
+            // K-Lines provide true daily volatility
+
+            // Map Market History to Dates
+            const priceMap = new Map();
+            const snapshotMap = new Map(); // NEW: Hard Data Map
+
+            if (window.GLOBAL_MARKET_HISTORY) {
+                if (Array.isArray(window.GLOBAL_MARKET_HISTORY.history)) {
+                    window.GLOBAL_MARKET_HISTORY.history.forEach(p => priceMap.set(p.date, p.price));
+                }
+                if (Array.isArray(window.GLOBAL_MARKET_HISTORY.equitySnapshots)) {
+                    window.GLOBAL_MARKET_HISTORY.equitySnapshots.forEach(s => snapshotMap.set(s.date, s.equity));
+                    console.log('[Chart] snapshotMap loaded:', snapshotMap.size, 'entries', [...snapshotMap.entries()]);
+                } else {
+                    console.log('[Chart] No equitySnapshots found in GLOBAL_MARKET_HISTORY');
+                }
+            }
+
+            // Find current price (last available) or from deposit data
+            let currentPrice = 0;
+            if (window.GLOBAL_MARKET_HISTORY && window.GLOBAL_MARKET_HISTORY.history && window.GLOBAL_MARKET_HISTORY.history.length > 0) {
+                currentPrice = window.GLOBAL_MARKET_HISTORY.history[window.GLOBAL_MARKET_HISTORY.history.length - 1].price;
+            }
+
+            // Build clean equity curve: JUST deposits + profit (no scaling or volatility)
+            const equityCurve = equityReconstructed.map((val, i) => {
+                const date = history[i].date;
+
+                // PRIORITY 1: Use real Binance snapshot if available
+                if (snapshotMap.has(date)) {
+                    return snapshotMap.get(date);
+                }
+
+                // PRIORITY 2: Use reconstructed value (deposits + cumulative profit)
+                // NO volatility adjustment - this causes the weird fluctuations
+                return val;
             });
 
             const slicedEquity = equityCurve.slice(startIndex);
@@ -1218,28 +1300,36 @@
             }
         }
 
-        function init() {
+        async function init() {
             renderCompanions();
+
             // Wait a tick to ensure DOM is ready
-            setTimeout(() => {
-                fetchAllData();
-                fetchRPG();
-                fetchChart();
-                fetchDeposits(); // Capital Tracker
-                fetchFinancialHistory();
-                fetchAnalytics(); // NEW: Performance Analytics
-            }, 100);
+            await new Promise(r => setTimeout(r, 100));
+
+            // CRITICAL: Load deposits FIRST (other fetches need this for chart)
+            await fetchDeposits();
+
+            // Now load the rest (these may trigger renderChart which needs DEPOSIT_DATA)
+            fetchAllData();
+            fetchRPG();
+            fetchChart();
+            fetchEquitySnapshots(); // Charts need snapshots too
+            fetchFinancialHistory();
+            fetchMarketHistory(); // NEW: Volatility Data
+            fetchAnalytics(); // NEW: Performance Analytics
 
             setInterval(fetchAllData, 5000);
             setInterval(fetchRPG, 60000);
             setInterval(fetchChart, 60000);
             setInterval(fetchDeposits, 30000);
             setInterval(fetchFinancialHistory, 60000);
+            setInterval(fetchMarketHistory, 60000);
             setInterval(fetchAnalytics, 60000); // Refresh analytics every minute
         }
 
         init();
     </script>
+    <script src="socket.io.min.js"></script>
 </body>
 
 </html>

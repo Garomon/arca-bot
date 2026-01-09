@@ -591,6 +591,109 @@ app.get('/api/rpg', async (req, res) => {
     }
 });
 
+// ==================== DAILY EQUITY SNAPSHOTS SYSTEM ====================
+// Records REAL equity from Binance once per day at midnight for accurate charting
+
+const EQUITY_SNAPSHOTS_FILE = path.join(__dirname, 'data', 'equity_snapshots.json');
+
+// Load or initialize snapshots
+function loadEquitySnapshots() {
+    try {
+        if (fs.existsSync(EQUITY_SNAPSHOTS_FILE)) {
+            return JSON.parse(fs.readFileSync(EQUITY_SNAPSHOTS_FILE, 'utf8'));
+        }
+    } catch (e) {
+        console.error('[SNAPSHOTS] Error loading snapshots:', e.message);
+    }
+    return { snapshots: [], capitalInvested: 0 };
+}
+
+// Save snapshots to disk
+function saveEquitySnapshots(data) {
+    fs.writeFileSync(EQUITY_SNAPSHOTS_FILE, JSON.stringify(data, null, 2));
+}
+
+// Record a daily snapshot of REAL equity from Binance
+async function recordDailyEquitySnapshot() {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const data = loadEquitySnapshots();
+
+    // Skip if already recorded today
+    if (data.snapshots.some(s => s.date === today)) {
+        console.log(`[SNAPSHOTS] Already recorded for ${today}, skipping.`);
+        return;
+    }
+
+    try {
+        // Fetch real balances from Binance
+        const balance = await binance.fetchBalance();
+
+        // Fetch current prices for all relevant assets
+        const btcPrice = (await binance.fetchTicker('BTC/USDT')).last || 0;
+        const solPrice = (await binance.fetchTicker('SOL/USDT')).last || 0;
+        const dogePrice = (await binance.fetchTicker('DOGE/USDT')).last || 0;
+        const bnbPrice = (await binance.fetchTicker('BNB/USDT')).last || 0;
+
+        // Calculate total equity in USDT
+        const equity =
+            (parseFloat(balance['USDT']?.total) || 0) +
+            (parseFloat(balance['BTC']?.total) || 0) * btcPrice +
+            (parseFloat(balance['SOL']?.total) || 0) * solPrice +
+            (parseFloat(balance['DOGE']?.total) || 0) * dogePrice +
+            (parseFloat(balance['BNB']?.total) || 0) * bnbPrice;
+
+        // Calculate capital invested (from deposits file)
+        let capitalInvested = 0;
+        const depositsFile = path.join(__dirname, 'data', 'deposits.json');
+        if (fs.existsSync(depositsFile)) {
+            const depositsData = JSON.parse(fs.readFileSync(depositsFile, 'utf8'));
+            // Handle both formats: plain array OR {deposits: [...]}
+            const depositsArray = Array.isArray(depositsData) ? depositsData : (depositsData.deposits || []);
+            capitalInvested = depositsArray.reduce((sum, d) => sum + (d.amount || 0), 0);
+        }
+
+        // Save snapshot
+        data.snapshots.push({
+            date: today,
+            equity: parseFloat(equity.toFixed(2)),
+            capitalInvested: parseFloat(capitalInvested.toFixed(2)),
+            timestamp: Date.now()
+        });
+
+        // Keep only last 365 days
+        if (data.snapshots.length > 365) {
+            data.snapshots = data.snapshots.slice(-365);
+        }
+
+        saveEquitySnapshots(data);
+        console.log(`[SNAPSHOTS] ✅ Recorded equity snapshot for ${today}: $${equity.toFixed(2)}`);
+
+    } catch (e) {
+        console.error('[SNAPSHOTS] Error recording snapshot:', e.message);
+    }
+}
+
+// API Endpoint to serve snapshots to frontend
+app.get('/api/equity-snapshots', (req, res) => {
+    try {
+        const data = loadEquitySnapshots();
+        res.json(data);
+    } catch (e) {
+        console.error('[API] /api/equity-snapshots error:', e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Schedule: Record snapshot once per day (check every hour, only writes once)
+setInterval(() => {
+    recordDailyEquitySnapshot();
+}, 60 * 60 * 1000); // Check every hour
+
+// Record initial snapshot on startup (if not already done today)
+setTimeout(() => {
+    recordDailyEquitySnapshot();
+}, 30000); // 30 seconds after startup
+
 // --- GLOBAL PROFIT HISTORY API ---
 // Aggregates daily profit from ALL bots for the RPG Dashboard chart
 app.get('/api/profit-history', async (req, res) => {
@@ -4535,8 +4638,17 @@ async function syncWithExchange() {
     }
 }
 
-async function syncHistoricalTrades() {
+async function syncHistoricalTrades(deepClean = false) {
     try {
+        // DEEP CLEAN: Clear history to rebuild strictly from Binance data
+        if (deepClean) {
+            log('SYNC', '🧹 DEEP CLEAN: Clearing local history to remove phantoms...', 'warning');
+            state.filledOrders = [];
+            state.archivedOrders = [];
+            state.accumulatedProfit = 0;
+            saveState(); // Immediate save to prevent data loss if crash
+        }
+
         // ENGINEER FIX: Increase lookback to 500 to recover "lost" trades after a crash
         const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
         if (trades.length > 0) log('DEBUG', `Fetched ${trades.length} trades. Verifying against known orders...`);
@@ -4553,13 +4665,16 @@ async function syncHistoricalTrades() {
         }
 
         const knownIds = new Set(state.filledOrders.map(o => o.id));
+        // P1 FIX: Secondary dedup by timestamp+side+price (handles varying ID formats from CCXT)
+        const knownTimestamps = new Set(state.filledOrders.map(o => `${o.timestamp}_${o.side}_${o.price}`));
 
         for (const trade of trades) {
             // Fix ID access: CCXT sometimes uses .order, .orderId, or .id
             const tradeId = trade.orderId || trade.order || trade.id;
+            const tradeKey = `${trade.timestamp}_${trade.side}_${trade.price}`;
 
-            // Check if we know this trade
-            if (!knownIds.has(tradeId)) {
+            // Check if we know this trade (by ID OR by timestamp+side+price)
+            if (!knownIds.has(tradeId) && !knownTimestamps.has(tradeKey)) {
 
                 // HONESTY FIX: Don't estimate profits for synced trades
                 // Only real-time handleOrderFill() has accurate LIFO profit
@@ -4579,6 +4694,7 @@ async function syncHistoricalTrades() {
                     isNetProfit: false // Estimated, not FIFO-calculated
                 });
                 knownIds.add(tradeId); // Prevent duplicates in this loop
+                knownTimestamps.add(tradeKey); // Also add to timestamp set
                 addedCount++;
             }
             // NOTE: Removed backfill "repair" that was inventing fake profits
@@ -4602,6 +4718,16 @@ async function syncHistoricalTrades() {
             }
             log('SYNC', `Imported ${addedCount} historical trades from exchange`, 'success');
             saveState();
+
+            // IF DEEP CLEAN: Recalculate Total Profit strictly from the new clean history
+            if (deepClean) {
+                const totalProfitParams = state.filledOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
+                state.totalProfit = totalProfitParams;
+                state.accumulatedProfit = totalProfitParams; // Sync variable to history
+                log('SYNC', `💰 DEEP CLEAN COMPLETE. Total Profit Reset to: $${state.totalProfit.toFixed(4)}`, 'success');
+                saveState();
+            }
+
             // ENGINEER FIX: Force UI refresh to show recovered profit immediately
             io.emit('init_state', state);
         }
@@ -4803,6 +4929,14 @@ server.listen(BOT_PORT, async () => {
         socket.on('reconcile_inventory', async () => {
             console.log('>> [CMD] MANUAL INVENTORY RECONCILIATION TRIGGERED');
             await reconcileInventoryWithExchange();
+        });
+
+        // P0 FIX: Force Deep Clean (Trojan Horse Fix for Missing Keys)
+        socket.on('force_deep_clean', async () => {
+            console.log('>> [CMD] 🧹 FORCE DEEP CLEAN TRIGGERED');
+            log('SYSTEM', '⚠️ INITIATING DEEP CLEAN AUDIT via Socket Command...', 'warning');
+            await syncHistoricalTrades(true); // Pass true for deepClean
+            emitGridState();
         });
     });
 

@@ -17,6 +17,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.3",
     "technicalindicators": "^3.1.0"
   }
 }
