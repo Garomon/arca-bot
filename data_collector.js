@@ -45,6 +45,55 @@ class DataCollector {
     }
 
     /**
+     * Calculates efficiency metrics from filledOrders for ML enrichment
+     */
+    _calculateEfficiencyMetrics(state) {
+        const now = Date.now();
+        const h24 = 24 * 60 * 60 * 1000;
+        const h1 = 60 * 60 * 1000;
+        const orders = state.filledOrders || [];
+
+        // Filter orders from last 24h
+        const orders24h = orders.filter(o => o.timestamp && (now - o.timestamp) < h24);
+        const orders1h = orders.filter(o => o.timestamp && (now - o.timestamp) < h1);
+
+        // Calculate avg spread from sells with spreadPct
+        const sellsWithSpread = orders24h.filter(o => o.side === 'sell' && typeof o.spreadPct === 'number');
+        const avgSpread24h = sellsWithSpread.length > 0
+            ? sellsWithSpread.reduce((sum, o) => sum + o.spreadPct, 0) / sellsWithSpread.length
+            : 0;
+
+        // Calculate trades in last hour (both buys and sells)
+        const tradesLastHour = orders1h.filter(o => o.side === 'buy' || o.side === 'sell').length;
+
+        // Calculate avg hold time from matched lots with timestamps
+        const holdTimes = [];
+        for (const order of orders24h) {
+            if (order.side === 'sell' && order.matchedLots && order.matchedLots.length > 0) {
+                for (const lot of order.matchedLots) {
+                    if (lot.timestamp && order.timestamp) {
+                        const holdMs = order.timestamp - lot.timestamp;
+                        const holdHours = holdMs / (1000 * 60 * 60);
+                        if (holdHours > 0 && holdHours < 720) {
+                            holdTimes.push(holdHours);
+                        }
+                    }
+                }
+            }
+        }
+        const avgHoldTime24h = holdTimes.length > 0
+            ? holdTimes.reduce((a, b) => a + b, 0) / holdTimes.length
+            : 0;
+
+        return {
+            avgSpread24h: parseFloat(avgSpread24h.toFixed(3)),
+            tradesLastHour,
+            avgHoldTime24h: parseFloat(avgHoldTime24h.toFixed(1)),
+            sellsCount24h: sellsWithSpread.length
+        };
+    }
+
+    /**
      * Logs a snapshot of the current market state and bot internals.
      * @param {Object} state - The bot's state object
      * @param {Object} analysis - Technical analysis results
@@ -55,19 +104,31 @@ class DataCollector {
         try {
             if (!state || !analysis) return;
 
+            const now = new Date();
+            const hourOfDay = now.getHours();
+            const dayOfWeek = now.getDay(); // 0=Sun, 6=Sat
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+            // Calculate efficiency metrics from recent trades
+            const efficiency = this._calculateEfficiencyMetrics(state);
+
             const snapshot = {
                 timestamp: Date.now(),
-                iso: new Date().toISOString(),
+                iso: now.toISOString(),
 
                 // 0. IDENTITY (Critical for Unified Model)
                 pair: state.pair || 'UNKNOWN',
+
+                // 0.5 TEMPORAL CONTEXT (Time-based patterns)
+                hour_of_day: hourOfDay,
+                day_of_week: dayOfWeek,
+                is_weekend: isWeekend,
 
                 // 1. MARKET DATA (The "Input")
                 price: state.currentPrice,
                 rsi: analysis.rsi,
                 ema: analysis.ema,
                 ema_dev_pct: analysis.ema ? ((state.currentPrice - analysis.ema) / analysis.ema) * 100 : 0, // Normalized Trend
-                bb_bandwidth: analysis.bandwidth,
                 bb_bandwidth: analysis.bandwidth,
                 volatility_regime: state.volatilityRegime,
                 market_regime: state.marketRegime,
@@ -92,7 +153,13 @@ class DataCollector {
                 inventory_lots: state.inventory ? state.inventory.length : 0,
                 total_profit: state.totalProfit,
 
-                // 4.5 WEEKLY METRICS (Performance Tracking)
+                // 4.5 EFFICIENCY METRICS (ML Feature Engineering)
+                avg_spread_24h: efficiency.avgSpread24h,
+                avg_hold_time_24h: efficiency.avgHoldTime24h,
+                trades_last_hour: efficiency.tradesLastHour,
+                sells_count_24h: efficiency.sellsCount24h,
+
+                // 4.6 WEEKLY METRICS (Performance Tracking)
                 in_range_percent: state.metrics && (state.metrics.ticksInRange + state.metrics.ticksOutOfRange) > 0
                     ? ((state.metrics.ticksInRange / (state.metrics.ticksInRange + state.metrics.ticksOutOfRange)) * 100).toFixed(1)
                     : 'N/A',

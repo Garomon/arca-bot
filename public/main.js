@@ -852,10 +852,14 @@ function renderTradeHistory() {
             let matchIndicator = '-';
             let matchTooltip = '';
             if (!isBuy && t.matchType) {
-                if (t.matchType === 'EXACT') matchIndicator = '✅';
-                else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';
-                else if (t.matchType === 'FALLBACK') matchIndicator = '❌';
-                else if (t.matchType === 'ESTIMATED') matchIndicator = '☑️'; // Auto-Repaired Match
+                if (t.matchType === 'EXACT') matchIndicator = '✅';           // Perfect FIFO match
+                else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';      // Close price match
+                else if (t.matchType === 'RECOVERED') matchIndicator = '🔍';  // Found real BUY in Binance history
+                else if (t.matchType === 'SYNC_MATCHED') matchIndicator = '✅'; // Synced with real BUY match
+                else if (t.matchType === 'SYNC_FALLBACK') matchIndicator = '⚠️'; // Synced with grid fallback
+                else if (t.matchType === 'FALLBACK') matchIndicator = '⚠️';   // Grid spacing fallback (no real data)
+                else if (t.matchType === 'ESTIMATED' || t.matchType === 'SYNC_ESTIMATED') matchIndicator = '⚠️'; // Legacy
+                else if (t.matchType === 'REPAIRED') matchIndicator = '🔧';   // Manually repaired
 
                 // Build tooltip with matched lots info
                 const lots = t.matchedLots || t.lotsUsed || [];
@@ -884,7 +888,7 @@ function renderTradeHistory() {
                     ${(() => {
                     const val = parseFloat(t.fees || 0);
                     if (val === 0) return '-';
-                    if (t.feeCurrency === 'BNB') return `${val.toFixed(6)} <span class="text-success" style="font-size:0.6rem">BNB</span>`;
+                    if (t.feeCurrency && t.feeCurrency.includes('BNB')) return `${val.toFixed(6)} <span class="text-success" style="font-size:0.6rem">BNB</span>`;
                     return `$${val.toFixed(4)}`;
                 })()}
                 </td>

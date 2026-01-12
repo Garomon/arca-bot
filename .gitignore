@@ -4,3 +4,7 @@ node_modules/
 .DS_Store
 
 VPS_SECRET.txt
+
+# Temp files
+temp_*.json
+nul
