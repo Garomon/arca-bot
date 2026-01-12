@@ -203,7 +203,40 @@ echo "  node scripts/full_audit.js SOL/USDT --fix"; \
 echo "  node scripts/full_audit.js DOGE/USDT --fix"; \
 echo "  node scripts/audit_deep_forensic.js  # 🔍 AUDITORIA FORENSE DE FEES"; \
 echo "  node scripts/check_ghosts.js         # 👻 CAZAFANTASMAS"; \
-echo "  node scripts/check_orphan_orders.js  # 🔗 ORDENES HUERFANAS"
+echo "  node scripts/check_orphan_orders.js  # 🔗 ORDENES HUERFANAS"; \
+echo -e "\n🧬 --- 17. LIFE COACH STATUS [GUÍA DE VIDA] ---"; \
+curl -s http://localhost:3000/api/life-coach 2>/dev/null | node -e " \
+const chunks = []; \
+process.stdin.on('data', c => chunks.push(c)); \
+process.stdin.on('end', () => { \
+  try { \
+    const d = JSON.parse(Buffer.concat(chunks).toString()); \
+    console.log('  👤 Nivel:', d.level, '| Días Activo:', d.daysActive); \
+    console.log('  💰 Equity: \$' + (d.equity||0).toFixed(2)); \
+    console.log(''); \
+    console.log('  📋 MISIONES ACTIVAS:'); \
+    (d.missions||[]).forEach(m => { \
+      const pct = m.progressPercent || 0; \
+      const bar = '█'.repeat(Math.floor(pct/10)) + '░'.repeat(10-Math.floor(pct/10)); \
+      console.log('     ' + m.icon + ' ' + m.name + ': [' + bar + '] ' + pct + '%'); \
+      console.log('        ' + m.description + ' (+' + m.xpReward + ' XP)'); \
+    }); \
+    console.log(''); \
+    console.log('  💡 TIPS DEL MENTOR:'); \
+    (d.tips||[]).slice(0,2).forEach(t => console.log('     ' + t.icon + ' ' + t.tip)); \
+    console.log(''); \
+    console.log('  📈 ESTRATEGIAS:'); \
+    (d.strategies||[]).forEach(s => { \
+      const icon = s.unlocked ? '✅' : '🔒'; \
+      console.log('     ' + icon + ' ' + s.name + (s.unlocked ? '' : ' (Lvl ' + (s.minLevel||'?') + ')')); \
+    }); \
+    console.log(''); \
+    console.log('  🔥 HÁBITOS:'); \
+    console.log('     💎 Días sin retiro: ' + (d.habits?.noWithdrawalDays || 0)); \
+    console.log('     💉 Días desde inyección: ' + (d.habits?.lastInjectionDays || '?')); \
+    console.log('     📊 Meta mensual: \$' + (d.stats?.depositsThisMonth||0) + '/\$' + (d.stats?.monthlyGoal||500)); \
+  } catch(e) { console.log('  ⚠️ No se pudo cargar Life Coach API'); } \
+});" || echo "  ⚠️ Life Coach API no disponible"
 ```
 
 ---
