@@ -557,17 +557,23 @@ app.get('/api/rpg', async (req, res) => {
         // Define quests based on progression
         let activeQuest;
         if (currentEquity >= 1500) {
+            const daysProgress = Math.min(daysActive, 30);
             activeQuest = {
                 name: "El Rito de Fortalecimiento",
                 objective: "Mantener el sistema 30 días sin intervención manual",
+                progress: `${daysProgress.toFixed(0)}/30 días`,
+                progressPercent: Math.round((daysProgress / 30) * 100),
                 status: daysActive >= 30 ? "COMPLETED" : "IN_PROGRESS",
                 reward: "1500 XP + Título: Maestro Autonomista"
             };
         } else {
+            const equityProgress = Math.round((currentEquity / 1500) * 100);
             activeQuest = {
                 name: "El Cruce del Valle",
-                objective: "Alcanzar $1,500 en Capital Total (Equity)",
-                status: "IN_PROGRESS",
+                objective: "Alcanzar $1,500 USD de capital",
+                progress: `$${currentEquity.toFixed(0)}/$1,500`,
+                progressPercent: Math.min(equityProgress, 100),
+                status: currentEquity >= 1500 ? "COMPLETED" : "IN_PROGRESS",
                 reward: "1000 XP + Rango: Caballero del Grid"
             };
         }
@@ -708,6 +714,7 @@ app.get('/api/profit-history', async (req, res) => {
                 try {
                     const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
 
+
                     // Aggregate NET profit from ALL sell trades (filledOrders)
                     if (data.filledOrders && Array.isArray(data.filledOrders)) {
                         data.filledOrders.forEach(trade => {
@@ -742,6 +749,7 @@ app.get('/api/profit-history', async (req, res) => {
                     profit: profitByDay[dateStr] ? parseFloat(profitByDay[dateStr].toFixed(4)) : 0
                 });
             }
+
         }
 
         res.json({
@@ -822,7 +830,9 @@ app.get('/api/analytics', async (req, res) => {
         let totalDeposited = 0;
         try {
             const depositData = readDeposits();
-            totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
+            // FIX: Filter out rebalance events (no amount) and handle undefined
+            const actualDeposits = depositData.deposits.filter(d => d.type !== 'rebalance');
+            totalDeposited = actualDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
         } catch (e) { }
 
         const roiAllTime = totalDeposited > 0 ? (totalProfit / totalDeposited) * 100 : 0;
@@ -876,15 +886,33 @@ app.get('/api/analytics', async (req, res) => {
             } else break;
         }
 
-        // 5. Max Drawdown
-        let peak = 0;
+        // 5. Max Drawdown (from equity snapshots if available)
         let maxDrawdown = 0;
-        let runningTotal = 0;
-        for (const day of days) {
-            runningTotal += day.profit;
-            if (runningTotal > peak) peak = runningTotal;
-            const drawdown = peak > 0 ? ((peak - runningTotal) / peak) * 100 : 0;
-            if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+        try {
+            const snapshotsFile = path.join(__dirname, 'data', 'equity_snapshots.json');
+            if (fs.existsSync(snapshotsFile)) {
+                const snapData = JSON.parse(fs.readFileSync(snapshotsFile, 'utf8'));
+                if (snapData.snapshots && snapData.snapshots.length > 1) {
+                    let equityPeak = 0;
+                    for (const snap of snapData.snapshots) {
+                        if (snap.equity > equityPeak) equityPeak = snap.equity;
+                        const dd = equityPeak > 0 ? ((equityPeak - snap.equity) / equityPeak) * 100 : 0;
+                        if (dd > maxDrawdown) maxDrawdown = dd;
+                    }
+                }
+            }
+        } catch (e) { /* Use profit-based fallback */ }
+
+        // Fallback: profit-based drawdown if no equity data
+        if (maxDrawdown === 0 && days.length > 0) {
+            let peak = 0;
+            let runningTotal = 0;
+            for (const day of days) {
+                runningTotal += day.profit;
+                if (runningTotal > peak) peak = runningTotal;
+                const drawdown = peak > 0 ? ((peak - runningTotal) / peak) * 100 : 0;
+                if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+            }
         }
 
         // 6. Bot comparison (leaderboard)
@@ -947,6 +975,318 @@ app.get('/api/analytics', async (req, res) => {
 });
 
 // ============================================
+// INSIGHTS API - Advanced Analytics for ML
+// ============================================
+
+// GET /api/trade-activity - Heatmap data (trades by hour/day)
+app.get('/api/trade-activity', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+
+        // Initialize heatmap: 7 days x 24 hours
+        const heatmap = [];
+        for (let day = 0; day < 7; day++) {
+            for (let hour = 0; hour < 24; hour++) {
+                heatmap.push({ day, hour, count: 0 });
+            }
+        }
+
+        let totalTrades = 0;
+        let peakCount = 0;
+        let peakDay = 0;
+        let peakHour = 0;
+
+        const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        // Process all bot state files
+        for (const file of files) {
+            try {
+                const stateData = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+                const orders = stateData.filledOrders || [];
+
+                for (const order of orders) {
+                    if (order.timestamp) {
+                        const date = new Date(order.timestamp);
+                        const day = date.getDay(); // 0=Sunday
+                        const hour = date.getHours();
+
+                        const idx = day * 24 + hour;
+                        heatmap[idx].count++;
+                        totalTrades++;
+
+                        if (heatmap[idx].count > peakCount) {
+                            peakCount = heatmap[idx].count;
+                            peakDay = day;
+                            peakHour = hour;
+                        }
+                    }
+                }
+            } catch (e) { /* skip corrupted files */ }
+        }
+
+        res.json({
+            heatmap,
+            peakHour: {
+                day: dayNames[peakDay],
+                hour: `${peakHour.toString().padStart(2, '0')}:00`,
+                count: peakCount
+            },
+            totalTrades,
+            dayNames
+        });
+
+    } catch (err) {
+        console.error('[API] /api/trade-activity error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/bot-comparison - Profit breakdown by bot
+app.get('/api/bot-comparison', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+
+        const botColors = {
+            'BTC': '#f7931a',
+            'SOL': '#9945ff',
+            'DOGE': '#c3a634',
+            'ETH': '#627eea'
+        };
+
+        const bots = [];
+        let totalProfit = 0;
+        let totalTrades = 0;
+
+        for (const file of files) {
+            try {
+                const stateData = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+                const pair = stateData.pair || file.replace('VANTAGE01_', '').replace('_state.json', '');
+                const baseName = pair.split('/')[0].replace('USDT', '');
+
+                const orders = stateData.filledOrders || [];
+                const sells = orders.filter(o => o.side === 'sell');
+
+                const profit = sells.reduce((sum, o) => sum + (o.profit || 0), 0);
+                const trades = sells.length;
+
+                totalProfit += profit;
+                totalTrades += trades;
+
+                bots.push({
+                    name: baseName,
+                    profit: parseFloat(profit.toFixed(2)),
+                    trades,
+                    color: botColors[baseName] || '#888888'
+                });
+            } catch (e) { /* skip */ }
+        }
+
+        // Calculate percentages
+        bots.forEach(bot => {
+            bot.percentage = totalProfit > 0 ? parseFloat(((bot.profit / totalProfit) * 100).toFixed(1)) : 0;
+        });
+
+        // Sort by profit descending
+        bots.sort((a, b) => b.profit - a.profit);
+
+        res.json({
+            bots,
+            totalProfit: parseFloat(totalProfit.toFixed(2)),
+            totalTrades
+        });
+
+    } catch (err) {
+        console.error('[API] /api/bot-comparison error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/spread-distribution - Spread histogram
+app.get('/api/spread-distribution', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+
+        // Define spread ranges
+        const ranges = [
+            { min: 0, max: 0.3, label: '0-0.3%', count: 0, profit: 0 },
+            { min: 0.3, max: 0.5, label: '0.3-0.5%', count: 0, profit: 0 },
+            { min: 0.5, max: 0.8, label: '0.5-0.8%', count: 0, profit: 0 },
+            { min: 0.8, max: 1.0, label: '0.8-1.0%', count: 0, profit: 0 },
+            { min: 1.0, max: 1.5, label: '1.0-1.5%', count: 0, profit: 0 },
+            { min: 1.5, max: 100, label: '1.5%+', count: 0, profit: 0 }
+        ];
+
+        let totalSpread = 0;
+        let spreadCount = 0;
+
+        for (const file of files) {
+            try {
+                const stateData = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+                const orders = stateData.filledOrders || [];
+                const sells = orders.filter(o => o.side === 'sell' && o.spreadPct);
+
+                for (const sell of sells) {
+                    const spread = Math.abs(sell.spreadPct);
+                    totalSpread += spread;
+                    spreadCount++;
+
+                    for (const range of ranges) {
+                        if (spread >= range.min && spread < range.max) {
+                            range.count++;
+                            range.profit += (sell.profit || 0);
+                            break;
+                        }
+                    }
+                }
+            } catch (e) { /* skip */ }
+        }
+
+        // Find optimal range (highest count)
+        let optimalRange = ranges[0].label;
+        let maxCount = 0;
+        ranges.forEach(r => {
+            r.profit = parseFloat(r.profit.toFixed(2));
+            if (r.count > maxCount) {
+                maxCount = r.count;
+                optimalRange = r.label;
+            }
+        });
+
+        res.json({
+            distribution: ranges.filter(r => r.count > 0),
+            avgSpread: spreadCount > 0 ? parseFloat((totalSpread / spreadCount).toFixed(2)) : 0,
+            optimalRange,
+            totalTrades: spreadCount
+        });
+
+    } catch (err) {
+        console.error('[API] /api/spread-distribution error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/hold-times - Average time between buy and sell
+app.get('/api/hold-times', async (req, res) => {
+    try {
+        const sessionsDir = path.join(__dirname, 'data', 'sessions');
+        const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
+
+        const botHoldTimes = [];
+
+        for (const file of files) {
+            try {
+                const stateData = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
+                const pair = stateData.pair || file.replace('VANTAGE01_', '').replace('_state.json', '');
+                const baseName = pair.split('/')[0].replace('USDT', '');
+
+                const orders = stateData.filledOrders || [];
+                const holdTimes = [];
+
+                // Build maps for BUY order lookup
+                const buyOrderById = new Map();       // lotId -> timestamp
+                const buyOrdersByPrice = new Map();   // price -> [{timestamp, amount}]
+
+                for (const order of orders) {
+                    if (order.side === 'buy' && order.timestamp) {
+                        // Map by ID (handles both real IDs and REC_* IDs)
+                        if (order.id) {
+                            buyOrderById.set(order.id, order.timestamp);
+                        }
+                        // Also index by price for fallback matching
+                        const price = order.price;
+                        if (price) {
+                            if (!buyOrdersByPrice.has(price)) {
+                                buyOrdersByPrice.set(price, []);
+                            }
+                            buyOrdersByPrice.get(price).push({
+                                timestamp: order.timestamp,
+                                amount: order.amount || order.filled || 0
+                            });
+                        }
+                    }
+                }
+
+                // Find sells with matched lots and calculate hold times
+                for (const order of orders) {
+                    if (order.side === 'sell' && order.matchedLots && order.matchedLots.length > 0) {
+                        for (const lot of order.matchedLots) {
+                            let buyTimestamp = null;
+
+                            // Strategy 1: Direct timestamp in lot (newer format)
+                            if (lot.timestamp) {
+                                buyTimestamp = lot.timestamp;
+                            }
+
+                            // Strategy 2: Lookup by lotId
+                            if (!buyTimestamp && lot.lotId) {
+                                buyTimestamp = buyOrderById.get(lot.lotId);
+                            }
+
+                            // Strategy 3: Match by buyPrice (fallback for reconstructed orders)
+                            if (!buyTimestamp) {
+                                const lotBuyPrice = lot.buyPrice || lot.price;
+                                if (lotBuyPrice && buyOrdersByPrice.has(lotBuyPrice)) {
+                                    const candidates = buyOrdersByPrice.get(lotBuyPrice);
+                                    // Use the first matching buy at that price that happened before sell
+                                    const validBuy = candidates.find(c => c.timestamp < order.timestamp);
+                                    if (validBuy) {
+                                        buyTimestamp = validBuy.timestamp;
+                                    }
+                                }
+                            }
+
+                            // Calculate hold time if we found the buy timestamp
+                            if (buyTimestamp && order.timestamp) {
+                                const holdMs = order.timestamp - buyTimestamp;
+                                const holdHours = holdMs / (1000 * 60 * 60);
+                                if (holdHours > 0 && holdHours < 720) { // Max 30 days
+                                    holdTimes.push(holdHours);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (holdTimes.length > 0) {
+                    const avg = holdTimes.reduce((a, b) => a + b, 0) / holdTimes.length;
+                    const min = Math.min(...holdTimes);
+                    const max = Math.max(...holdTimes);
+
+                    botHoldTimes.push({
+                        name: baseName,
+                        avgHoldHours: parseFloat(avg.toFixed(1)),
+                        minHold: parseFloat(min.toFixed(1)),
+                        maxHold: parseFloat(max.toFixed(1)),
+                        sampleSize: holdTimes.length
+                    });
+                }
+            } catch (e) { /* skip */ }
+        }
+
+        // Calculate global average
+        let globalSum = 0;
+        let globalCount = 0;
+        botHoldTimes.forEach(bot => {
+            globalSum += bot.avgHoldHours * bot.sampleSize;
+            globalCount += bot.sampleSize;
+        });
+
+        res.json({
+            bots: botHoldTimes,
+            globalAvg: globalCount > 0 ? parseFloat((globalSum / globalCount).toFixed(1)) : 0,
+            totalSamples: globalCount
+        });
+
+    } catch (err) {
+        console.error('[API] /api/hold-times error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ============================================
 // DEPOSIT TRACKING API - Capital Transparency
 // ============================================
 const DEPOSITS_FILE = path.join(__dirname, 'data', 'deposits.json');
@@ -972,7 +1312,9 @@ function writeDeposits(data) {
 app.get('/api/deposits', async (req, res) => {
     try {
         const data = readDeposits();
-        const totalDeposited = data.deposits.reduce((sum, d) => sum + d.amount, 0);
+        // Filter out rebalance events (they don't have amount)
+        const actualDeposits = data.deposits.filter(d => d.type !== 'rebalance');
+        const totalDeposited = actualDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
 
         // Get current equity from Binance (Dynamic dynamic)
         const balance = await binance.fetchBalance();
@@ -1012,7 +1354,7 @@ app.get('/api/deposits', async (req, res) => {
             currentEquity,
             profit,
             roi: parseFloat(roi),
-            deposits: data.deposits.sort((a, b) => new Date(a.date) - new Date(b.date))
+            deposits: actualDeposits.sort((a, b) => new Date(a.date) - new Date(b.date))
         });
     } catch (err) {
         console.error('[API] /api/deposits error:', err.message);
@@ -1029,10 +1371,30 @@ app.post('/api/deposits', (req, res) => {
             return res.status(400).json({ error: 'Date and amount are required' });
         }
 
+        // Normalize date to yyyy-mm-dd format (auto-fix mm/dd swap if date is in future)
+        let normalizedDate = date;
+        const dateObj = new Date(date + 'T12:00:00');
+        if (!isNaN(dateObj.getTime())) {
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            if (dateObj > today) {
+                // Date is in future - try swapping month and day
+                const parts = date.split('-');
+                if (parts.length === 3 && parseInt(parts[1]) <= 12 && parseInt(parts[2]) <= 12) {
+                    const swapped = `${parts[0]}-${parts[2]}-${parts[1]}`;
+                    const swappedDate = new Date(swapped + 'T12:00:00');
+                    if (swappedDate <= today) {
+                        normalizedDate = swapped;
+                        console.log(`[DEPOSITS] Date auto-corrected: ${date} -> ${normalizedDate}`);
+                    }
+                }
+            }
+        }
+
         const data = readDeposits();
         const newDeposit = {
             id: data.nextId,
-            date: date,
+            date: normalizedDate,
             amount: parseFloat(amount),
             note: note || ''
         };
@@ -1298,16 +1660,25 @@ function loadState() {
             const acc = saved.accumulatedProfit || 0;
             const tot = saved.totalProfit || 0;
             state.totalProfit = Math.max(acc, tot);
-            state.accumulatedProfit = Math.max(acc, tot); // Sync both in memory
+            state.accumulatedProfit = Math.max(acc, tot);
 
             if (state.totalProfit > tot) {
                 console.log(`>> [RECOVERY] Restored $${state.totalProfit.toFixed(4)} from Audited Baseline.`);
             }
 
-            // P0 FIX: Restore accumulated profit if we just recovered from emergency stop
             if (saved.emergencyStop) {
                 state.accumulatedProfit = state.totalProfit;
-                // state.emergencyStop = false; // Doctrine: Keep true until manual intervention
+            }
+
+            // AUTO-AUDIT: Final Sync RAM with History (The Truth Protocol)
+            if (state.filledOrders && state.filledOrders.length > 0) {
+                const sumTrades = state.filledOrders.reduce((sum, o) => sum + (parseFloat(o.profit) || 0), 0);
+                const currentInMem = parseFloat(state.totalProfit || 0);
+                if (Math.abs(sumTrades - currentInMem) > 0.01) {
+                    console.log(`>> [AUTO-AUDIT] Final Truth: RAM ($${currentInMem.toFixed(4)}) -> History ($${sumTrades.toFixed(4)})`);
+                    state.totalProfit = sumTrades;
+                    state.accumulatedProfit = sumTrades;
+                }
             }
 
             // AUDIT FIX: Ensure inventory exists
@@ -1681,18 +2052,21 @@ async function getCurrentPrice() {
 }
 
 // PHASE 5: Time-Weighted Average Capital (TWAC) for accurate APY calculation
-// TRUE TWR: Weights capital by the time each deposit was active
+// TRUE TWR: Weights capital by the time each deposit was active, accounting for dynamic allocations and rebalances
 function calculateTimeWeightedCapital() {
     try {
         const depositData = readDeposits();
-        const deposits = depositData.deposits || [];
+        const events = depositData.deposits || [];
 
-        if (deposits.length === 0) {
+        if (events.length === 0) {
             return state.initialCapital || 100;
         }
 
-        // Sort deposits by date ascending
-        const sortedDeposits = [...deposits].sort((a, b) =>
+        // Identify this bot's symbol (e.g., BTC, SOL, DOGE)
+        const botSymbol = CONFIG.pair.split('/')[0];
+
+        // Sort events chronologically
+        const sortedEvents = [...events].sort((a, b) =>
             new Date(a.date).getTime() - new Date(b.date).getTime()
         );
 
@@ -1700,46 +2074,55 @@ function calculateTimeWeightedCapital() {
         let totalWeightedCapital = 0;
         let totalDays = 0;
         let runningCapital = 0;
+        let totalPoolCapital = 0; // Track total pool for rebalancing
 
-        // Calculate time-weighted capital for each period
-        for (let i = 0; i < sortedDeposits.length; i++) {
-            const deposit = sortedDeposits[i];
-            const depositDate = new Date(deposit.date).getTime();
+        for (let i = 0; i < sortedEvents.length; i++) {
+            const event = sortedEvents[i];
+            const eventDate = new Date(event.date).getTime();
 
-            // End of this period is either next deposit or now
-            const nextDate = (i < sortedDeposits.length - 1)
-                ? new Date(sortedDeposits[i + 1].date).getTime()
+            // End of this period is either next event or now
+            const nextDate = (i < sortedEvents.length - 1)
+                ? new Date(sortedEvents[i + 1].date).getTime()
                 : now;
 
-            // Add this deposit to running capital
-            runningCapital += deposit.amount;
+            // Get allocation for this bot
+            const allocation = event.allocation || {};
+            const allocationPct = (allocation[botSymbol] || 0) / 100;
+
+            if (event.type === 'rebalance') {
+                // REBALANCE: Redistribute ALL existing capital with new allocation
+                runningCapital = totalPoolCapital * allocationPct;
+            } else {
+                // DEPOSIT: Add new capital according to allocation
+                const depositAmount = parseFloat(event.amount) || 0;
+                totalPoolCapital += depositAmount;
+                runningCapital += depositAmount * allocationPct;
+            }
 
             // Calculate days this capital level was active
-            const periodDays = Math.max(0, (nextDate - depositDate) / (1000 * 60 * 60 * 24));
+            const periodDays = Math.max(0, (nextDate - eventDate) / (1000 * 60 * 60 * 24));
 
             // Weight by days
             totalWeightedCapital += runningCapital * periodDays;
             totalDays += periodDays;
         }
 
-        // Apply this bot's allocation percentage
-        const avgCapital = totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
-        const allocatedTWR = avgCapital * CAPITAL_ALLOCATION;
+        const twrCapital = totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
 
         // Debug log (infrequent - 1% of calls)
         if (Math.random() < 0.01) {
-            const totalDeposited = deposits.reduce((sum, d) => sum + d.amount, 0);
-            console.log(`>> [TWR] Time-Weighted Capital: $${allocatedTWR.toFixed(2)} (avg of $${avgCapital.toFixed(2)} × ${(CAPITAL_ALLOCATION * 100).toFixed(0)}%)`);
-            console.log(`>> [TWR] vs Simple Sum: $${(totalDeposited * CAPITAL_ALLOCATION).toFixed(2)} | Periods: ${sortedDeposits.length} | Days: ${totalDays.toFixed(1)}`);
+            console.log(`>> [TWR] ${botSymbol} Capital: $${twrCapital.toFixed(2)} | Days: ${totalDays.toFixed(1)}`);
         }
 
-        return allocatedTWR;
+        return twrCapital > 0 ? twrCapital : (state.initialCapital || 100);
+
     } catch (e) {
-        // Fallback to simple calculation
+        console.error(`>> [TWR] Error calculating capital: ${e.message}`);
+        // Fallback to simple allocation if possible, otherwise initial
         const depositData = readDeposits();
-        const totalDeposited = depositData.deposits.reduce((sum, d) => sum + d.amount, 0);
-        console.log(`>> [TWR] Fallback to simple: $${(totalDeposited * CAPITAL_ALLOCATION).toFixed(2)} (Error: ${e.message})`);
-        return totalDeposited * CAPITAL_ALLOCATION;
+        const actualDeposits = depositData.deposits.filter(d => d.type !== 'rebalance');
+        const totalDeposited = actualDeposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+        return totalDeposited * (CAPITAL_ALLOCATION || 0.33);
     }
 }
 
@@ -4141,9 +4524,26 @@ async function checkLiveOrders() {
                     const realFillPrice = parseFloat(info.average || info.price);
                     const filledAmount = parseFloat(info.filled || order.amount);
 
+                    // FIX: Get actual fee - if not in order, fetch from trades
+                    let actualFee = info.fee;
+                    if (!actualFee || !actualFee.cost || actualFee.cost === 0) {
+                        try {
+                            const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 10);
+                            const orderTrades = trades.filter(t => t.order === order.id || t.order === info.id);
+                            if (orderTrades.length > 0) {
+                                // Sum all fees for this order
+                                const totalCost = orderTrades.reduce((sum, t) => sum + (t.fee?.cost || 0), 0);
+                                const currency = orderTrades[0].fee?.currency || 'USDT';
+                                actualFee = { cost: totalCost, currency };
+                                log('FEE', `Fetched real fee from trades: ${totalCost.toFixed(6)} ${currency}`, 'info');
+                            }
+                        } catch (e) {
+                            log('WARN', `Could not fetch trades for fee: ${e.message}`, 'warning');
+                        }
+                    }
+
                     // Merge new data with order metadata
-                    // FIX: Pass actual fee data from exchange
-                    await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice, info.fee);
+                    await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice, actualFee);
                 }
             } catch (e) {
                 // Order might be gone, assume filled if not in openOrders? 
@@ -4198,20 +4598,50 @@ async function handleOrderFill(order, fillPrice, actualFee) {
     let sellTotalFees = 0; // FIX: Declare at function scope for orderRecord access
     let sellMatchType = null; // FIX: Store match quality (EXACT/CLOSE/FALLBACK) for UI
 
+    // Track BUY fee for orderRecord (declared before inventory block)
+    let buyFeeUSDT = 0;
+    let buyFeeCurrency = 'ESTIMATED';
+
     if (order.side === 'buy') {
         // INVENTORY TRACKING: Add new lot
         if (!state.inventory) state.inventory = [];
-        // P0 FIX: Normalize Fee to USDT for valid FIFO
-        const fee = estimateFeeUSDT(fillPrice, order.amount);
+
+        // Calculate fee - use actual if provided, else estimate
+        if (actualFee && actualFee.cost > 0) {
+            if (actualFee.currency === 'USDT') {
+                buyFeeUSDT = actualFee.cost;
+                buyFeeCurrency = 'USDT';
+            } else if (actualFee.currency === 'BNB') {
+                // Convert BNB to USDT (fetch live price or use recent estimate)
+                try {
+                    const bnbTicker = await binance.fetchTicker('BNB/USDT');
+                    buyFeeUSDT = actualFee.cost * bnbTicker.last;
+                } catch (e) {
+                    buyFeeUSDT = actualFee.cost * 890; // Fallback estimate
+                }
+                buyFeeCurrency = 'BNB-';
+            } else if (actualFee.currency === BASE_ASSET) {
+                // Fee paid in base asset (BTC, SOL, DOGE) - convert using fill price
+                buyFeeUSDT = actualFee.cost * fillPrice;
+                buyFeeCurrency = 'BNB-';
+            } else {
+                // Unknown currency - estimate
+                buyFeeUSDT = estimateFeeUSDT(fillPrice, order.amount);
+                buyFeeCurrency = 'ESTIMATED';
+            }
+        } else {
+            buyFeeUSDT = estimateFeeUSDT(fillPrice, order.amount);
+        }
+
         state.inventory.push({
             id: order.id,
             price: fillPrice,
             amount: order.amount, // Track full amount
             remaining: order.amount, // Amount available to sell
-            fee: fee,
+            fee: buyFeeUSDT,
             timestamp: Date.now()
         });
-        log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} ${BASE_ASSET} @ $${fillPrice.toFixed(2)}`, 'info');
+        log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} ${BASE_ASSET} @ $${fillPrice.toFixed(2)} | Fee: $${buyFeeUSDT.toFixed(4)}`, 'info');
     }
     else if (order.side === 'sell') {
         // INVENTORY TRACKING: Consume lots (FIFO)
@@ -4283,11 +4713,22 @@ async function handleOrderFill(order, fillPrice, actualFee) {
             const expectedBuyPrice = fillPrice / (1 + spacing);
             const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance for rounding
 
-            // Sort by proximity to expected buy price (closest first)
+            // IMPROVED: Sort by composite score (price proximity + amount match)
+            // This helps find the EXACT lot that corresponds to this SELL
+            const sellAmount = order.amount;
             inventoryCandidates.sort((a, b) => {
-                const diffA = Math.abs(a.price - expectedBuyPrice);
-                const diffB = Math.abs(b.price - expectedBuyPrice);
-                return diffA - diffB;
+                const priceDiffA = Math.abs(a.price - expectedBuyPrice) / expectedBuyPrice;
+                const priceDiffB = Math.abs(b.price - expectedBuyPrice) / expectedBuyPrice;
+
+                // Amount match bonus: prefer lots where remaining amount matches sell amount
+                const amountDiffA = Math.abs(a.remaining - sellAmount) / sellAmount;
+                const amountDiffB = Math.abs(b.remaining - sellAmount) / sellAmount;
+
+                // Composite score: 70% price, 30% amount (price is more important)
+                const scoreA = priceDiffA * 0.7 + amountDiffA * 0.3;
+                const scoreB = priceDiffB * 0.7 + amountDiffB * 0.3;
+
+                return scoreA - scoreB;
             });
 
             // Log the match attempt for transparency
@@ -4367,12 +4808,74 @@ async function handleOrderFill(order, fillPrice, actualFee) {
         const priceDeviation = avgCostPerUnit / fillPrice; // e.g. 90000 / 92000 = 0.97 (Normal) vs 1.07 / 93000 = 0.00001 (Bug)
 
         if (costBasis === 0 || priceDeviation < 0.5) {
-            log('WARN', `⚠️ Suspicious Cost Basis Detected! (Avg Cost: $${avgCostPerUnit.toFixed(2)} vs Sell: $${fillPrice.toFixed(2)}). Using estimate.`, 'warning');
-            const spacing = order.spacing || CONFIG.gridSpacing;
-            const estimatedBuyPrice = fillPrice / (1 + spacing);
-            costBasis = estimatedBuyPrice * order.amount;
-            costBasis = estimatedBuyPrice * order.amount;
-            entryFees = costBasis * CONFIG.tradingFee; // Estimate entry fee too
+            log('WARN', `⚠️ Suspicious Cost Basis Detected! (Avg Cost: $${avgCostPerUnit.toFixed(2)} vs Sell: $${fillPrice.toFixed(2)}). Searching real trade history...`, 'warning');
+
+            // FIX: Search Binance trade history for the REAL matching BUY
+            let realBuyFound = false;
+            try {
+                const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 100);
+                const tolerance = 0.001; // 0.1% amount tolerance
+
+                // Find matching BUY: same amount, lower price, earlier timestamp
+                for (const potentialBuy of trades) {
+                    if (potentialBuy.side === 'buy' &&
+                        potentialBuy.price < fillPrice &&
+                        Math.abs(potentialBuy.amount - order.amount) / order.amount < tolerance) {
+
+                        // Found the REAL matching BUY!
+                        const realBuyPrice = potentialBuy.price;
+                        costBasis = realBuyPrice * order.amount;
+
+                        // Get REAL entry fee from the buy trade
+                        if (potentialBuy.fee && potentialBuy.fee.cost > 0) {
+                            if (potentialBuy.fee.currency === 'USDT') {
+                                entryFees = potentialBuy.fee.cost;
+                            } else if (potentialBuy.fee.currency === 'BNB') {
+                                const bnbTicker = await binance.fetchTicker('BNB/USDT');
+                                entryFees = potentialBuy.fee.cost * bnbTicker.last;
+                            } else {
+                                entryFees = potentialBuy.fee.cost * potentialBuy.price;
+                            }
+                        }
+
+                        if (matchedLots.length === 0) {
+                            matchedLots.push({
+                                lotId: potentialBuy.orderId || potentialBuy.order || potentialBuy.id,
+                                buyPrice: realBuyPrice,
+                                amountTaken: order.amount,
+                                remainingAfter: 0,
+                                timestamp: potentialBuy.timestamp
+                            });
+                        }
+                        sellMatchType = 'RECOVERED';
+                        realBuyFound = true;
+                        log('RECOVERY', `✅ Found REAL BUY in history: $${realBuyPrice.toFixed(2)} | Fee: $${entryFees.toFixed(4)}`, 'success');
+                        break;
+                    }
+                }
+            } catch (e) {
+                log('WARN', `Could not fetch trade history: ${e.message}`, 'warning');
+            }
+
+            // Only use grid spacing fallback if real BUY not found
+            if (!realBuyFound) {
+                const spacing = order.spacing || CONFIG.gridSpacing;
+                const fallbackBuyPrice = fillPrice / (1 + spacing);
+                costBasis = fallbackBuyPrice * order.amount;
+                entryFees = costBasis * CONFIG.tradingFee;
+
+                if (matchedLots.length === 0) {
+                    matchedLots.push({
+                        lotId: 'FALLBACK',
+                        buyPrice: fallbackBuyPrice,
+                        amountTaken: order.amount,
+                        remainingAfter: 0,
+                        timestamp: Date.now()
+                    });
+                }
+                sellMatchType = 'FALLBACK';
+                log('WARN', `📊 Using FALLBACK cost basis: $${fallbackBuyPrice.toFixed(2)} (No match in 100 recent trades)`, 'warning');
+            }
         }
 
         const grossProfit = sellRevenue - costBasis;
@@ -4445,6 +4948,11 @@ async function handleOrderFill(order, fillPrice, actualFee) {
         orderRecord.matchMethod = ACCOUNTING_METHOD; // Store method used
         orderRecord.matchType = sellMatchType; // FIX: Store match quality (EXACT/CLOSE/FALLBACK) for UI
     }
+    // FIX: Add fee data for BUY orders too (so Transaction Log shows fees)
+    if (order.side === 'buy') {
+        orderRecord.fees = buyFeeUSDT;
+        orderRecord.feeCurrency = buyFeeCurrency;
+    }
     state.filledOrders.push(orderRecord);
 
     // MEMORY LEAK PROTECTION: Keep last 1000 orders only
@@ -4471,6 +4979,12 @@ async function handleOrderFill(order, fillPrice, actualFee) {
         log('EXECUTION', `📥 BUY FILLED @ $${fillPrice.toFixed(2)}`, 'success');
     }
     io.emit('trade_success', { side: order.side, price: fillPrice, profit });
+
+    // FIX: Emit updated trade history so UI shows matchType immediately
+    if (state.filledOrders) {
+        const sortedHistory = [...state.filledOrders].sort((a, b) => b.timestamp - a.timestamp);
+        io.emit('debug_trades', sortedHistory);
+    }
 
     // Re-place opposite order
     const newSide = order.side === 'buy' ? 'sell' : 'buy';
@@ -4573,13 +5087,14 @@ async function syncWithExchange() {
                     // P0 FIX: Use filled amount to preserve FIFO accuracy (vs using order.amount which is requested)
                     const filledAmount = order.filled || order.amount || missingOrder.amount;
 
+                    // FIX: Pass actual fee data from exchange (same as checkLiveOrders)
                     await handleOrderFill({
                         ...missingOrder, // Preserve local metadata (level, spacing)
                         side: order.side,
                         amount: filledAmount,
                         status: 'open',
                         timestamp: order.timestamp || Date.now()
-                    }, fillPrice);
+                    }, fillPrice, order.fee);
 
                 } else if (order.status === 'canceled') {
                     log('SYNC', `Order ${missingOrder.id} was canceled. Removing.`);
@@ -4676,23 +5191,136 @@ async function syncHistoricalTrades(deepClean = false) {
             // Check if we know this trade (by ID OR by timestamp+side+price)
             if (!knownIds.has(tradeId) && !knownTimestamps.has(tradeKey)) {
 
-                // HONESTY FIX: Don't estimate profits for synced trades
-                // Only real-time handleOrderFill() has accurate LIFO profit
-                // Synced trades show profit=0; run recalculate_profit.js for totals
-                const estimatedProfit = 0;
-
-                // Add to history
-                state.filledOrders.push({
+                // Build order record with basic data
+                const orderRecord = {
                     id: tradeId,
                     side: trade.side,
                     price: trade.price,
                     amount: trade.amount,
                     timestamp: trade.timestamp,
-                    profit: estimatedProfit,
+                    fillPrice: trade.price,
                     status: 'filled',
                     isEstimated: true, // Synced from exchange history, not real-time LIFO
-                    isNetProfit: false // Estimated, not FIFO-calculated
-                });
+                    isNetProfit: false
+                };
+
+                // FIX: Use REAL fee from Binance trade data
+                let realFeeUSDT = 0;
+                let feeCurrency = 'USDT';
+                if (trade.fee && trade.fee.cost > 0) {
+                    if (trade.fee.currency === 'USDT') {
+                        realFeeUSDT = trade.fee.cost;
+                        feeCurrency = 'USDT';
+                    } else if (trade.fee.currency === 'BNB') {
+                        // Convert BNB to USDT (approximate - we don't have live price during sync)
+                        realFeeUSDT = trade.fee.cost * 700; // Conservative estimate
+                        feeCurrency = 'BNB';
+                    } else if (trade.fee.currency === BASE_ASSET) {
+                        realFeeUSDT = trade.fee.cost * trade.price;
+                        feeCurrency = BASE_ASSET;
+                    } else {
+                        realFeeUSDT = trade.fee.cost;
+                        feeCurrency = trade.fee.currency;
+                    }
+                }
+
+                // For SELL orders, find the REAL matching BUY in trade history
+                if (trade.side === 'sell') {
+                    const sellPrice = trade.price;
+                    const amount = trade.amount;
+
+                    // Search for matching BUY: same/similar amount, lower price, earlier timestamp
+                    let matchedBuy = null;
+                    const tolerance = 0.001; // 0.1% tolerance for amount matching
+
+                    for (const potentialBuy of trades) {
+                        if (potentialBuy.side === 'buy' &&
+                            potentialBuy.timestamp < trade.timestamp &&
+                            potentialBuy.price < sellPrice &&
+                            Math.abs(potentialBuy.amount - amount) / amount < tolerance) {
+                            // Found a matching BUY
+                            matchedBuy = potentialBuy;
+                            break; // Take the first (most recent) match
+                        }
+                    }
+
+                    let buyPrice, matchType, lotId;
+                    let entryFee = 0;
+
+                    if (matchedBuy) {
+                        // REAL match found!
+                        buyPrice = matchedBuy.price;
+                        matchType = 'SYNC_MATCHED';
+                        lotId = matchedBuy.orderId || matchedBuy.order || matchedBuy.id;
+                        // Get real entry fee from matched buy
+                        if (matchedBuy.fee && matchedBuy.fee.cost > 0) {
+                            if (matchedBuy.fee.currency === 'USDT') {
+                                entryFee = matchedBuy.fee.cost;
+                            } else if (matchedBuy.fee.currency === 'BNB') {
+                                entryFee = matchedBuy.fee.cost * 700;
+                            } else {
+                                entryFee = matchedBuy.fee.cost * matchedBuy.price;
+                            }
+                        }
+                    } else {
+                        // No match in trade history - try to find in current inventory
+                        const spacing = CONFIG.gridSpacing || 0.01;
+                        const expectedBuyPrice = sellPrice / (1 + spacing);
+                        const invTolerance = expectedBuyPrice * 0.02; // 2% tolerance
+
+                        // Search inventory for matching lot
+                        const inventoryMatch = (state.inventory || []).find(lot =>
+                            lot.remaining > 0 &&
+                            Math.abs(lot.price - expectedBuyPrice) <= invTolerance
+                        );
+
+                        if (inventoryMatch) {
+                            // Found match in inventory - use REAL data
+                            buyPrice = inventoryMatch.price;
+                            matchType = 'SYNC_MATCHED';
+                            lotId = inventoryMatch.id;
+                            entryFee = inventoryMatch.fee ? (amount / inventoryMatch.amount) * inventoryMatch.fee : 0;
+                            log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)}`, 'success');
+                        } else {
+                            // NO REAL DATA AVAILABLE - Skip this trade instead of using fake data
+                            log('SYNC', `⏭️ Skipping SELL #${trade.id} - No matching BUY found in history or inventory. Will sync on next cycle.`, 'warning');
+                            continue; // Skip to next trade - don't add with fake data
+                        }
+                    }
+
+                    const costBasis = buyPrice * amount;
+                    const sellRevenue = sellPrice * amount;
+                    const totalFees = entryFee + realFeeUSDT;
+
+                    const spreadPct = ((sellPrice - buyPrice) / buyPrice) * 100;
+                    const grossProfit = sellRevenue - costBasis;
+                    const netProfit = grossProfit - totalFees;
+
+                    orderRecord.costBasis = buyPrice;
+                    orderRecord.spreadPct = spreadPct;
+                    orderRecord.fees = totalFees;
+                    orderRecord.feeCurrency = feeCurrency;
+                    orderRecord.profit = netProfit;
+                    orderRecord.matchType = matchType;
+                    orderRecord.matchedLots = [{
+                        lotId: lotId,
+                        buyPrice: buyPrice,
+                        amountTaken: amount,
+                        remainingAfter: 0,
+                        timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
+                    }];
+
+                    const matchStatus = matchedBuy ? '✅ REAL' : '⚠️ FALLBACK';
+                    log('SYNC', `📊 SELL synced ${matchStatus}: $${sellPrice.toFixed(2)} | Cost: $${buyPrice.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Profit: $${netProfit.toFixed(4)}`, matchedBuy ? 'success' : 'warning');
+                } else {
+                    // BUY orders: use REAL fee from trade
+                    orderRecord.profit = 0;
+                    orderRecord.fees = realFeeUSDT;
+                    orderRecord.feeCurrency = feeCurrency;
+                }
+
+                // Add to history
+                state.filledOrders.push(orderRecord);
                 knownIds.add(tradeId); // Prevent duplicates in this loop
                 knownTimestamps.add(tradeKey); // Also add to timestamp set
                 addedCount++;
