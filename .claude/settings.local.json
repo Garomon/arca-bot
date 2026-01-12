@@ -21,7 +21,11 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Improved SPREAD_MATCH tracking + ID repair scripts\n\n- SPREAD_MATCH now uses composite score \\(70% price + 30% amount\\) for better lot matching\n- Added fix_ids_only.js: Replaces synthetic IDs \\(REC_xxx\\) with real Binance Order IDs\n- Added repair_sync_fallback.js: Fixes SYNC_FALLBACK lotIds without changing profits\n- Added analyze_ids.js: Diagnostic tool for ID trazability analysis\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git push)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nchore: Sync with VPS production \\(master\\)\n\n- Updated .gitignore with temp file exclusions\n- Synced data_collector.js from VPS\n- Synced public/dashboard.html from VPS\n- Synced public/main.js from VPS\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(sshpass -p '7q2$TA/nVP!CsFi' scp:*)"
+      "Bash(sshpass -p '7q2$TA/nVP!CsFi' scp:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: Life Coach bugs - correct days calculation + $500 monthly goal\n\n- Fixed LAUNCH_DATE from 2024-12-14 to 2025-12-03 \\(was showing 394 days instead of ~40\\)\n- Changed MONTHLY_INJECTION_GOAL from $300 to $500 \\(user agreement\\)\n- Added filter to exclude rebalances from deposit calculations\n- Updated dashboard default text to show $500 goal\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(curl -s http://167.71.1.124:3000/api/life-coach)",
+      "Bash(git commit:*)"
     ]
   }
 }

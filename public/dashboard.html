@@ -1008,7 +1008,8 @@
 
             document.getElementById('unrealized-pnl').innerText = `$${tUnreal.toFixed(2)}`;
             document.getElementById('unrealized-pnl').className = `stat-val ${tUnreal >= 0 ? '' : 'neg'}`;
-            document.getElementById('global-equity').innerText = `$${tEquity.toFixed(2)}`;
+            const equityMXN = tEquity * mxnRate;
+            document.getElementById('global-equity').innerHTML = `$${tEquity.toFixed(2)} <small style="color:#888;font-size:0.55em">≈ $${equityMXN.toFixed(0)} MXN</small>`;
             document.getElementById('total-orders').innerText = tOrders;
 
             updateLogs(allLogs);
