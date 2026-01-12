@@ -986,7 +986,7 @@
             GLOBAL_EQUITY = tEquity;
 
             // SYNC CHECK: Use Chart value if available and discrepancy is minor (prevents reversion)
-            const mxnRate = window.usdMxnRate || 20.5;
+            const mxnRate = window.usdMxnRate || 18.0;
             if (typeof window.FINAL_CHART_PROFIT !== 'undefined' && Math.abs(window.FINAL_CHART_PROFIT - tProfit) < 1.0) {
                 const chartProfitMXN = window.FINAL_CHART_PROFIT * mxnRate;
                 document.getElementById('total-profit').innerHTML = `$${window.FINAL_CHART_PROFIT.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${chartProfitMXN.toFixed(0)} MXN</small>`;
@@ -996,7 +996,7 @@
             }
 
             const dailyEl = document.getElementById('daily-profit');
-            const dailyMXN = tDaily * (window.usdMxnRate || 20.5);
+            const dailyMXN = tDaily * (window.usdMxnRate || 18.0);
             dailyEl.style.display = 'flex';
             dailyEl.style.flexDirection = 'column';
             dailyEl.style.alignItems = 'center';
@@ -1103,7 +1103,7 @@
 
             const profitEl = document.getElementById(`profit-${id}`);
             if (profitEl) {
-                const botProfitMXN = (data.totalProfit || 0) * (window.usdMxnRate || 20.5);
+                const botProfitMXN = (data.totalProfit || 0) * (window.usdMxnRate || 18.0);
                 profitEl.innerHTML = `$${(data.totalProfit || 0).toFixed(2)} <small style="color:#888;font-size:0.6em">≈$${botProfitMXN.toFixed(0)}</small>`;
             }
 
@@ -2154,7 +2154,7 @@
                         // Only sync if values are actually different after rounding
                         if (currentRounded !== chartRounded && Math.abs(chartRounded - currentRounded) < 1.0) {
                             console.log(`[Sync] Adjusting Header Profit to match Chart: $${currentRounded} -> $${chartRounded}`);
-                            const mxnRate = window.usdMxnRate || 20.5;
+                            const mxnRate = window.usdMxnRate || 18.0;
                             const profitMXN = chartRounded * mxnRate;
                             headerProfitEl.innerHTML = `$${chartRounded.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${profitMXN.toFixed(0)} MXN</small>`;
                             headerProfitEl.style.textShadow = "0 0 10px var(--gold-primary)";
@@ -2307,7 +2307,7 @@
                     // UPDATE HERO ROW (Protagonists)
                     const profitEl = document.getElementById('cap-profit');
                     if (profitEl) {
-                        const mxnRate = window.usdMxnRate || 20.5;
+                        const mxnRate = window.usdMxnRate || 18.0;
                         const profitMXN = data.profit * mxnRate;
                         profitEl.innerHTML = `${data.profit >= 0 ? '+' : ''}$${data.profit.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${profitMXN.toFixed(0)} MXN</small>`;
                         profitEl.style.color = data.profit >= 0 ? 'var(--emerald-life)' : 'var(--ruby-danger)';

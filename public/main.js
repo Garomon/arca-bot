@@ -122,12 +122,12 @@ function updateBotUIFromAPI(data, spirit) {
         ui.freeUSDT.innerText = `$${data.freeUSDT.toFixed(2)}`;
     }
     if (ui.profitTotal && data.totalProfit !== undefined) {
-        const profitMXN = data.totalProfit * (window.usdMxnRate || 20.5);
+        const profitMXN = data.totalProfit * (window.usdMxnRate || 18.0);
         ui.profitTotal.innerHTML = `$${data.totalProfit.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${profitMXN.toFixed(0)} MXN</small>`;
         ui.profitTotal.style.color = data.totalProfit > 0 ? 'var(--spirit-primary)' : '#ff3b3b';
     }
     if (ui.totalEquity && data.equity !== undefined) {
-        const equityMXN = data.equity * (window.usdMxnRate || 20.5);
+        const equityMXN = data.equity * (window.usdMxnRate || 18.0);
         ui.totalEquity.innerHTML = `$${data.equity.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${equityMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })} MXN</small>`;
     }
     if (ui.activeLoops && data.activeOrders !== undefined) {
@@ -2310,24 +2310,37 @@ function loadSavedValues() {
 // ===== LIVE DATA FETCHING =====
 
 // Global exchange rate
-window.usdMxnRate = 20.5; // Default, will be updated
+window.usdMxnRate = 18.0; // Default, will be updated from Binance
 
-// Fetch USD/MXN exchange rate
+// Fetch USD/MXN exchange rate from Binance (matches P2P rates)
 async function fetchExchangeRate() {
     try {
-        // Using exchangerate-api.com (free tier)
+        // Try Binance ticker for USDTMXN (most accurate for crypto users)
+        const binanceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTMXN');
+        if (binanceRes.ok) {
+            const data = await binanceRes.json();
+            window.usdMxnRate = parseFloat(data.price);
+            updateExchangeRateDisplay();
+            log("ARCA", `USD/MXN (Binance): $${window.usdMxnRate.toFixed(2)}`, "success");
+            return window.usdMxnRate;
+        }
+    } catch (error) {
+        console.error('Error fetching Binance rate:', error);
+    }
+
+    // Fallback to exchangerate-api
+    try {
         const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
         if (response.ok) {
             const data = await response.json();
             window.usdMxnRate = data.rates.MXN;
             updateExchangeRateDisplay();
-            log("ARCA", `USD/MXN: $${window.usdMxnRate.toFixed(2)}`, "success");
+            log("ARCA", `USD/MXN (API): $${window.usdMxnRate.toFixed(2)}`, "success");
             return window.usdMxnRate;
         }
     } catch (error) {
         console.error('Error fetching exchange rate:', error);
-        // Fallback to approximate rate
-        window.usdMxnRate = 20.5;
+        window.usdMxnRate = 18.0;
     }
     return window.usdMxnRate;
 }
@@ -2463,7 +2476,7 @@ async function fetchMacroContext() {
         try {
             // DXY is harder to get free - use exchange rate proxy
             // If USD is strong vs MXN, DXY is likely strong
-            const dxyProxy = window.usdMxnRate || 20.5;
+            const dxyProxy = window.usdMxnRate || 18.0;
             // Rough correlation: MXN 20.5 ≈ DXY 106
             dxyIndex = 100 + ((dxyProxy - 18) * 2);
         } catch (e) {
