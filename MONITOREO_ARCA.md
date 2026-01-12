@@ -1,9 +1,125 @@
-# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v5.4
-*(Actualizado: 2026-01-10 - Safety Lock Detection + Log Monitor + Profit Sync)*
+# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v6.0
+*(Actualizado: 2026-01-12 - Life Coach System + RPG Progression + Wealth Roadmap)*
 
 **IP VPS:** `167.71.1.124`
 **Usuario:** `root`
 **Password:** `7q2$TA/nVP!CsFi`
+
+---
+
+## 🧬 PROMPT MAESTRO (CONTEXTO PARA IA)
+
+```
+CONTEXTO DEL PROYECTO ARCA - GAROSSA WEALTH SYSTEM
+
+OBJETIVO: Guiar a Garossa desde ~$1,300 USD hasta $1,000,000 USD (élite millonaria)
+ESTRATEGIA: Grid Trading + Reinversión 100% + Inyección $500/mes + Escalamiento progresivo
+TIMELINE: 7-10 años de disciplina consistente
+
+ESTADO ACTUAL (Enero 2026):
+- Equity: ~$1,300 USD
+- Profit Realizado: ~$29 USD
+- APY Real: ~34% (TWR)
+- Días Activo: ~40 días
+- Nivel RPG: 8 (Señor de la Forja)
+- Misión Actual: Cruzar el Valle ($1,500)
+
+BOTS ACTIVOS:
+- BTC/USDT (Puerto 3000) - Grid trading con SMART_DCA
+- SOL/USDT (Puerto 3001) - Grid trading con SMART_DCA
+- DOGE/USDT (Puerto 3004) - Grid trading con SMART_DCA
+
+SISTEMAS IMPLEMENTADOS:
+1. Grid Bots - Trading automático 24/7
+2. Dashboard - Monitoreo en tiempo real (http://167.71.1.124:3000)
+3. Life Coach - Guía gamificada hacia la riqueza
+4. RPG Progression - Sistema de niveles y misiones
+5. Capital Tracker - Seguimiento de depósitos
+6. Profit Charts - Visualización de ganancias por bot
+
+COMPROMISO DEL USUARIO:
+- Depositar $500 USD/mes (sin falta)
+- NO retirar capital (manos de diamante)
+- Seguir las misiones del Life Coach
+- Escalar estrategias según nivel
+
+CONVERSIÓN MXN:
+- Usa Binance USDT/MXN rate (~18 MXN/USD)
+- NO usar rate bancario (20.5 es incorrecto)
+
+SI EL BOT ESTÁ PAUSADO (SAFETY LOCK):
+- Ejecutar: node scripts/full_audit.js SYMBOL/USDT --fix
+- Reiniciar: pm2 restart bot-SYMBOL
+```
+
+---
+
+## 🎮 SISTEMA RPG - PROGRESIÓN DE NIVELES
+
+### Niveles y Títulos
+| Nivel | Título | XP Requerido | Equity Aprox |
+|-------|--------|--------------|--------------|
+| 1-3 | Aprendiz del Grid | 0-1500 | $0-500 |
+| 4-6 | Guerrero del Spread | 1500-3000 | $500-1500 |
+| 7-9 | Señor de la Forja | 3000-4500 | $1500-3000 |
+| 10-12 | Maestro del Compuesto | 4500-6000 | $3000-5000 |
+| 13-15 | Arquitecto de Riqueza | 6000-7500 | $5000-10000 |
+| 16-20 | Barón del Capital | 7500-10000 | $10000-25000 |
+| 21-25 | Duque de las Finanzas | 10000-12500 | $25000-50000 |
+| 26-30 | Príncipe del Mercado | 12500-15000 | $50000-100000 |
+| 31-35 | Rey del Patrimonio | 15000-17500 | $100000-250000 |
+| 36-40 | Emperador Financiero | 17500-20000 | $250000-500000 |
+| 41-45 | Leyenda Viviente | 20000-22500 | $500000-750000 |
+| 46-50 | Titán Inmortal | 22500+ | $750000-1000000+ |
+
+### Recompensas de Vida (Milestones)
+| Equity | Recompensa Sugerida |
+|--------|---------------------|
+| $1,500 | AirPods Pro |
+| $3,000 | iPhone nuevo |
+| $5,000 | MacBook / Viaje nacional |
+| $10,000 | Reloj de lujo / Moto |
+| $25,000 | Auto usado premium |
+| $50,000 | Enganche de depa |
+| $100,000 | Auto nuevo / Inversión inmobiliaria |
+| $250,000 | Propiedad completa |
+| $500,000 | Casa de tus sueños |
+| $1,000,000 | LIBERTAD FINANCIERA |
+
+---
+
+## 📈 ESTRATEGIAS DESBLOQUEADAS POR NIVEL
+
+| Nivel/Equity | Estrategia | Descripción |
+|--------------|------------|-------------|
+| 0+ | Grid Trading | Base automática 24/7 |
+| 0+ | Reinversión 100% | Todo el profit se queda |
+| 0+ | Inyección $500/mes | Acelera el compound |
+| Lvl 5 / $3K | Staking/Earn | 8-12% APY en Binance Earn |
+| Lvl 7 / $5K | DCA Blue Chips | Acumula BTC/ETH gradualmente |
+| Lvl 10 / $10K | ETFs (VOO/QQQ) | Diversifica fuera de crypto |
+| Lvl 12 / $15K | Apalancamiento 2x | Solo 20% del capital MAX |
+| Lvl 15 / $25K | REITs/Real Estate | Ingreso pasivo inmobiliario |
+
+---
+
+## 🎯 LIFE COACH - MISIONES ACTIVAS
+
+### Misiones Recurrentes
+1. **Inyección Mensual** - Meta: $500 USD/mes (+500 XP)
+2. **Manos de Diamante** - No retires capital (+50 XP/día)
+3. **Check-in Diario** - Revisa el dashboard (+10 XP/día)
+
+### Side Quests (Educación)
+- Aprende sobre interés compuesto (+200 XP)
+- Estudia Dollar Cost Averaging (+200 XP)
+- Investiga sobre Staking (+250 XP)
+- Lee "El Inversor Inteligente" (+500 XP)
+- Aprende sobre ETFs (+300 XP)
+
+### Endpoints del Life Coach
+- GET `/api/life-coach` - Estado completo del coach
+- POST `/api/life-coach/complete-quest` - Marcar quest completada
 
 ---
 
@@ -89,7 +205,6 @@ echo "  node scripts/audit_deep_forensic.js  # 🔍 AUDITORIA FORENSE DE FEES"; 
 echo "  node scripts/check_ghosts.js         # 👻 CAZAFANTASMAS"; \
 echo "  node scripts/check_orphan_orders.js  # 🔗 ORDENES HUERFANAS"
 ```
-```
 
 ---
 
@@ -98,55 +213,48 @@ echo "  node scripts/check_orphan_orders.js  # 🔗 ORDENES HUERFANAS"
 Antes de auditar gráficos o archivos locales, asegúrate de tener la **verdad** del VPS.
 
 ### 📥 Traer datos del VPS (VPS -> PC):
-Ejecuta esto en tu terminal local (VS Code) para descargar historiales y logs frescos:
 ```bash
 npm run sync:down
 ```
-*Te pedirá el password del VPS.*
 
 ### 📤 Subir cambios de código (PC -> VPS):
-Si mejoras la interfaz o los scripts, súbelos **sin riesgo** de borrar datos:
 ```bash
 npm run sync:up
 ```
-*Sube `.js`, `.html`, `.css` pero IGNORA `data/sessions` para proteger la memoria del bot.*
 
 ---
 
-##  LEYENDA DE TIEMPOS (¡IMPORTANTE!)
+## 🌐 URLS DEL SISTEMA
 
-| Etiqueta | Significado |
-|----------|-------------|
-| `[TIEMPO REAL]` | Dato que refleja el estado AHORA MISMO. Úsalo para diagnosticar problemas actuales. |
-| `[HOY]` | Dato que se limpia cada día a las 00:00 UTC. Solo muestra actividad del día en curso. |
-| `[AYER]` | Reporte del día anterior. Útil para comparar rendimiento. |
-| `[ÚLTIMAS 24H]` | Errores de las últimas 24 horas (puede incluir ayer). |
-| `[HISTÓRICO]` | ⚠️ **CUIDADO:** Este dato es ACUMULADO desde que instalaste el bot. NO es de hoy. |
+| Recurso | URL |
+|---------|-----|
+| Dashboard Principal | http://167.71.1.124:3000 |
+| API BTC Status | http://167.71.1.124:3000/api/status |
+| API SOL Status | http://167.71.1.124:3001/api/status |
+| API DOGE Status | http://167.71.1.124:3004/api/status |
+| Life Coach API | http://167.71.1.124:3000/api/life-coach |
+| Profit History | http://167.71.1.124:3000/api/profit-history |
+| Equity Snapshots | http://167.71.1.124:3000/api/equity-snapshots |
 
 ---
 
-## 🚦 2. Semáforo de Salud (Solo usa datos `[TIEMPO REAL]`)
+## 🚦 2. Semáforo de Salud
 
 ### 🟢 SANO (Todo bien)
-*   **PM2 Status:** Los 3 bots dicen `online` en verde.
-*   **Actividad:** Los logs muestran timestamps recientes (últimos 5 minutos).
-*   **Logs:** Ves `[AI] ANALYZING`, `[INTEL] Regime: ...`, `[SYNC] STATE IS IN SYNC`.
+- **PM2 Status:** Los 3 bots dicen `online` en verde
+- **Actividad:** Logs muestran timestamps recientes (últimos 5 min)
+- **Logs:** Ves `[AI] ANALYZING`, `[INTEL] Regime: ...`, `[SYNC] STATE IS IN SYNC`
 
-### 🟡 ALERTA (Ojo, pero no es emergencia)
-*   `🛡️ BUY BLOCKED: USDT_FLOOR`: El bot pausó compras para proteger liquidez. **Correcto.**
-*   `Regime: WEAK_BEAR`: El bot está en modo defensivo. **Esperado en mercado bajista.**
-*   `BUY WALL DETECTED`: El bot espera un mejor precio. **Estrategia normal.**
+### 🟡 ALERTA (Normal, no emergencia)
+- `🛡️ BUY BLOCKED: USDT_FLOOR`: Protegiendo liquidez
+- `Regime: WEAK_BEAR`: Modo defensivo (esperado en bajada)
+- `BLOCKED_BY_SELL_WALL`: Esperando mejor precio
 
 ### 🔴 PELIGRO (Acción Inmediata)
-*   **Logs vacíos o timestamps viejos:** El bot puede estar muerto.
-*   **PM2 dice `stopped` o `errored`:** Necesita reinicio.
-*   **Errores repetidos:** `ECONNRESET`, `Binance API Down`, `CRITICAL ERROR`.
-*   **Contador `↺` alto + tú NO reiniciaste:** Hay crashes reales. Revisa `pm2_crash.log`.
-*   **⛔ PAUSADO en sección 13:** Bot bloqueado por Safety Lock. Ejecuta: `node scripts/full_audit.js SYMBOL --fix`
-*   **Logs > 1GB en sección 14:** Disco llenándose. Ejecuta: `pm2 flush`
-*   **FIXING en sección 15:** Discrepancia de profit detectada y corregida automáticamente.
-
-> **Nota sobre el contador `↺` (restarts):** Si tú hiciste mantenimientos/resets manuales, este contador estará alto. Usa `pm2 reset all` para ponerlo en cero y monitorear desde limpio.
+- **Logs vacíos o timestamps viejos:** Bot muerto
+- **PM2 dice `stopped` o `errored`:** Reiniciar
+- **⛔ PAUSADO en sección 13:** Safety Lock → `node scripts/full_audit.js SYMBOL --fix`
+- **Logs > 1GB:** Ejecutar `pm2 flush`
 
 ---
 
@@ -157,81 +265,54 @@ npm run sync:up
 /root/arca-bot/scripts/update_all_bots.sh
 ```
 
-**B) Ver status de procesos:**
+**B) Reparar Safety Lock:**
 ```bash
-pm2 list
+cd /root/arca-bot
+node scripts/full_audit.js BTC/USDT --fix
+node scripts/full_audit.js SOL/USDT --fix
+node scripts/full_audit.js DOGE/USDT --fix
+pm2 restart all
 ```
 
-**C) Buscar errores en logs:**
+**C) Ver errores:**
 ```bash
 grep "ERROR" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log | tail -n 20
 ```
 
 ---
 
-## 🧹 4. Comandos de Limpieza/Reset
+## 🧹 4. Comandos de Limpieza
 
-### Resetear contador de restarts (PM2):
+### Resetear contador de restarts:
 ```bash
 pm2 reset all
 ```
-*Solo limpia el contador `↺`. No afecta los bots ni los datos.*
 
-### Resetear Max Drawdown (Histórico):
+### Limpiar logs (si disco lleno):
 ```bash
-# BTC Bot
-ssh root@167.71.1.124 "cd /root/arca-bot && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_BTCUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
-
-# SOL Bot (uses same codebase as BTC)
-ssh root@167.71.1.124 "cd /root/arca-bot && node -e \"const fs=require('fs'); const f='data/sessions/VANTAGE01_SOLUSDT_state.json'; let s=JSON.parse(fs.readFileSync(f)); s.maxDrawdown=0; fs.writeFileSync(f,JSON.stringify(s,null,2)); console.log('Done');\""
+pm2 flush
 ```
-*Esto pone a cero el "récord de peor caída". El bot debe reiniciarse después.*
 
-### Borrar Crash Logs (para empezar limpio):
+### Borrar Crash Logs:
 ```bash
 echo "" > /root/arca-bot/logs/pm2_crash.log
 ```
 
 ---
 
-## 🔍 5. AUDITORÍAS Y VERIFICACIÓN DE PROFIT
+## 💰 5. Auditorías de Profit
 
-### Comando Rápido - Ver P&L Real (Flujo de Caja):
+### Auditoría Rápida:
 ```bash
 cd /root/arca-bot && node scripts/raw_cashflow_audit.js
 ```
-*Muestra: USDT gastado, USDT recibido, fees, inventario, P&L total*
 
 ### Auditoría Completa con SPREAD_MATCH:
 ```bash
-cd /root/arca-bot && node scripts/full_audit.js BTC/USDT
-cd /root/arca-bot && node scripts/full_audit.js SOL/USDT
-cd /root/arca-bot && node scripts/full_audit.js DOGE/USDT
+node scripts/full_audit.js BTC/USDT
+node scripts/full_audit.js SOL/USDT
+node scripts/full_audit.js DOGE/USDT
 ```
-*Muestra: Win rate, calidad de matches, profit realizado vs estado*
-
-### Auditoría Cuántica (Trade por Trade):
-```bash
-cd /root/arca-bot && node scripts/quantum_audit.js BTC/USDT
-cd /root/arca-bot && node scripts/quantum_audit.js SOL/USDT
-cd /root/arca-bot && node scripts/quantum_audit.js DOGE/USDT
-```
-*Muestra: Cada trade individual con running totals y checksum verification*
-
-### Trazabilidad Forense (Ver qué lotes se vendieron):
-```bash
-grep "Matched Lots" /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log | tail -n 20
-```
-*Muestra exactamente qué ID de compra se usó para cada venta (ej: #1234 @ $90k).*
-
-### Recalcular Profits (Después de correcciones):
-```bash
-cd /root/arca-bot && node scripts/backfill_profits.js BTC/USDT
-cd /root/arca-bot && node scripts/backfill_profits.js SOL/USDT
-cd /root/arca-bot && node scripts/backfill_profits.js DOGE/USDT
-pm2 restart all
-```
-*⚠️ Solo usar si se detectan discrepancias. Reconstruye inventario y profits.*
 
 ### Verificar Balance Real de Binance:
 ```bash
@@ -260,72 +341,91 @@ const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.A
 
 ---
 
-## 🛡️ 6. Protecciones Activas (Configuración)
-*   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
-## 🛡️ 6. Protecciones Activas (Configuración)
-*   **Piso de USDT (15%)**: Nunca gastará tu último 15% de dólares.
-*   **Tope de Inventario (70%)**: Nunca llenará más del 70% de la bolsa con monedas.
-*   **🛡️ SAFETY NET (-0.5%)**: **NUEVO.** Bloquea VENTA si la pérdida es > 0.5%. Evita "Amnesia".
-    *   Si ves `[SKIP] Insufficient BASE for SELL`, el bot tiene poco inventario. SMART_DCA espera mejor precio.
+## 🛡️ 6. Protecciones Activas
+
+| Protección | Valor | Descripción |
+|------------|-------|-------------|
+| Piso USDT | 15% | Nunca gasta el último 15% |
+| Tope Inventario | 70% | Máximo 70% en monedas |
+| Safety Net | -0.5% | Bloquea venta con pérdida > 0.5% |
+| SMART_DCA | Auto | Espera mejor precio si está cargado |
 
 ---
 
-## 💰 7. Entendiendo el Reporte Diario
+## 📊 7. Entendiendo el Dashboard
 
-El reporte tiene datos de diferentes temporalidades. Aquí está la guía:
+### Métricas Principales
+| Campo | Descripción |
+|-------|-------------|
+| Total Realizado | Profit confirmado (vendido) |
+| Ganancia Neta | Profit - Pérdidas flotantes |
+| Flotante | Ganancia/pérdida no realizada |
+| Equity Global | USDT + valor de todos los activos |
+| ROI Trading | Eficiencia del bot |
+| APY Global | Rendimiento anualizado (TWR) |
 
-| Campo | Temporalidad | Descripción |
-|-------|--------------|-------------|
-| `Today's Profit` | `[HOY]` | Ganancia neta SOLO del día. Se resetea a las 00:00 UTC. |
-| `Total Profit` | `[HISTÓRICO]` | Ganancia acumulada desde que instalaste el bot. |
-| `Max Drawdown` | `[HISTÓRICO]` | La peor caída que ha tenido el bot EN SU VIDA. No es de hoy. |
-| `Total ROI` | `[HISTÓRICO]` | Retorno total basado en `Total Profit` / `Initial Capital`. |
-| `Trades Executed` | `[HOY]` | Órdenes ejecutadas hoy. |
-| `Active Orders` | `[TIEMPO REAL]` | Órdenes abiertas ahora mismo. |
-| `Inventory Lots` | `[TIEMPO REAL]` | Lotes de monedas que el bot tiene en inventario. |
-| `Current Price` | `[TIEMPO REAL]` | Precio del par al momento del reporte. |
-| `Market Regime` | `[TIEMPO REAL]` | Clasificación del mercado (BULL, BEAR, etc.). |
-| `% Time In Range` | `[DESDE INICIO]` | % de ciclos donde el precio estuvo dentro del grid. |
-| `Avg Cost` | `[TIEMPO REAL]` | Costo promedio de tu inventario (si estás "cargado"). |
-| `Buy & Hold Return` | `[DESDE INICIO]` | Retorno si hubieras holdeado en lugar de usar el bot. |
-| `Bot vs Hold` | `[DESDE INICIO]` | Indica quién está ganando: el bot o simplemente holdear. |
-| `APY` | `[TIEMPO REAL]` | Rendimiento Anual Proyectado usando **Time-Weighted Return**. |
+### Conversión MXN
+- El dashboard usa **Binance USDT/MXN** (~18 MXN)
+- NO el rate bancario (20.5 es incorrecto)
+- Debe coincidir con lo que muestra Binance
 
 ---
 
-## ⚡ 8. DASHBOARD DINÁMICO & TWR (NUEVO)
+## 📅 8. Checklist Diario del Trader
 
-### 🔄 Dinamismo Total
-El dashboard es ahora **100% reactivo**. No requieres recargar la página:
-1.  **Profit & Equity:** Se actualizan cada 5 segundos.
-2.  **Depósitos:** Si agregas capital en el *Capital Tracker*, el cálculo de APY se ajusta **al instante**.
-3.  **Global APY:** Calcula el rendimiento de TODA tu cartera en tiempo real.
-4.  **Detección Universal:** El Equity Global escanea CUALQUIER activo en tu wallet (BNB, SHIB, PEPE...), no solo los que tradea el bot.
+### Mañana (5 min):
+- [ ] Revisar dashboard - ¿Bots online?
+- [ ] Verificar profit de ayer
+- [ ] Checar misiones del Life Coach
 
-### ⏳ Time-Weighted Return (TWR)
-El cálculo de APY ya no es simple (`Profit / Capital Final`). Ahora usa **TWR**:
-*   Pondera cada dólar por el **tiempo exacto** que estuvo invertido.
-*   Si depositas $1000 hoy, no diluye el rendimiento de los $100 que tenías hace un año.
-*   **Fórmula:** `(Profit Total / Capital Promedio Ponderado por Días) * 365`.
-*   *Resultado:* Tu APY reflejará la verdadera eficiencia de tu dinero, no solo el volumen.
+### Mensual:
+- [ ] Depositar $500 USD (CRÍTICO)
+- [ ] Registrar en Capital Tracker
+- [ ] Revisar progreso hacia milestone
+
+### Cuando hay problemas:
+- [ ] Ejecutar comando maestro
+- [ ] Si hay Safety Lock → full_audit.js --fix
+- [ ] Si hay errores repetidos → revisar logs
 
 ---
 
-## ✅ 9. VALIDACIÓN Y CORRECCIONES CONFIRMADAS (08-ENE-2026)
+## 🎯 9. Tu Roadmap Personal
 
-### 🕵️ Auditoría Forense de Fees
-*   **Estado:** ✅ CONFIRMADO.
-*   **Hallazgo:** El bot descuenta correctamente tanto `entryFees` (Comisión de Compra histórica) como `sellFee` (Comisión de Venta actual) antes de reportar el Profit.
-*   **Fórmula Validada:** `Profit = (SellPrice * Amount) - CostBasis - (BuyFees + SellFees)`.
+```
+ACTUAL:     $1,300 USD (Nivel 8)
+            ↓
+MILESTONE:  $1,500 USD (Cruzar el Valle) - ~$200 más
+            ↓
+AÑO 1:      $8,000 - $12,000 USD
+            ↓
+AÑO 3:      $30,000 - $50,000 USD
+            ↓
+AÑO 5:      $80,000 - $120,000 USD
+            ↓
+AÑO 7:      $200,000 - $300,000 USD
+            ↓
+AÑO 10:     $500,000 - $1,000,000 USD 🎉
+```
 
-### 👻 Reparación Trade Fantasma (SOL)
-*   **Incidente:** Trade de las 20:08 apareció con $0 profit tras reinicio profundo.
-*   **Solución:** Parche manual (`fix_sol_ghost_v3.js`) reinsertando Cost Basis ($138.2), Spread (0.77%) y Fees (0.000021 BNB).
-*   **Estado:** ✅ RESUELTO. Data 100% consistente.
+**Fórmula del Éxito:**
+```
+TÚ: $500/mes + NO tocar
+SISTEMA: Trading 24/7 + Compound + Guía
+RESULTADO: Libertad financiera en 7-10 años
+```
 
-### 📈 Gráfica de Equidad Universal
-*   **Incidente:** Fechas futuras (09-Ene) y snapshots inconsistentes.
-*   **Solución:** Zona horaria fijada a 'America/Mexico_City', capping de fechas futuras y uso de snapshots reales de la API.
-*   **Estado:** ✅ RESUELTO. Gráfica limpia.
+---
 
-> **Regla de Oro:** Si algo dice `[HISTÓRICO]` y te parece raro (ej: Drawdown alto), probablemente es un "fantasma del pasado", no un problema de hoy.
+## ✅ 10. Registro de Actualizaciones
+
+| Fecha | Versión | Cambios |
+|-------|---------|---------|
+| 2026-01-12 | v6.0 | Life Coach, RPG System, Prompt Maestro, MXN fix |
+| 2026-01-10 | v5.4 | Safety Lock Detection, Log Monitor |
+| 2026-01-08 | v5.3 | Fee Forensics, Ghost Trade Repair |
+| 2025-12-31 | v5.0 | DOGE bot added, Multi-bot dashboard |
+
+---
+
+*"El sistema trabaja por ti. Tú trabajas para alimentarlo."* 💎🦅
