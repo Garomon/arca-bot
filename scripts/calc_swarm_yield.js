@@ -5,6 +5,7 @@ const http = require('http');
 // Basic Configuration
 const SESSIONS_DIR = path.join(__dirname, '..', 'data', 'sessions');
 const ROOT_DIR = path.join(__dirname, '..');
+const DEPOSITS_FILE = path.join(__dirname, '..', 'data', 'deposits.json');
 
 // Bot API ports to try
 const BOT_PORTS = [3000, 3001, 3002];
@@ -39,6 +40,71 @@ async function getRealBinanceEquity() {
         } catch (e) { /* try next port */ }
     }
     return null;
+}
+
+// TWR Capital Calculation (Time-Weighted Return)
+function calculateTWRCapital(deposits, endDate = Date.now()) {
+    if (!deposits || deposits.length === 0) return 0;
+
+    const sortedDeposits = [...deposits].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let totalWeightedCapital = 0;
+    let totalDays = 0;
+    let runningCapital = 0;
+
+    for (let i = 0; i < sortedDeposits.length; i++) {
+        const deposit = sortedDeposits[i];
+        const depositDate = new Date(deposit.date).getTime();
+        const nextDate = (i < sortedDeposits.length - 1) ? new Date(sortedDeposits[i + 1].date).getTime() : endDate;
+
+        runningCapital += (parseFloat(deposit.amount) || 0);
+
+        const periodDuration = Math.max(0, nextDate - depositDate);
+        const periodDays = periodDuration / (1000 * 60 * 60 * 24);
+
+        totalWeightedCapital += runningCapital * periodDays;
+        totalDays += periodDays;
+    }
+
+    return { twrCapital: totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital, totalDays };
+}
+
+// Per-Bot TWR Capital Calculation using allocations (handles rebalance events)
+function calculatePerBotTWR(deposits, botSymbol, endDate = Date.now()) {
+    if (!deposits || deposits.length === 0) return { twrCapital: 0, totalDays: 0 };
+
+    const sortedEvents = [...deposits].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let totalWeightedCapital = 0;
+    let totalDays = 0;
+    let runningCapital = 0;
+    let totalPoolCapital = 0; // Track total pool for rebalancing
+
+    for (let i = 0; i < sortedEvents.length; i++) {
+        const event = sortedEvents[i];
+        const eventDate = new Date(event.date).getTime();
+        const nextDate = (i < sortedEvents.length - 1) ? new Date(sortedEvents[i + 1].date).getTime() : endDate;
+
+        // Get allocation for this bot
+        const allocation = event.allocation || {};
+        const allocationPct = (allocation[botSymbol] || 0) / 100;
+
+        if (event.type === 'rebalance') {
+            // REBALANCE: Redistribute ALL existing capital with new allocation
+            runningCapital = totalPoolCapital * allocationPct;
+        } else {
+            // DEPOSIT: Add new capital according to allocation
+            const depositAmount = parseFloat(event.amount) || 0;
+            totalPoolCapital += depositAmount;
+            runningCapital += depositAmount * allocationPct;
+        }
+
+        const periodDuration = Math.max(0, nextDate - eventDate);
+        const periodDays = periodDuration / (1000 * 60 * 60 * 24);
+
+        totalWeightedCapital += runningCapital * periodDays;
+        totalDays += periodDays;
+    }
+
+    return { twrCapital: totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital, totalDays };
 }
 
 // Helper to find all state files
@@ -81,14 +147,29 @@ async function calculateSwarmYield() {
     let botCount = 0;
     let totalAllocatedEquity = 0;
 
+    // Load deposits for per-bot TWR calculation
+    let depositsList = [];
+    try {
+        if (fs.existsSync(DEPOSITS_FILE)) {
+            const depositsData = JSON.parse(fs.readFileSync(DEPOSITS_FILE, 'utf8'));
+            if (depositsData.deposits && Array.isArray(depositsData.deposits)) {
+                depositsList = depositsData.deposits;
+            }
+        }
+    } catch (e) { /* Use fallback */ }
+
     // Table Header
-    console.log(`| ${'BOT ID'.padEnd(14)} | ${'Active'.padEnd(8)} | ${'Profit'.padEnd(10)} | ${'Yield/Day'.padEnd(10)} |`);
+    console.log(`| ${'BOT ID'.padEnd(14)} | ${'Active'.padEnd(8)} | ${'Profit'.padEnd(10)} | ${'TWR Yield'.padEnd(10)} |`);
     console.log(`|${'-'.repeat(16)}|${'-'.repeat(10)}|${'-'.repeat(12)}|${'-'.repeat(12)}|`);
 
     files.forEach(file => {
         try {
             const state = JSON.parse(fs.readFileSync(file, 'utf8'));
             const botId = path.basename(file).replace('_state.json', '').replace('USDT', '');
+
+            // Extract symbol for allocation lookup (BTC, SOL, DOGE)
+            const symbolMatch = botId.match(/VANTAGE01_(\w+)/);
+            const symbol = symbolMatch ? symbolMatch[1] : 'UNKNOWN';
 
             // Analyze History
             const filledOrders = state.filledOrders || [];
@@ -99,8 +180,11 @@ async function calculateSwarmYield() {
             const daysActive = (Date.now() - firstTrade) / (1000 * 60 * 60 * 24);
 
             const profit = state.totalProfit || 0;
-            const capital = state.initialCapital || 100; // For yield calc only
-            const dailyYield = (profit / capital) / daysActive;
+
+            // Use per-bot TWR capital instead of initialCapital
+            const botTWR = calculatePerBotTWR(depositsList, symbol);
+            const capital = botTWR.twrCapital > 0 ? botTWR.twrCapital : (state.initialCapital || 100);
+            const dailyYield = capital > 0 && daysActive > 0 ? (profit / capital) / daysActive : 0;
 
             // Log Row
             console.log(`| ${botId.padEnd(14)} | ${daysActive.toFixed(1).padEnd(8)} | $${profit.toFixed(2).padEnd(9)} | ${(dailyYield * 100).toFixed(3)}%    |`);
@@ -121,8 +205,28 @@ async function calculateSwarmYield() {
 
     // Use Binance equity if available, otherwise fallback
     const displayEquity = binanceEquity || totalAllocatedEquity;
-    const averageSwarmYield = totalAllocatedEquity > 0 ? (weightedYieldSum / totalAllocatedEquity) : 0;
-    const projectedAnnual = ((Math.pow(1 + averageSwarmYield, 365) - 1) * 100);
+
+    // Calculate TWR APY (REAL metric)
+    let twrCapital = totalAllocatedEquity;
+    let daysActive = swarmDaysActive;
+    let twrAPY = 0;
+    let dailyYield = 0;
+
+    try {
+        if (fs.existsSync(DEPOSITS_FILE)) {
+            const depositsData = JSON.parse(fs.readFileSync(DEPOSITS_FILE, 'utf8'));
+            if (depositsData.deposits && Array.isArray(depositsData.deposits)) {
+                const result = calculateTWRCapital(depositsData.deposits);
+                twrCapital = result.twrCapital;
+                daysActive = result.totalDays;
+            }
+        }
+    } catch (e) { /* Use fallback */ }
+
+    if (twrCapital > 0 && daysActive > 0) {
+        dailyYield = totalProfit / twrCapital / daysActive;
+        twrAPY = dailyYield * 365 * 100; // Simple APR (conservative)
+    }
 
     console.log(`\n=========================================`);
     console.log(`🧠 SWARM METRICS`);
@@ -133,8 +237,8 @@ async function calculateSwarmYield() {
         console.log(`   💰 Est. Capital:  $${totalAllocatedEquity.toFixed(2)} (from state files)`);
     }
     console.log(`   📈 Realized Profit: $${totalProfit.toFixed(2)}`);
-    console.log(`   📊 Daily Yield:     ${(averageSwarmYield * 100).toFixed(4)}%`);
-    console.log(`   🚀 APY (Compound):  ${projectedAnnual.toFixed(0)}%`);
+    console.log(`   📊 Daily Yield:     ${(dailyYield * 100).toFixed(4)}%`);
+    console.log(`   🚀 TWR APY:         ${twrAPY.toFixed(0)}% (Real)`);
     console.log(`=========================================`);
 
     // Equity breakdown

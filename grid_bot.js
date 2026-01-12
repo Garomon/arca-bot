@@ -523,8 +523,9 @@ app.get('/api/rpg', async (req, res) => {
         const xpFromDays = Math.floor(daysActive * 20);    // 20 XP per day active
         const totalXp = BASE_XP + xpFromProfit + xpFromDays;
 
-        // 4. Level & Title System (Dynamic)
+        // 4. Level & Title System (Dynamic) - FULL JOURNEY TO MILLIONAIRE
         const LEVEL_DATA = [
+            // TIER 1: INICIACIÓN (Levels 1-10)
             { level: 1, xp: 0, title: "Novato del Grid" },
             { level: 2, xp: 100, title: "Aprendiz de Trading" },
             { level: 3, xp: 300, title: "Explorador de Mercados" },
@@ -534,9 +535,43 @@ app.get('/api/rpg', async (req, res) => {
             { level: 7, xp: 2200, title: "Mercader Errante" },
             { level: 8, xp: 3000, title: "Señor de la Forja" },
             { level: 9, xp: 4500, title: "Maestro del Grid" },
-            { level: 10, xp: 6000, title: "Arcano Financiero" },
-            { level: 11, xp: 8000, title: "Leyenda Cripto" },
-            { level: 50, xp: 150000, title: "Dios del Trading" }
+            { level: 10, xp: 6000, title: "Caballero del Grid" },
+            // TIER 2: CONSOLIDACIÓN (Levels 11-20)
+            { level: 11, xp: 8000, title: "Arcano Financiero" },
+            { level: 12, xp: 10000, title: "Guardián del Capital" },
+            { level: 13, xp: 13000, title: "Sabio del Compuesto" },
+            { level: 14, xp: 16000, title: "Templario del ROI" },
+            { level: 15, xp: 20000, title: "Conde del Rendimiento" },
+            { level: 16, xp: 25000, title: "Barón de las Cripto" },
+            { level: 17, xp: 30000, title: "Vizconde del Mercado" },
+            { level: 18, xp: 36000, title: "Marqués del Profit" },
+            { level: 19, xp: 43000, title: "Duque del Grid" },
+            { level: 20, xp: 50000, title: "Archiduque Financiero" },
+            // TIER 3: ASCENSIÓN (Levels 21-30)
+            { level: 21, xp: 60000, title: "Príncipe del Capital" },
+            { level: 22, xp: 72000, title: "Rey del Spread" },
+            { level: 23, xp: 85000, title: "Emperador del ROI" },
+            { level: 24, xp: 100000, title: "Titán del Mercado" },
+            { level: 25, xp: 120000, title: "Leyenda Cripto" },
+            { level: 26, xp: 145000, title: "Oráculo del Grid" },
+            { level: 27, xp: 175000, title: "Semidiós Financiero" },
+            { level: 28, xp: 210000, title: "Avatar del Compuesto" },
+            { level: 29, xp: 250000, title: "Deidad del Trading" },
+            { level: 30, xp: 300000, title: "Arcángel del Profit" },
+            // TIER 4: ÉLITE (Levels 31-40)
+            { level: 31, xp: 360000, title: "Señor de las Finanzas" },
+            { level: 32, xp: 430000, title: "Patriarca del Capital" },
+            { level: 33, xp: 510000, title: "Dios del Grid" },
+            { level: 34, xp: 600000, title: "Creador de Riqueza" },
+            { level: 35, xp: 700000, title: "Arquitecto del Millón" },
+            { level: 36, xp: 820000, title: "Millonario Iniciado" },
+            { level: 37, xp: 960000, title: "Millonario Consolidado" },
+            { level: 38, xp: 1120000, title: "Millonario Ascendido" },
+            { level: 39, xp: 1300000, title: "Multi-Millonario" },
+            { level: 40, xp: 1500000, title: "ÉLITE FINANCIERA" },
+            // TIER LEGENDARIO (Beyond)
+            { level: 50, xp: 5000000, title: "Inmortal del Mercado" },
+            { level: 99, xp: 99999999, title: "∞ ASCENDIDO ∞" }
         ];
 
         let currentLevelData = LEVEL_DATA[0];
@@ -548,33 +583,155 @@ app.get('/api/rpg', async (req, res) => {
             }
         }
 
-        // 5. Quest Status (Dynamic Progression)
+        // 5. Quest Status (Dynamic Progression) - FULL JOURNEY TO MILLIONAIRE
         let currentEquity = 0;
         try {
             currentEquity = await getGlobalEquity();
         } catch (e) { }
 
-        // Define quests based on progression
+        // Define ALL milestone quests for the journey to millionaire
+        // ESTRATEGIA: Grid Trading → Inyección Capital → Apalancamiento → Real Estate → Diversificación
+        const QUEST_MILESTONES = [
+            // ===== ACT I: EL DESPERTAR (Grid Trading Puro) =====
+            { equity: 1500, name: "El Cruce del Valle",
+              objective: "Alcanzar $1,500 USD de capital",
+              reward: "1000 XP + Caballero del Grid", emoji: "⚔️",
+              lifeReward: "🎮 Headset gamer / Gadget" },
+
+            { equity: 2000, name: "La Forja del Guerrero",
+              objective: "Alcanzar $2,000 USD de capital",
+              reward: "1500 XP + Herrero del Profit", emoji: "🔨",
+              lifeReward: "🍽️ Cena en restaurante nice" },
+
+            { equity: 3000, name: "El Pacto del Compuesto",
+              objective: "Alcanzar $3,000 USD de capital",
+              reward: "2000 XP + Maestro Compuesto", emoji: "📈",
+              lifeReward: "📱 iPhone/Galaxy nuevo" },
+
+            { equity: 5000, name: "La Conquista del Reino",
+              objective: "Alcanzar $5,000 USD de capital",
+              reward: "3000 XP + Conquistador", emoji: "🏰",
+              lifeReward: "💻 Setup upgrade / MacBook" },
+
+            // ===== ACT II: LA EXPANSIÓN (Grid + Inyección Capital) =====
+            { equity: 7500, name: "El Templo del Poder",
+              objective: "Alcanzar $7,500 USD de capital",
+              reward: "4000 XP + Sacerdote del Grid", emoji: "🏛️",
+              lifeReward: "🏍️ Moto / E-bike" },
+
+            { equity: 10000, name: "Los Diez Mil Soles",
+              objective: "Alcanzar $10,000 USD (5 DÍGITOS)",
+              reward: "5000 XP + Leyenda 5 Dígitos", emoji: "☀️",
+              lifeReward: "✈️ Viaje internacional" },
+
+            { equity: 15000, name: "La Cámara de los Titanes",
+              objective: "Alcanzar $15,000 USD de capital",
+              reward: "7500 XP + Titán del Mercado", emoji: "⚡",
+              lifeReward: "🚗 Enganche para carro" },
+
+            { equity: 25000, name: "El Despertar del Dragón",
+              objective: "Alcanzar $25,000 USD de capital",
+              reward: "12500 XP + Domador de Dragones", emoji: "🐉",
+              lifeReward: "🚙 Carro / Rolex" },
+
+            // ===== ACT III: EL APALANCAMIENTO (Futuros + Margen) =====
+            { equity: 50000, name: "El Trono del Rey",
+              objective: "Alcanzar $50,000 USD de capital",
+              reward: "25000 XP + Rey del Trading", emoji: "👑",
+              lifeReward: "🏠 Enganche depa CDMX" },
+
+            { equity: 75000, name: "La Fortaleza de Cristal",
+              objective: "Alcanzar $75,000 USD de capital",
+              reward: "37500 XP + Arquitecto Financiero", emoji: "🔮",
+              lifeReward: "🏢 Depa pequeño pagado" },
+
+            { equity: 100000, name: "El Club de los Cien Mil",
+              objective: "Alcanzar $100,000 USD (6 DÍGITOS)",
+              reward: "50000 XP + Semidiós Financiero", emoji: "💯",
+              lifeReward: "🏖️ Depa Cancún/Playa" },
+
+            // ===== ACT IV: DIVERSIFICACIÓN (Real Estate + Assets) =====
+            { equity: 150000, name: "El Portal Dimensional",
+              objective: "Alcanzar $150,000 USD de capital",
+              reward: "75000 XP + Viajero Entre Mundos", emoji: "🌀",
+              lifeReward: "🌴 Enganche depa Miami" },
+
+            { equity: 250000, name: "La Corona de Plata",
+              objective: "Alcanzar $250,000 USD de capital",
+              reward: "125000 XP + Barón del Capital", emoji: "🥈",
+              lifeReward: "🏙️ Depa CDMX premium" },
+
+            { equity: 500000, name: "La Corona de Oro",
+              objective: "Alcanzar $500,000 USD de capital",
+              reward: "250000 XP + Emperador del Capital", emoji: "🥇",
+              lifeReward: "🌆 Depa Miami pagado" },
+
+            // ===== ACT V: LA ÉLITE =====
+            { equity: 750000, name: "Las Puertas del Olimpo",
+              objective: "Alcanzar $750,000 USD de capital",
+              reward: "500000 XP + Guardián del Olimpo", emoji: "⛩️",
+              lifeReward: "🏝️ Casa en la playa" },
+
+            { equity: 1000000, name: "EL MILLÓN",
+              objective: "Alcanzar $1,000,000 USD (7 DÍGITOS)",
+              reward: "1000000 XP + 🏆 MILLONARIO 🏆", emoji: "💰",
+              lifeReward: "🛥️ Yate / Depa Dubai" },
+
+            // ===== ACT VI: LEGADO (Más allá del millón) =====
+            { equity: 2500000, name: "El Consejo de los Dioses",
+              objective: "Alcanzar $2,500,000 USD de capital",
+              reward: "2500000 XP + Miembro del Consejo", emoji: "🌟",
+              lifeReward: "🏰 Mansión / Multi-propiedades" },
+
+            { equity: 5000000, name: "El Legado Eterno",
+              objective: "Alcanzar $5,000,000 USD de capital",
+              reward: "5000000 XP + Creador de Dinastías", emoji: "👁️",
+              lifeReward: "🛩️ Jet (fracción) / Yate grande" },
+
+            { equity: 10000000, name: "∞ LEYENDA INMORTAL ∞",
+              objective: "Alcanzar $10,000,000 USD de capital",
+              reward: "∞ XP + Has Trascendido", emoji: "🌌",
+              lifeReward: "🌍 Lo que quieras. Ganaste la vida." }
+        ];
+
+        // Find current active quest based on equity
         let activeQuest;
-        if (currentEquity >= 1500) {
-            const daysProgress = Math.min(daysActive, 30);
+        let currentMilestone = QUEST_MILESTONES.find(m => currentEquity < m.equity);
+
+        if (!currentMilestone) {
+            // Player has completed ALL quests - they're a legend!
             activeQuest = {
-                name: "El Rito de Fortalecimiento",
-                objective: "Mantener el sistema 30 días sin intervención manual",
-                progress: `${daysProgress.toFixed(0)}/30 días`,
-                progressPercent: Math.round((daysProgress / 30) * 100),
-                status: daysActive >= 30 ? "COMPLETED" : "IN_PROGRESS",
-                reward: "1500 XP + Título: Maestro Autonomista"
+                name: "∞ LEYENDA VIVIENTE ∞",
+                objective: "Has completado todos los capítulos. Tu legado es eterno.",
+                progress: "COMPLETADO",
+                progressPercent: 100,
+                status: "LEGENDARY",
+                reward: "Has trascendido. El universo te observa.",
+                emoji: "🌌",
+                lifeReward: "🌍 Todo. Literalmente todo."
             };
         } else {
-            const equityProgress = Math.round((currentEquity / 1500) * 100);
+            // Find previous milestone for context
+            const milestoneIndex = QUEST_MILESTONES.indexOf(currentMilestone);
+            const previousEquity = milestoneIndex > 0 ? QUEST_MILESTONES[milestoneIndex - 1].equity : 0;
+            const targetEquity = currentMilestone.equity;
+
+            // Calculate progress within this milestone
+            const progressInMilestone = currentEquity - previousEquity;
+            const totalRequired = targetEquity - previousEquity;
+            const progressPercent = Math.min(Math.round((progressInMilestone / totalRequired) * 100), 100);
+
             activeQuest = {
-                name: "El Cruce del Valle",
-                objective: "Alcanzar $1,500 USD de capital",
-                progress: `$${currentEquity.toFixed(0)}/$1,500`,
-                progressPercent: Math.min(equityProgress, 100),
-                status: currentEquity >= 1500 ? "COMPLETED" : "IN_PROGRESS",
-                reward: "1000 XP + Rango: Caballero del Grid"
+                name: currentMilestone.name,
+                objective: currentMilestone.objective,
+                progress: `$${currentEquity.toLocaleString()}/$${targetEquity.toLocaleString()}`,
+                progressPercent: progressPercent,
+                status: currentEquity >= targetEquity ? "COMPLETED" : "IN_PROGRESS",
+                reward: currentMilestone.reward,
+                emoji: currentMilestone.emoji,
+                lifeReward: currentMilestone.lifeReward,
+                chapter: milestoneIndex + 1,
+                totalChapters: QUEST_MILESTONES.length
             };
         }
 
@@ -593,6 +750,332 @@ app.get('/api/rpg', async (req, res) => {
 
     } catch (err) {
         console.error('[API] /api/rpg error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==================== ARCA LIFE COACH SYSTEM ====================
+// AI-powered financial mentor that guides you to millionaire status
+
+const LIFE_COACH_FILE = path.join(__dirname, 'data', 'life_coach_state.json');
+
+// Load or initialize life coach state
+function loadLifeCoachState() {
+    try {
+        if (fs.existsSync(LIFE_COACH_FILE)) {
+            return JSON.parse(fs.readFileSync(LIFE_COACH_FILE, 'utf8'));
+        }
+    } catch (e) { }
+    return {
+        completedSideQuests: [],
+        habits: {
+            lastInjectionDate: null,
+            injectionStreak: 0,
+            lastCheckInDate: null,
+            checkInStreak: 0,
+            noWithdrawalDays: 0
+        },
+        unlockedStrategies: ['grid_trading'],
+        notes: []
+    };
+}
+
+function saveLifeCoachState(data) {
+    fs.writeFileSync(LIFE_COACH_FILE, JSON.stringify(data, null, 2));
+}
+
+// Side Quests - Educational missions
+const SIDE_QUESTS = [
+    // Beginner Education
+    { id: 'learn_compound', name: 'El Poder del Compuesto', description: 'Aprende cómo funciona el interés compuesto', xp: 200, category: 'education', minLevel: 1, url: 'https://www.investopedia.com/terms/c/compoundinterest.asp' },
+    { id: 'learn_dca', name: 'Dollar Cost Averaging', description: 'Entiende la estrategia DCA para reducir riesgo', xp: 200, category: 'education', minLevel: 1, url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp' },
+    { id: 'learn_grid', name: 'Maestría Grid Trading', description: 'Domina la estrategia que usa tu bot', xp: 300, category: 'education', minLevel: 2 },
+
+    // Intermediate
+    { id: 'learn_staking', name: 'Staking 101', description: 'Aprende a generar rendimiento pasivo con staking', xp: 400, category: 'education', minLevel: 5, url: 'https://www.binance.com/en/staking' },
+    { id: 'learn_defi', name: 'Intro a DeFi', description: 'Entiende Aave, Compound y yield farming', xp: 500, category: 'education', minLevel: 7 },
+    { id: 'open_etf_account', name: 'Abre Cuenta de ETFs', description: 'Registrate en GBM+, Kuspit o similar para ETFs', xp: 600, category: 'action', minLevel: 8 },
+
+    // Advanced
+    { id: 'learn_futures', name: 'Futuros y Apalancamiento', description: 'Aprende margin trading de forma segura', xp: 700, category: 'education', minLevel: 10 },
+    { id: 'learn_reits', name: 'REITs Tokenizados', description: 'Real estate fraccionado: RealT, Lofty', xp: 600, category: 'education', minLevel: 12 },
+    { id: 'first_etf', name: 'Primera Compra ETF', description: 'Compra tu primer ETF (VOO, QQQ, VTI)', xp: 800, category: 'action', minLevel: 10 },
+
+    // Expert
+    { id: 'learn_tax', name: 'Optimización Fiscal', description: 'Aprende sobre impuestos en crypto en México', xp: 500, category: 'education', minLevel: 15 },
+    { id: 'diversify_realestate', name: 'Primera Inversión Inmobiliaria', description: 'Invierte en REIT o propiedad fraccionada', xp: 1000, category: 'action', minLevel: 15 },
+];
+
+// Get contextual tips based on current state
+function getMentorTips(equity, level, daysActive, lastInjectionDays) {
+    const tips = [];
+
+    // Core philosophy tips
+    if (equity < 2000) {
+        tips.push({ priority: 'high', icon: '🎯', tip: 'FASE ACUMULACIÓN: Tu único trabajo es NO TOCAR el capital. Deja que el bot trabaje.' });
+    }
+
+    if (equity < 5000) {
+        tips.push({ priority: 'medium', icon: '💉', tip: 'Inyectar $200-500/mes acelera DRAMÁTICAMENTE tu progreso. Cada $ cuenta más ahora.' });
+    }
+
+    if (lastInjectionDays > 30) {
+        tips.push({ priority: 'high', icon: '⚠️', tip: `Han pasado ${lastInjectionDays} días sin inyección. ¿Puedes meter algo este mes?` });
+    }
+
+    // Level-specific tips
+    if (level >= 5 && level < 10) {
+        tips.push({ priority: 'medium', icon: '📚', tip: 'Es buen momento para aprender sobre staking. Podrías poner parte en Binance Earn.' });
+    }
+
+    if (level >= 10 && equity >= 10000) {
+        tips.push({ priority: 'medium', icon: '📈', tip: 'Con $10k+ considera diversificar: 70% grid, 20% holding, 10% ETFs.' });
+    }
+
+    if (level >= 15 && equity >= 25000) {
+        tips.push({ priority: 'low', icon: '🏠', tip: 'Ya puedes explorar REITs o crowdfunding inmobiliario para ingreso pasivo adicional.' });
+    }
+
+    // Motivational tips
+    if (daysActive > 30 && daysActive <= 60) {
+        tips.push({ priority: 'low', icon: '🔥', tip: `¡${daysActive} días de disciplina! El hábito se está formando. NO pares.` });
+    }
+
+    if (daysActive > 100) {
+        tips.push({ priority: 'low', icon: '🏆', tip: `${daysActive} días consistente. Eres parte del 1% que no abandona.` });
+    }
+
+    return tips;
+}
+
+// Get active missions based on state
+function getActiveMissions(equity, level, coachState, depositsThisMonth) {
+    const missions = [];
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Monthly injection mission
+    const MONTHLY_INJECTION_GOAL = 500; // $500 USD goal (user agreement)
+    const injectedThisMonth = depositsThisMonth || 0;
+    if (injectedThisMonth < MONTHLY_INJECTION_GOAL) {
+        missions.push({
+            id: 'monthly_injection',
+            type: 'recurring',
+            icon: '💉',
+            name: 'Inyección Mensual',
+            description: `Meta: $${MONTHLY_INJECTION_GOAL} USD este mes`,
+            progress: injectedThisMonth,
+            target: MONTHLY_INJECTION_GOAL,
+            progressPercent: Math.min(100, Math.round((injectedThisMonth / MONTHLY_INJECTION_GOAL) * 100)),
+            xpReward: 500,
+            priority: 'high'
+        });
+    }
+
+    // No-touch mission (don't withdraw)
+    missions.push({
+        id: 'diamond_hands',
+        type: 'streak',
+        icon: '💎',
+        name: 'Manos de Diamante',
+        description: 'No retires capital - deja componer',
+        progress: coachState.habits?.noWithdrawalDays || 0,
+        target: 365,
+        progressPercent: Math.min(100, Math.round(((coachState.habits?.noWithdrawalDays || 0) / 365) * 100)),
+        xpReward: 50, // per day
+        priority: 'medium'
+    });
+
+    // Level-specific missions
+    if (equity < 1500) {
+        missions.push({
+            id: 'reach_1500',
+            type: 'milestone',
+            icon: '⚔️',
+            name: 'Cruzar el Valle',
+            description: 'Alcanza $1,500 USD de equity',
+            progress: equity,
+            target: 1500,
+            progressPercent: Math.min(100, Math.round((equity / 1500) * 100)),
+            xpReward: 1000,
+            priority: 'high'
+        });
+    }
+
+    // Education mission based on level
+    const availableQuests = SIDE_QUESTS.filter(q =>
+        q.minLevel <= level &&
+        !coachState.completedSideQuests?.includes(q.id)
+    );
+
+    if (availableQuests.length > 0) {
+        const nextQuest = availableQuests[0];
+        missions.push({
+            id: nextQuest.id,
+            type: 'side_quest',
+            icon: '📚',
+            name: nextQuest.name,
+            description: nextQuest.description,
+            xpReward: nextQuest.xp,
+            priority: 'low',
+            url: nextQuest.url || null,
+            action: 'complete_quest'
+        });
+    }
+
+    return missions.sort((a, b) => {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
+}
+
+// API endpoint for Life Coach
+app.get('/api/life-coach', async (req, res) => {
+    try {
+        const coachState = loadLifeCoachState();
+
+        // Get current equity
+        let currentEquity = 0;
+        try {
+            currentEquity = await getGlobalEquity();
+        } catch (e) { }
+
+        // Get deposits data
+        let depositsThisMonth = 0;
+        let lastInjectionDays = 999;
+        try {
+            const depositsFile = path.join(__dirname, 'data', 'deposits.json');
+            if (fs.existsSync(depositsFile)) {
+                const depositsData = JSON.parse(fs.readFileSync(depositsFile, 'utf8'));
+                const now = new Date();
+                const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+                depositsData.deposits?.forEach(d => {
+                    // Skip rebalances (no actual deposit amount)
+                    if (d.type === 'rebalance' || !d.amount) return;
+
+                    if (d.date.startsWith(currentMonth)) {
+                        depositsThisMonth += d.amount;
+                    }
+                    // Calculate days since last injection
+                    const depositDate = new Date(d.date);
+                    const daysDiff = Math.floor((now - depositDate) / (1000 * 60 * 60 * 24));
+                    if (daysDiff < lastInjectionDays) {
+                        lastInjectionDays = daysDiff;
+                    }
+                });
+            }
+        } catch (e) { }
+
+        // Calculate level and days active (LAUNCH_DATE synced with RPG system)
+        const LAUNCH_DATE = new Date('2025-12-03T00:00:00Z');
+        const daysActive = Math.max(1, Math.floor((Date.now() - LAUNCH_DATE) / (1000 * 60 * 60 * 24)));
+
+        // Simple level calculation
+        const totalProfit = currentEquity - 1247; // Approximate initial
+        const xpFromProfit = Math.floor(Math.max(0, totalProfit) * 50);
+        const xpFromDays = daysActive * 20;
+        const totalXp = 810 + xpFromProfit + xpFromDays;
+        const level = Math.floor(totalXp / 500) + 1;
+
+        // Get mentor tips
+        const tips = getMentorTips(currentEquity, level, daysActive, lastInjectionDays);
+
+        // Get active missions
+        const missions = getActiveMissions(currentEquity, level, coachState, depositsThisMonth);
+
+        // Get available side quests
+        const sideQuests = SIDE_QUESTS.filter(q =>
+            q.minLevel <= level &&
+            !coachState.completedSideQuests?.includes(q.id)
+        ).slice(0, 5);
+
+        // Unlocked strategies based on level/equity
+        const strategies = [];
+        strategies.push({ name: 'Grid Trading', unlocked: true, description: 'Tu base - genera profit 24/7' });
+        strategies.push({ name: 'Reinversión 100%', unlocked: true, description: 'Todo el profit se queda' });
+        strategies.push({ name: 'Inyección de Capital', unlocked: true, description: 'Acelera con dinero extra' });
+        strategies.push({ name: 'Staking/Earn', unlocked: level >= 5 || currentEquity >= 3000, description: '8-12% APY en holdings', minLevel: 5 });
+        strategies.push({ name: 'DCA Blue Chips', unlocked: level >= 7 || currentEquity >= 5000, description: 'Acumula BTC/ETH gradualmente', minLevel: 7 });
+        strategies.push({ name: 'ETFs (VOO/QQQ)', unlocked: level >= 10 || currentEquity >= 10000, description: 'Diversifica fuera de crypto', minLevel: 10 });
+        strategies.push({ name: 'Apalancamiento 2x', unlocked: level >= 12 || currentEquity >= 15000, description: 'Solo 20% del capital MAX', minLevel: 12 });
+        strategies.push({ name: 'REITs/Real Estate', unlocked: level >= 15 || currentEquity >= 25000, description: 'Ingreso pasivo inmobiliario', minLevel: 15 });
+
+        // Habits tracking
+        const habits = {
+            injectionStreak: coachState.habits?.injectionStreak || 0,
+            checkInStreak: coachState.habits?.checkInStreak || 0,
+            noWithdrawalDays: daysActive, // Simplified - assume no withdrawals
+            lastInjectionDays: lastInjectionDays
+        };
+
+        res.json({
+            success: true,
+            equity: currentEquity,
+            level: level,
+            daysActive: daysActive,
+
+            // Mentor tips (contextual advice)
+            tips: tips,
+
+            // Active missions
+            missions: missions,
+
+            // Side quests available
+            sideQuests: sideQuests,
+
+            // Unlocked strategies
+            strategies: strategies,
+
+            // Habits
+            habits: habits,
+
+            // Stats for display
+            stats: {
+                depositsThisMonth: depositsThisMonth,
+                monthlyGoal: 500,
+                completedQuests: coachState.completedSideQuests?.length || 0,
+                totalSideQuests: SIDE_QUESTS.length
+            }
+        });
+
+    } catch (err) {
+        console.error('[API] /api/life-coach error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Complete a side quest
+app.post('/api/life-coach/complete-quest', express.json(), (req, res) => {
+    try {
+        const { questId } = req.body;
+        if (!questId) {
+            return res.status(400).json({ error: 'questId required' });
+        }
+
+        const quest = SIDE_QUESTS.find(q => q.id === questId);
+        if (!quest) {
+            return res.status(404).json({ error: 'Quest not found' });
+        }
+
+        const coachState = loadLifeCoachState();
+
+        if (coachState.completedSideQuests?.includes(questId)) {
+            return res.json({ success: false, message: 'Quest already completed' });
+        }
+
+        coachState.completedSideQuests = coachState.completedSideQuests || [];
+        coachState.completedSideQuests.push(questId);
+        saveLifeCoachState(coachState);
+
+        res.json({
+            success: true,
+            message: `¡Quest completado! +${quest.xp} XP`,
+            xpEarned: quest.xp,
+            questName: quest.name
+        });
+
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -621,7 +1104,11 @@ function saveEquitySnapshots(data) {
 
 // Record a daily snapshot of REAL equity from Binance
 async function recordDailyEquitySnapshot() {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    // Use CDMX timezone (UTC-6)
+    const now = new Date();
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const cdmxTime = new Date(utcTime + (3600000 * -6));
+    const today = cdmxTime.toISOString().split('T')[0]; // YYYY-MM-DD in CDMX
     const data = loadEquitySnapshots();
 
     // Skip if already recorded today
@@ -706,6 +1193,8 @@ app.get('/api/profit-history', async (req, res) => {
     try {
         const sessionsDir = path.join(__dirname, 'data', 'sessions');
         const profitByDay = {};
+        // Track profit by bot (BTC, SOL, DOGE)
+        const profitByBot = { BTC: {}, SOL: {}, DOGE: {} };
 
         if (fs.existsSync(sessionsDir)) {
             const stateFiles = fs.readdirSync(sessionsDir).filter(f => f.endsWith('_state.json'));
@@ -714,6 +1203,12 @@ app.get('/api/profit-history', async (req, res) => {
                 try {
                     const data = JSON.parse(fs.readFileSync(path.join(sessionsDir, file), 'utf8'));
 
+                    // Detect which bot this file belongs to
+                    let botName = 'OTHER';
+                    const pair = data.pair || file.toUpperCase();
+                    if (pair.includes('BTC')) botName = 'BTC';
+                    else if (pair.includes('SOL')) botName = 'SOL';
+                    else if (pair.includes('DOGE')) botName = 'DOGE';
 
                     // Aggregate NET profit from ALL sell trades (filledOrders)
                     if (data.filledOrders && Array.isArray(data.filledOrders)) {
@@ -724,7 +1219,13 @@ app.get('/api/profit-history', async (req, res) => {
                                 const centralDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
                                 const date = centralDate.toISOString().split('T')[0];
 
+                                // Total profit
                                 profitByDay[date] = (profitByDay[date] || 0) + trade.profit;
+
+                                // Per-bot profit
+                                if (profitByBot[botName]) {
+                                    profitByBot[botName][date] = (profitByBot[botName][date] || 0) + trade.profit;
+                                }
                             }
                         });
                     }
@@ -733,20 +1234,34 @@ app.get('/api/profit-history', async (req, res) => {
         }
 
         // Sort and format for chart - FILL MISSING DAYS
-        const sortedDates = Object.keys(profitByDay).sort();
+        const allDates = new Set([
+            ...Object.keys(profitByDay),
+            ...Object.keys(profitByBot.BTC),
+            ...Object.keys(profitByBot.SOL),
+            ...Object.keys(profitByBot.DOGE)
+        ]);
+        const sortedDates = [...allDates].sort();
 
-        // Fill gaps: Generate all dates from first to today
+        // Fill gaps: Generate all dates from first to today (CDMX timezone)
         const history = [];
         if (sortedDates.length > 0) {
-            const startDate = new Date(sortedDates[0]);
-            const endDate = new Date(); // Today
-            endDate.setHours(0, 0, 0, 0);
+            const startDate = new Date(sortedDates[0] + 'T12:00:00-06:00'); // Parse as CDMX noon
+
+            // Get today in CDMX
+            const nowUtc = Date.now() + (new Date().getTimezoneOffset() * 60000);
+            const cdmxNow = new Date(nowUtc + (3600000 * -6));
+            const endDateStr = cdmxNow.toISOString().split('T')[0];
+            const endDate = new Date(endDateStr + 'T12:00:00-06:00');
 
             for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-                const dateStr = d.toISOString().split('T')[0];
+                // Get date string in CDMX context
+                const dateStr = new Date(d.getTime()).toISOString().split('T')[0];
                 history.push({
                     date: dateStr,
-                    profit: profitByDay[dateStr] ? parseFloat(profitByDay[dateStr].toFixed(4)) : 0
+                    profit: profitByDay[dateStr] ? parseFloat(profitByDay[dateStr].toFixed(4)) : 0,
+                    btc: profitByBot.BTC[dateStr] ? parseFloat(profitByBot.BTC[dateStr].toFixed(4)) : 0,
+                    sol: profitByBot.SOL[dateStr] ? parseFloat(profitByBot.SOL[dateStr].toFixed(4)) : 0,
+                    doge: profitByBot.DOGE[dateStr] ? parseFloat(profitByBot.DOGE[dateStr].toFixed(4)) : 0
                 });
             }
 
@@ -760,6 +1275,82 @@ app.get('/api/profit-history', async (req, res) => {
 
     } catch (err) {
         console.error('[API] /api/profit-history error:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- INDIVIDUAL BOT PROFIT HISTORY API ---
+// Returns profit history for THIS specific bot only (homologado con dashboard)
+app.get('/api/bot-profit-history', async (req, res) => {
+    try {
+        const profitByDay = {};
+        const filledOrders = state.filledOrders || [];
+
+        // Aggregate NET profit from sell trades (CDMX timezone)
+        filledOrders.forEach(trade => {
+            if (trade.side === 'sell' && typeof trade.profit === 'number') {
+                // Convert to CDMX (UTC-6) for date grouping
+                const utcDate = new Date(trade.timestamp);
+                const cdmxDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
+                const date = cdmxDate.toISOString().split('T')[0];
+                profitByDay[date] = (profitByDay[date] || 0) + trade.profit;
+            }
+        });
+
+        // Sort and fill gaps (CDMX timezone)
+        const sortedDates = Object.keys(profitByDay).sort();
+        const history = [];
+
+        if (sortedDates.length > 0) {
+            const startDate = new Date(sortedDates[0] + 'T12:00:00-06:00');
+
+            // Get today in CDMX
+            const nowUtc = Date.now() + (new Date().getTimezoneOffset() * 60000);
+            const cdmxNow = new Date(nowUtc + (3600000 * -6));
+            const endDateStr = cdmxNow.toISOString().split('T')[0];
+            const endDate = new Date(endDateStr + 'T12:00:00-06:00');
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = new Date(d.getTime()).toISOString().split('T')[0];
+                history.push({
+                    date: dateStr,
+                    profit: profitByDay[dateStr] ? parseFloat(profitByDay[dateStr].toFixed(4)) : 0
+                });
+            }
+        }
+
+        // Calculate cumulative for chart
+        let cumulative = 0;
+        const historyWithCumulative = history.map(h => {
+            cumulative += h.profit;
+            return {
+                ...h,
+                cumulative: parseFloat(cumulative.toFixed(4))
+            };
+        });
+
+        // Bot-specific info
+        const totalProfit = state.totalProfit || 0;
+        const totalTrades = filledOrders.filter(o => o.side === 'sell').length;
+        const initialCapital = state.initialCapital || CONFIG.initialCapital || 0;
+        const roi = initialCapital > 0 ? (totalProfit / initialCapital * 100) : 0;
+
+        res.json({
+            success: true,
+            bot: {
+                id: BOT_ID,
+                pair: CONFIG.pair,
+                totalProfit: parseFloat(totalProfit.toFixed(2)),
+                totalTrades,
+                initialCapital: parseFloat(initialCapital.toFixed(2)),
+                roi: parseFloat(roi.toFixed(2))
+            },
+            totalDays: historyWithCumulative.length,
+            history: historyWithCumulative
+        });
+
+    } catch (err) {
+        console.error('[API] /api/bot-profit-history error:', err.message);
         res.status(500).json({ error: err.message });
     }
 });
@@ -837,11 +1428,13 @@ app.get('/api/analytics', async (req, res) => {
 
         const roiAllTime = totalDeposited > 0 ? (totalProfit / totalDeposited) * 100 : 0;
 
-        // Calculate period ROIs
+        // Calculate period ROIs (using CDMX timezone UTC-6)
         const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const cdmxTime = new Date(utcTime + (3600000 * -6));
+        const today = cdmxTime.toISOString().split('T')[0];
+        const weekAgo = new Date(cdmxTime.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const monthAgo = new Date(cdmxTime.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
         const profitLast7 = days.filter(d => d.date >= weekAgo).reduce((sum, d) => sum + d.profit, 0);
         const profitLast30 = days.filter(d => d.date >= monthAgo).reduce((sum, d) => sum + d.profit, 0);
@@ -5602,11 +6195,15 @@ server.listen(BOT_PORT, async () => {
 
     function generateDailyReport() {
         const now = new Date();
-        const dateStr = now.toISOString().split('T')[0];
+        // Use CDMX timezone (UTC-6) for date calculations
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const cdmxTime = new Date(utcTime + (3600000 * -6));
+        const dateStr = cdmxTime.toISOString().split('T')[0];
         const reportFile = path.join(REPORTS_DIR, `daily_report_${BOT_ID}_${PAIR_ID}_${dateStr}.txt`);
 
-        // Calculate today's metrics
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        // Calculate today's metrics (CDMX timezone)
+        const cdmxISO = cdmxTime.toISOString().split('T')[0];
+        const todayStart = new Date(`${cdmxISO}T00:00:00.000-06:00`).getTime();
         const todayTrades = (state.filledOrders || []).filter(o => o.timestamp >= todayStart);
         const todaySells = todayTrades.filter(o => o.side === 'sell');
         const todayProfit = todaySells.reduce((sum, o) => sum + (o.profit || 0), 0);
@@ -5722,18 +6319,25 @@ Generated: ${now.toISOString()}
     // Local timer variable (Do not persist to state)
     let reportTimer;
 
-    // Schedule daily report at 11:59 PM
+    // Schedule daily report at 11:59 PM CDMX time (UTC-6)
     function scheduleDailyReport() {
         const now = new Date();
-        const next1159 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0);
 
-        // If already past 11:59 today, schedule for tomorrow
-        if (now >= next1159) {
-            next1159.setDate(next1159.getDate() + 1);
+        // Calculate current CDMX time
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const cdmxNow = new Date(utcTime + (3600000 * -6));
+
+        // Target: 11:59 PM CDMX = 05:59 AM UTC next day
+        const cdmxDateStr = cdmxNow.toISOString().split('T')[0];
+        let next1159CDMX = new Date(`${cdmxDateStr}T23:59:00.000-06:00`);
+
+        // If already past 11:59 PM CDMX today, schedule for tomorrow
+        if (now >= next1159CDMX) {
+            next1159CDMX = new Date(next1159CDMX.getTime() + 24 * 60 * 60 * 1000);
         }
 
-        const hoursUntil = (next1159 - now) / (1000 * 60 * 60);
-        console.log(`>> [REPORT] Next daily report in ${hoursUntil.toFixed(1)} hours`);
+        const hoursUntil = (next1159CDMX - now) / (1000 * 60 * 60);
+        console.log(`>> [REPORT] Next daily report in ${hoursUntil.toFixed(1)} hours (11:59 PM CDMX)`);
 
         // Clear any existing timer
         if (reportTimer) clearTimeout(reportTimer);
@@ -5741,9 +6345,9 @@ Generated: ${now.toISOString()}
         reportTimer = setTimeout(() => {
             generateDailyReport();
             scheduleDailyReport(); // Reschedule for next day
-        }, next1159 - now);
+        }, next1159CDMX - now);
 
-        log('REPORT', 'Daily report scheduler initialized');
+        log('REPORT', 'Daily report scheduler initialized (CDMX timezone)');
     }
 
     // Call it

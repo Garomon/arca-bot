@@ -405,12 +405,16 @@ async function analyzeAndProject() {
     }
 
     // Quest System (Dynamic based on equity/days)
-    let activeQuest, questStatus;
+    let activeQuest, questStatus, questObjective, questProgress;
     if (currentCapital >= 1500) {
         activeQuest = "El Rito de Fortalecimiento";
-        questStatus = daysActive >= 30 ? "COMPLETADA (Esperando Recompensa)" : "EN PROGRESO";
+        questObjective = "Mantener el sistema activo por 30 días";
+        questProgress = `${Math.min(daysActive, 30).toFixed(0)}/30 días`;
+        questStatus = daysActive >= 30 ? "COMPLETADA" : "EN PROGRESO";
     } else {
         activeQuest = "El Cruce del Valle";
+        questObjective = "Alcanzar $1,500 USD de capital";
+        questProgress = `${currentCapital.toFixed(0)}/$1,500 (${((currentCapital/1500)*100).toFixed(0)}%)`;
         questStatus = currentCapital >= 1500 ? "COMPLETADA" : "EN PROGRESO";
     }
 
@@ -430,6 +434,8 @@ async function analyzeAndProject() {
     log(`      Progreso:     [${xpBar}] ${(fillPercent * 100).toFixed(1)}%`);
     log("   ═════════════════════════════════════════════");
     log(`   📜 Misión Activa: ${activeQuest}`);
+    log(`   🎯 Objetivo:      ${questObjective}`);
+    log(`   📊 Progreso:      ${questProgress}`);
     log(`   ✅ Estado:        ${questStatus}`);
     log("   ═════════════════════════════════════════════");
 

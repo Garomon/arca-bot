@@ -1,9 +1,9 @@
-# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v5.2
-*(Actualizado: 2026-01-07 - Universal Equity + TWR + Dynamic Dash)*
+# 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v5.4
+*(Actualizado: 2026-01-10 - Safety Lock Detection + Log Monitor + Profit Sync)*
 
-**IP VPS:** `167.71.1.124`  ssh root@167.71.1.124       
+**IP VPS:** `167.71.1.124`
 **Usuario:** `root`
-**Password:** 
+**Password:** `7q2$TA/nVP!CsFi`
 
 ---
 
@@ -34,9 +34,9 @@ df -h | grep -E '^/dev/root|Filesystem'; free -m | grep Mem; \
 echo -e "\n🕵️ --- 3. ¿HUBO REINICIOS HOY? [HOY] ---"; \
 ls -lh /root/arca-bot/logs/VANTAGE* 2>/dev/null | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)"; \
 echo -e "\n🚨 --- 4. ERRORES DE HOY [HOY] ---"; \
-grep "ERROR" /root/arca-bot/logs/VANTAGE01_*_activity.log 2>/dev/null | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (¡Bien!)"; \
+grep "ERROR" /root/arca-bot/logs/VANTAGE01_*_activity.log 2>/dev/null | grep "$(TZ='America/Mexico_City' date +%Y-%m-%d)" | tail -n 5 || echo "Sin errores hoy (OK)"; \
 echo -e "\n☠️ --- 4.b CRASH LOGS [HISTÓRICO - desde último borrado] ---"; \
-cat /root/arca-bot/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (¡Bien!)"; \
+cat /root/arca-bot/logs/pm2_crash.log 2>/dev/null | tail -n 10 || echo "Sin crashes registrados (OK)"; \
 echo -e "\n💰 --- 5. REPORTE DE AYER [AYER] ---"; \
 cat /root/arca-bot/reports/daily_report_*_BTCUSDT_$(TZ='America/Mexico_City' date -d "yesterday" +%Y-%m-%d).txt 2>/dev/null || echo "No hay reporte de BTC de ayer."; \
 echo -e "\n💰 --- 5.b REPORTE DE AYER (SOL) [AYER] ---"; \
@@ -65,11 +65,29 @@ echo -e "\n🦅 --- 11. SWARM YIELD AUDIT [TIEMPO REAL] ---"; \
 node /root/arca-bot/scripts/calc_swarm_yield.js 2>/dev/null || echo "Script no disponible"; \
 echo -e "\n📊 --- 12. PROYECCIÓN DE RIQUEZA (HARD MODE: NET EQUITY) ---"; \
 node /root/arca-bot/scripts/analyze_projection.js 2>/dev/null || echo "Script no disponible"; \
-echo -e "\n🔬 --- 13. AUDITORÍA MANUAL [OPCIONAL] ---"; \
-echo "  node scripts/full_audit.js BTC/USDT"; \
-echo "  node scripts/full_audit.js SOL/USDT"; \
-echo "  node scripts/full_audit.js DOGE/USDT"; \
-echo "  node scripts/check_ghosts.js  # Cazafantasmas"
+echo -e "\n🚨 --- 13. SAFETY LOCKS & PAUSAS [CRÍTICO] ---"; \
+echo "Verificando si algún bot está PAUSADO..."; \
+for pair in BTCUSDT SOLUSDT DOGEUSDT; do \
+  paused=$(grep -o '"paused":[^,]*' /root/arca-bot/data/sessions/VANTAGE01_${pair}_state.json 2>/dev/null | head -1); \
+  reason=$(grep -o '"pauseReason":"[^"]*"' /root/arca-bot/data/sessions/VANTAGE01_${pair}_state.json 2>/dev/null | head -1); \
+  if echo "$paused" | grep -q "true"; then \
+    echo "  ⛔ $pair: PAUSADO - $reason"; \
+  else \
+    echo "  ✅ $pair: ACTIVO"; \
+  fi; \
+done; \
+echo -e "\n📦 --- 14. TAMAÑO DE LOGS [MONITOREO DISCO] ---"; \
+du -sh /root/arca-bot/logs/ 2>/dev/null || echo "No se pudo leer"; \
+echo "  (Si supera 1GB, considera: pm2 flush)"; \
+echo -e "\n🔗 --- 15. SYNC CHECK: PROFIT vs TRADES ---"; \
+node /root/arca-bot/scripts/force_sync_profit.js 2>/dev/null | grep -E "CHECK|FIXING|OK" || echo "Script no disponible"; \
+echo -e "\n🔬 --- 16. AUDITORÍA MANUAL [OPCIONAL] ---"; \
+echo "  node scripts/full_audit.js BTC/USDT --fix  # Repara Safety Locks"; \
+echo "  node scripts/full_audit.js SOL/USDT --fix"; \
+echo "  node scripts/full_audit.js DOGE/USDT --fix"; \
+echo "  node scripts/audit_deep_forensic.js  # 🔍 AUDITORIA FORENSE DE FEES"; \
+echo "  node scripts/check_ghosts.js         # 👻 CAZAFANTASMAS"; \
+echo "  node scripts/check_orphan_orders.js  # 🔗 ORDENES HUERFANAS"
 ```
 ```
 
@@ -95,7 +113,7 @@ npm run sync:up
 
 ---
 
-## � LEYENDA DE TIEMPOS (¡IMPORTANTE!)
+##  LEYENDA DE TIEMPOS (¡IMPORTANTE!)
 
 | Etiqueta | Significado |
 |----------|-------------|
@@ -124,6 +142,9 @@ npm run sync:up
 *   **PM2 dice `stopped` o `errored`:** Necesita reinicio.
 *   **Errores repetidos:** `ECONNRESET`, `Binance API Down`, `CRITICAL ERROR`.
 *   **Contador `↺` alto + tú NO reiniciaste:** Hay crashes reales. Revisa `pm2_crash.log`.
+*   **⛔ PAUSADO en sección 13:** Bot bloqueado por Safety Lock. Ejecuta: `node scripts/full_audit.js SYMBOL --fix`
+*   **Logs > 1GB en sección 14:** Disco llenándose. Ejecuta: `pm2 flush`
+*   **FIXING en sección 15:** Discrepancia de profit detectada y corregida automáticamente.
 
 > **Nota sobre el contador `↺` (restarts):** Si tú hiciste mantenimientos/resets manuales, este contador estará alto. Usa `pm2 reset all` para ponerlo en cero y monitorear desde limpio.
 
@@ -287,5 +308,24 @@ El cálculo de APY ya no es simple (`Profit / Capital Final`). Ahora usa **TWR**
 *   Si depositas $1000 hoy, no diluye el rendimiento de los $100 que tenías hace un año.
 *   **Fórmula:** `(Profit Total / Capital Promedio Ponderado por Días) * 365`.
 *   *Resultado:* Tu APY reflejará la verdadera eficiencia de tu dinero, no solo el volumen.
+
+---
+
+## ✅ 9. VALIDACIÓN Y CORRECCIONES CONFIRMADAS (08-ENE-2026)
+
+### 🕵️ Auditoría Forense de Fees
+*   **Estado:** ✅ CONFIRMADO.
+*   **Hallazgo:** El bot descuenta correctamente tanto `entryFees` (Comisión de Compra histórica) como `sellFee` (Comisión de Venta actual) antes de reportar el Profit.
+*   **Fórmula Validada:** `Profit = (SellPrice * Amount) - CostBasis - (BuyFees + SellFees)`.
+
+### 👻 Reparación Trade Fantasma (SOL)
+*   **Incidente:** Trade de las 20:08 apareció con $0 profit tras reinicio profundo.
+*   **Solución:** Parche manual (`fix_sol_ghost_v3.js`) reinsertando Cost Basis ($138.2), Spread (0.77%) y Fees (0.000021 BNB).
+*   **Estado:** ✅ RESUELTO. Data 100% consistente.
+
+### 📈 Gráfica de Equidad Universal
+*   **Incidente:** Fechas futuras (09-Ene) y snapshots inconsistentes.
+*   **Solución:** Zona horaria fijada a 'America/Mexico_City', capping de fechas futuras y uso de snapshots reales de la API.
+*   **Estado:** ✅ RESUELTO. Gráfica limpia.
 
 > **Regla de Oro:** Si algo dice `[HISTÓRICO]` y te parece raro (ej: Drawdown alto), probablemente es un "fantasma del pasado", no un problema de hoy.

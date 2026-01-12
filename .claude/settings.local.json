@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe\" -c \"which sshpass 2>/dev/null || echo ''no sshpass in git bash''\")",
+      "Bash(pip install:*)",
+      "Bash(python -c:*)",
+      "Bash(python -u -c \"\n# -*- coding: utf-8 -*-\nimport paramiko\nimport io\nimport sys\n\nssh = paramiko.SSHClient\\(\\)\nssh.set_missing_host_key_policy\\(paramiko.AutoAddPolicy\\(\\)\\)\n\ntry:\n    ssh.connect\\(''167.71.1.124'', username=''root'', password=''7q2$TA/nVP!CsFi'', timeout=15\\)\n    print\\(''CONECTADO AL VPS''\\)\n    print\\(''''\\)\n    \n    cmds = [\n        ''pm2 jlist 2>/dev/null | python3 -c \"\"import sys,json; d=json.load\\(sys.stdin\\); [print\\(f\\\\\"\"{p[\\\\\"\"name\\\\\"\"]}: {p[\\\\\"\"pm2_env\\\\\"\"][\\\\\"\"status\\\\\"\"]} | uptime: {p[\\\\\"\"pm2_env\\\\\"\"][\\\\\"\"pm_uptime\\\\\"\"]} | restarts: {p[\\\\\"\"pm2_env\\\\\"\"][\\\\\"\"restart_time\\\\\"\"]}\\\\\"\"\\) for p in d]\"\"'',\n        ''free -h | head -2'',\n        ''df -h / | tail -1'',\n        ''uptime'',\n        ''pm2 logs --nostream --lines 5 2>&1 | tail -20''\n    ]\n    \n    for cmd in cmds:\n        stdin, stdout, stderr = ssh.exec_command\\(cmd\\)\n        out = stdout.read\\(\\).decode\\(''utf-8'', errors=''ignore''\\).strip\\(\\)\n        err = stderr.read\\(\\).decode\\(''utf-8'', errors=''ignore''\\).strip\\(\\)\n        if out:\n            print\\(out\\)\n        if err and ''error'' in err.lower\\(\\):\n            print\\(f''ERR: {err}''\\)\n        print\\(''''\\)\n    \n    ssh.close\\(\\)\n    print\\(''DONE''\\)\nexcept Exception as e:\n    print\\(f''Error: {type\\(e\\).__name__}: {e}''\\)\n\")",
+      "Bash(scp:*)",
+      "Bash(ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"cd /root/grid-bot && mkdir -p scripts && mv repair_all_empty_trades.js scripts/ 2>/dev/null; ls -la scripts/\")",
+      "Bash(ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"cd /root/grid-bot && pm2 stop all && node scripts/repair_all_empty_trades.js\")",
+      "Bash(ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"find /root -name ''*_state.json'' 2>/dev/null | head -20\")",
+      "Bash(ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"ls -la /root/arca-bot/\")",
+      "Bash(ssh:*)",
+      "Bash(timeout 20 ssh:*)",
+      "Bash(timeout 30 scp:*)",
+      "Bash(timeout 15 ssh:*)",
+      "Bash(sshpass -p '7q2$TA/nVP!CsFi' ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"grep -E ''gridSpacing'' /root/arca-bot/grid_bot.js | head -5\")",
+      "Bash(sshpass -p '7q2$TA/nVP!CsFi' ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"pm2 list\")",
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Improved SPREAD_MATCH tracking + ID repair scripts\n\n- SPREAD_MATCH now uses composite score \\(70% price + 30% amount\\) for better lot matching\n- Added fix_ids_only.js: Replaces synthetic IDs \\(REC_xxx\\) with real Binance Order IDs\n- Added repair_sync_fallback.js: Fixes SYNC_FALLBACK lotIds without changing profits\n- Added analyze_ids.js: Diagnostic tool for ID trazability analysis\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nchore: Sync with VPS production \\(master\\)\n\n- Updated .gitignore with temp file exclusions\n- Synced data_collector.js from VPS\n- Synced public/dashboard.html from VPS\n- Synced public/main.js from VPS\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(sshpass -p '7q2$TA/nVP!CsFi' scp:*)"
+    ]
+  }
+}

@@ -1,35 +1,72 @@
 {
-    "deposits": [
-        {
-            "id": 1,
-            "date": "2025-12-09",
-            "amount": 500,
-            "note": "P2P Compra inicial"
-        },
-        {
-            "id": 2,
-            "date": "2025-12-22",
-            "amount": 333,
-            "note": "Compra MXN→USDT"
-        },
-        {
-            "id": 3,
-            "date": "2025-12-30",
-            "amount": 83,
-            "note": "Compra MXN→USDT"
-        },
-        {
-            "id": 4,
-            "date": "2026-01-02",
-            "amount": 83,
-            "note": "Compra MXN→USDT (3 txns)"
-        },
-        {
-            "id": 5,
-            "date": "2025-12-02",
-            "amount": 108.74,
-            "note": "P2P - Compra"
-        }
-    ],
-    "nextId": 6
+  "deposits": [
+    {
+      "id": 5,
+      "date": "2025-12-02",
+      "amount": 108.74,
+      "note": "P2P - Compra",
+      "allocation": {
+        "BTC": 50,
+        "SOL": 50
+      }
+    },
+    {
+      "id": 1,
+      "date": "2025-12-09",
+      "amount": 500,
+      "note": "P2P Compra inicial",
+      "allocation": {
+        "BTC": 50,
+        "SOL": 50
+      }
+    },
+    {
+      "id": 2,
+      "date": "2025-12-22",
+      "amount": 333,
+      "note": "Compra MXN→USDT",
+      "allocation": {
+        "BTC": 50,
+        "SOL": 50
+      }
+    },
+    {
+      "id": 3,
+      "date": "2025-12-30",
+      "amount": 83,
+      "note": "Compra MXN→USDT",
+      "allocation": {
+        "BTC": 50,
+        "SOL": 50
+      }
+    },
+    {
+      "type": "rebalance",
+      "date": "2025-12-31",
+      "note": "Added DOGE bot - redistributed all capital",
+      "allocation": {
+        "BTC": 40,
+        "SOL": 40,
+        "DOGE": 20
+      }
+    },
+    {
+      "id": 4,
+      "date": "2026-01-02",
+      "amount": 83,
+      "note": "Compra MXN→USDT (3 txns)",
+      "allocation": {
+        "BTC": 40,
+        "SOL": 40,
+        "DOGE": 20
+      }
+    },
+    {
+      "id": 6,
+      "date": "2026-01-11",
+      "amount": 167,
+      "note": " Compra MXN→USDT"
+    }
+  ],
+  "nextId": 7
 }

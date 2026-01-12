@@ -122,11 +122,13 @@ function updateBotUIFromAPI(data, spirit) {
         ui.freeUSDT.innerText = `$${data.freeUSDT.toFixed(2)}`;
     }
     if (ui.profitTotal && data.totalProfit !== undefined) {
-        ui.profitTotal.innerText = `$${data.totalProfit.toFixed(2)}`;
+        const profitMXN = data.totalProfit * (window.usdMxnRate || 20.5);
+        ui.profitTotal.innerHTML = `$${data.totalProfit.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${profitMXN.toFixed(0)} MXN</small>`;
         ui.profitTotal.style.color = data.totalProfit > 0 ? 'var(--spirit-primary)' : '#ff3b3b';
     }
     if (ui.totalEquity && data.equity !== undefined) {
-        ui.totalEquity.innerText = `$${data.equity.toFixed(2)}`;
+        const equityMXN = data.equity * (window.usdMxnRate || 20.5);
+        ui.totalEquity.innerHTML = `$${data.equity.toFixed(2)} <small style="color:#888;font-size:0.65em">≈ $${equityMXN.toLocaleString('es-MX', { maximumFractionDigits: 0 })} MXN</small>`;
     }
     if (ui.activeLoops && data.activeOrders !== undefined) {
         ui.activeLoops.innerText = data.activeOrders;
@@ -937,78 +939,110 @@ socket.on('debug_trades', (trades) => {
     if (trades && Array.isArray(trades)) {
         tradeHistory = trades;
         renderTradeHistory();
-        renderProfitChart(); // NEW: Update profit chart
+        // Chart now fetched via API, but keep socket data for fallback
+        if (!botProfitHistory) renderProfitChartFromSocket();
     }
 });
 
-// ===== PROFIT CHART LOGIC =====
+// ===== PROFIT CHART LOGIC (Homologado con Dashboard) =====
 let profitChartInstance = null;
+let botProfitHistory = null;
 
-function renderProfitChart() {
-    if (!tradeHistory || tradeHistory.length === 0) return;
+// Chart colors (same as dashboard)
+const COLOR_GOLD = '#ffd700';
+const COLOR_EMERALD = '#00ff9d';
+const COLOR_GRID = 'rgba(255,255,255,0.05)';
 
-    const canvas = document.getElementById('profit-chart-canvas');
-    if (!canvas) return;
+// Fetch bot-specific profit history from API (like dashboard does)
+async function fetchBotProfitHistory() {
+    try {
+        // Detect current bot path for correct API routing via nginx
+        // /sol/ -> /sol/api/... , /doge/ -> /doge/api/... , / -> /api/...
+        const pathMatch = window.location.pathname.match(/^\/(sol|doge)\//);
+        const pathPrefix = pathMatch ? pathMatch[0] : '/';
+        const apiUrl = `${pathPrefix}api/bot-profit-history`;
+        console.log('[Chart] Fetching from:', apiUrl);
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error('API error');
+        const data = await res.json();
 
-    // 1. Aggregate NET Profit by Day (UTC-6 Central Time)
-    const profitByDay = {};
-    tradeHistory.forEach(t => {
-        if (t.side === 'sell' && typeof t.profit === 'number') {
-            // Convert to UTC-6 (Central Time) for date grouping
-            const utcDate = new Date(t.timestamp);
-            const centralDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
-            const date = centralDate.toISOString().split('T')[0]; // YYYY-MM-DD
-            profitByDay[date] = (profitByDay[date] || 0) + t.profit;
+        if (data.success && data.history) {
+            botProfitHistory = data;
+            fullBotHistory = data; // Store full history for filtering
+            renderProfitChartFiltered(data, currentChartTimeframe); // Apply current filter
+
+            // Update bot info display if elements exist
+            const botInfoEl = document.getElementById('chart-bot-info');
+            if (botInfoEl && data.bot) {
+                botInfoEl.innerHTML = `
+                    <span style="color:#ffd700">${data.bot.pair}</span> |
+                    <span style="color:#00ff9d">$${data.bot.totalProfit.toFixed(2)}</span> |
+                    <span style="color:#888">${data.bot.totalTrades} trades</span> |
+                    <span style="color:#00d4ff">${data.bot.roi.toFixed(2)}% ROI</span>
+                `;
+            }
         }
-    });
+    } catch (err) {
+        console.error('[Chart] Failed to fetch bot profit history:', err.message);
+        // Fallback to socket-based rendering if API fails
+        renderProfitChartFromSocket();
+    }
+}
 
-    // 2. Sort dates and take last 30 days
-    const sortedDates = Object.keys(profitByDay).sort();
-    const last30Days = sortedDates.slice(-30);
-    const labels = last30Days.map(d => d.substring(5)); // MM-DD format
-    const data = last30Days.map(d => profitByDay[d].toFixed(2));
+// Main render function using API data
+function renderProfitChart(data) {
+    const canvas = document.getElementById('profit-chart-canvas');
+    if (!canvas || !data || !data.history || data.history.length === 0) return;
 
-    // 3. Cumulative Profit for Area Fill
-    let cumulative = 0;
-    const cumulativeData = last30Days.map(d => {
-        cumulative += profitByDay[d];
-        return cumulative.toFixed(2);
-    });
+    // Take last 21 days
+    const history = data.history.slice(-21);
+    const labels = history.map(h => h.date.substring(5)); // MM-DD format
+    const dailyProfits = history.map(h => h.profit);
+    const cumulativeData = history.map(h => h.cumulative);
 
     // Update badge label
     const badgeEl = document.getElementById('chart-days-label');
-    if (badgeEl) badgeEl.innerText = `LAST ${last30Days.length} DAYS`;
+    if (badgeEl) badgeEl.innerText = `LAST ${history.length} DAYS`;
 
-    // 4. Destroy previous chart if exists
+    // Destroy previous chart if exists
     if (profitChartInstance) {
         profitChartInstance.destroy();
     }
 
-    // 5. Create Chart
+    // Create Chart (Dashboard Style)
     const ctx = canvas.getContext('2d');
+
+    // Gold gradient for cumulative line (like dashboard)
+    const gradFillGold = ctx.createLinearGradient(0, 0, 0, 200);
+    gradFillGold.addColorStop(0, 'rgba(255, 215, 0, 0.2)');
+    gradFillGold.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
+
     profitChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [
                 {
-                    label: 'Daily Profit ($)',
-                    data: data,
-                    backgroundColor: 'rgba(0, 255, 157, 0.6)',
-                    borderColor: '#00ff9d',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    order: 2
-                },
-                {
                     label: 'Cumulative ($)',
                     data: cumulativeData,
                     type: 'line',
-                    borderColor: '#00d4ff',
-                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                    borderColor: COLOR_GOLD,
+                    backgroundColor: gradFillGold,
+                    borderWidth: 2,
+                    pointRadius: 2,
                     fill: true,
                     tension: 0.3,
-                    pointRadius: 0,
+                    yAxisID: 'y_cumulative',
+                    order: 0
+                },
+                {
+                    label: 'Daily Profit ($)',
+                    data: dailyProfits,
+                    backgroundColor: ctx => (ctx.raw || 0) >= 0 ? 'rgba(0, 255, 157, 0.7)' : 'rgba(255, 42, 109, 0.7)',
+                    borderColor: ctx => (ctx.raw || 0) >= 0 ? COLOR_EMERALD : '#ff2a6d',
+                    borderWidth: 1,
+                    borderRadius: 3,
+                    yAxisID: 'y_daily',
                     order: 1
                 }
             ]
@@ -1016,35 +1050,189 @@ function renderProfitChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: {
                     display: true,
-                    labels: { color: '#888', font: { size: 10 } }
+                    labels: { color: '#ccc', font: { size: 10 }, usePointStyle: true }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#00ff9d'
+                    backgroundColor: 'rgba(10, 10, 16, 0.95)',
+                    callbacks: {
+                        label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}`
+                    }
                 }
             },
             scales: {
                 x: {
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#666', font: { size: 9 } }
+                    grid: { color: COLOR_GRID },
+                    ticks: { color: '#666', font: { size: 10 } }
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: '#666', font: { size: 9 }, callback: v => '$' + v }
+                y_daily: {
+                    type: 'linear',
+                    position: 'left',
+                    grid: { color: COLOR_GRID },
+                    ticks: { color: COLOR_EMERALD, callback: v => '$' + v },
+                    title: { display: true, text: 'Daily', color: '#555', font: { size: 9 } }
+                },
+                y_cumulative: {
+                    type: 'linear',
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: { color: COLOR_GOLD, callback: v => '$' + v },
+                    title: { display: true, text: 'Total', color: '#555', font: { size: 9 } }
                 }
             }
         }
     });
 }
+
+// Fallback: render from socket tradeHistory if API fails
+function renderProfitChartFromSocket() {
+    if (!tradeHistory || tradeHistory.length === 0) return;
+
+    const canvas = document.getElementById('profit-chart-canvas');
+    if (!canvas) return;
+
+    // Aggregate NET Profit by Day (CDMX timezone UTC-6)
+    const profitByDay = {};
+    tradeHistory.forEach(t => {
+        if (t.side === 'sell' && typeof t.profit === 'number') {
+            const utcDate = new Date(t.timestamp);
+            const cdmxDate = new Date(utcDate.getTime() - (6 * 60 * 60 * 1000));
+            const date = cdmxDate.toISOString().split('T')[0];
+            profitByDay[date] = (profitByDay[date] || 0) + t.profit;
+        }
+    });
+
+    const sortedDates = Object.keys(profitByDay).sort();
+    const lastDays = sortedDates.slice(-21);
+
+    let cumulative = 0;
+    const history = lastDays.map(d => {
+        cumulative += profitByDay[d];
+        return { date: d, profit: profitByDay[d], cumulative };
+    });
+
+    renderProfitChart({ history });
+}
+
+// ===== CHART FILTER FUNCTIONS (Like Dashboard) =====
+let currentChartTimeframe = 21; // Default to 21 days
+let fullBotHistory = null; // Store full history for filtering
+
+// Update timeframe filter
+function updateBotChartTimeframe(days, btn) {
+    currentChartTimeframe = days;
+
+    // Update active button state
+    document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    // Clear date inputs
+    const fromInput = document.getElementById('chart-date-from');
+    const toInput = document.getElementById('chart-date-to');
+    if (fromInput) fromInput.value = '';
+    if (toInput) toInput.value = '';
+
+    // Re-render with new timeframe
+    if (fullBotHistory) {
+        renderProfitChartFiltered(fullBotHistory, days);
+    }
+}
+
+// Apply custom date range
+function applyBotChartRange() {
+    const fromInput = document.getElementById('chart-date-from');
+    const toInput = document.getElementById('chart-date-to');
+
+    if (!fromInput?.value || !toInput?.value) {
+        alert('Selecciona ambas fechas');
+        return;
+    }
+
+    // Remove active from timeframe buttons
+    document.querySelectorAll('.chart-filter-btn').forEach(b => b.classList.remove('active'));
+
+    if (fullBotHistory) {
+        const from = fromInput.value;
+        const to = toInput.value;
+        const filtered = fullBotHistory.history.filter(h => h.date >= from && h.date <= to);
+
+        // Recalculate cumulative for filtered range
+        let cumulative = 0;
+        const historyWithCumulative = filtered.map(h => {
+            cumulative += h.profit;
+            return { ...h, cumulative };
+        });
+
+        renderProfitChart({
+            ...fullBotHistory,
+            history: historyWithCumulative
+        });
+
+        // Update label
+        const badgeEl = document.getElementById('chart-days-label');
+        if (badgeEl) badgeEl.innerText = `${from.substring(5)} → ${to.substring(5)}`;
+    }
+}
+
+// Render with timeframe filter
+function renderProfitChartFiltered(data, days) {
+    if (!data || !data.history) return;
+
+    let history = data.history;
+    if (days > 0) {
+        history = history.slice(-days);
+    }
+
+    // Recalculate cumulative for filtered range
+    let cumulative = 0;
+    const historyWithCumulative = history.map(h => {
+        cumulative += h.profit;
+        return { ...h, cumulative };
+    });
+
+    renderProfitChart({ ...data, history: historyWithCumulative });
+
+    // Update label
+    const badgeEl = document.getElementById('chart-days-label');
+    if (badgeEl) {
+        badgeEl.innerText = days > 0 ? `LAST ${history.length} DAYS` : `ALL TIME (${history.length} days)`;
+    }
+}
+
+// Initialize date inputs (CDMX timezone)
+function initChartDateInputs() {
+    const nowUTC = Date.now();
+    const cdmxMs = nowUTC - (6 * 60 * 60 * 1000);
+    const cdmxNow = new Date(cdmxMs);
+    const today = cdmxNow.toISOString().split('T')[0];
+
+    const fromInput = document.getElementById('chart-date-from');
+    const toInput = document.getElementById('chart-date-to');
+
+    if (fromInput && toInput) {
+        fromInput.max = today;
+        toInput.max = today;
+        toInput.value = today;
+
+        // Default "from" to 30 days ago
+        const thirtyDaysAgoMs = cdmxMs - (30 * 24 * 60 * 60 * 1000);
+        fromInput.value = new Date(thirtyDaysAgoMs).toISOString().split('T')[0];
+    }
+}
+
+// Make functions global for onclick handlers
+window.updateBotChartTimeframe = updateBotChartTimeframe;
+window.applyBotChartRange = applyBotChartRange;
+
+// Fetch on load and refresh periodically
+setTimeout(() => {
+    fetchBotProfitHistory();
+    initChartDateInputs();
+}, 2000);
+setInterval(fetchBotProfitHistory, 60000); // Refresh every minute
 
 // ULTIMATE INTELLIGENCE - Composite Signal Display
 socket.on('composite_signal', (data) => {
