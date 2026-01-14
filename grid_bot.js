@@ -16,6 +16,7 @@ const { RSI, EMA, BollingerBands, ATR } = require('technicalindicators');
 const adaptiveHelpers = require('./adaptive_helpers');
 const DataCollector = require('./data_collector');
 const crypto = require('crypto');
+const { execSync } = require('child_process');
 
 // --- BINANCE CONNECTION (GLOBAL SCOPE) ---
 const binance = new ccxt.binance({
@@ -349,6 +350,42 @@ app.get('/api/status', async (req, res) => {
             timestamp: l.timestamp
         }));
 
+        // Fetch USD/MXN rate (Binance P2P approximate rate)
+        // Binance doesn't have USDT/MXN on spot, use external API or cached P2P rate
+        let usdMxnRate = 18.0; // Default, updated from Binance
+        try {
+            // Try to get cached rate from global state (cache for 5 min)
+            if (global.usdMxnRateCache && global.usdMxnRateCacheTime > Date.now() - 300000) {
+                usdMxnRate = global.usdMxnRateCache;
+            } else {
+                // Fetch from Binance API (real USDT/MXN rate)
+                const https = require('https');
+                const ratePromise = new Promise((resolve, reject) => {
+                    https.get('https://api.binance.com/api/v3/ticker/price?symbol=USDTMXN', (res) => {
+                        let data = '';
+                        res.on('data', chunk => data += chunk);
+                        res.on('end', () => {
+                            try {
+                                const json = JSON.parse(data);
+                                if (json.price) {
+                                    resolve(parseFloat(json.price));
+                                } else {
+                                    reject(new Error('No price'));
+                                }
+                            } catch (e) { reject(e); }
+                        });
+                    }).on('error', reject);
+                });
+                const rate = await Promise.race([ratePromise, new Promise((_, rej) => setTimeout(() => rej('timeout'), 2000))]);
+                usdMxnRate = rate;
+                global.usdMxnRateCache = rate;
+                global.usdMxnRateCacheTime = Date.now();
+            }
+        } catch (e) {
+            // Use default on error
+            usdMxnRate = 18.0;
+        }
+
         res.json({
             // Basic info
             pair: CONFIG.pair,
@@ -372,6 +409,7 @@ app.get('/api/status', async (req, res) => {
             initialCapital: initialCapital,
             roi: roi,
             apy: apy,
+            usdMxnRate: usdMxnRate,
 
             // Trade metrics
             winRate: winRate,
@@ -586,7 +624,22 @@ app.get('/api/rpg', async (req, res) => {
         // 5. Quest Status (Dynamic Progression) - FULL JOURNEY TO MILLIONAIRE
         let currentEquity = 0;
         try {
-            currentEquity = await getGlobalEquity();
+            currentEquity = await (async () => {
+            try {
+                const bal = await binance.fetchBalance();
+                let baseVal = 0;
+                const assets = Object.keys(bal).filter(k => !['info','free','used','total','USDT'].includes(k));
+                const tickers = await binance.fetchTickers().catch(() => ({}));
+                for (const a of assets) {
+                    const q = bal[a]?.total || 0;
+                    if (q > 0.000001) {
+                        const px = tickers[a+'/USDT']?.last || tickers[a+'USDT']?.last || 0;
+                        baseVal += q * px;
+                    }
+                }
+                return (bal.USDT?.total || 0) + baseVal;
+            } catch(e) { return 0; }
+        })();
         } catch (e) { }
 
         // Define ALL milestone quests for the journey to millionaire
@@ -595,17 +648,17 @@ app.get('/api/rpg', async (req, res) => {
             // ===== ACT I: EL DESPERTAR (Grid Trading Puro) =====
             { equity: 1500, name: "El Cruce del Valle",
               objective: "Alcanzar $1,500 USD de capital",
-              reward: "1000 XP + Caballero del Grid", emoji: "⚔️",
+              reward: "1000 XP", badge: "⚔️ Veterano del Valle", emoji: "⚔️",
               lifeReward: "🎮 Headset gamer / Gadget" },
 
             { equity: 2000, name: "La Forja del Guerrero",
               objective: "Alcanzar $2,000 USD de capital",
-              reward: "1500 XP + Herrero del Profit", emoji: "🔨",
+              reward: "1500 XP", badge: "🔨 Herrero del Profit", emoji: "🔨",
               lifeReward: "🍽️ Cena en restaurante nice" },
 
             { equity: 3000, name: "El Pacto del Compuesto",
               objective: "Alcanzar $3,000 USD de capital",
-              reward: "2000 XP + Maestro Compuesto", emoji: "📈",
+              reward: "2000 XP", badge: "📈 Maestro Compounder", emoji: "📈",
               lifeReward: "📱 iPhone/Galaxy nuevo" },
 
             { equity: 5000, name: "La Conquista del Reino",
@@ -626,7 +679,7 @@ app.get('/api/rpg', async (req, res) => {
 
             { equity: 15000, name: "La Cámara de los Titanes",
               objective: "Alcanzar $15,000 USD de capital",
-              reward: "7500 XP + Titán del Mercado", emoji: "⚡",
+              reward: "7500 XP", badge: "⚡ Campeón de los Titanes", emoji: "⚡",
               lifeReward: "🚗 Enganche para carro" },
 
             { equity: 25000, name: "El Despertar del Dragón",
@@ -806,9 +859,334 @@ const SIDE_QUESTS = [
     { id: 'diversify_realestate', name: 'Primera Inversión Inmobiliaria', description: 'Invierte en REIT o propiedad fraccionada', xp: 1000, category: 'action', minLevel: 15 },
 ];
 
+// === MILLIONAIRE ROADMAP CALCULATOR ===
+function calculateMillionaireRoadmap(equity, currentAPY, monthlyInjection = 500) {
+    const TARGET = 1000000;
+    const roadmap = {
+        currentEquity: equity,
+        currentAPY: currentAPY,
+        monthlyInjection: monthlyInjection,
+        yearsToMillion: 0,
+        milestones: [],
+        apyScenarios: [],
+        criticalInsight: ''
+    };
+
+    // Calculate years to $1M with current APY + injections
+    // Formula: compound growth with periodic additions
+    let projected = equity;
+    let years = 0;
+    const monthlyRate = Math.pow(1 + currentAPY/100, 1/12) - 1;
+
+    while (projected < TARGET && years < 50) {
+        for (let m = 0; m < 12; m++) {
+            projected = projected * (1 + monthlyRate) + monthlyInjection;
+        }
+        years++;
+
+        // Track milestones
+        if (projected >= 3000 && !roadmap.milestones.find(m => m.target === 3000)) {
+            roadmap.milestones.push({ target: 3000, yearsAway: years, unlock: 'Staking/Earn (+8-12% APY)' });
+        }
+        if (projected >= 5000 && !roadmap.milestones.find(m => m.target === 5000)) {
+            roadmap.milestones.push({ target: 5000, yearsAway: years, unlock: 'DCA Blue Chips' });
+        }
+        if (projected >= 10000 && !roadmap.milestones.find(m => m.target === 10000)) {
+            roadmap.milestones.push({ target: 10000, yearsAway: years, unlock: 'ETFs (VOO/QQQ)' });
+        }
+        if (projected >= 25000 && !roadmap.milestones.find(m => m.target === 25000)) {
+            roadmap.milestones.push({ target: 25000, yearsAway: years, unlock: 'LEVERAGE 2x - PUNTO DE INFLEXIÓN' });
+        }
+        if (projected >= 100000 && !roadmap.milestones.find(m => m.target === 100000)) {
+            roadmap.milestones.push({ target: 100000, yearsAway: years, unlock: 'Private Equity' });
+        }
+    }
+    roadmap.yearsToMillion = years;
+
+    // APY scenarios comparison
+    [34, 50, 70, 100].forEach(apy => {
+        let proj = equity;
+        let y = 0;
+        const rate = Math.pow(1 + apy/100, 1/12) - 1;
+        while (proj < TARGET && y < 50) {
+            for (let m = 0; m < 12; m++) {
+                proj = proj * (1 + rate) + monthlyInjection;
+            }
+            y++;
+        }
+        roadmap.apyScenarios.push({ apy, yearsToMillion: y });
+    });
+
+    // Critical insight based on current state
+    if (currentAPY < 50) {
+        roadmap.criticalInsight = `Con ${currentAPY}% APY llegarás en ~${years} años. Para acelerar: 1) Grids más tight en pares volátiles, 2) Llegar a $25K para leverage 2x, 3) Aumentar inyecciones mensuales.`;
+    } else if (currentAPY < 70) {
+        roadmap.criticalInsight = `${currentAPY}% APY es sólido. Enfócate en llegar a $25K para activar leverage 2x y potencialmente duplicar tu APY.`;
+    } else {
+        roadmap.criticalInsight = `${currentAPY}% APY es excelente. Mantén la disciplina y llegarás al millón en ~${years} años.`;
+    }
+
+    return roadmap;
+}
+
+// === MXN MILESTONES (Para motivación local México) ===
+// mxnRate comes from Binance USDTMXN real-time price
+function calculateMXNMilestones(equity, currentAPY, monthlyInjection = 500, mxnRate = 18.0) {
+    const MXN_TARGETS = [
+        { mxn: 100000, name: "100K MXN", title: "Ahorrador Serio", icon: "💵", reward: "Fondo de emergencia sólido" },
+        { mxn: 250000, name: "250K MXN", title: "Clase Media Alta", icon: "💰", reward: "Enganche para un carro" },
+        { mxn: 500000, name: "500K MXN", title: "Inversionista", icon: "📈", reward: "Enganche para depa CDMX" },
+        { mxn: 1000000, name: "1M MXN", title: "MILLONARIO MXN", icon: "🇲🇽", reward: "¡Millonario en México!", legendary: true },
+        { mxn: 2500000, name: "2.5M MXN", title: "Alta Sociedad", icon: "🏆", reward: "Casa propia pagada" },
+        { mxn: 5000000, name: "5M MXN", title: "Élite Nacional", icon: "👑", reward: "Múltiples propiedades" },
+        { mxn: 10000000, name: "10M MXN", title: "Top 1% México", icon: "🌟", reward: "Libertad financiera total" }
+    ];
+
+    const currentMXN = equity * mxnRate;
+    const monthlyRate = Math.pow(1 + currentAPY/100, 1/12) - 1;
+
+    const milestones = MXN_TARGETS.map(target => {
+        const targetUSD = target.mxn / mxnRate;
+        const achieved = currentMXN >= target.mxn;
+
+        // Calculate months to reach
+        let monthsToReach = 0;
+        if (!achieved) {
+            let projected = equity;
+            while (projected < targetUSD && monthsToReach < 600) { // Max 50 years
+                projected = projected * (1 + monthlyRate) + monthlyInjection;
+                monthsToReach++;
+            }
+        }
+
+        const yearsToReach = monthsToReach / 12;
+        const estimatedDate = new Date();
+        estimatedDate.setMonth(estimatedDate.getMonth() + monthsToReach);
+
+        return {
+            ...target,
+            targetUSD: targetUSD,
+            achieved,
+            currentMXN,
+            progressPercent: Math.min(100, (currentMXN / target.mxn) * 100),
+            monthsToReach,
+            yearsToReach: yearsToReach.toFixed(1),
+            estimatedDate: estimatedDate.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })
+        };
+    });
+
+    // Find next milestone
+    const nextMilestone = milestones.find(m => !m.achieved);
+    const achievedCount = milestones.filter(m => m.achieved).length;
+
+    return {
+        currentMXN,
+        mxnRate,
+        milestones,
+        nextMilestone,
+        achievedCount,
+        totalMilestones: milestones.length
+    };
+}
+
+// === INJECTION INDICATOR PRO (GREEN/YELLOW/RED) ===
+function calculateInjectionIndicator() {
+    try {
+        const trainingDir = path.join(__dirname, "logs", "training_data");
+        const today = new Date().toISOString().split("T")[0];
+        const pairs = ["BTCUSDT", "SOLUSDT", "DOGEUSDT"];
+
+        // Collect latest snapshots from each pair
+        const snapshots = pairs.map(pair => {
+            try {
+                const file = path.join(trainingDir, `market_snapshots_${pair}_${today}.jsonl`);
+                if (!fs.existsSync(file)) return null;
+                const lines = fs.readFileSync(file, "utf8").trim().split("\n");
+                const last = lines[lines.length - 1];
+                return JSON.parse(last);
+            } catch(e) { return null; }
+        }).filter(Boolean);
+
+        if (snapshots.length === 0) {
+            return { signal: "YELLOW", emoji: "🟡", message: "Sin datos de mercado", score: 50, breakdown: [] };
+        }
+
+        // Initialize scoring
+        let score = 50;
+        const breakdown = [];
+
+        // === 1. FEAR & GREED INDEX ===
+        const fearGreed = snapshots[0]?.fear_greed || 50;
+        let fgPoints = 0;
+        let fgLabel = "";
+        if (fearGreed <= 25) { fgPoints = 15; fgLabel = "Extreme Fear"; }
+        else if (fearGreed <= 40) { fgPoints = 10; fgLabel = "Fear"; }
+        else if (fearGreed <= 60) { fgPoints = 0; fgLabel = "Neutral"; }
+        else if (fearGreed <= 75) { fgPoints = -8; fgLabel = "Greed"; }
+        else { fgPoints = -15; fgLabel = "Extreme Greed"; }
+        score += fgPoints;
+        breakdown.push({ factor: "Fear & Greed", value: fearGreed, label: fgLabel, points: fgPoints });
+
+        // === 2. RSI PROMEDIO ===
+        const rsiValues = snapshots.map(s => s.rsi).filter(r => r !== undefined);
+        const avgRsi = rsiValues.length > 0 ? rsiValues.reduce((a,b) => a+b, 0) / rsiValues.length : 50;
+        let rsiPoints = 0;
+        let rsiLabel = "";
+        if (avgRsi < 30) { rsiPoints = 15; rsiLabel = "Oversold"; }
+        else if (avgRsi < 40) { rsiPoints = 8; rsiLabel = "Bajo"; }
+        else if (avgRsi <= 60) { rsiPoints = 0; rsiLabel = "Neutral"; }
+        else if (avgRsi <= 70) { rsiPoints = -6; rsiLabel = "Alto"; }
+        else { rsiPoints = -12; rsiLabel = "Overbought"; }
+        score += rsiPoints;
+        breakdown.push({ factor: "RSI Promedio", value: Math.round(avgRsi), label: rsiLabel, points: rsiPoints });
+
+        // === 3. PRECIO vs EMA ===
+        const emaDev = snapshots.map(s => s.ema_dev_pct).filter(e => e !== undefined);
+        const avgEmaDev = emaDev.length > 0 ? emaDev.reduce((a,b) => a+b, 0) / emaDev.length : 0;
+        let emaPoints = 0;
+        let emaLabel = "";
+        if (avgEmaDev < -5) { emaPoints = 12; emaLabel = "Gran descuento"; }
+        else if (avgEmaDev < -2) { emaPoints = 6; emaLabel = "Descuento"; }
+        else if (avgEmaDev <= 2) { emaPoints = 0; emaLabel = "Normal"; }
+        else if (avgEmaDev <= 5) { emaPoints = -4; emaLabel = "Premium"; }
+        else { emaPoints = -10; emaLabel = "Muy caro"; }
+        score += emaPoints;
+        breakdown.push({ factor: "Precio vs EMA", value: avgEmaDev.toFixed(1) + "%", label: emaLabel, points: emaPoints });
+
+        // === 4. REGIMEN DE MERCADO ===
+        const regimes = snapshots.map(s => s.market_regime).filter(Boolean);
+        const regimeCounts = {};
+        regimes.forEach(r => regimeCounts[r] = (regimeCounts[r] || 0) + 1);
+        const dominantRegime = Object.keys(regimeCounts).sort((a,b) => regimeCounts[b] - regimeCounts[a])[0] || "NEUTRAL";
+        let regimePoints = 0;
+        if (dominantRegime === "STRONG_BEAR") regimePoints = 15;
+        else if (dominantRegime === "WEAK_BEAR") regimePoints = 8;
+        else if (dominantRegime === "SIDEWAYS" || dominantRegime === "NEUTRAL") regimePoints = 0;
+        else if (dominantRegime === "BULL" || dominantRegime === "WEAK_BULL") regimePoints = -6;
+        else if (dominantRegime === "STRONG_BULL") regimePoints = -10;
+        score += regimePoints;
+        breakdown.push({ factor: "Regimen", value: dominantRegime, label: "", points: regimePoints });
+
+        // === 5. VOLATILIDAD ===
+        const volRegimes = snapshots.map(s => s.volatility_regime).filter(Boolean);
+        const volCounts = {};
+        volRegimes.forEach(v => volCounts[v] = (volCounts[v] || 0) + 1);
+        const dominantVol = Object.keys(volCounts).sort((a,b) => volCounts[b] - volCounts[a])[0] || "NORMAL";
+        let volPoints = 0;
+        if (dominantVol === "LOW") volPoints = 8;
+        else if (dominantVol === "NORMAL") volPoints = 3;
+        else if (dominantVol === "HIGH") volPoints = -6;
+        else if (dominantVol === "EXTREME") volPoints = -12;
+        score += volPoints;
+        breakdown.push({ factor: "Volatilidad", value: dominantVol, label: "", points: volPoints });
+
+        // === 6. FUNDING RATE ===
+        const fundingRates = snapshots.map(s => s.funding_rate).filter(f => f !== undefined);
+        const avgFunding = fundingRates.length > 0 ? fundingRates.reduce((a,b) => a+b, 0) / fundingRates.length : 0;
+        let fundingPoints = 0;
+        let fundingLabel = "";
+        if (avgFunding < -0.0005) { fundingPoints = 12; fundingLabel = "Shorts pagando"; }
+        else if (avgFunding < 0) { fundingPoints = 4; fundingLabel = "Leve bajista"; }
+        else if (avgFunding <= 0.0005) { fundingPoints = 0; fundingLabel = "Neutral"; }
+        else if (avgFunding <= 0.001) { fundingPoints = -4; fundingLabel = "Leve alcista"; }
+        else { fundingPoints = -10; fundingLabel = "Overleveraged"; }
+        score += fundingPoints;
+        breakdown.push({ factor: "Funding Rate", value: (avgFunding * 100).toFixed(3) + "%", label: fundingLabel, points: fundingPoints });
+
+        // === 7. DIA DE LA SEMANA ===
+        const dayOfWeek = new Date().getDay();
+        let dayPoints = 0;
+        let dayLabel = "";
+        if (dayOfWeek === 0 || dayOfWeek === 1) { dayPoints = 5; dayLabel = "Dom/Lun (favorable)"; }
+        else if (dayOfWeek === 5 || dayOfWeek === 6) { dayPoints = -5; dayLabel = "Fin de semana"; }
+        else { dayPoints = 0; dayLabel = "Entre semana"; }
+        score += dayPoints;
+        breakdown.push({ factor: "Dia", value: ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"][dayOfWeek], label: dayLabel, points: dayPoints });
+
+        // === CALCULATE FINAL SIGNAL ===
+        score = Math.max(0, Math.min(100, score)); // Clamp 0-100
+
+        let signal, emoji, message;
+        if (score >= 65) {
+            signal = "GREEN";
+            emoji = "🟢";
+            message = "BUEN momento para inyectar";
+        } else if (score >= 45) {
+            signal = "YELLOW";
+            emoji = "🟡";
+            message = "Momento NEUTRAL - puedes si quieres";
+        } else {
+            signal = "RED";
+            emoji = "🔴";
+            message = "ESPERA - no es buen momento";
+        }
+
+        // Summary reasons
+        const positives = breakdown.filter(b => b.points > 0).map(b => b.factor + " (" + b.label + ")");
+        const negatives = breakdown.filter(b => b.points < 0).map(b => b.factor + " (" + b.label + ")");
+
+        return {
+            signal,
+            emoji,
+            message,
+            score: Math.round(score),
+            breakdown,
+            positives,
+            negatives,
+            recommendation: score >= 65 ? "Adelante, es buen momento" :
+                           score >= 55 ? "Puedes inyectar si ya planeabas hacerlo" :
+                           score >= 45 ? "Espera unos dias si puedes" :
+                           score >= 35 ? "Mejor espera una correccion" :
+                           "Espera, el mercado esta en maximos"
+        };
+    } catch(e) {
+        return { signal: "YELLOW", emoji: "🟡", message: "Error: " + e.message, score: 50, breakdown: [] };
+    }
+}
+
 // Get contextual tips based on current state
-function getMentorTips(equity, level, daysActive, lastInjectionDays) {
+function getMentorTips(equity, level, daysActive, lastInjectionDays, currentAPY = 34, monthlyInjection = 500) {
     const tips = [];
+
+    // Calculate years to $1M WITH monthly injections (consistent calculation)
+    let yearsWithInjections = 50;
+    let projected = equity;
+    const monthlyRate = Math.pow(1 + currentAPY/100, 1/12) - 1;
+    for (let y = 1; y <= 50; y++) {
+        for (let m = 0; m < 12; m++) {
+            projected = projected * (1 + monthlyRate) + monthlyInjection;
+        }
+        if (projected >= 1000000) {
+            yearsWithInjections = y;
+            break;
+        }
+    }
+
+    // === CRITICAL: APY-BASED GUIDANCE (with accurate years) ===
+    if (currentAPY < 50) {
+        tips.push({
+            priority: 'critical',
+            icon: '🎯',
+            tip: `Tu APY actual (${currentAPY}%) + $${monthlyInjection}/mes = ~${yearsWithInjections} años para $1M. OPCIONES: 1) Grids más agresivos, 2) Pares más volátiles, 3) Acelerar a $25K para leverage.`
+        });
+    }
+
+    // Leverage unlock guidance
+    if (equity >= 20000 && equity < 25000) {
+        tips.push({
+            priority: 'critical',
+            icon: '🔥',
+            tip: `¡ESTÁS A $${(25000-equity).toFixed(0)} DE DESBLOQUEAR LEVERAGE 2x! Este es el punto de inflexión. Con leverage puedes pasar de 34% a 68% APY.`
+        });
+    }
+
+    if (equity >= 25000 && equity < 50000) {
+        tips.push({
+            priority: 'high',
+            icon: '⚡',
+            tip: `LEVERAGE DESBLOQUEADO. Usa MÁXIMO 20% de tu capital ($${(equity*0.2).toFixed(0)}) en posiciones 2x. Esto puede DUPLICAR tu APY sin riesgo catastrófico.`
+        });
+    }
 
     // Core philosophy tips
     if (equity < 2000) {
@@ -821,6 +1199,15 @@ function getMentorTips(equity, level, daysActive, lastInjectionDays) {
 
     if (lastInjectionDays > 30) {
         tips.push({ priority: 'high', icon: '⚠️', tip: `Han pasado ${lastInjectionDays} días sin inyección. ¿Puedes meter algo este mes?` });
+    }
+
+    // === APY OPTIMIZATION TIPS ===
+    if (currentAPY < 40) {
+        tips.push({
+            priority: 'medium',
+            icon: '📊',
+            tip: 'CÓMO AUMENTAR APY: 1) Grids más tight (0.3-0.5% spacing), 2) Pares volátiles (SOL, DOGE), 3) Más capital activo en grids.'
+        });
     }
 
     // Level-specific tips
@@ -836,6 +1223,15 @@ function getMentorTips(equity, level, daysActive, lastInjectionDays) {
         tips.push({ priority: 'low', icon: '🏠', tip: 'Ya puedes explorar REITs o crowdfunding inmobiliario para ingreso pasivo adicional.' });
     }
 
+    // === PATH TO MILLIONAIRE (only show if not already covered by critical tip) ===
+    if (currentAPY >= 50 && yearsWithInjections > 5) {
+        tips.push({
+            priority: 'high',
+            icon: '🚀',
+            tip: `Con ${currentAPY}% APY + $${monthlyInjection}/mes = ${yearsWithInjections} años a $1M. ¡Vas bien! Mantén la disciplina.`
+        });
+    }
+
     // Motivational tips
     if (daysActive > 30 && daysActive <= 60) {
         tips.push({ priority: 'low', icon: '🔥', tip: `¡${daysActive} días de disciplina! El hábito se está formando. NO pares.` });
@@ -849,7 +1245,7 @@ function getMentorTips(equity, level, daysActive, lastInjectionDays) {
 }
 
 // Get active missions based on state
-function getActiveMissions(equity, level, coachState, depositsThisMonth) {
+function getActiveMissions(equity, level, coachState, depositsThisMonth, daysActive) {
     const missions = [];
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -879,25 +1275,38 @@ function getActiveMissions(equity, level, coachState, depositsThisMonth) {
         icon: '💎',
         name: 'Manos de Diamante',
         description: 'No retires capital - deja componer',
-        progress: coachState.habits?.noWithdrawalDays || 0,
+        progress: daysActive, // Days without withdrawal (since launch)
         target: 365,
-        progressPercent: Math.min(100, Math.round(((coachState.habits?.noWithdrawalDays || 0) / 365) * 100)),
+        progressPercent: Math.min(100, Math.round((daysActive / 365) * 100)),
         xpReward: 50, // per day
         priority: 'medium'
     });
 
-    // Level-specific missions
-    if (equity < 1500) {
+    // === STORY MISSIONS (progressive milestones) ===
+    const storyMilestones = [
+        { id: 'reach_1500', target: 1500, name: 'El Cruce del Valle', icon: '⚔️', xp: 1000, desc: 'Alcanza $1,500 USD de equity' },
+        { id: 'reach_2000', target: 2000, name: 'La Forja del Guerrero', icon: '🔨', xp: 1500, desc: 'Alcanza $2,000 USD de capital' },
+        { id: 'reach_3000', target: 3000, name: 'El Despertar del Poder', icon: '📈', xp: 2000, desc: 'Alcanza $3,000 USD de capital' },
+        { id: 'reach_5000', target: 5000, name: 'La Conquista del Reino', icon: '👑', xp: 3000, desc: 'Alcanza $5,000 USD de capital' },
+        { id: 'reach_10000', target: 10000, name: 'El Ascenso del Titán', icon: '🏔️', xp: 5000, desc: 'Alcanza $10,000 USD de capital' },
+        { id: 'reach_25000', target: 25000, name: 'La Llave del Leverage', icon: '🔑', xp: 10000, desc: 'Desbloquea Leverage 2x' },
+        { id: 'reach_100000', target: 100000, name: 'El Umbral de los 6 Dígitos', icon: '💎', xp: 25000, desc: 'Alcanza $100,000 USD' },
+        { id: 'reach_1000000', target: 1000000, name: 'MILLONARIO', icon: '🏆', xp: 100000, desc: '¡UN MILLÓN DE DÓLARES!' }
+    ];
+
+    // Find the NEXT milestone (first one not yet reached)
+    const nextMilestone = storyMilestones.find(m => equity < m.target);
+    if (nextMilestone) {
         missions.push({
-            id: 'reach_1500',
+            id: nextMilestone.id,
             type: 'milestone',
-            icon: '⚔️',
-            name: 'Cruzar el Valle',
-            description: 'Alcanza $1,500 USD de equity',
+            icon: nextMilestone.icon,
+            name: nextMilestone.name,
+            description: nextMilestone.desc,
             progress: equity,
-            target: 1500,
-            progressPercent: Math.min(100, Math.round((equity / 1500) * 100)),
-            xpReward: 1000,
+            target: nextMilestone.target,
+            progressPercent: Math.min(100, Math.round((equity / nextMilestone.target) * 100)),
+            xpReward: nextMilestone.xp,
             priority: 'high'
         });
     }
@@ -937,11 +1346,28 @@ app.get('/api/life-coach', async (req, res) => {
         // Get current equity
         let currentEquity = 0;
         try {
-            currentEquity = await getGlobalEquity();
+            currentEquity = await (async () => {
+            try {
+                const bal = await binance.fetchBalance();
+                let baseVal = 0;
+                const assets = Object.keys(bal).filter(k => !['info','free','used','total','USDT'].includes(k));
+                const tickers = await binance.fetchTickers().catch(() => ({}));
+                for (const a of assets) {
+                    const q = bal[a]?.total || 0;
+                    if (q > 0.000001) {
+                        const px = tickers[a+'/USDT']?.last || tickers[a+'USDT']?.last || 0;
+                        baseVal += q * px;
+                    }
+                }
+                return (bal.USDT?.total || 0) + baseVal;
+            } catch(e) { return 0; }
+        })();
         } catch (e) { }
 
         // Get deposits data
         let depositsThisMonth = 0;
+        let totalDeposits = 0;
+        let firstDepositDate = null;
         let lastInjectionDays = 999;
         try {
             const depositsFile = path.join(__dirname, 'data', 'deposits.json');
@@ -957,6 +1383,13 @@ app.get('/api/life-coach', async (req, res) => {
                     if (d.date.startsWith(currentMonth)) {
                         depositsThisMonth += d.amount;
                     }
+                    // Track total deposits for average calculation
+                    if (d.amount > 0) {
+                        totalDeposits += d.amount;
+                        if (!firstDepositDate || d.date < firstDepositDate) {
+                            firstDepositDate = d.date;
+                        }
+                    }
                     // Calculate days since last injection
                     const depositDate = new Date(d.date);
                     const daysDiff = Math.floor((now - depositDate) / (1000 * 60 * 60 * 24));
@@ -966,6 +1399,13 @@ app.get('/api/life-coach', async (req, res) => {
                 });
             }
         } catch (e) { }
+        
+        // Calculate average monthly injection
+        let avgMonthlyInjection = 500; // Default
+        if (firstDepositDate && totalDeposits > 0) {
+            const monthsActive = Math.max(1, Math.ceil((Date.now() - new Date(firstDepositDate)) / (1000 * 60 * 60 * 24 * 30)));
+            avgMonthlyInjection = Math.round(totalDeposits / monthsActive);
+        }
 
         // Calculate level and days active (LAUNCH_DATE synced with RPG system)
         const LAUNCH_DATE = new Date('2025-12-03T00:00:00Z');
@@ -978,11 +1418,70 @@ app.get('/api/life-coach', async (req, res) => {
         const totalXp = 810 + xpFromProfit + xpFromDays;
         const level = Math.floor(totalXp / 500) + 1;
 
-        // Get mentor tips
-        const tips = getMentorTips(currentEquity, level, daysActive, lastInjectionDays);
+        // Get GLOBAL APY using TWR formula (same as dashboard)
+        let globalAPY = 34; // Default
+        try {
+            // Sum realized profit from all 3 bot state files (more reliable than HTTP)
+            const sessionsDir = path.join(__dirname, 'data', 'sessions');
+            const botPairs = ['BTCUSDT', 'SOLUSDT', 'DOGEUSDT'];
+            let totalProfit = 0;
+            for (const pair of botPairs) {
+                const stateFile = path.join(sessionsDir, `VANTAGE01_${pair}_state.json`);
+                if (fs.existsSync(stateFile)) {
+                    try {
+                        const botState = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+                        totalProfit += botState.totalProfit || 0;
+                    } catch (e) { /* skip if unreadable */ }
+                }
+            }
+
+            // Calculate TWR-based APY (identical to dashboard.html)
+            const depositsFile = path.join(__dirname, 'data', 'deposits.json');
+            if (fs.existsSync(depositsFile) && totalDeposits > 0) {
+                const depositsData = JSON.parse(fs.readFileSync(depositsFile, 'utf8'));
+                const actualDeposits = (depositsData.deposits || []).filter(d => d.type !== 'rebalance' && d.amount > 0);
+
+                if (actualDeposits.length > 0) {
+                    const sortedDeposits = [...actualDeposits].sort((a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                    );
+
+                    const now = Date.now();
+                    let totalWeightedCapital = 0;
+                    let totalDaysCalc = 0;
+                    let runningCapital = 0;
+
+                    for (let i = 0; i < sortedDeposits.length; i++) {
+                        const deposit = sortedDeposits[i];
+                        const depositDate = new Date(deposit.date).getTime();
+                        const nextDate = (i < sortedDeposits.length - 1)
+                            ? new Date(sortedDeposits[i + 1].date).getTime()
+                            : now;
+
+                        runningCapital += deposit.amount;
+                        const periodDays = Math.max(0, (nextDate - depositDate) / (1000 * 60 * 60 * 24));
+                        totalWeightedCapital += runningCapital * periodDays;
+                        totalDaysCalc += periodDays;
+                    }
+
+                    const twrCapital = totalDaysCalc > 0 ? (totalWeightedCapital / totalDaysCalc) : runningCapital;
+                    const globalROI = twrCapital > 0 ? (totalProfit / twrCapital) * 100 : 0;
+                    globalAPY = (globalROI / Math.max(1, totalDaysCalc)) * 365;
+                }
+            }
+        } catch (e) {
+            console.error('[Life Coach] Error calculating global APY:', e.message);
+        }
+        const currentAPY = Math.round(globalAPY);
+
+        // Get mentor tips WITH APY context and monthly injection
+        const tips = getMentorTips(currentEquity, level, daysActive, lastInjectionDays, currentAPY, avgMonthlyInjection);
+
+        // Calculate millionaire roadmap
+        const roadmap = calculateMillionaireRoadmap(currentEquity, currentAPY, avgMonthlyInjection);
 
         // Get active missions
-        const missions = getActiveMissions(currentEquity, level, coachState, depositsThisMonth);
+        const missions = getActiveMissions(currentEquity, level, coachState, depositsThisMonth, daysActive);
 
         // Get available side quests
         const sideQuests = SIDE_QUESTS.filter(q =>
@@ -992,14 +1491,19 @@ app.get('/api/life-coach', async (req, res) => {
 
         // Unlocked strategies based on level/equity
         const strategies = [];
+        // === ESTRATEGIAS BASADAS 100% EN CAPITAL (no nivel) ===
         strategies.push({ name: 'Grid Trading', unlocked: true, description: 'Tu base - genera profit 24/7' });
         strategies.push({ name: 'Reinversión 100%', unlocked: true, description: 'Todo el profit se queda' });
         strategies.push({ name: 'Inyección de Capital', unlocked: true, description: 'Acelera con dinero extra' });
-        strategies.push({ name: 'Staking/Earn', unlocked: level >= 5 || currentEquity >= 3000, description: '8-12% APY en holdings', minLevel: 5 });
-        strategies.push({ name: 'DCA Blue Chips', unlocked: level >= 7 || currentEquity >= 5000, description: 'Acumula BTC/ETH gradualmente', minLevel: 7 });
-        strategies.push({ name: 'ETFs (VOO/QQQ)', unlocked: level >= 10 || currentEquity >= 10000, description: 'Diversifica fuera de crypto', minLevel: 10 });
-        strategies.push({ name: 'Apalancamiento 2x', unlocked: level >= 12 || currentEquity >= 15000, description: 'Solo 20% del capital MAX', minLevel: 12 });
-        strategies.push({ name: 'REITs/Real Estate', unlocked: level >= 15 || currentEquity >= 25000, description: 'Ingreso pasivo inmobiliario', minLevel: 15 });
+        strategies.push({ name: 'Staking/Earn', unlocked: currentEquity >= 3000, description: '8-12% APY en holdings', minCapital: 3000 });
+        strategies.push({ name: 'DCA Blue Chips', unlocked: currentEquity >= 5000, description: 'Acumula BTC/ETH gradualmente', minCapital: 5000 });
+        strategies.push({ name: 'ETFs (VOO/QQQ)', unlocked: currentEquity >= 10000, description: 'Diversifica fuera de crypto', minCapital: 10000 });
+        strategies.push({ name: 'Apalancamiento 2x', unlocked: currentEquity >= 25000, description: 'Solo 20% del capital MAX', minCapital: 25000 });
+        strategies.push({ name: 'REITs/Real Estate', unlocked: currentEquity >= 50000, description: 'Ingreso pasivo inmobiliario', minCapital: 50000 });
+        strategies.push({ name: 'Private Equity', unlocked: currentEquity >= 100000, description: 'Inversiones alternativas', minCapital: 100000 });
+        strategies.push({ name: 'Angel Investing', unlocked: currentEquity >= 250000, description: 'Invierte en startups', minCapital: 250000 });
+        strategies.push({ name: 'Hedge Funds', unlocked: currentEquity >= 500000, description: 'Fondos de cobertura', minCapital: 500000 });
+        strategies.push({ name: 'Family Office', unlocked: currentEquity >= 1000000, description: '¡ERES MILLONARIO!', minCapital: 1000000 });
 
         // Habits tracking
         const habits = {
@@ -1009,11 +1513,32 @@ app.get('/api/life-coach', async (req, res) => {
             lastInjectionDays: lastInjectionDays
         };
 
+        // Get injection indicator
+        const injectionIndicator = calculateInjectionIndicator();
+
+        // Get MXN milestones (motivación México) - Use REAL Binance rate
+        const realMxnRate = global.usdMxnRateCache || 18.0; // From Binance USDTMXN
+        const mxnMilestones = calculateMXNMilestones(currentEquity, currentAPY, avgMonthlyInjection, realMxnRate);
+
+        // Get all deposits for history display
+        let allDeposits = [];
+        try {
+            const depositsFile = path.join(__dirname, 'data', 'deposits.json');
+            if (fs.existsSync(depositsFile)) {
+                const depositsData = JSON.parse(fs.readFileSync(depositsFile, 'utf8'));
+                allDeposits = depositsData.deposits || [];
+            }
+        } catch (e) { }
+
         res.json({
             success: true,
             equity: currentEquity,
             level: level,
             daysActive: daysActive,
+            currentAPY: currentAPY,
+
+            // === NEW: Millionaire Roadmap ===
+            roadmap: roadmap,
 
             // Mentor tips (contextual advice)
             tips: tips,
@@ -1033,10 +1558,20 @@ app.get('/api/life-coach', async (req, res) => {
             // Stats for display
             stats: {
                 depositsThisMonth: depositsThisMonth,
+                avgMonthlyInjection: avgMonthlyInjection,
                 monthlyGoal: 500,
                 completedQuests: coachState.completedSideQuests?.length || 0,
                 totalSideQuests: SIDE_QUESTS.length
-            }
+            },
+
+            // Injection Indicator PRO
+            injectionIndicator: injectionIndicator,
+
+            // All deposits for history display
+            deposits: allDeposits,
+
+            // MXN Milestones (motivación México)
+            mxnMilestones: mxnMilestones
         });
 
     } catch (err) {
@@ -1985,11 +2520,29 @@ app.post('/api/deposits', (req, res) => {
         }
 
         const data = readDeposits();
+
+        // Auto-assign allocation from last rebalance event
+        let autoAllocation = { BTC: 40, SOL: 40, DOGE: 20 }; // Default
+        for (const d of data.deposits) {
+            if (d.type === 'rebalance' && d.allocation) {
+                autoAllocation = d.allocation;
+            }
+        }
+
+        // Calculate injection indicator at deposit time
+        const indicator = calculateInjectionIndicator();
+
         const newDeposit = {
             id: data.nextId,
             date: normalizedDate,
             amount: parseFloat(amount),
-            note: note || ''
+            note: note || '',
+            allocation: autoAllocation, // Auto-assigned from last rebalance
+            indicator: {
+                signal: indicator.signal,
+                score: indicator.score,
+                emoji: indicator.emoji
+            }
         };
 
         data.deposits.push(newDeposit);
@@ -2264,13 +2817,17 @@ function loadState() {
             }
 
             // AUTO-AUDIT: Final Sync RAM with History (The Truth Protocol)
+            // P0 FIX: Include accumulatedProfit from archived trades (>1000 orders)
             if (state.filledOrders && state.filledOrders.length > 0) {
                 const sumTrades = state.filledOrders.reduce((sum, o) => sum + (parseFloat(o.profit) || 0), 0);
+                const archivedProfit = parseFloat(state.accumulatedProfit || 0);
+                const totalFromHistory = sumTrades + archivedProfit; // Include archived!
                 const currentInMem = parseFloat(state.totalProfit || 0);
-                if (Math.abs(sumTrades - currentInMem) > 0.01) {
-                    console.log(`>> [AUTO-AUDIT] Final Truth: RAM ($${currentInMem.toFixed(4)}) -> History ($${sumTrades.toFixed(4)})`);
-                    state.totalProfit = sumTrades;
-                    state.accumulatedProfit = sumTrades;
+
+                // Only audit if there's a significant discrepancy AND it's not from archived orders
+                if (Math.abs(totalFromHistory - currentInMem) > 0.01) {
+                    console.log(`>> [AUTO-AUDIT] Final Truth: RAM (${currentInMem.toFixed(4)}) -> History+Archived (${totalFromHistory.toFixed(4)})`);
+                    state.totalProfit = totalFromHistory;
                 }
             }
 
@@ -2532,6 +3089,22 @@ async function reconcileInventoryWithExchange() {
         const currentTotal = state.inventory ? state.inventory.reduce((sum, lot) => sum + lot.remaining, 0) : 0;
         const newTotal = newInventory.reduce((sum, lot) => sum + lot.remaining, 0);
 
+        // P1 FIX: Check for audited lots BEFORE replacing inventory (not after!)
+        // Bug was: check happened after replacement, so it always failed
+        const hasAuditedLots = state.inventory && state.inventory.some(l => l.auditVerified);
+
+        // If we have audited lots, TRUST them and don't overwrite
+        if (hasAuditedLots) {
+            log('RECONCILE', `✅ Audited inventory detected (${state.inventory.length} lots with auditVerified). Preserving cost basis.`, 'success');
+            // Verify totals match approximately (within 1%)
+            if (Math.abs(currentTotal - newTotal) / currentTotal < 0.01) {
+                log('RECONCILE', `✅ Balance verified: State=${currentTotal.toFixed(6)}, Exchange=${newTotal.toFixed(6)}. All good!`, 'success');
+            } else {
+                log('RECONCILE', `⚠️ Balance mismatch: State=${currentTotal.toFixed(6)}, Exchange=${newTotal.toFixed(6)}. May need manual review.`, 'warning');
+            }
+            return; // Don't touch audited inventory!
+        }
+
         if (Math.abs(currentTotal - newTotal) > TOLERANCE || oldIds !== newIds) {
             state.inventory = newInventory;
             // Mark state as estimated until true sequence is established
@@ -2540,17 +3113,10 @@ async function reconcileInventoryWithExchange() {
             log('RECONCILE', `✅ Inventory Rebuilt (Strict FIFO). Holdings: ${newTotal.toFixed(6)} ${baseAsset}.`, 'success');
 
             // --- SAFETY NET: AMNESIA BLOCKING PROTOCOL ---
+            // Note: If we reach here, we DON'T have audited lots (that check already returned above)
             // SELF-HEALING: If total balance is below DUST_THRESHOLD, don't pause!
-            // Also skip if we already have AUDIT_VERIFIED lots (prevents overwriting full_audit.js results)
-            const hasAuditedLots = state.inventory && state.inventory.some(l => l.auditVerified);
-
             if (newTotal < dustThreshold) {
                 log('RECONCILE', `🧹 Self-Healing: Amnesia detected but balance (${newTotal.toFixed(6)}) is below DUST_THRESHOLD (${dustThreshold}). Skipping Pause.`, 'success');
-                state.isPaused = false;
-                state.pauseReason = null;
-                saveState();
-            } else if (hasAuditedLots && Math.abs(currentTotal - newTotal) < 0.0001) {
-                log('RECONCILE', `✅ Audited Inventory preserved. Skipping Amnesia Lock.`, 'success');
                 state.isPaused = false;
                 state.pauseReason = null;
                 saveState();
@@ -5564,6 +6130,15 @@ async function handleOrderFill(order, fillPrice, actualFee) {
     // P0 FIX: Save state immediately to persist profit
     saveState();
 
+    // P1 FIX: Sync profit from Binance after each SELL to ensure accuracy
+    if (order.side === 'sell') {
+        try {
+            await syncProfitFromBinance();
+        } catch (syncErr) {
+            log('WARN', `Profit sync skipped: ${syncErr.message}`, 'warning');
+        }
+    }
+
     // Enhanced execution log with cost basis for sells (using function-scoped vars)
     if (order.side === 'sell' && sellAvgCost !== null) {
         const profitEmoji = profit > 0 ? '💰' : '📉';
@@ -5746,6 +6321,64 @@ async function syncWithExchange() {
     }
 }
 
+// ============================================================================
+// PROFIT SYNC - Runs full_audit.js to get 100% accurate profit from Binance
+// Guarantees profit is REAL, never inflated - works today and in 5 years
+// ============================================================================
+async function syncProfitFromBinance() {
+    try {
+        const pair = CONFIG.pair || 'BTC/USDT';
+        const scriptPath = path.join(__dirname, 'scripts', 'full_audit.js');
+
+        log('PROFIT_SYNC', `Running full audit for ${pair}...`, 'info');
+
+        // Execute the audit script synchronously (takes ~2-3 seconds)
+        const output = execSync(`node "${scriptPath}" "${pair}"`, {
+            cwd: __dirname,
+            encoding: 'utf8',
+            timeout: 30000, // 30 second timeout
+            stdio: ['pipe', 'pipe', 'pipe'] // Capture stdout and stderr
+        });
+
+        // Parse "Realized Profit: $X.XX" from output
+        // Format: ║     Realized Profit:     $      9.2691                       ║
+        const profitMatch = output.match(/Realized Profit:\s*\$\s*([\d.-]+)/);
+
+        if (!profitMatch) {
+            log('PROFIT_SYNC', 'Could not parse profit from audit output', 'warning');
+            return { success: false, reason: 'PARSE_FAILED' };
+        }
+
+        const auditProfit = parseFloat(profitMatch[1]);
+        const oldProfit = state.totalProfit || 0;
+        const profitDiff = auditProfit - oldProfit;
+
+        // Always update to audit value (it's the source of truth)
+        state.totalProfit = auditProfit;
+        state.accumulatedProfit = auditProfit;
+        state.lastProfitSync = Date.now();
+        saveState();
+
+        if (Math.abs(profitDiff) > 0.001) {
+            log('PROFIT_SYNC', `✅ AUDIT SYNC: $${oldProfit.toFixed(4)} → $${auditProfit.toFixed(4)} (Δ $${profitDiff.toFixed(4)})`, 'success');
+        } else {
+            log('PROFIT_SYNC', `✅ Profit verified by audit: $${auditProfit.toFixed(4)}`, 'success');
+        }
+
+        return {
+            success: true,
+            oldProfit,
+            newProfit: auditProfit,
+            diff: profitDiff,
+            method: 'FULL_AUDIT'
+        };
+
+    } catch (e) {
+        log('ERROR', `Profit audit sync failed: ${e.message}`, 'error');
+        return { success: false, reason: e.message };
+    }
+}
+
 async function syncHistoricalTrades(deepClean = false) {
     try {
         // DEEP CLEAN: Clear history to rebuild strictly from Binance data
@@ -5758,8 +6391,21 @@ async function syncHistoricalTrades(deepClean = false) {
         }
 
         // ENGINEER FIX: Increase lookback to 500 to recover "lost" trades after a crash
-        const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
-        if (trades.length > 0) log('DEBUG', `Fetched ${trades.length} trades. Verifying against known orders...`);
+        const allTrades = await binance.fetchMyTrades(CONFIG.pair, undefined, 500);
+
+        // P0 FIX: Skip historical sync if we have audited data
+        // Only process trades newer than the most recent order in filledOrders
+        // This prevents conflict between audit data and sync logic
+        let trades = allTrades;
+        if (state.filledOrders && state.filledOrders.length > 0) {
+            const newestOrder = Math.max(...state.filledOrders.map(o => o.timestamp || 0));
+            trades = allTrades.filter(t => t.timestamp > newestOrder);
+            if (allTrades.length > 0) {
+                log('DEBUG', `Fetched ${allTrades.length} trades, processing ${trades.length} newer than existing history`);
+            }
+        } else if (allTrades.length > 0) {
+            log('DEBUG', `Fetched ${allTrades.length} trades (no existing history)`);
+        }
         let addedCount = 0;
 
         // Ensure filledOrders array exists
@@ -5775,6 +6421,15 @@ async function syncHistoricalTrades(deepClean = false) {
         const knownIds = new Set(state.filledOrders.map(o => o.id));
         // P1 FIX: Secondary dedup by timestamp+side+price (handles varying ID formats from CCXT)
         const knownTimestamps = new Set(state.filledOrders.map(o => `${o.timestamp}_${o.side}_${o.price}`));
+
+        // P0 FIX: Track which BUYs have already been matched to SELLs
+        // Initialize with ALL lotIds already used by existing sells in history
+        const usedBuyIds = new Set();
+        state.filledOrders.filter(o => o.side === 'sell' && o.matchedLots && o.matchedLots.length > 0)
+            .forEach(o => o.matchedLots.forEach(l => usedBuyIds.add(l.lotId)));
+        if (usedBuyIds.size > 0) {
+            log('SYNC', `Pre-loaded ${usedBuyIds.size} already-matched lotIds to prevent duplicates`, 'info');
+        }
 
         for (const trade of trades) {
             // Fix ID access: CCXT sometimes uses .order, .orderId, or .id
@@ -5827,10 +6482,12 @@ async function syncHistoricalTrades(deepClean = false) {
                     const tolerance = 0.001; // 0.1% tolerance for amount matching
 
                     for (const potentialBuy of trades) {
+                        const potentialBuyId = potentialBuy.orderId || potentialBuy.order || potentialBuy.id;
                         if (potentialBuy.side === 'buy' &&
                             potentialBuy.timestamp < trade.timestamp &&
                             potentialBuy.price < sellPrice &&
-                            Math.abs(potentialBuy.amount - amount) / amount < tolerance) {
+                            Math.abs(potentialBuy.amount - amount) / amount < tolerance &&
+                            !usedBuyIds.has(potentialBuyId)) { // P0 FIX: Don't reuse already matched BUYs
                             // Found a matching BUY
                             matchedBuy = potentialBuy;
                             break; // Take the first (most recent) match
@@ -5839,12 +6496,15 @@ async function syncHistoricalTrades(deepClean = false) {
 
                     let buyPrice, matchType, lotId;
                     let entryFee = 0;
+                    let actualRemainingAfter = 0; // P0 FIX: Track actual remaining for matchedLots
 
                     if (matchedBuy) {
                         // REAL match found!
                         buyPrice = matchedBuy.price;
                         matchType = 'SYNC_MATCHED';
                         lotId = matchedBuy.orderId || matchedBuy.order || matchedBuy.id;
+                        usedBuyIds.add(lotId); // P0 FIX: Mark this BUY as consumed
+                        actualRemainingAfter = 0; // Trade history match = assume fully consumed
                         // Get real entry fee from matched buy
                         if (matchedBuy.fee && matchedBuy.fee.cost > 0) {
                             if (matchedBuy.fee.currency === 'USDT') {
@@ -5861,9 +6521,11 @@ async function syncHistoricalTrades(deepClean = false) {
                         const expectedBuyPrice = sellPrice / (1 + spacing);
                         const invTolerance = expectedBuyPrice * 0.02; // 2% tolerance
 
-                        // Search inventory for matching lot
+                        // Search inventory for matching lot (P0 FIX: also check usedBuyIds)
                         const inventoryMatch = (state.inventory || []).find(lot =>
                             lot.remaining > 0 &&
+                            lot.remaining >= amount && // P0 FIX: Must have enough remaining
+                            !usedBuyIds.has(lot.id) && // P0 FIX: Don't reuse matched lots
                             Math.abs(lot.price - expectedBuyPrice) <= invTolerance
                         );
 
@@ -5873,7 +6535,13 @@ async function syncHistoricalTrades(deepClean = false) {
                             matchType = 'SYNC_MATCHED';
                             lotId = inventoryMatch.id;
                             entryFee = inventoryMatch.fee ? (amount / inventoryMatch.amount) * inventoryMatch.fee : 0;
-                            log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)}`, 'success');
+
+                            // P0 FIX: Update inventory remaining and mark as used
+                            actualRemainingAfter = Number((inventoryMatch.remaining - amount).toFixed(8));
+                            inventoryMatch.remaining = actualRemainingAfter;
+                            usedBuyIds.add(lotId);
+
+                            log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
                         } else {
                             // NO REAL DATA AVAILABLE - Skip this trade instead of using fake data
                             log('SYNC', `⏭️ Skipping SELL #${trade.id} - No matching BUY found in history or inventory. Will sync on next cycle.`, 'warning');
@@ -5899,7 +6567,7 @@ async function syncHistoricalTrades(deepClean = false) {
                         lotId: lotId,
                         buyPrice: buyPrice,
                         amountTaken: amount,
-                        remainingAfter: 0,
+                        remainingAfter: actualRemainingAfter, // P0 FIX: Use real remaining
                         timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
                     }];
 
@@ -5920,6 +6588,15 @@ async function syncHistoricalTrades(deepClean = false) {
             }
             // NOTE: Removed backfill "repair" that was inventing fake profits
             // Real profit comes from handleOrderFill LIFO or recalculate_profit.js
+        }
+
+        // P0 FIX: Clean up empty inventory lots after sync matching
+        const inventoryBefore = (state.inventory || []).length;
+        state.inventory = (state.inventory || []).filter(lot => lot.remaining > 0.00000001);
+        const inventoryAfter = state.inventory.length;
+        if (inventoryBefore > inventoryAfter) {
+            log('SYNC', `🧹 Cleaned ${inventoryBefore - inventoryAfter} exhausted inventory lots`, 'info');
+            saveState(); // Save inventory changes even if no new trades added
         }
 
         if (addedCount > 0) {

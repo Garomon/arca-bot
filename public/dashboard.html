@@ -467,6 +467,22 @@
                 💰 CAPITAL TRACKER
             </h3>
 
+            <!-- Injection Indicator PRO -->
+            <div id="injection-indicator" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 2px solid #666;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span id="indicator-emoji" style="font-size: 2rem;">🟡</span>
+                        <div>
+                            <div style="font-size: 0.9rem; font-weight: bold; color: #fff;">¿Buen momento para inyectar?</div>
+                            <div id="indicator-message" style="font-size: 0.75rem; color: #aaa;">Calculando...</div>
+                        </div>
+                    </div>
+                    <div id="indicator-score" style="font-size: 1.5rem; font-weight: bold; color: #666;">--</div>
+                </div>
+                <div id="indicator-breakdown" style="margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px; font-size: 0.7rem;"></div>
+                <div id="indicator-recommendation" style="margin-top: 10px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.75rem; color: #aaa;"></div>
+            </div>
+
             <!-- Summary Cards -->
             <div class="stats-hex-grid" style="grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
                 <div class="stat-cell" style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2);" title="Suma de todos tus depósitos de capital">
@@ -554,6 +570,14 @@
                 <div id="deposit-history" style="max-height: 200px; overflow-y: auto;">
                     <div style="padding: 15px; text-align: center; color: #555; font-size: 0.8rem;">Cargando
                         depósitos...</div>
+                </div>
+            </div>
+
+            <!-- Injection History with Indicators -->
+            <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-size: 0.75rem; color: var(--cyan-holo); margin-bottom: 12px;">📊 HISTORIAL DE INYECCIONES (con indicador)</div>
+                <div id="injection-history-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto;">
+                    <div style="color: #555; font-size: 0.8rem;">Cargando historial...</div>
                 </div>
             </div>
         </div>
@@ -813,6 +837,52 @@
                     </div>
                 </div>
             </div>
+
+            <!-- MXN MILESTONES - Road to Millonario México -->
+            <div style="margin-top: 20px; background: linear-gradient(135deg, rgba(0,100,0,0.2), rgba(206,17,38,0.1)); border-radius: 12px; padding: 20px; border: 2px solid rgba(0,100,0,0.4);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <div>
+                        <div style="font-size: 0.9rem; color: #00ff9d; font-weight: bold;">🇲🇽 ROAD TO MILLONARIO MXN</div>
+                        <div style="font-size: 0.65rem; color: #888;">Milestones en tu moneda local</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div id="mxn-current" style="font-size: 1.2rem; color: #fff; font-weight: bold;">$--</div>
+                        <div style="font-size: 0.6rem; color: #666;">MXN actual</div>
+                        <div id="mxn-rate" style="font-size: 0.55rem; color: #00ff9d;">@ $-- MXN/USD</div>
+                    </div>
+                </div>
+
+                <!-- Next MXN Milestone -->
+                <div id="mxn-next-milestone" style="background: rgba(0,0,0,0.4); border-radius: 10px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #00ff9d;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div id="mxn-next-icon" style="font-size: 1.5rem; display: inline-block; margin-right: 10px;">🎯</div>
+                            <span id="mxn-next-name" style="font-size: 1rem; color: #fff; font-weight: bold;">--</span>
+                            <span id="mxn-next-title" style="font-size: 0.7rem; color: var(--gold-primary); margin-left: 8px;">--</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div id="mxn-next-eta" style="font-size: 0.9rem; color: #00ff9d;">--</div>
+                            <div style="font-size: 0.6rem; color: #666;">Estimado</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #888; margin-bottom: 4px;">
+                            <span id="mxn-progress-text">$0 / $0 MXN</span>
+                            <span id="mxn-progress-percent">0%</span>
+                        </div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                            <div id="mxn-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #006400, #00ff9d); transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                    <div id="mxn-next-reward" style="margin-top: 8px; font-size: 0.7rem; color: #f0b90b;">🏆 --</div>
+                </div>
+
+                <!-- All MXN Milestones -->
+                <div style="font-size: 0.7rem; color: #666; margin-bottom: 8px;">TODOS LOS MILESTONES:</div>
+                <div id="mxn-milestones-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
+                    <div style="color: #555; font-size: 0.7rem;">Cargando...</div>
+                </div>
+            </div>
         </div>
 
         <!-- LOGS SECTION (CRÓNICAS) -->
@@ -830,6 +900,26 @@
     </div>
 
     <script>
+        // === USD/MXN Exchange Rate (from Binance) ===
+        window.usdMxnRate = 18.0; // Default, updated from Binance
+
+        async function fetchBinanceExchangeRate() {
+            try {
+                const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTMXN');
+                if (res.ok) {
+                    const data = await res.json();
+                    window.usdMxnRate = parseFloat(data.price);
+                    console.log(`[Exchange] USD/MXN from Binance: ${window.usdMxnRate.toFixed(2)}`);
+                }
+            } catch (e) {
+                console.error('[Exchange] Failed to fetch rate:', e);
+            }
+        }
+
+        // Fetch rate immediately and every 5 minutes
+        fetchBinanceExchangeRate();
+        setInterval(fetchBinanceExchangeRate, 5 * 60 * 1000);
+
         // === CONFIG ===
         const BOTS = [
             { id: 'btc', name: 'IGNIS', role: 'Espíritu de Fuego (BTC)', icon: '🔥', url: '/' },
@@ -945,6 +1035,9 @@
                     const res = await fetch(url);
                     if (res.ok) {
                         const data = await res.json();
+                        // Capture USD/MXN rate and APY from Binance
+                        if (data.usdMxnRate) window.usdMxnRate = data.usdMxnRate;
+                        if (data.apy) window.currentAPY = data.apy;
                         updateBotUI(bot.id, data);
                         if (data.status !== "stopped") botsActive++;
 
@@ -1020,42 +1113,17 @@
                 document.getElementById('global-roi').innerText = `${roi.toFixed(1)}%`;
             }
 
-            // Calculate Global APY using Time-Weighted Return (always calculate)
-            const deposits = window.DEPOSIT_DATA?.deposits || [];
-            if (deposits.length > 0) {
-                // Filter out rebalance events
-                const actualDeposits = deposits.filter(d => d.type !== 'rebalance' && d.amount > 0);
-                if (actualDeposits.length > 0) {
-                    const sortedDeposits = [...actualDeposits].sort((a, b) =>
-                        new Date(a.date).getTime() - new Date(b.date).getTime()
-                    );
+            // Calculate Global APY using PRE-CALCULATED TWR values (stable, no recalc every poll)
+            if (window.APY_TWR_CAPITAL && window.APY_DAYS_ACTIVE) {
+                const twrCapital = window.APY_TWR_CAPITAL;
+                const daysActive = window.APY_DAYS_ACTIVE;
+                const globalROI = twrCapital > 0 ? (tProfit / twrCapital) * 100 : 0;
+                const globalAPY = (globalROI / daysActive) * 365;
 
-                    const now = Date.now();
-                    let totalWeightedCapital = 0;
-                    let totalDays = 0;
-                    let runningCapital = 0;
-
-                    for (let i = 0; i < sortedDeposits.length; i++) {
-                        const deposit = sortedDeposits[i];
-                        const depositDate = new Date(deposit.date).getTime();
-                        const nextDate = (i < sortedDeposits.length - 1)
-                            ? new Date(sortedDeposits[i + 1].date).getTime()
-                            : now;
-
-                        runningCapital += deposit.amount;
-                        const periodDays = Math.max(0, (nextDate - depositDate) / (1000 * 60 * 60 * 24));
-
-                        totalWeightedCapital += runningCapital * periodDays;
-                        totalDays += periodDays;
-                    }
-
-                    const twrCapital = totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
-                    const daysActive = totalDays || 1;
-
-                    // APY based on REALIZED profit (original formula)
-                    const globalROI = twrCapital > 0 ? (tProfit / twrCapital) * 100 : 0;
-                    const globalAPY = (globalROI / daysActive) * 365;
-
+                // STABILITY: Only update if APY is reasonable (< 150%) and profit > 0
+                // This prevents wild swings when bots are loading or data is partial
+                if (globalAPY > 0 && globalAPY < 150 && tProfit > 0) {
+                    window.currentAPY = globalAPY;
                     const apyEl = document.getElementById('global-apy');
                     if (apyEl) {
                         apyEl.innerText = `~${globalAPY.toFixed(0)}%`;
@@ -1292,20 +1360,51 @@
                     }).join('');
                 }
 
-                // Render Strategies
+                // Render Strategies with Dynamic Unlock Estimates
                 const strategiesContainer = document.getElementById('strategies-list');
                 if (strategiesContainer && data.strategies) {
+                    const currentEquity = data.equity || 1500;
+                    const realAPY = window.currentAPY || 25;
+                    const dailyGrowthRate = realAPY / 100 / 365;
+                    const monthlyInjection = (data.stats && data.stats.avgMonthlyInjection) ? data.stats.avgMonthlyInjection : 500;
+                    const dailyInjection = monthlyInjection / 30;
+
                     strategiesContainer.innerHTML = data.strategies.map(s => {
                         const unlocked = s.unlocked;
                         const icon = unlocked ? '✅' : '🔒';
                         const color = unlocked ? 'var(--emerald-life)' : '#555';
                         const textColor = unlocked ? '#ccc' : '#444';
-                        const minLvl = !unlocked && s.minLevel ? ` (Lvl ${s.minLevel})` : '';
-                        return `<div style="display: flex; align-items: center; gap: 8px; padding: 6px; opacity: ${unlocked ? 1 : 0.5};">
+
+                        let unlockInfo = '';
+                        if (!unlocked && s.minCapital) {
+                            const needed = s.minCapital - currentEquity;
+                            if (needed > 0) {
+                                let projected = currentEquity;
+                                let daysToUnlock = 0;
+                                while (projected < s.minCapital && daysToUnlock < 10000) {
+                                    projected = projected * (1 + dailyGrowthRate) + dailyInjection;
+                                    daysToUnlock++;
+                                }
+                                const monthsToUnlock = Math.ceil(daysToUnlock / 30);
+                                if (monthsToUnlock <= 1) {
+                                    unlockInfo = 'Faltan $' + needed.toFixed(0) + ' (~' + daysToUnlock + ' dias)';
+                                } else if (monthsToUnlock <= 12) {
+                                    unlockInfo = 'Faltan $' + needed.toFixed(0) + ' (~' + monthsToUnlock + ' meses)';
+                                } else {
+                                    const years = (monthsToUnlock / 12).toFixed(1);
+                                    unlockInfo = 'Faltan $' + needed.toFixed(0) + ' (~' + years + ' años)';
+                                }
+                            }
+                        }
+
+                        const unlockLine = !unlocked && unlockInfo ? `<div style="font-size:0.55rem;color:#f0b90b;margin-top:2px">🎯 ${unlockInfo}</div>` : '';
+
+                        return `<div style="display:flex;align-items:center;gap:8px;padding:6px;opacity:${unlocked ? 1 : 0.5}">
                             <span>${icon}</span>
-                            <div style="flex: 1;">
-                                <span style="font-size: 0.75rem; color: ${color};">${s.name}${minLvl}</span>
-                                <div style="font-size: 0.6rem; color: ${textColor};">${s.description}</div>
+                            <div style="flex:1">
+                                <span style="font-size:0.75rem;color:${color}">${s.name}</span>
+                                <div style="font-size:0.6rem;color:${textColor}">${s.description}</div>
+                                ${unlockLine}
                             </div>
                         </div>`;
                     }).join('');
@@ -1329,6 +1428,135 @@
                     const barEl = document.getElementById('monthly-injection-bar');
                     if (progressEl) progressEl.innerText = `$${data.stats.depositsThisMonth} / $${data.stats.monthlyGoal}`;
                     if (barEl) barEl.style.width = `${Math.min(100, (data.stats.depositsThisMonth / data.stats.monthlyGoal) * 100)}%`;
+                }
+
+                // === INJECTION INDICATOR PRO ===
+                if (data.injectionIndicator) {
+                    const ind = data.injectionIndicator;
+                    const emojiEl = document.getElementById('indicator-emoji');
+                    const msgEl = document.getElementById('indicator-message');
+                    const scoreEl = document.getElementById('indicator-score');
+                    const breakdownEl = document.getElementById('indicator-breakdown');
+                    const recEl = document.getElementById('indicator-recommendation');
+                    const containerEl = document.getElementById('injection-indicator');
+
+                    if (emojiEl) emojiEl.innerText = ind.emoji;
+                    if (msgEl) msgEl.innerText = ind.message;
+                    if (scoreEl) {
+                        scoreEl.innerText = ind.score + '/100';
+                        scoreEl.style.color = ind.signal === 'GREEN' ? '#00ff9d' : ind.signal === 'RED' ? '#ff4444' : '#f0b90b';
+                    }
+                    if (containerEl) {
+                        containerEl.style.borderColor = ind.signal === 'GREEN' ? '#00ff9d' : ind.signal === 'RED' ? '#ff4444' : '#f0b90b';
+                    }
+
+                    // Render breakdown
+                    if (breakdownEl && ind.breakdown) {
+                        breakdownEl.innerHTML = ind.breakdown.map(b => {
+                            const ptsColor = b.points > 0 ? '#00ff9d' : b.points < 0 ? '#ff4444' : '#888';
+                            const pts = (b.points >= 0 ? '+' : '') + b.points;
+                            return `<div style="display: flex; justify-content: space-between; padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 4px;">
+                                <span style="color: #aaa;">${b.factor}</span>
+                                <span><span style="color: #fff; margin-right: 8px;">${b.value}</span><span style="color: ${ptsColor}; font-weight: bold;">${pts}</span></span>
+                            </div>`;
+                        }).join('');
+                    }
+
+                    if (recEl && ind.recommendation) {
+                        recEl.innerHTML = `<strong>📋 Recomendación:</strong> ${ind.recommendation}`;
+                    }
+                }
+
+                // === DEPOSIT HISTORY WITH INDICATORS ===
+                if (data.deposits) {
+                    const depositsListEl = document.getElementById('injection-history-list');
+                    if (depositsListEl) {
+                        // Sort by date descending (most recent first)
+                        const sortedDeposits = [...data.deposits]
+                            .filter(d => d.amount) // Only actual deposits, not rebalance events
+                            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                        if (sortedDeposits.length === 0) {
+                            depositsListEl.innerHTML = '<div style="color: #555; font-size: 0.8rem;">Sin depósitos registrados</div>';
+                        } else {
+                            depositsListEl.innerHTML = sortedDeposits.map(d => {
+                                const ind = d.indicator || { signal: 'N/A', emoji: '⚪', score: '?' };
+                                const borderColor = ind.signal === 'GREEN' ? '#00ff9d' : ind.signal === 'RED' ? '#ff4444' : ind.signal === 'YELLOW' ? '#f0b90b' : '#666';
+                                const signalText = ind.signal === 'N/A' ? 'Sin datos' : ind.signal;
+                                return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(255,255,255,0.02); border-radius: 6px; border-left: 3px solid ${borderColor};">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <span style="font-size: 1.2rem;">${ind.emoji}</span>
+                                        <div>
+                                            <div style="font-size: 0.8rem; color: #fff; font-weight: 500;">$${d.amount.toFixed(0)}</div>
+                                            <div style="font-size: 0.65rem; color: #666;">${d.date}${d.note ? ' - ' + d.note : ''}</div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 0.7rem; color: ${borderColor}; font-weight: bold;">${signalText}</div>
+                                        <div style="font-size: 0.6rem; color: #555;">${ind.score !== '?' ? 'Score: ' + ind.score : ''}</div>
+                                    </div>
+                                </div>`;
+                            }).join('');
+                        }
+                    }
+                }
+
+                // === MXN MILESTONES RENDERING ===
+                if (data.mxnMilestones) {
+                    const mxn = data.mxnMilestones;
+
+                    // Check for milestone celebrations
+                    checkMXNMilestones(mxn.currentMXN);
+
+                    // Update current MXN
+                    const currentMxnEl = document.getElementById('mxn-current');
+                    if (currentMxnEl) {
+                        currentMxnEl.innerText = '$' + Math.round(mxn.currentMXN).toLocaleString('es-MX');
+                    }
+
+                    // Update MXN rate (from Binance USDTMXN)
+                    const mxnRateEl = document.getElementById('mxn-rate');
+                    if (mxnRateEl && mxn.mxnRate) {
+                        mxnRateEl.innerText = `@ $${mxn.mxnRate.toFixed(2)} MXN/USD`;
+                    }
+
+                    // Update next milestone
+                    if (mxn.nextMilestone) {
+                        const nm = mxn.nextMilestone;
+                        document.getElementById('mxn-next-icon').innerText = nm.icon;
+                        document.getElementById('mxn-next-name').innerText = nm.name;
+                        document.getElementById('mxn-next-title').innerText = nm.title;
+                        document.getElementById('mxn-next-eta').innerText = nm.estimatedDate;
+                        document.getElementById('mxn-progress-text').innerText = `$${Math.round(mxn.currentMXN).toLocaleString('es-MX')} / $${nm.mxn.toLocaleString('es-MX')} MXN`;
+                        document.getElementById('mxn-progress-percent').innerText = nm.progressPercent.toFixed(1) + '%';
+                        document.getElementById('mxn-progress-bar').style.width = nm.progressPercent + '%';
+                        document.getElementById('mxn-next-reward').innerText = '🏆 ' + nm.reward;
+
+                        // Special styling for legendary milestone (1M MXN)
+                        if (nm.legendary) {
+                            document.getElementById('mxn-next-milestone').style.borderLeftColor = '#f0b90b';
+                            document.getElementById('mxn-next-milestone').style.background = 'linear-gradient(135deg, rgba(240,185,11,0.15), rgba(0,0,0,0.4))';
+                        }
+                    }
+
+                    // Render all milestones
+                    const milestonesListEl = document.getElementById('mxn-milestones-list');
+                    if (milestonesListEl && mxn.milestones) {
+                        milestonesListEl.innerHTML = mxn.milestones.map(m => {
+                            const bgColor = m.achieved ? 'rgba(0,255,157,0.15)' : 'rgba(255,255,255,0.02)';
+                            const borderColor = m.achieved ? '#00ff9d' : m.legendary ? '#f0b90b' : '#333';
+                            const textColor = m.achieved ? '#00ff9d' : '#666';
+                            const icon = m.achieved ? '✅' : m.icon;
+                            const eta = m.achieved ? 'LOGRADO' : m.yearsToReach < 1 ? `${m.monthsToReach}m` : `${m.yearsToReach}a`;
+
+                            return `<div style="padding: 8px; background: ${bgColor}; border-radius: 6px; border: 1px solid ${borderColor}; text-align: center;">
+                                <div style="font-size: 1.2rem;">${icon}</div>
+                                <div style="font-size: 0.7rem; color: ${textColor}; font-weight: bold;">${m.name}</div>
+                                <div style="font-size: 0.55rem; color: #555;">${m.title}</div>
+                                <div style="font-size: 0.6rem; color: ${m.achieved ? '#00ff9d' : '#f0b90b'}; margin-top: 4px;">${eta}</div>
+                            </div>`;
+                        }).join('');
+                    }
                 }
 
             } catch (e) {
@@ -1362,7 +1590,7 @@
             // ===== ACT I: EL DESPERTAR (Grid Trading Puro) =====
             'El Cruce del Valle': {
                 xpReward: 1000, chapter: 1,
-                newRank: '⚔️ Caballero del Grid ⚔️',
+                newRank: '⚔️ Veterano del Valle ⚔️',
                 nextQuest: 'La Forja del Guerrero',
                 nextObjective: 'Alcanzar $2,000 USD de capital',
                 lifeReward: '🎮 Headset gamer / Gadget',
@@ -1411,7 +1639,7 @@
             },
             'La Cámara de los Titanes': {
                 xpReward: 7500, chapter: 7,
-                newRank: '⚡ Titán del Mercado ⚡',
+                newRank: '⚡ Campeón de los Titanes ⚡',
                 nextQuest: 'El Despertar del Dragón',
                 nextObjective: 'Alcanzar $25,000 USD de capital',
                 lifeReward: '🚗 Enganche para carro',
@@ -1522,6 +1750,141 @@
                 legendary: true
             }
         };
+
+        // ========== MXN MILESTONES CELEBRATION SYSTEM ==========
+        // Parallel celebrations for Mexican peso milestones
+        const MXN_CELEBRATION_CONFIG = {
+            100000: {
+                name: '100K MXN',
+                title: '💵 AHORRADOR SERIO 💵',
+                message: '¡Tienes un fondo de emergencia sólido!',
+                nextMilestone: '250K MXN',
+                nextReward: 'Enganche para un carro',
+                xpBonus: 500
+            },
+            250000: {
+                name: '250K MXN',
+                title: '💰 CLASE MEDIA ALTA 💰',
+                message: '¡Ya puedes dar el enganche de un carro!',
+                nextMilestone: '500K MXN',
+                nextReward: 'Enganche para depa CDMX',
+                xpBonus: 1000
+            },
+            500000: {
+                name: '500K MXN',
+                title: '📈 INVERSIONISTA 📈',
+                message: '¡Puedes dar el enganche de un depa en CDMX!',
+                nextMilestone: '1M MXN',
+                nextReward: '¡Millonario en México!',
+                xpBonus: 2000
+            },
+            1000000: {
+                name: '1M MXN',
+                title: '🇲🇽 MILLONARIO MXN 🇲🇽',
+                message: '¡ERES MILLONARIO EN MÉXICO! La élite local.',
+                nextMilestone: '2.5M MXN',
+                nextReward: 'Casa propia pagada',
+                xpBonus: 5000,
+                legendary: true
+            },
+            2500000: {
+                name: '2.5M MXN',
+                title: '🏆 ALTA SOCIEDAD 🏆',
+                message: '¡Puedes comprar una casa pagada!',
+                nextMilestone: '5M MXN',
+                nextReward: 'Múltiples propiedades',
+                xpBonus: 10000,
+                legendary: true
+            },
+            5000000: {
+                name: '5M MXN',
+                title: '👑 ÉLITE NACIONAL 👑',
+                message: '¡Top 1% de México! Múltiples propiedades.',
+                nextMilestone: '10M MXN',
+                nextReward: 'Libertad financiera total',
+                xpBonus: 25000,
+                legendary: true
+            },
+            10000000: {
+                name: '10M MXN',
+                title: '🌟 TOP 1% MÉXICO 🌟',
+                message: '¡LIBERTAD FINANCIERA TOTAL! Vive de tus inversiones.',
+                nextMilestone: 'USD Millionaire',
+                nextReward: 'La élite global te espera',
+                xpBonus: 50000,
+                legendary: true
+            }
+        };
+
+        // Track last known MXN value for milestone detection
+        let lastKnownMXN = parseFloat(localStorage.getItem('arca_last_mxn') || '0');
+
+        function checkMXNMilestones(currentMXN) {
+            const milestoneThresholds = [100000, 250000, 500000, 1000000, 2500000, 5000000, 10000000];
+
+            for (const threshold of milestoneThresholds) {
+                // Check if we just crossed this threshold
+                if (currentMXN >= threshold && lastKnownMXN < threshold) {
+                    const celebratedKey = `arca_celebrated_mxn_${threshold}`;
+                    if (!localStorage.getItem(celebratedKey)) {
+                        triggerMXNCelebration(threshold);
+                        localStorage.setItem(celebratedKey, 'true');
+                    }
+                }
+            }
+
+            // Update last known MXN
+            lastKnownMXN = currentMXN;
+            localStorage.setItem('arca_last_mxn', currentMXN.toString());
+        }
+
+        function triggerMXNCelebration(threshold) {
+            const config = MXN_CELEBRATION_CONFIG[threshold];
+            if (!config) return;
+
+            // Create MXN-specific modal
+            const modalHTML = `
+                <div id="mxn-celebration-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+                    <div style="background: linear-gradient(135deg, #006400, #004d00); border: 3px solid #00ff9d; border-radius: 20px; padding: 40px; text-align: center; max-width: 500px; animation: mxnPulse 0.5s ease-out; ${config.legendary ? 'box-shadow: 0 0 60px rgba(240,185,11,0.5);' : ''}">
+                        <div style="font-size: 4rem; margin-bottom: 10px;">🇲🇽</div>
+                        <div style="font-size: 0.8rem; color: #00ff9d; margin-bottom: 5px;">¡MILESTONE MXN ALCANZADO!</div>
+                        <div style="font-size: 2rem; color: #fff; font-weight: bold; margin-bottom: 10px;">${config.name}</div>
+                        <div style="font-size: 1.2rem; color: #f0b90b; margin-bottom: 20px;">${config.title}</div>
+                        <div style="font-size: 1rem; color: #ccc; margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">${config.message}</div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 10px;">
+                            <div style="font-size: 0.7rem; color: #888;">SIGUIENTE MILESTONE:</div>
+                            <div style="font-size: 1.1rem; color: #00ff9d; font-weight: bold;">${config.nextMilestone}</div>
+                            <div style="font-size: 0.8rem; color: #f0b90b;">🏆 ${config.nextReward}</div>
+                        </div>
+                        <div style="margin-top: 20px; font-size: 0.9rem; color: #9945ff;">+${config.xpBonus} XP BONUS</div>
+                        <button onclick="closeMXNCelebration()" style="margin-top: 25px; padding: 12px 40px; background: linear-gradient(90deg, #00ff9d, #006400); border: none; border-radius: 25px; color: #000; font-weight: bold; cursor: pointer; font-size: 1rem;">¡VAMOS POR MÁS!</button>
+                    </div>
+                </div>
+                <style>
+                    @keyframes mxnPulse {
+                        0% { transform: scale(0.5); opacity: 0; }
+                        50% { transform: scale(1.05); }
+                        100% { transform: scale(1); opacity: 1; }
+                    }
+                </style>
+            `;
+
+            // Add modal to body
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalHTML;
+            document.body.appendChild(modalContainer);
+
+            // Start confetti
+            startConfetti(config.legendary ? 400 : 200);
+
+            // Play victory sound
+            playVictorySound();
+        }
+
+        function closeMXNCelebration() {
+            const modal = document.getElementById('mxn-celebration-modal');
+            if (modal) modal.parentElement.remove();
+        }
 
         function checkQuestCompletion(currentQuest, previousQuest) {
             // If quest name changed (new quest = previous completed)
@@ -2327,6 +2690,31 @@
 
                     // Render history
                     renderDeposits(data.deposits);
+
+                    // PRE-CALCULATE APY (stable, not recalculated every poll)
+                    const actualDeposits = (data.deposits || []).filter(d => d.type !== 'rebalance' && d.amount > 0);
+                    if (actualDeposits.length > 0) {
+                        const sortedDeposits = [...actualDeposits].sort((a, b) =>
+                            new Date(a.date).getTime() - new Date(b.date).getTime()
+                        );
+                        const now = Date.now();
+                        let totalWeightedCapital = 0;
+                        let totalDays = 0;
+                        let runningCapital = 0;
+                        for (let i = 0; i < sortedDeposits.length; i++) {
+                            const deposit = sortedDeposits[i];
+                            const depositDate = new Date(deposit.date).getTime();
+                            const nextDate = (i < sortedDeposits.length - 1)
+                                ? new Date(sortedDeposits[i + 1].date).getTime()
+                                : now;
+                            runningCapital += deposit.amount;
+                            const periodDays = Math.max(0, (nextDate - depositDate) / (1000 * 60 * 60 * 24));
+                            totalWeightedCapital += runningCapital * periodDays;
+                            totalDays += periodDays;
+                        }
+                        window.APY_TWR_CAPITAL = totalDays > 0 ? (totalWeightedCapital / totalDays) : runningCapital;
+                        window.APY_DAYS_ACTIVE = totalDays || 1;
+                    }
 
                     // Update monthly goal tracker
                     updateMonthlyGoal(data.deposits);
