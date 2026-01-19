@@ -20,6 +20,23 @@
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <script>
+        // Mobile-optimized Chart.js defaults
+        const isMobileDevice = window.innerWidth < 768;
+
+        if (isMobileDevice && typeof Chart !== 'undefined') {
+            // Set global defaults for mobile
+            Chart.defaults.font.size = 9;
+            Chart.defaults.plugins.legend.labels.font = { size: 8 };
+            Chart.defaults.plugins.legend.labels.boxWidth = 8;
+            Chart.defaults.plugins.legend.labels.padding = 5;
+
+            // Override scale defaults
+            Chart.defaults.scale.ticks.maxTicksLimit = 5;
+        }
+    </script>
+
     <style>
         @keyframes spin {
             to {
@@ -222,6 +239,259 @@
             }
         }
     </style>
+
+    <style>
+        /* === ACHIEVEMENTS MOBILE OPTIMIZATION === */
+        @media (max-width: 768px) {
+            /* Timeline: smaller boxes, better wrap */
+            #milestones-timeline {
+                gap: 6px !important;
+                justify-content: center;
+            }
+            #milestones-timeline > div {
+                min-width: 50px !important;
+                padding: 6px 8px !important;
+                font-size: 0.9em;
+            }
+            #milestones-timeline > div > div:first-child {
+                font-size: 1rem !important;
+            }
+            #milestones-timeline > div > div:nth-child(2) {
+                font-size: 0.55rem !important;
+            }
+            #milestones-timeline > div > div:nth-child(3) {
+                font-size: 0.65rem !important;
+            }
+
+            /* Next rewards: single column on mobile */
+            #next-rewards {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* Pending reward box: compact */
+            #pending-reward-box {
+                padding: 12px !important;
+            }
+            #pending-reward-box button {
+                width: 100%;
+                padding: 12px !important;
+            }
+
+            /* Redeemed box: stack on mobile */
+            #redeemed-rewards-list > div {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 5px;
+            }
+
+            /* Section header: smaller */
+            .elite-card h3 {
+                font-size: 0.95rem !important;
+            }
+
+            /* Progress text */
+            #achievements-progress {
+                font-size: 0.75rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Extra small screens */
+            #milestones-timeline > div {
+                min-width: 42px !important;
+                padding: 5px 6px !important;
+            }
+            #milestones-timeline > div > div:first-child {
+                font-size: 0.85rem !important;
+            }
+
+            #next-rewards > div {
+                padding: 12px !important;
+            }
+        }
+    </style>
+
+
+    <style>
+        /* === STATS CARDS MOBILE FIX === */
+        @media (max-width: 768px) {
+            /* Hero stats row: vertical stack */
+            .hero-stats-row {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+
+            .hero-card {
+                width: 100% !important;
+                min-width: unset !important;
+                padding: 15px !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+            }
+
+            .hero-card .hero-icon {
+                font-size: 1.5rem !important;
+                margin-right: 12px !important;
+                margin-bottom: 0 !important;
+            }
+
+            .hero-card .hero-content {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+
+            .hero-card .hero-label {
+                font-size: 0.7rem !important;
+                margin-bottom: 3px !important;
+            }
+
+            .hero-card .hero-val {
+                font-size: 1.3rem !important;
+            }
+
+            .hero-card.main-hero .hero-val {
+                font-size: 1.5rem !important;
+            }
+
+            /* Stats hex grid: 2 columns on tablet, 1 on phone */
+            .stats-hex-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            .stat-cell {
+                padding: 12px 10px !important;
+            }
+
+            .stat-cell .stat-label {
+                font-size: 0.65rem !important;
+            }
+
+            .stat-cell .stat-val {
+                font-size: 1rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-card {
+                padding: 12px !important;
+            }
+
+            .hero-card .hero-val {
+                font-size: 1.1rem !important;
+            }
+
+            .hero-card.main-hero .hero-val {
+                font-size: 1.3rem !important;
+            }
+
+            /* Stats: still 2 columns but tighter */
+            .stats-hex-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+            }
+
+            .stat-cell {
+                padding: 10px 8px !important;
+            }
+
+            .stat-cell .stat-val {
+                font-size: 0.9rem !important;
+            }
+        }
+    </style>
+
+
+    <style>
+        /* === CHARTS MOBILE OPTIMIZATION === */
+        @media (max-width: 768px) {
+            /* Chart containers: more height */
+            .elite-card canvas,
+            .chart-container canvas {
+                max-height: 200px !important;
+            }
+
+            /* Chart filter buttons: smaller */
+            .chart-filter-btn {
+                padding: 4px 8px !important;
+                font-size: 0.65rem !important;
+            }
+
+            /* Date inputs: smaller */
+            .chart-date-input {
+                width: 85px !important;
+                font-size: 0.6rem !important;
+                padding: 3px 5px !important;
+            }
+
+            /* Chart titles: smaller */
+            .elite-card h3,
+            .chart-title {
+                font-size: 0.9rem !important;
+            }
+
+            /* Legend: hide text, show only dots on very small */
+            .chart-legend {
+                font-size: 0.6rem !important;
+                flex-wrap: wrap !important;
+                gap: 5px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Even more compact on phones */
+            .chart-filter-btn {
+                padding: 3px 6px !important;
+                font-size: 0.6rem !important;
+            }
+
+            .chart-date-input {
+                width: 75px !important;
+                font-size: 0.55rem !important;
+            }
+
+            /* Stack filter row */
+            .chart-filters,
+            .chart-controls {
+                flex-wrap: wrap !important;
+                gap: 5px !important;
+            }
+
+            /* Capital vs Equity chart specific */
+            #capital-chart-container {
+                min-height: 180px !important;
+            }
+        }
+    </style>
+
+
+    <style>
+        
+    <style>
+        /* === INSIGHTS MOBILE FIX v2 === */
+        @media (max-width: 768px) {
+            /* Make insights section scroll horizontally if needed */
+            .insights-row {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* But try to make cards fit */
+            .insights-card {
+                min-width: 280px;
+            }
+
+            /* Spread chart - just ensure it doesn't overflow */
+            #spread-chart-container,
+            #spread-chart {
+                max-width: 100% !important;
+            }
+        }
+    </style>
+
 </head>
 
 <body>
@@ -450,7 +720,19 @@
             </div>
         </div>
 
+
+        <!-- MINDSET ANTI-FEAR SECTION -->
+        <div id="mindset-section" style="display: none; margin: 20px 0; padding: 20px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; border-left: 4px solid #e94560;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                <span style="font-size: 1.5rem;">🧘</span>
+                <h3 style="margin: 0; color: #e94560; font-size: 1rem;">MODO PACIENCIA ACTIVADO</h3>
+            </div>
+            <div id="mindset-message" style="color: #a0a0a0; font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px;"></div>
+            <div id="mindset-strategy" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+        </div>
+
         <!-- COMPANION GRID (FULL SIZE) -->
+        
         <h2
             style="margin-bottom: 25px; color: #fff; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 10px;">
             🛡️ ESPÍRITUS GUARDIANES
@@ -731,7 +1013,7 @@
                 <!-- Distribución de Spreads -->
                 <div class="insights-card">
                     <div style="font-size: 0.75rem; color: #888; margin-bottom: 10px;">📈 DISTRIBUCIÓN DE SPREADS</div>
-                    <div style="height: 150px;">
+                    <div id="spread-chart-container" style="height: 150px;">
                         <canvas id="spread-chart"></canvas>
                     </div>
                     <div id="spread-avg-info" style="margin-top: 8px; font-size: 0.65rem; color: #888;">
@@ -837,6 +1119,51 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- 🏆 ACHIEVEMENTS & LIFE REWARDS -->
+        <div class="elite-card" style="margin-bottom: 30px; padding: 25px; background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(20,20,30,0.6)); border: 1px solid rgba(255,215,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--gold-primary); font-size: 1.1rem;">🏆 VIAJE A LA ÉLITE MILLONARIA</h3>
+                <span id="achievements-progress" style="font-size: 0.85rem; color: #888;">Cargando...</span>
+            </div>
+            
+            <!-- Pending Reward Box -->
+            <div id="pending-reward-box" style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,140,0,0.05)); border: 2px solid var(--gold-primary); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: none;">
+                <div style="font-size: 0.75rem; color: var(--gold-dim); margin-bottom: 8px;">🎁 LIFE REWARD PENDIENTE</div>
+                <div id="pending-reward-name" style="font-size: 1.1rem; font-weight: bold; color: #fff;"></div>
+                <div id="pending-reward-detail" style="font-size: 1rem; color: var(--gold-primary); margin-top: 10px;"></div>
+                <button onclick="claimReward()" style="margin-top: 15px; background: var(--gold-primary); color: #000; border: none; padding: 10px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s;">✅ YA LO RECLAMÉ</button>
+            </div>
+
+            <!-- Current Mission IN_PROGRESS -->
+            <div id="in-progress-box" style="display: none; background: rgba(0,200,255,0.08); border: 2px solid #00d4ff; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <div style="font-size: 0.75rem; color: #00d4ff; margin-bottom: 8px;">⚡ MISIÓN ACTUAL EN PROGRESO</div>
+                <div id="in-progress-name" style="font-size: 1.1rem; font-weight: bold; color: #fff;"></div>
+                <div id="in-progress-detail" style="font-size: 0.9rem; color: #aaa; margin-top: 5px;"></div>
+                <div style="margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; height: 20px; overflow: hidden; position: relative;">
+                    <div id="in-progress-bar" style="height: 100%; background: linear-gradient(90deg, #00d4ff, #00ff88); width: 0%; transition: width 0.5s;"></div>
+                    <div id="in-progress-percent" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.7rem; color: #fff; font-weight: bold;">0%</div>
+                </div>
+            </div>
+
+            <!-- Redeemed Rewards -->
+            <div id="redeemed-rewards-box" style="display: none; background: rgba(0,255,100,0.05); border: 1px solid rgba(0,255,100,0.3); border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                <div style="font-size: 0.75rem; color: #00ff64; margin-bottom: 10px;">✅ REWARDS YA RECLAMADOS:</div>
+                <div id="redeemed-rewards-list"></div>
+            </div>
+
+            <!-- Milestones Timeline -->
+            <div id="milestones-timeline" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;"></div>
+            
+            <!-- Next Rewards Preview -->
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <div style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">📍 PRÓXIMOS LIFE REWARDS:</div>
+                <div id="next-rewards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;"></div>
+            </div>
+        </div>
+
+        <!-- LOGS SECTION (CRÓNICAS) -->
 
             <!-- MXN MILESTONES - Road to Millonario México -->
             <div style="margin-top: 20px; background: linear-gradient(135deg, rgba(0,100,0,0.2), rgba(206,17,38,0.1)); border-radius: 12px; padding: 20px; border: 2px solid rgba(0,100,0,0.4);">
@@ -883,9 +1210,7 @@
                     <div style="color: #555; font-size: 0.7rem;">Cargando...</div>
                 </div>
             </div>
-        </div>
 
-        <!-- LOGS SECTION (CRÓNICAS) -->
         <div class="elite-card logs-section" style="margin-top: 30px; padding: 20px;">
             <h3 style="color: var(--cyan-holo); margin-bottom: 20px;">📜 CRÓNICAS DEL SISTEMA</h3>
             <div class="logs-list" id="logs-list">
@@ -1501,61 +1826,35 @@
                     }
                 }
 
+
                 // === MXN MILESTONES RENDERING ===
                 if (data.mxnMilestones) {
                     const mxn = data.mxnMilestones;
-
-                    // Check for milestone celebrations
-                    checkMXNMilestones(mxn.currentMXN);
-
-                    // Update current MXN
-                    const currentMxnEl = document.getElementById('mxn-current');
-                    if (currentMxnEl) {
-                        currentMxnEl.innerText = '$' + Math.round(mxn.currentMXN).toLocaleString('es-MX');
-                    }
-
-                    // Update MXN rate (from Binance USDTMXN)
-                    const mxnRateEl = document.getElementById('mxn-rate');
-                    if (mxnRateEl && mxn.mxnRate) {
-                        mxnRateEl.innerText = `@ $${mxn.mxnRate.toFixed(2)} MXN/USD`;
-                    }
-
-                    // Update next milestone
+                    const currentMxnEl = document.getElementById("mxn-current");
+                    if (currentMxnEl) currentMxnEl.innerText = "$" + Math.round(mxn.currentMXN).toLocaleString("es-MX");
+                    const mxnRateEl = document.getElementById("mxn-rate");
+                    if (mxnRateEl && mxn.mxnRate) mxnRateEl.innerText = "@ $" + mxn.mxnRate.toFixed(2) + " MXN/USD";
                     if (mxn.nextMilestone) {
                         const nm = mxn.nextMilestone;
-                        document.getElementById('mxn-next-icon').innerText = nm.icon;
-                        document.getElementById('mxn-next-name').innerText = nm.name;
-                        document.getElementById('mxn-next-title').innerText = nm.title;
-                        document.getElementById('mxn-next-eta').innerText = nm.estimatedDate;
-                        document.getElementById('mxn-progress-text').innerText = `$${Math.round(mxn.currentMXN).toLocaleString('es-MX')} / $${nm.mxn.toLocaleString('es-MX')} MXN`;
-                        document.getElementById('mxn-progress-percent').innerText = nm.progressPercent.toFixed(1) + '%';
-                        document.getElementById('mxn-progress-bar').style.width = nm.progressPercent + '%';
-                        document.getElementById('mxn-next-reward').innerText = '🏆 ' + nm.reward;
-
-                        // Special styling for legendary milestone (1M MXN)
-                        if (nm.legendary) {
-                            document.getElementById('mxn-next-milestone').style.borderLeftColor = '#f0b90b';
-                            document.getElementById('mxn-next-milestone').style.background = 'linear-gradient(135deg, rgba(240,185,11,0.15), rgba(0,0,0,0.4))';
-                        }
+                        document.getElementById("mxn-next-icon").innerText = nm.icon;
+                        document.getElementById("mxn-next-name").innerText = nm.name;
+                        document.getElementById("mxn-next-title").innerText = nm.title;
+                        document.getElementById("mxn-next-eta").innerText = nm.estimatedDate;
+                        document.getElementById("mxn-progress-text").innerText = "$" + Math.round(mxn.currentMXN).toLocaleString("es-MX") + " / $" + nm.mxn.toLocaleString("es-MX") + " MXN";
+                        document.getElementById("mxn-progress-percent").innerText = nm.progressPercent.toFixed(1) + "%";
+                        document.getElementById("mxn-progress-bar").style.width = nm.progressPercent + "%";
+                        document.getElementById("mxn-next-reward").innerText = "🏆 " + nm.reward;
                     }
-
-                    // Render all milestones
-                    const milestonesListEl = document.getElementById('mxn-milestones-list');
+                    const milestonesListEl = document.getElementById("mxn-milestones-list");
                     if (milestonesListEl && mxn.milestones) {
-                        milestonesListEl.innerHTML = mxn.milestones.map(m => {
-                            const bgColor = m.achieved ? 'rgba(0,255,157,0.15)' : 'rgba(255,255,255,0.02)';
-                            const borderColor = m.achieved ? '#00ff9d' : m.legendary ? '#f0b90b' : '#333';
-                            const textColor = m.achieved ? '#00ff9d' : '#666';
-                            const icon = m.achieved ? '✅' : m.icon;
-                            const eta = m.achieved ? 'LOGRADO' : m.yearsToReach < 1 ? `${m.monthsToReach}m` : `${m.yearsToReach}a`;
-
-                            return `<div style="padding: 8px; background: ${bgColor}; border-radius: 6px; border: 1px solid ${borderColor}; text-align: center;">
-                                <div style="font-size: 1.2rem;">${icon}</div>
-                                <div style="font-size: 0.7rem; color: ${textColor}; font-weight: bold;">${m.name}</div>
-                                <div style="font-size: 0.55rem; color: #555;">${m.title}</div>
-                                <div style="font-size: 0.6rem; color: ${m.achieved ? '#00ff9d' : '#f0b90b'}; margin-top: 4px;">${eta}</div>
-                            </div>`;
-                        }).join('');
+                        milestonesListEl.innerHTML = mxn.milestones.map(function(m) {
+                            var bgColor = m.achieved ? "rgba(0,255,157,0.15)" : "rgba(255,255,255,0.02)";
+                            var borderColor = m.achieved ? "#00ff9d" : m.legendary ? "#f0b90b" : "#333";
+                            var textColor = m.achieved ? "#00ff9d" : "#666";
+                            var icon = m.achieved ? "✅" : m.icon;
+                            var eta = m.achieved ? "LOGRADO" : (m.yearsToReach < 1 ? m.monthsToReach + "m" : m.yearsToReach + "a");
+                            return "<div style=\"padding:8px;background:" + bgColor + ";border-radius:6px;border:1px solid " + borderColor + ";text-align:center\"><div style=\"font-size:1.2rem\">" + icon + "</div><div style=\"font-size:0.7rem;color:" + textColor + ";font-weight:bold\">" + m.name + "</div><div style=\"font-size:0.55rem;color:#555\">" + m.title + "</div><div style=\"font-size:0.6rem;color:" + (m.achieved ? "#00ff9d" : "#f0b90b") + ";margin-top:4px\">" + eta + "</div></div>";
+                        }).join("");
                     }
                 }
 
@@ -1750,141 +2049,6 @@
                 legendary: true
             }
         };
-
-        // ========== MXN MILESTONES CELEBRATION SYSTEM ==========
-        // Parallel celebrations for Mexican peso milestones
-        const MXN_CELEBRATION_CONFIG = {
-            100000: {
-                name: '100K MXN',
-                title: '💵 AHORRADOR SERIO 💵',
-                message: '¡Tienes un fondo de emergencia sólido!',
-                nextMilestone: '250K MXN',
-                nextReward: 'Enganche para un carro',
-                xpBonus: 500
-            },
-            250000: {
-                name: '250K MXN',
-                title: '💰 CLASE MEDIA ALTA 💰',
-                message: '¡Ya puedes dar el enganche de un carro!',
-                nextMilestone: '500K MXN',
-                nextReward: 'Enganche para depa CDMX',
-                xpBonus: 1000
-            },
-            500000: {
-                name: '500K MXN',
-                title: '📈 INVERSIONISTA 📈',
-                message: '¡Puedes dar el enganche de un depa en CDMX!',
-                nextMilestone: '1M MXN',
-                nextReward: '¡Millonario en México!',
-                xpBonus: 2000
-            },
-            1000000: {
-                name: '1M MXN',
-                title: '🇲🇽 MILLONARIO MXN 🇲🇽',
-                message: '¡ERES MILLONARIO EN MÉXICO! La élite local.',
-                nextMilestone: '2.5M MXN',
-                nextReward: 'Casa propia pagada',
-                xpBonus: 5000,
-                legendary: true
-            },
-            2500000: {
-                name: '2.5M MXN',
-                title: '🏆 ALTA SOCIEDAD 🏆',
-                message: '¡Puedes comprar una casa pagada!',
-                nextMilestone: '5M MXN',
-                nextReward: 'Múltiples propiedades',
-                xpBonus: 10000,
-                legendary: true
-            },
-            5000000: {
-                name: '5M MXN',
-                title: '👑 ÉLITE NACIONAL 👑',
-                message: '¡Top 1% de México! Múltiples propiedades.',
-                nextMilestone: '10M MXN',
-                nextReward: 'Libertad financiera total',
-                xpBonus: 25000,
-                legendary: true
-            },
-            10000000: {
-                name: '10M MXN',
-                title: '🌟 TOP 1% MÉXICO 🌟',
-                message: '¡LIBERTAD FINANCIERA TOTAL! Vive de tus inversiones.',
-                nextMilestone: 'USD Millionaire',
-                nextReward: 'La élite global te espera',
-                xpBonus: 50000,
-                legendary: true
-            }
-        };
-
-        // Track last known MXN value for milestone detection
-        let lastKnownMXN = parseFloat(localStorage.getItem('arca_last_mxn') || '0');
-
-        function checkMXNMilestones(currentMXN) {
-            const milestoneThresholds = [100000, 250000, 500000, 1000000, 2500000, 5000000, 10000000];
-
-            for (const threshold of milestoneThresholds) {
-                // Check if we just crossed this threshold
-                if (currentMXN >= threshold && lastKnownMXN < threshold) {
-                    const celebratedKey = `arca_celebrated_mxn_${threshold}`;
-                    if (!localStorage.getItem(celebratedKey)) {
-                        triggerMXNCelebration(threshold);
-                        localStorage.setItem(celebratedKey, 'true');
-                    }
-                }
-            }
-
-            // Update last known MXN
-            lastKnownMXN = currentMXN;
-            localStorage.setItem('arca_last_mxn', currentMXN.toString());
-        }
-
-        function triggerMXNCelebration(threshold) {
-            const config = MXN_CELEBRATION_CONFIG[threshold];
-            if (!config) return;
-
-            // Create MXN-specific modal
-            const modalHTML = `
-                <div id="mxn-celebration-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 10000;">
-                    <div style="background: linear-gradient(135deg, #006400, #004d00); border: 3px solid #00ff9d; border-radius: 20px; padding: 40px; text-align: center; max-width: 500px; animation: mxnPulse 0.5s ease-out; ${config.legendary ? 'box-shadow: 0 0 60px rgba(240,185,11,0.5);' : ''}">
-                        <div style="font-size: 4rem; margin-bottom: 10px;">🇲🇽</div>
-                        <div style="font-size: 0.8rem; color: #00ff9d; margin-bottom: 5px;">¡MILESTONE MXN ALCANZADO!</div>
-                        <div style="font-size: 2rem; color: #fff; font-weight: bold; margin-bottom: 10px;">${config.name}</div>
-                        <div style="font-size: 1.2rem; color: #f0b90b; margin-bottom: 20px;">${config.title}</div>
-                        <div style="font-size: 1rem; color: #ccc; margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">${config.message}</div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 10px;">
-                            <div style="font-size: 0.7rem; color: #888;">SIGUIENTE MILESTONE:</div>
-                            <div style="font-size: 1.1rem; color: #00ff9d; font-weight: bold;">${config.nextMilestone}</div>
-                            <div style="font-size: 0.8rem; color: #f0b90b;">🏆 ${config.nextReward}</div>
-                        </div>
-                        <div style="margin-top: 20px; font-size: 0.9rem; color: #9945ff;">+${config.xpBonus} XP BONUS</div>
-                        <button onclick="closeMXNCelebration()" style="margin-top: 25px; padding: 12px 40px; background: linear-gradient(90deg, #00ff9d, #006400); border: none; border-radius: 25px; color: #000; font-weight: bold; cursor: pointer; font-size: 1rem;">¡VAMOS POR MÁS!</button>
-                    </div>
-                </div>
-                <style>
-                    @keyframes mxnPulse {
-                        0% { transform: scale(0.5); opacity: 0; }
-                        50% { transform: scale(1.05); }
-                        100% { transform: scale(1); opacity: 1; }
-                    }
-                </style>
-            `;
-
-            // Add modal to body
-            const modalContainer = document.createElement('div');
-            modalContainer.innerHTML = modalHTML;
-            document.body.appendChild(modalContainer);
-
-            // Start confetti
-            startConfetti(config.legendary ? 400 : 200);
-
-            // Play victory sound
-            playVictorySound();
-        }
-
-        function closeMXNCelebration() {
-            const modal = document.getElementById('mxn-celebration-modal');
-            if (modal) modal.parentElement.remove();
-        }
 
         function checkQuestCompletion(currentQuest, previousQuest) {
             // If quest name changed (new quest = previous completed)
@@ -2474,7 +2638,7 @@
                         maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
-                            legend: { display: true, labels: { color: '#ccc', font: { family: FONT_UI, size: 10 }, usePointStyle: true } },
+                            legend: { display: true, position: isMobileDevice ? 'top' : 'top', labels: { color: '#ccc', font: { family: FONT_UI, size: isMobileDevice ? 8 : 10 }, usePointStyle: true, boxWidth: isMobileDevice ? 8 : 12, padding: isMobileDevice ? 5 : 10 } },
                             tooltip: {
                                 backgroundColor: 'rgba(10, 10, 16, 0.95)',
                                 callbacks: {
@@ -2483,7 +2647,7 @@
                             }
                         },
                         scales: {
-                            x: { grid: { color: COLOR_GRID }, ticks: { color: '#666', font: { size: 10 } } },
+                            x: { grid: { color: COLOR_GRID }, ticks: { color: '#666', font: { size: isMobileDevice ? 8 : 10 }, maxTicksLimit: isMobileDevice ? 6 : 12, maxRotation: 45 } },
                             y: {
                                 beginAtZero: false,
                                 grid: { color: COLOR_GRID },
@@ -2630,7 +2794,7 @@
                             }
                         },
                         scales: {
-                            x: { grid: { color: COLOR_GRID }, ticks: { color: '#666', font: { size: 10 } } },
+                            x: { grid: { color: COLOR_GRID }, ticks: { color: '#666', font: { size: typeof isMobileDevice !== 'undefined' && isMobileDevice ? 8 : 10 }, maxTicksLimit: typeof isMobileDevice !== 'undefined' && isMobileDevice ? 6 : 12 } },
                             y_daily: {
                                 type: 'linear',
                                 position: 'left',
@@ -3184,7 +3348,8 @@
             fetchFinancialHistory();
             fetchMarketHistory(); // NEW: Volatility Data
             fetchAnalytics(); // NEW: Performance Analytics
-            fetchAllInsights(); // NEW: Advanced Insights
+            fetchAllInsights();
+            fetchMindset();
 
             setInterval(fetchAllData, 5000);
             setInterval(fetchRPG, 60000);
@@ -3194,12 +3359,174 @@
             setInterval(fetchFinancialHistory, 60000);
             setInterval(fetchMarketHistory, 60000);
             setInterval(fetchAnalytics, 60000); // Refresh analytics every minute
-            setInterval(fetchAllInsights, 120000); // Refresh insights every 2 minutes
+            setInterval(fetchAllInsights, 120000);
+            setInterval(fetchMindset, 30000);
         }
 
         init();
+
+        // MINDSET ANTI-FEAR SYSTEM
+        // MINDSET ANTI-FEAR SYSTEM - Uses dashboard's existing netGain
+        async function fetchMindset() {
+            try {
+                const section = document.getElementById('mindset-section');
+                const msgDiv = document.getElementById('mindset-message');
+                const stratDiv = document.getElementById('mindset-strategy');
+                
+                // Get netGain from the dashboard's existing element
+                const netGainEl = document.getElementById('net-gain');
+                if (!netGainEl) return;
+                
+                const netGainText = netGainEl.innerText.replace('$', '').replace(',', '');
+                const netGain = parseFloat(netGainText) || 0;
+                
+                if (netGain < 0) {
+                    section.style.display = 'block';
+                    const messages = [
+                        "Este es un momento temporal. El bot sigue trabajando.",
+                        "Los lotes comprados durante la baja son tu ventaja futura.",
+                        "El mercado siempre cicla. Paciencia = Profit.",
+                        "CETES no te hace millonario. El bot + paciencia si.",
+                        "El flotante negativo = mas tokens a menor precio."
+                    ];
+                    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                    msgDiv.innerHTML = '<strong style="color:#e94560;">Net: $' + netGain.toFixed(2) + '</strong> | ' + randomMsg;
+                    
+                    const strategy = ["NO vendas en panico", "El bot compro barato - eso es BUENO", "Cuando suba, las ganancias seran mayores", "Tu unico trabajo: ESPERAR"];
+                    stratDiv.innerHTML = strategy.map(s => 
+                        '<span style="background:#2d3a4a;padding:5px 10px;border-radius:5px;font-size:0.8rem;color:#4ade80;">' + s + '</span>'
+                    ).join('');
+                } else {
+                    section.style.display = 'none';
+                }
+            } catch(e) {
+                console.log('Mindset error:', e);
+            }
+        }
+    <script>
+
+    
+
+    
+    // ========== ACHIEVEMENTS v3 ==========
+    console.log("[ACH] Script loaded");
+
+    async function loadAchievements() {
+        console.log("[ACH] Fetching...");
+        try {
+            const res = await fetch("/api/achievements");
+            const data = await res.json();
+            console.log("[ACH] Got data:", data.success);
+
+            if (!data.success) return;
+
+            var progressEl = document.getElementById("achievements-progress");
+            if (progressEl) progressEl.innerText = "Cap " + data.completedChapters + "/" + data.totalChapters;
+
+            var pendingBox = document.getElementById("pending-reward-box");
+            if (data.nextToRedeem && pendingBox) {
+                pendingBox.style.display = "block";
+                window.pendingMilestoneId = data.nextToRedeem.id;
+                var nameEl = document.getElementById("pending-reward-name");
+                var detailEl = document.getElementById("pending-reward-detail");
+                if (nameEl) nameEl.innerText = "Cap " + data.nextToRedeem.chapter + ": " + data.nextToRedeem.name;
+                if (detailEl) detailEl.innerText = data.nextToRedeem.lifeReward;
+            } else if (pendingBox) {
+                pendingBox.style.display = "none";
+            }
+
+            // Show IN_PROGRESS mission with progress bar
+            var inProgressBox = document.getElementById("in-progress-box");
+            if (data.inProgress && inProgressBox) {
+                inProgressBox.style.display = "block";
+                var ipName = document.getElementById("in-progress-name");
+                var ipDetail = document.getElementById("in-progress-detail");
+                var ipBar = document.getElementById("in-progress-bar");
+                var ipPercent = document.getElementById("in-progress-percent");
+                if (ipName) ipName.innerText = "Cap " + data.inProgress.chapter + ": " + data.inProgress.name;
+                if (ipDetail) ipDetail.innerText = "$" + Math.round(data.currentEquity).toLocaleString() + " / $" + data.inProgress.equity.toLocaleString() + " USD";
+                if (ipBar) ipBar.style.width = data.inProgress.progressPercent + "%";
+                if (ipPercent) ipPercent.innerText = data.inProgress.progressPercent + "%";
+            } else if (inProgressBox) {
+                inProgressBox.style.display = "none";
+            }
+
+            var timeline = document.getElementById("milestones-timeline");
+            if (timeline && data.achievements) {
+                var h = "";
+                data.achievements.forEach(function(a) {
+                    var bg = "rgba(50,50,50,0.5)", bd = "#333", ic = "🔒";
+                    if (a.status === "REDEEMED") { bg = "rgba(0,255,100,0.15)"; bd = "#00ff64"; ic = "✅"; }
+                    else if (a.status === "PENDING_REWARD") { bg = "rgba(255,215,0,0.2)"; bd = "#ffd700"; ic = "🎁"; }
+                    else if (a.status === "IN_PROGRESS") { bg = "rgba(0,200,255,0.15)"; bd = "#00d4ff"; ic = "⚡"; }
+                    h += "<div style='background:" + bg + ";border:1px solid " + bd + ";border-radius:8px;padding:10px 15px;text-align:center;min-width:70px;position:relative;overflow:hidden;'>";
+                    if (a.status === "IN_PROGRESS" && a.progressPercent > 0) {
+                        h += "<div style='position:absolute;bottom:0;left:0;width:" + a.progressPercent + "%;height:3px;background:#00d4ff;'></div>";
+                    }
+                    h += "<div style='font-size:1.2rem;'>" + ic + "</div>";
+                    h += "<div style='font-size:0.65rem;color:#888;'>Cap " + a.chapter + "</div>";
+                    h += "<div style='font-size:0.75rem;color:#fff;font-weight:bold;'>$" + (a.equity >= 1000 ? Math.round(a.equity/100)/10 + "K" : a.equity) + "</div>";
+                    if (a.status === "IN_PROGRESS") { h += "<div style='font-size:0.55rem;color:#00d4ff;'>" + a.progressPercent + "%</div>"; }
+                    h += "</div>";
+                });
+                timeline.innerHTML = h;
+            }
+
+            var nextEl = document.getElementById("next-rewards");
+            if (nextEl && data.achievements) {
+                var locked = data.achievements.filter(function(x) { return x.status === "LOCKED"; }).slice(0, 3);
+                var h2 = "";
+                locked.forEach(function(a) {
+                    h2 += "<div style='background:rgba(20,20,30,0.6);border:1px solid #444;border-radius:10px;padding:15px;'>";
+                    h2 += "<div style='display:flex;justify-content:space-between;margin-bottom:10px;'>";
+                    h2 += "<span style='font-size:0.75rem;color:#666;'>Cap " + a.chapter + "</span>";
+                    h2 += "<span style='font-size:0.9rem;color:#b8860b;font-weight:bold;'>$" + a.equity.toLocaleString() + "</span></div>";
+                    h2 += "<div style='font-size:0.85rem;color:#aaa;margin-bottom:8px;'>" + a.name + "</div>";
+                    h2 += "<div style='font-size:0.95rem;color:#00ff64;'>" + a.lifeReward + "</div></div>";
+                });
+                nextEl.innerHTML = h2;
+            }
+
+            // Show redeemed rewards
+            var redeemedBox = document.getElementById("redeemed-rewards-box");
+            var redeemedList = document.getElementById("redeemed-rewards-list");
+            if (redeemedBox && redeemedList && data.achievements) {
+                var redeemed = data.achievements.filter(function(x) { return x.status === "REDEEMED"; });
+                if (redeemed.length > 0) {
+                    redeemedBox.style.display = "block";
+                    var rh = "";
+                    redeemed.forEach(function(a) {
+                        rh += "<div style='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1);'>";
+                        rh += "<div><span style='color:#00ff64;'>✅ Cap " + a.chapter + ":</span> <span style='color:#fff;'>" + a.name + "</span></div>";
+                        rh += "<div style='color:#00ff64;font-weight:bold;'>" + a.lifeReward + "</div>";
+                        rh += "</div>";
+                    });
+                    redeemedList.innerHTML = rh;
+                } else {
+                    redeemedBox.style.display = "none";
+                }
+            }
+            console.log("[ACH] Done!");
+        } catch (err) { console.error("[ACH] Error:", err); }
+    }
+
+    async function claimReward() {
+        if (!window.pendingMilestoneId) return;
+        try {
+            var res = await fetch("/api/achievements/redeem", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ milestoneId: window.pendingMilestoneId })
+            });
+            var data = await res.json();
+            if (data.success) { alert("🎉 ¡Life Reward reclamado!"); loadAchievements(); }
+        } catch (err) { console.error("[ACH] Claim error:", err); }
+    }
+
+    setTimeout(loadAchievements, 2000);
+    setInterval(loadAchievements, 60000);
+
     </script>
-    <script src="socket.io.min.js"></script>
 </body>
 
 </html>

@@ -311,6 +311,29 @@
                         </div>
                     </div>
                 </div>
+            
+                <!-- 🏆 ACHIEVEMENTS & REWARDS -->
+                <div class="achievements-section" style="margin-top: 30px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: #ffd700;">🏆 VIAJE A LA ÉLITE MILLONARIA</h3>
+                        <span id="achievements-progress" style="font-size: 0.8rem; color: #888;">Cargando...</span>
+                    </div>
+                    
+                    <div id="pending-reward-box" style="background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,140,0,0.1)); border: 2px solid #ffd700; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: none;">
+                        <div style="font-size: 0.75rem; color: #b8860b; margin-bottom: 5px;">🎁 REWARD PENDIENTE</div>
+                        <div id="pending-reward-name" style="font-size: 1rem; font-weight: bold; color: #fff;"></div>
+                        <div id="pending-reward-detail" style="font-size: 0.85rem; color: #ffd700; margin-top: 5px;"></div>
+                        <button onclick="claimReward()" style="margin-top: 10px; background: #ffd700; color: #000; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">✅ YA LO RECLAMÉ</button>
+                    </div>
+                    
+                    <div id="milestones-timeline" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;"></div>
+                    
+                    <div style="border-top: 1px solid #333; padding-top: 15px;">
+                        <div style="font-size: 0.75rem; color: #666; margin-bottom: 10px;">📍 PRÓXIMOS PREMIOS:</div>
+                        <div id="next-rewards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;"></div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- TAB 2: FINTECH ACCOUNTS -->
@@ -1254,7 +1277,73 @@
         </main>
     </div>
 
-    <script src="main.js"></script>
+    <script src="main.js">
+
+    // ========== ACHIEVEMENTS SYSTEM ==========
+    let pendingMilestoneId = null;
+    
+    async function loadAchievements() {
+        try {
+            const res = await fetch("/api/achievements");
+            const data = await res.json();
+            if (!data.success) return;
+            
+            document.getElementById("achievements-progress").innerText = "Cap " + data.completedChapters + "/" + data.totalChapters;
+            
+            const pendingBox = document.getElementById("pending-reward-box");
+            if (data.nextToRedeem) {
+                pendingBox.style.display = "block";
+                pendingMilestoneId = data.nextToRedeem.id;
+                document.getElementById("pending-reward-name").innerText = "Cap " + data.nextToRedeem.chapter + ": " + data.nextToRedeem.name + " ($" + data.nextToRedeem.equity.toLocaleString() + ")";
+                document.getElementById("pending-reward-detail").innerText = data.nextToRedeem.lifeReward;
+            } else {
+                pendingBox.style.display = "none";
+            }
+            
+            let timelineHtml = "";
+            data.achievements.forEach(function(a) {
+                let bg = "rgba(50,50,50,0.5)", bd = "#333", ic = "🔒";
+                if (a.status === "REDEEMED") { bg = "rgba(0,255,100,0.15)"; bd = "#00ff64"; ic = "✅"; }
+                else if (a.status === "PENDING_REWARD") { bg = "rgba(255,215,0,0.2)"; bd = "#ffd700"; ic = "🎁"; }
+                timelineHtml += "<div style=\"background:" + bg + ";border:1px solid " + bd + ";border-radius:6px;padding:8px 12px;text-align:center;min-width:60px;\">" +
+                    "<div style=\"font-size:1rem;\">" + ic + "</div>" +
+                    "<div style=\"font-size:0.65rem;color:#888;\">Cap " + a.chapter + "</div>" +
+                    "<div style=\"font-size:0.7rem;color:#fff;font-weight:bold;\">$" + (a.equity >= 1000 ? Math.floor(a.equity/1000) + "K" : a.equity) + "</div>" +
+                "</div>";
+            });
+            document.getElementById("milestones-timeline").innerHTML = timelineHtml;
+            
+            let nextHtml = "";
+            data.achievements.filter(function(a) { return a.status === "LOCKED"; }).slice(0, 3).forEach(function(a) {
+                nextHtml += "<div style=\"background:rgba(30,30,30,0.5);border:1px solid #444;border-radius:8px;padding:12px;\">" +
+                    "<div style=\"display:flex;justify-content:space-between;margin-bottom:8px;\">" +
+                        "<span style=\"font-size:0.7rem;color:#666;\">Cap " + a.chapter + "</span>" +
+                        "<span style=\"font-size:0.8rem;color:#b8860b;font-weight:bold;\">$" + a.equity.toLocaleString() + "</span></div>" +
+                    "<div style=\"font-size:0.75rem;color:#aaa;margin-bottom:5px;\">" + a.name + "</div>" +
+                    "<div style=\"font-size:0.8rem;color:#00ff64;\">" + a.lifeReward + "</div></div>";
+            });
+            document.getElementById("next-rewards").innerHTML = nextHtml;
+        } catch (err) { console.error("Achievements error:", err); }
+    }
+    
+    async function claimReward() {
+        if (!pendingMilestoneId) return;
+        try {
+            const res = await fetch("/api/achievements/redeem", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ milestoneId: pendingMilestoneId })
+            });
+            const data = await res.json();
+            if (data.success) { alert("🎉 ¡Premio reclamado! Disfrútalo."); loadAchievements(); }
+        } catch (err) { console.error("Claim error:", err); }
+    }
+    
+    // Load achievements on page load
+    setTimeout(loadAchievements, 2000);
+    setInterval(loadAchievements, 60000);
+
+    </script>
     <!-- MOBILE RPG FLOATING BUTTON (Responsive & Non-Intrusive) -->
     <style>
         .rpg-fab {

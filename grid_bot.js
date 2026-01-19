@@ -553,7 +553,7 @@ app.get('/api/rpg', async (req, res) => {
         // 2. Calculate Days Active
         const now = new Date();
         const diffTime = Math.abs(now - LAUNCH_DATE);
-        daysActive = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        daysActive = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         // 3. XP Calculation (SYNCED with analyze_projection.js)
         const BASE_XP = 810;                           // Base XP to sync with Codex
@@ -749,7 +749,13 @@ app.get('/api/rpg', async (req, res) => {
 
         // Find current active quest based on equity
         let activeQuest;
-        let currentMilestone = QUEST_MILESTONES.find(m => currentEquity < m.equity);
+        // Load completed milestones from state
+        const coachState = loadLifeCoachState();
+        const completedEquities = (coachState.completedMilestones || []).map(id => {
+            const match = id.match(/reach_(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        });
+        let currentMilestone = QUEST_MILESTONES.find(m => !completedEquities.includes(m.equity));
 
         if (!currentMilestone) {
             // Player has completed ALL quests - they're a legend!
@@ -820,6 +826,7 @@ function loadLifeCoachState() {
         }
     } catch (e) { }
     return {
+        completedMilestones: [],
         completedSideQuests: [],
         habits: {
             lastInjectionDate: null,
@@ -929,6 +936,7 @@ function calculateMillionaireRoadmap(equity, currentAPY, monthlyInjection = 500)
     return roadmap;
 }
 
+// === INJECTION INDICATOR PRO (GREEN/YELLOW/RED) ===
 // === MXN MILESTONES (Para motivación local México) ===
 // mxnRate comes from Binance USDTMXN real-time price
 function calculateMXNMilestones(equity, currentAPY, monthlyInjection = 500, mxnRate = 18.0) {
@@ -949,11 +957,10 @@ function calculateMXNMilestones(equity, currentAPY, monthlyInjection = 500, mxnR
         const targetUSD = target.mxn / mxnRate;
         const achieved = currentMXN >= target.mxn;
 
-        // Calculate months to reach
         let monthsToReach = 0;
         if (!achieved) {
             let projected = equity;
-            while (projected < targetUSD && monthsToReach < 600) { // Max 50 years
+            while (projected < targetUSD && monthsToReach < 600) {
                 projected = projected * (1 + monthlyRate) + monthlyInjection;
                 monthsToReach++;
             }
@@ -971,11 +978,10 @@ function calculateMXNMilestones(equity, currentAPY, monthlyInjection = 500, mxnR
             progressPercent: Math.min(100, (currentMXN / target.mxn) * 100),
             monthsToReach,
             yearsToReach: yearsToReach.toFixed(1),
-            estimatedDate: estimatedDate.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })
+            estimatedDate: estimatedDate.toLocaleDateString("es-MX", { month: "short", year: "numeric" })
         };
     });
 
-    // Find next milestone
     const nextMilestone = milestones.find(m => !m.achieved);
     const achievedCount = milestones.filter(m => m.achieved).length;
 
@@ -989,7 +995,6 @@ function calculateMXNMilestones(equity, currentAPY, monthlyInjection = 500, mxnR
     };
 }
 
-// === INJECTION INDICATOR PRO (GREEN/YELLOW/RED) ===
 function calculateInjectionIndicator() {
     try {
         const trainingDir = path.join(__dirname, "logs", "training_data");
@@ -1016,7 +1021,7 @@ function calculateInjectionIndicator() {
         const breakdown = [];
 
         // === 1. FEAR & GREED INDEX ===
-        const fearGreed = snapshots[0]?.fear_greed || 50;
+        let fgCache = externalDataCache.fearGreed; let fgNum = (fgCache.value !== null && Date.now() - fgCache.timestamp < 3600000) ? (typeof fgCache.value === "object" ? fgCache.value.value : fgCache.value) : null; const fearGreed = fgNum || (snapshots[0]?.fear_greed || 50);
         let fgPoints = 0;
         let fgLabel = "";
         if (fearGreed <= 25) { fgPoints = 15; fgLabel = "Extreme Fear"; }
@@ -1295,7 +1300,8 @@ function getActiveMissions(equity, level, coachState, depositsThisMonth, daysAct
     ];
 
     // Find the NEXT milestone (first one not yet reached)
-    const nextMilestone = storyMilestones.find(m => equity < m.target);
+    // Find next milestone not yet permanently completed
+    const nextMilestone = storyMilestones.find(m => !coachState.completedMilestones?.includes(m.id));
     if (nextMilestone) {
         missions.push({
             id: nextMilestone.id,
@@ -1364,6 +1370,40 @@ app.get('/api/life-coach', async (req, res) => {
         })();
         } catch (e) { }
 
+        // AUTO-COMPLETE MILESTONES when equity reaches target
+        const MILESTONE_TARGETS = [
+            { id: "reach_1500", target: 1500 },
+            { id: "reach_2000", target: 2000 },
+            { id: "reach_3000", target: 3000 },
+            { id: "reach_5000", target: 5000 },
+            { id: "reach_7500", target: 7500 },
+            { id: "reach_10000", target: 10000 },
+            { id: "reach_15000", target: 15000 },
+            { id: "reach_20000", target: 20000 },
+            { id: "reach_25000", target: 25000 },
+            { id: "reach_35000", target: 35000 },
+            { id: "reach_50000", target: 50000 },
+            { id: "reach_75000", target: 75000 },
+            { id: "reach_100000", target: 100000 },
+            { id: "reach_250000", target: 250000 },
+            { id: "reach_500000", target: 500000 },
+            { id: "reach_1000000", target: 1000000 },
+            { id: "reach_10000", target: 10000 },
+            { id: "reach_25000", target: 25000 },
+            { id: "reach_100000", target: 100000 },
+            { id: "reach_1000000", target: 1000000 }
+        ];
+        let stateChanged = false;
+        if (!coachState.completedMilestones) coachState.completedMilestones = [];
+        for (const m of MILESTONE_TARGETS) {
+            if (currentEquity >= m.target && !coachState.completedMilestones.includes(m.id)) {
+                coachState.completedMilestones.push(m.id);
+                stateChanged = true;
+                console.log("[LIFE-COACH] Milestone completed: " + m.id);
+            }
+        }
+        if (stateChanged) saveLifeCoachState(coachState);
+
         // Get deposits data
         let depositsThisMonth = 0;
         let totalDeposits = 0;
@@ -1411,12 +1451,48 @@ app.get('/api/life-coach', async (req, res) => {
         const LAUNCH_DATE = new Date('2025-12-03T00:00:00Z');
         const daysActive = Math.max(1, Math.floor((Date.now() - LAUNCH_DATE) / (1000 * 60 * 60 * 24)));
 
-        // Simple level calculation
-        const totalProfit = currentEquity - 1247; // Approximate initial
-        const xpFromProfit = Math.floor(Math.max(0, totalProfit) * 50);
+        // RPG Level calculation - use REAL profit from state files
+        const sessionsDir = path.join(__dirname, "data", "sessions");
+        const botPairs = ["BTCUSDT", "SOLUSDT", "DOGEUSDT"];
+        let realizedProfit = 0;
+        for (const pair of botPairs) {
+            const stateFile = path.join(sessionsDir, `VANTAGE01_${pair}_state.json`);
+            if (fs.existsSync(stateFile)) {
+                try {
+                    const botState = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+                    realizedProfit += botState.totalProfit || 0;
+                } catch (e) { }
+            }
+        }
+        const xpFromProfit = Math.floor(Math.max(0, realizedProfit) * 50);
         const xpFromDays = daysActive * 20;
         const totalXp = 810 + xpFromProfit + xpFromDays;
-        const level = Math.floor(totalXp / 500) + 1;
+        
+        // XP Table synced with /api/rpg endpoint
+        const xpTable = [
+            { level: 1, xp: 0, title: "Novato del Grid" },
+            { level: 2, xp: 100, title: "Aprendiz de Trading" },
+            { level: 3, xp: 300, title: "Explorador de Mercados" },
+            { level: 4, xp: 600, title: "Comerciante Audaz" },
+            { level: 5, xp: 1000, title: "Estratega del Spread" },
+            { level: 6, xp: 1500, title: "Domador de Volatilidad" },
+            { level: 7, xp: 2200, title: "Mercader Errante" },
+            { level: 8, xp: 3000, title: "Señor de la Forja" },
+            { level: 9, xp: 4500, title: "Maestro del Grid" },
+            { level: 10, xp: 6000, title: "Caballero del Grid" },
+            { level: 15, xp: 20000, title: "Conde del Rendimiento" },
+            { level: 20, xp: 50000, title: "Archiduque Financiero" },
+            { level: 25, xp: 120000, title: "Leyenda Cripto" },
+            { level: 30, xp: 300000, title: "Arcángel del Profit" }
+        ];
+        let level = 1;
+        let title = "Soñador";
+        for (const tier of xpTable) {
+            if (totalXp >= tier.xp) {
+                level = tier.level;
+                title = tier.title;
+            }
+        }
 
         // Get GLOBAL APY using TWR formula (same as dashboard)
         let globalAPY = 34; // Default
@@ -1534,6 +1610,8 @@ app.get('/api/life-coach', async (req, res) => {
             success: true,
             equity: currentEquity,
             level: level,
+            title: title,
+            xp: totalXp,
             daysActive: daysActive,
             currentAPY: currentAPY,
 
@@ -2801,34 +2879,21 @@ function loadState() {
                 console.log(`>> [RECOVERY] Loaded ${state.filledOrders.length} historical orders.`);
             }
 
-            // P0 FIX: UNIFY PROFIT ARCHITECTURE (Professional Grade)
-            // Ensure totalProfit is ALWAYS at least the value of accumulated (audited) profit
-            const acc = saved.accumulatedProfit || 0;
-            const tot = saved.totalProfit || 0;
-            state.totalProfit = Math.max(acc, tot);
-            state.accumulatedProfit = Math.max(acc, tot);
+            // FIXED: Preserve saved values - no inflation
+            state.totalProfit = saved.totalProfit || 0;
+            state.accumulatedProfit = saved.accumulatedProfit || 0;
 
-            if (state.totalProfit > tot) {
-                console.log(`>> [RECOVERY] Restored $${state.totalProfit.toFixed(4)} from Audited Baseline.`);
-            }
 
             if (saved.emergencyStop) {
                 state.accumulatedProfit = state.totalProfit;
             }
 
-            // AUTO-AUDIT: Final Sync RAM with History (The Truth Protocol)
-            // P0 FIX: Include accumulatedProfit from archived trades (>1000 orders)
+            // FIXED: Sum of trades is the single source of truth
             if (state.filledOrders && state.filledOrders.length > 0) {
                 const sumTrades = state.filledOrders.reduce((sum, o) => sum + (parseFloat(o.profit) || 0), 0);
-                const archivedProfit = parseFloat(state.accumulatedProfit || 0);
-                const totalFromHistory = sumTrades + archivedProfit; // Include archived!
-                const currentInMem = parseFloat(state.totalProfit || 0);
-
-                // Only audit if there's a significant discrepancy AND it's not from archived orders
-                if (Math.abs(totalFromHistory - currentInMem) > 0.01) {
-                    console.log(`>> [AUTO-AUDIT] Final Truth: RAM (${currentInMem.toFixed(4)}) -> History+Archived (${totalFromHistory.toFixed(4)})`);
-                    state.totalProfit = totalFromHistory;
-                }
+                state.totalProfit = sumTrades;
+                state.accumulatedProfit = sumTrades;
+                console.log(`>> [PROFIT-VERIFIED] ${state.filledOrders.length} trades = $${sumTrades.toFixed(4)}`);
             }
 
             // AUDIT FIX: Ensure inventory exists
@@ -3782,14 +3847,21 @@ function checkSafetyNet(level) {
         // If we couldn't match enough inventory, we can't fully judge.
         // Assume the rest is "at market" or safe? 
         // Safer to judge based on what we matched.
-        if (consumedAmount === 0) return { safe: true };
+        if (consumedAmount === 0) {
+            // P0 FIX: NO inventory matched = BLOCK THE SELL
+            // This prevents selling with cost:null (unknown cost)
+            return {
+                safe: false,
+                reason: 'NO_MATCH: Cannot find matching buy inventory. Blocking sell to prevent loss.'
+            };
+        }
 
         const avgCost = costBasis / consumedAmount;
         const profitPct = ((sellPrice - avgCost) / avgCost) * 100;
 
         // 5. DECISION: Block if loss > 0.5% (Strict Profit Protection)
         // Grid bot should NEVER sell below cost. We allow -0.5% only for slippage/fees buffer.
-        const LOSS_TOLERANCE = -0.5;
+        const LOSS_TOLERANCE = -0.1; // P0 FIX: Tighter loss tolerance (was -0.5%)
 
         if (profitPct < LOSS_TOLERANCE) {
             // EXCEPTION: IF price is WAY above entry (e.g. we missed the top), maybe we want to sell?
@@ -3808,7 +3880,11 @@ function checkSafetyNet(level) {
 
     } catch (e) {
         console.error('SafetyNet Error:', e);
-        return { safe: true }; // Fail open if logic crashes, don't freeze bot
+        // P0 FIX: Fail CLOSED - if we can't verify safety, DON'T SELL
+        return {
+            safe: false,
+            reason: 'SAFETY_ERROR: ' + e.message + ' - Blocking sell for safety.'
+        };
     }
 }
 
@@ -4274,6 +4350,7 @@ async function runMonitorLoop(myId) {
             try {
                 // Construct external metrics object from cache
                 const externalMetrics = {
+                    fearGreed: externalDataCache.fearGreed,
                     fundingRate: externalDataCache.fundingRate,
                     btcDominance: externalDataCache.btcDominance,
                     openInterest: externalDataCache.openInterest,
@@ -6571,6 +6648,11 @@ async function syncHistoricalTrades(deepClean = false) {
                         timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
                     }];
 
+                    // P0 FIX: Block sync sells with negative spread
+                    if (spreadPct < -0.1 && !matchedBuy) {
+                        log('GUARD', '🛡️ SYNC BLOCKED: Negative spread ' + spreadPct.toFixed(2) + '% with no matched buy', 'error');
+                        continue; // Skip this sell, don't record it
+                    }
                     const matchStatus = matchedBuy ? '✅ REAL' : '⚠️ FALLBACK';
                     log('SYNC', `📊 SELL synced ${matchStatus}: $${sellPrice.toFixed(2)} | Cost: $${buyPrice.toFixed(2)} | Spread: ${spreadPct.toFixed(2)}% | Profit: $${netProfit.toFixed(4)}`, matchedBuy ? 'success' : 'warning');
                 } else {
@@ -7081,4 +7163,228 @@ process.on('uncaughtException', (err) => {
     } catch (e) { }
     log('ERROR', `Uncaught Exception: ${err.message}`, 'error');
     process.exit(1); // Force exit so PM2 restarts
+});
+
+// ==================== ACHIEVEMENTS & REWARDS ENDPOINT ====================
+app.get("/api/achievements", async (req, res) => {
+    try {
+        const coachState = loadLifeCoachState();
+
+        // Get current equity from Binance (same as life-coach)
+        let currentEquity = 0;
+        let mxnRate = 17.7;
+        try {
+            const bal = await binance.fetchBalance();
+            let baseVal = 0;
+            const assets = Object.keys(bal).filter(k => !['info','free','used','total','USDT'].includes(k));
+            const tickers = await binance.fetchTickers().catch(() => ({}));
+            for (const a of assets) {
+                const q = bal[a]?.total || 0;
+                if (q > 0.000001) {
+                    const px = tickers[a+'/USDT']?.last || tickers[a+'USDT']?.last || 0;
+                    baseVal += q * px;
+                }
+            }
+            currentEquity = (bal.USDT?.total || 0) + baseVal;
+
+            // Get MXN rate from USDTMXN ticker
+            mxnRate = tickers['USDT/MXN']?.last || tickers['USDTMXN']?.last || 17.7;
+        } catch (e) {
+            console.error('[ACHIEVEMENTS] Error fetching balance:', e.message);
+        }
+
+        // All milestones - DJ MAGNATE EDITION 🎧🔥
+        const ALL_MILESTONES = [
+            // === FASE 1: BEDROOM PRODUCER ===
+            { id: "reach_1500", equity: 1500, name: "El Cruce del Valle", chapter: 1, xp: 1000, badge: "⚔️ Soldado", lifeRewardUSD: 25, lifeReward: "🍾 Botella + Cena con tu crew", profitAtMilestone: 200 },
+            { id: "reach_2000", equity: 2000, name: "La Forja del Guerrero", chapter: 2, xp: 1500, badge: "🔨 Guerrero", lifeRewardUSD: 70, lifeReward: "🎧 Plugins / Sample packs premium", profitAtMilestone: 700 },
+            { id: "reach_3000", equity: 3000, name: "El Pacto del Compuesto", chapter: 3, xp: 2000, badge: "📈 Compounder", lifeRewardUSD: 100, lifeReward: "🎤 Controlador MIDI / Upgrade gear", profitAtMilestone: 1700 },
+
+            // === FASE 2: CLUB DJ ===
+            { id: "reach_5000", equity: 5000, name: "La Conquista del Reino", chapter: 4, xp: 3000, badge: "👑 Conquistador", lifeRewardUSD: 150, lifeReward: "🕶️ Fit completo pa'l club + Lentes", profitAtMilestone: 3700 },
+            { id: "reach_7500", equity: 7500, name: "El Templo del Poder", chapter: 5, xp: 4000, badge: "🏛️ Sacerdote", lifeRewardUSD: 200, lifeReward: "🎚️ Audio-Technica / Monitores studio", profitAtMilestone: 6200 },
+            { id: "reach_10000", equity: 10000, name: "Los Diez Mil Soles", chapter: 6, xp: 5000, badge: "☀️ Leyenda 5 Dígitos", lifeRewardUSD: 300, lifeReward: "🏖️ Weekend en la playa con amigos", profitAtMilestone: 8700 },
+
+            // === FASE 3: TOURING DJ ===
+            { id: "reach_15000", equity: 15000, name: "El Sendero del Águila", chapter: 7, xp: 6500, badge: "🦅 Águila", lifeRewardUSD: 400, lifeReward: "🎛️ Pioneer DDJ / Controlador pro", profitAtMilestone: 13700 },
+            { id: "reach_20000", equity: 20000, name: "La Puerta de Bronce", chapter: 8, xp: 8000, badge: "🚪 Guardián", lifeRewardUSD: 500, lifeReward: "🍾 FIESTA ÉPICA - Mesa VIP + Botellas", profitAtMilestone: 18700 },
+            { id: "reach_25000", equity: 25000, name: "El Despertar del Dragón", chapter: 9, xp: 10000, badge: "🐉 Dragón", lifeRewardUSD: 700, lifeReward: "✈️ TULUM / MIAMI trip con la crew", profitAtMilestone: 23700 },
+
+            // === FASE 4: PRODUCER RECONOCIDO ===
+            { id: "reach_35000", equity: 35000, name: "El Guardián del Tesoro", chapter: 10, xp: 15000, badge: "🛡️ Protector", lifeRewardUSD: 1000, lifeReward: "💻 MacBook Pro M3 + Ableton Suite", profitAtMilestone: 33700 },
+            { id: "reach_50000", equity: 50000, name: "El Trono del Rey", chapter: 11, xp: 20000, badge: "👑 Rey", lifeRewardUSD: 1500, lifeReward: "🏝️ IBIZA / EUROPA trip - Cuna del House", profitAtMilestone: 48700 },
+            { id: "reach_75000", equity: 75000, name: "El Oráculo de Oro", chapter: 12, xp: 30000, badge: "🔮 Oráculo", lifeRewardUSD: 2500, lifeReward: "🎚️ SETUP CDJ-3000 / Studio upgrade PRO", profitAtMilestone: 73700 },
+
+            // === FASE 5: HEADLINER ===
+            { id: "reach_100000", equity: 100000, name: "El Club de los Cien Mil", chapter: 13, xp: 40000, badge: "💯 Centurión", lifeRewardUSD: 5000, lifeReward: "🚗 CARRO DEPORTIVO - Llega con estilo", profitAtMilestone: 98700 },
+            { id: "reach_250000", equity: 250000, name: "La Corona de Plata", chapter: 14, xp: 80000, badge: "🥈 Barón", lifeRewardUSD: 15000, lifeReward: "🏠 DEPA PROPIO - Tu estudio/penthouse", profitAtMilestone: 248700 },
+            { id: "reach_500000", equity: 500000, name: "La Corona de Oro", chapter: 15, xp: 150000, badge: "🥇 Emperador", lifeRewardUSD: 30000, lifeReward: "🛥️ YATE PARTY - Fiesta legendaria", profitAtMilestone: 498700 },
+
+            // === FASE 6: INTERNATIONAL DJ MAGNATE ===
+            { id: "reach_1000000", equity: 1000000, name: "MAGNATE", chapter: 16, xp: 500000, badge: "🏆 MAGNATE", lifeRewardUSD: 0, lifeReward: "🏰 IMPERIO: Jet privado a gigs, Múltiples depas, Studio world-class, LIBERTAD TOTAL", profitAtMilestone: 998700 }
+        ];
+
+        const completed = coachState.completedMilestones || [];
+        const redeemed = coachState.redeemedRewards || [];
+
+        // Find the first non-completed milestone (current active)
+        const currentMilestoneId = ALL_MILESTONES.find(m => !completed.includes(m.id))?.id;
+
+        // Build achievements list with IN_PROGRESS status and MXN values
+        const achievements = ALL_MILESTONES.map(m => {
+            const isCompleted = completed.includes(m.id);
+            const isRedeemed = redeemed.includes(m.id);
+            const isCurrentActive = m.id === currentMilestoneId;
+
+            // Calculate progress for current milestone
+            let progressPercent = 0;
+            if (isCurrentActive && currentEquity > 0) {
+                const prevMilestone = ALL_MILESTONES[ALL_MILESTONES.indexOf(m) - 1];
+                const startEquity = prevMilestone ? prevMilestone.equity : 0;
+                const range = m.equity - startEquity;
+                const current = currentEquity - startEquity;
+                progressPercent = Math.min(100, Math.max(0, (current / range) * 100));
+            }
+
+            // Determine status
+            let status = "LOCKED";
+            if (isCompleted) {
+                status = isRedeemed ? "REDEEMED" : "PENDING_REWARD";
+            } else if (isCurrentActive) {
+                status = "IN_PROGRESS";
+            }
+
+            // Format reward with USD and MXN
+            const rewardMXN = Math.round(m.lifeRewardUSD * mxnRate);
+            const lifeRewardFull = m.lifeRewardUSD > 0
+                ? `${m.lifeReward} (~$${m.lifeRewardUSD} / ~$${rewardMXN.toLocaleString()} MXN)`
+                : m.lifeReward;
+
+            return {
+                ...m,
+                lifeReward: lifeRewardFull,
+                lifeRewardMXN: rewardMXN,
+                completed: isCompleted,
+                rewardRedeemed: isRedeemed,
+                status,
+                progressPercent: isCurrentActive ? Math.round(progressPercent) : (isCompleted ? 100 : 0),
+                currentEquity: isCurrentActive ? currentEquity : null
+            };
+        });
+
+        // Stats
+        const completedCount = achievements.filter(a => a.completed).length;
+        const pendingRewards = achievements.filter(a => a.status === "PENDING_REWARD");
+        const inProgress = achievements.find(a => a.status === "IN_PROGRESS");
+
+        res.json({
+            success: true,
+            totalChapters: ALL_MILESTONES.length,
+            completedChapters: completedCount,
+            pendingRewards: pendingRewards.length,
+            currentEquity,
+            mxnRate,
+            currentEquityMXN: Math.round(currentEquity * mxnRate),
+            achievements,
+            nextToRedeem: pendingRewards[0] || null,
+            inProgress: inProgress || null
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Endpoint to redeem a reward
+app.post("/api/achievements/redeem", express.json(), (req, res) => {
+    try {
+        const { milestoneId } = req.body;
+        const coachState = loadLifeCoachState();
+        
+        if (!coachState.completedMilestones?.includes(milestoneId)) {
+            return res.status(400).json({ error: "Milestone not completed yet" });
+        }
+        
+        if (!coachState.redeemedRewards) coachState.redeemedRewards = [];
+        
+        if (coachState.redeemedRewards.includes(milestoneId)) {
+            return res.status(400).json({ error: "Reward already redeemed" });
+        }
+        
+        coachState.redeemedRewards.push(milestoneId);
+        coachState.redeemedAt = coachState.redeemedAt || {};
+        coachState.redeemedAt[milestoneId] = new Date().toISOString();
+        
+        saveLifeCoachState(coachState);
+        
+        res.json({ success: true, message: "¡Recompensa reclamada! Disfruta tu premio 🎉" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// MINDSET ANTI-FEAR SYSTEM - Psychological support during dips
+app.get("/api/mindset", async (req, res) => {
+    try {
+        const depositsFile = path.join(__dirname, "data", "deposits.json");
+        const depositsData = JSON.parse(fs.readFileSync(depositsFile, "utf8"));
+        const deposits = depositsData.deposits || [];
+        const totalDeposited = deposits.reduce((sum, d) => sum + (d.amount || 0), 0);
+        
+        const bal = await binance.fetchBalance().catch(() => ({}));
+        const tickers = await binance.fetchTickers().catch(() => ({}));
+        
+        let totalEquity = bal.USDT?.total || 0;
+        const assets = Object.keys(bal).filter(k => !["info","free","used","total","USDT"].includes(k));
+        for (const a of assets) {
+            const q = bal[a]?.total || 0;
+            if (q > 0.000001) {
+                const px = tickers[a+"/USDT"]?.last || 0;
+                totalEquity += q * px;
+            }
+        }
+        
+        const netGain = totalEquity - totalDeposited;
+        const isNegative = netGain < 0;
+        
+        const mindsetData = {
+            currentState: isNegative ? "DIP" : "POSITIVE",
+            netGain: netGain.toFixed(2),
+            totalDeposited: totalDeposited.toFixed(2),
+            totalEquity: totalEquity.toFixed(2),
+            messages: [],
+            strategy: []
+        };
+        
+        if (isNegative) {
+            mindsetData.messages = [
+                "Este es un momento temporal. El bot sigue trabajando.",
+                "Los lotes comprados durante la baja son tu ventaja futura.",
+                "El mercado siempre cicla. Paciencia = Profit.",
+                "CETES no te hace millonario. El bot + paciencia si.",
+                "El flotante negativo = mas tokens a menor precio."
+            ];
+            mindsetData.strategy = [
+                "NO vendas en panico",
+                "El bot compro barato - eso es BUENO",
+                "Cuando suba, las ganancias seran mayores",
+                "Tu unico trabajo: ESPERAR"
+            ];
+        } else {
+            mindsetData.messages = [
+                "Momentum positivo. El compounding esta funcionando.",
+                "Cada profit reinvertido acelera el crecimiento.",
+                "Estas en el camino correcto hacia MAGNATE."
+            ];
+            mindsetData.strategy = [
+                "Manten el curso",
+                "Considera depositar mas si tienes capital",
+                "El bot escala con mas capital"
+            ];
+        }
+        
+        res.json(mindsetData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });

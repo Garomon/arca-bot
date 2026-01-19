@@ -623,22 +623,19 @@ socket.on('financial_update', (data) => {
     }
 
     // ===== SYNC BOT TO ARCA DATA (Portfolio Crypto) =====
+    // NOTE: Socket sends bot's ALLOCATED portion (~40%), not full account
+    // Portfolio crypto should come from /api/balance via syncPortfolioCrypto()
+    // Only update botEquity here (the bot's specific slice)
     if (typeof arcaData !== 'undefined') {
-        // FIX: Use globalEquity (Total Binance Balance) for Portfolio, not just allocated
-        const globalValueMXN = (data.globalEquity || data.accountEquity || data.totalEquity) * window.usdMxnRate;
-        arcaData.botEquity = data.totalEquity; // Bot's slice stays as-is
-        arcaData.portfolio.crypto = globalValueMXN; // Portfolio shows TOTAL account value
+        arcaData.botEquity = data.totalEquity; // Bot's allocated portion
 
-        // Update crypto display if exists
-        const cryptoValueInput = document.getElementById('crypto-value');
-        if (cryptoValueInput) {
-            cryptoValueInput.value = globalValueMXN.toFixed(0);
-        }
+        // DON'T update crypto-value from socket - it's only the bot's slice, not full account
+        // syncPortfolioCrypto() handles this correctly from /api/balance
 
         // Update goals progress
         updateGoalsProgress();
 
-        // Save to localStorage (debounced)
+        // Save to localStorage (debounced) - but don't save crypto from socket
         clearTimeout(window.botSaveTimeout);
         window.botSaveTimeout = setTimeout(() => saveArcaData(arcaData), 5000);
     }
@@ -1794,7 +1791,8 @@ function renderInputsFromData(data) {
         setVal('qqq-value', data.portfolio.qqq);
         setVal('gold-value', data.portfolio.gold);
         setVal('vwo-value', data.portfolio.vwo);
-        setVal('crypto-value', data.portfolio.crypto);
+        // NOTE: crypto-value comes fresh from bot API, not localStorage
+        // setVal('crypto-value', data.portfolio.crypto);
         setVal('monthly-contribution', data.portfolio.monthlyContribution);
     }
 
@@ -2292,7 +2290,8 @@ function loadSavedValues() {
     if (qqqInput) qqqInput.value = arcaData.portfolio.qqq;
     if (goldInput) goldInput.value = arcaData.portfolio.gold;
     if (vwoInput) vwoInput.value = arcaData.portfolio.vwo;
-    if (cryptoInput) cryptoInput.value = arcaData.portfolio.crypto;
+    // NOTE: Don't load crypto from localStorage - always get fresh from bot with current exchange rate
+    // if (cryptoInput) cryptoInput.value = arcaData.portfolio.crypto;
     if (monthlyInput) monthlyInput.value = arcaData.portfolio.monthlyContribution;
 
     // Load flow data
@@ -3105,11 +3104,46 @@ function setupBotControls() {
     // Manual Capital Update removed (Smart Detection Active)
 }
 
+// ===== SYNC PORTFOLIO CRYPTO FROM BOT (same as Dashboard) =====
+async function syncPortfolioCrypto() {
+    try {
+        const res = await fetch('/api/balance');
+        if (res.ok) {
+            const data = await res.json();
+            const totalEquityUSD = data.totalEquity || 0;
+            const mxnRate = window.usdMxnRate || 18.0;
+            const cryptoValueMXN = totalEquityUSD * mxnRate;
+
+            // Update the input field
+            const cryptoInput = document.getElementById('crypto-value');
+            if (cryptoInput) {
+                cryptoInput.value = cryptoValueMXN.toFixed(0);
+            }
+
+            // Update arcaData
+            if (typeof arcaData !== 'undefined') {
+                arcaData.portfolio.crypto = cryptoValueMXN;
+                arcaData.botEquity = totalEquityUSD;
+            }
+
+            // Recalculate goals
+            updateGoalsProgress();
+
+            console.log(`[PORTFOLIO SYNC] Crypto: $${totalEquityUSD.toFixed(2)} USD = $${cryptoValueMXN.toFixed(0)} MXN (rate: ${mxnRate.toFixed(2)})`);
+        }
+    } catch (e) {
+        console.error('Error syncing portfolio crypto:', e);
+    }
+}
+
 // ===== AUTO-REFRESH SYSTEM =====
 async function autoRefresh() {
     // Fetch exchange rate and macro data
     await fetchExchangeRate();
     await fetchMacroContext();
+
+    // Sync portfolio crypto from bot
+    await syncPortfolioCrypto();
 
     // Recalculate everything
     calculateNetWorth();
@@ -3139,6 +3173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initial data fetch
         await fetchExchangeRate();
         await fetchMacroContext();
+        await syncPortfolioCrypto(); // Sync crypto from bot with fresh rate
 
         // Calculations
         calculateNetWorth();

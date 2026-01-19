@@ -8,6 +8,13 @@
       "allocation": {
         "BTC": 50,
         "SOL": 50
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 75,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 23
       }
     },
     {
@@ -18,6 +25,13 @@
       "allocation": {
         "BTC": 50,
         "SOL": 50
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 75,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 22
       }
     },
     {
@@ -28,6 +42,13 @@
       "allocation": {
         "BTC": 50,
         "SOL": 50
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 75,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 25
       }
     },
     {
@@ -38,6 +59,13 @@
       "allocation": {
         "BTC": 50,
         "SOL": 50
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 75,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 23
       }
     },
     {
@@ -59,14 +87,67 @@
         "BTC": 40,
         "SOL": 40,
         "DOGE": 20
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 65,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 28
       }
     },
     {
       "id": 6,
       "date": "2026-01-11",
       "amount": 167,
-      "note": " Compra MXN→USDT"
+      "note": " Compra MXN→USDT",
+      "allocation": {
+        "BTC": 40,
+        "SOL": 40,
+        "DOGE": 20
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 65,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 29
+      }
+    },
+    {
+      "id": 7,
+      "date": "2026-01-12",
+      "amount": 195,
+      "note": " Compra MXN→USDT",
+      "allocation": {
+        "BTC": 40,
+        "SOL": 40,
+        "DOGE": 20
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 65,
+        "emoji": "🟢",
+        "estimated": true,
+        "fearGreed": 27
+      }
+    },
+    {
+      "id": 8,
+      "date": "2026-01-18",
+      "amount": 56,
+      "note": " Compra MXN→USDT",
+      "allocation": {
+        "BTC": 40,
+        "SOL": 40,
+        "DOGE": 20
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 69,
+        "emoji": "🟢"
+      }
     }
   ],
-  "nextId": 7
+  "nextId": 9
 }
