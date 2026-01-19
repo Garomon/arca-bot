@@ -3365,40 +3365,152 @@
 
         init();
 
-        // MINDSET ANTI-FEAR SYSTEM
-        // MINDSET ANTI-FEAR SYSTEM - Uses dashboard's existing netGain
+        // MINDSET COACHING SYSTEM - Multiple dynamic modes
         async function fetchMindset() {
             try {
                 const section = document.getElementById('mindset-section');
                 const msgDiv = document.getElementById('mindset-message');
                 const stratDiv = document.getElementById('mindset-strategy');
-                
-                // Get netGain from the dashboard's existing element
-                const netGainEl = document.getElementById('cap-profit');
-                if (!netGainEl) return;
-                
-                const netGainText = netGainEl.innerText.replace('$', '').replace(',', '');
-                const netGain = parseFloat(netGainText) || 0;
-                
+                if (!section) return;
+
+                // Get data from dashboard elements
+                const parseNum = (id) => {
+                    const el = document.getElementById(id);
+                    if (!el) return 0;
+                    return parseFloat(el.innerText.replace(/[$,%]/g, '').replace(',', '')) || 0;
+                };
+
+                const netGain = parseNum('cap-profit');
+                const dailyProfit = parseNum('daily-profit');
+                const flotante = parseNum('unrealized-pnl');
+                const roiEl = document.getElementById('cap-roi');
+                const roi = roiEl ? parseFloat(roiEl.innerText) || 0 : 0;
+
+                // Determine mode based on conditions (priority order)
+                let mode = null;
+
+                // 1. PACIENCIA - Net negative (highest priority when losing)
                 if (netGain < 0) {
-                    section.style.display = 'block';
-                    const messages = [
-                        "Este es un momento temporal. El bot sigue trabajando.",
-                        "Los lotes comprados durante la baja son tu ventaja futura.",
-                        "El mercado siempre cicla. Paciencia = Profit.",
-                        "CETES no te hace millonario. El bot + paciencia si.",
-                        "El flotante negativo = mas tokens a menor precio."
-                    ];
-                    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-                    msgDiv.innerHTML = '<strong style="color:#e94560;">Net: $' + netGain.toFixed(2) + '</strong> | ' + randomMsg;
-                    
-                    const strategy = ["NO vendas en panico", "El bot compro barato - eso es BUENO", "Cuando suba, las ganancias seran mayores", "Tu unico trabajo: ESPERAR"];
-                    stratDiv.innerHTML = strategy.map(s => 
-                        '<span style="background:#2d3a4a;padding:5px 10px;border-radius:5px;font-size:0.8rem;color:#4ade80;">' + s + '</span>'
-                    ).join('');
-                } else {
-                    section.style.display = 'none';
+                    mode = {
+                        icon: '🧘',
+                        title: 'MODO PACIENCIA ACTIVADO',
+                        color: '#e94560',
+                        bgColor: 'rgba(233,69,96,0.15)',
+                        stat: 'Net: $' + netGain.toFixed(2),
+                        messages: [
+                            "Este es un momento temporal. El bot sigue trabajando.",
+                            "Los lotes comprados durante la baja son tu ventaja futura.",
+                            "El mercado siempre cicla. Paciencia = Profit.",
+                            "El flotante negativo = mas tokens a menor precio.",
+                            "Warren Buffett: El mercado transfiere dinero de impacientes a pacientes."
+                        ],
+                        tips: ["NO vendas en panico", "El bot compro barato", "Cuando suba ganaras mas", "ESPERAR es tu trabajo"]
+                    };
                 }
+                // 2. DIAMOND HANDS - ROI > 5%
+                else if (roi > 5) {
+                    mode = {
+                        icon: '💎',
+                        title: 'MODO DIAMOND HANDS',
+                        color: '#00d4ff',
+                        bgColor: 'rgba(0,212,255,0.15)',
+                        stat: 'ROI: ' + roi.toFixed(1) + '%',
+                        messages: [
+                            "Estas superando a la mayoria de traders!",
+                            "El compounding esta haciendo su magia.",
+                            "Cada dia que pasa, tu ventaja crece.",
+                            "Este es el camino hacia MAGNATE."
+                        ],
+                        tips: ["Mantente firme", "No retires capital", "Deja que compound", "Sigue el plan"]
+                    };
+                }
+                // 3. COSECHA - Daily profit > $1
+                else if (dailyProfit > 1) {
+                    mode = {
+                        icon: '🌾',
+                        title: 'MODO COSECHA',
+                        color: '#ffd700',
+                        bgColor: 'rgba(255,215,0,0.15)',
+                        stat: 'Hoy: +$' + dailyProfit.toFixed(2),
+                        messages: [
+                            "Dia productivo! El bot esta tomando ganancias.",
+                            "Los sells de hoy son tu recompensa por la paciencia.",
+                            "Cada ciclo completado te acerca a la meta.",
+                            "El grid esta funcionando perfectamente."
+                        ],
+                        tips: ["Disfruta el progreso", "No toques nada", "El bot sabe", "Celebra pequeno"]
+                    };
+                }
+                // 4. ACUMULACION - Flotante muy negativo (comprando mucho)
+                else if (flotante < -20) {
+                    mode = {
+                        icon: '🛒',
+                        title: 'MODO ACUMULACION',
+                        color: '#9b59b6',
+                        bgColor: 'rgba(155,89,182,0.15)',
+                        stat: 'Flotante: $' + flotante.toFixed(2),
+                        messages: [
+                            "El bot esta comprando a precios bajos.",
+                            "Acumulacion = Preparacion para el proximo rally.",
+                            "Mas lotes = Mas ganancias cuando suba.",
+                            "Esta es la fase de siembra."
+                        ],
+                        tips: ["Fase de compra", "Normal en mercado bajista", "Preparando ganancias", "Paciencia"]
+                    };
+                }
+                // 5. CRECIMIENTO - Net positive
+                else if (netGain > 0) {
+                    mode = {
+                        icon: '🚀',
+                        title: 'MODO CRECIMIENTO',
+                        color: '#4ade80',
+                        bgColor: 'rgba(74,222,128,0.15)',
+                        stat: 'Net: +$' + netGain.toFixed(2),
+                        messages: [
+                            "Momentum positivo! Sigue asi.",
+                            "El bot esta generando valor real.",
+                            "Cada dolar ganado es tuyo para siempre.",
+                            "El sistema funciona. Confia en el proceso."
+                        ],
+                        tips: ["Mantente enfocado", "Considera aportar mas", "El exito atrae exito", "Sigue adelante"]
+                    };
+                }
+                // 6. STANDBY - Default when nothing special
+                else {
+                    mode = {
+                        icon: '⚡',
+                        title: 'MODO ACTIVO',
+                        color: '#888',
+                        bgColor: 'rgba(136,136,136,0.1)',
+                        stat: 'Sistema operando',
+                        messages: [
+                            "El bot monitorea el mercado 24/7.",
+                            "Esperando la proxima oportunidad.",
+                            "Todo funciona con normalidad.",
+                            "Sin accion requerida de tu parte."
+                        ],
+                        tips: ["Bot trabajando", "Mercado lateral", "Paciencia", "Todo normal"]
+                    };
+                }
+
+                // Render the mode
+                section.style.display = 'block';
+                section.style.borderLeftColor = mode.color;
+                section.style.background = 'linear-gradient(135deg, ' + mode.bgColor + ' 0%, rgba(22,33,62,0.95) 100%)';
+
+                const headerDiv = section.querySelector('div');
+                if (headerDiv) {
+                    headerDiv.innerHTML = '<span style="font-size:1.3rem;">' + mode.icon + '</span>' +
+                        '<span style="color:' + mode.color + ';font-size:0.9rem;font-weight:bold;">' + mode.title + '</span>';
+                }
+
+                const randomMsg = mode.messages[Math.floor(Math.random() * mode.messages.length)];
+                msgDiv.innerHTML = '<strong style="color:' + mode.color + ';">' + mode.stat + '</strong> | ' + randomMsg;
+
+                stratDiv.innerHTML = mode.tips.map(s =>
+                    '<span style="background:#2d3a4a;padding:5px 10px;border-radius:5px;font-size:0.8rem;color:' + mode.color + ';">' + s + '</span>'
+                ).join('');
+
             } catch(e) {
                 console.log('Mindset error:', e);
             }
