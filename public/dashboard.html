@@ -3398,25 +3398,43 @@
                 // Determine mode based on conditions (priority order)
                 let mode = null;
 
-                // 1. PACIENCIA - Net negative (highest priority when losing)
-                if (netGain < 0) {
+                // 1. ACUMULACION - Flotante muy negativo + net negativo = comprando en la baja
+                if (flotante < -20 && netGain < 0) {
+                    mode = {
+                        icon: '🛒',
+                        title: 'MODO ACUMULACION',
+                        color: '#9b59b6',
+                        bgColor: 'rgba(155,89,182,0.15)',
+                        stat: 'Comprando: $' + Math.abs(flotante).toFixed(0) + ' en lotes',
+                        messages: [
+                            "El bot esta comprando a precios de DESCUENTO!",
+                            "Acumulacion = Preparacion para el proximo rally.",
+                            "Mas lotes a bajo precio = Mas ganancias cuando suba.",
+                            "Esta es la fase de SIEMBRA. La cosecha viene.",
+                            "Los mejores traders compran cuando otros tienen miedo."
+                        ],
+                        tips: ["Fase de compra", "Precios baratos", "Rally viene pronto", "NO toques nada"]
+                    };
+                }
+                // 2. PACIENCIA - Net negativo pero flotante no tan extremo
+                else if (netGain < 0) {
                     mode = {
                         icon: '🧘',
-                        title: 'MODO PACIENCIA ACTIVADO',
+                        title: 'MODO PACIENCIA',
                         color: '#e94560',
                         bgColor: 'rgba(233,69,96,0.15)',
                         stat: 'Net: $' + netGain.toFixed(2),
                         messages: [
-                            "Este es un momento temporal. El bot sigue trabajando.",
-                            "Los lotes comprados durante la baja son tu ventaja futura.",
+                            "Momento temporal. El bot sigue trabajando.",
                             "El mercado siempre cicla. Paciencia = Profit.",
-                            "El flotante negativo = mas tokens a menor precio.",
-                            "Warren Buffett: El mercado transfiere dinero de impacientes a pacientes."
+                            "Warren Buffett: El mercado transfiere dinero de impacientes a pacientes.",
+                            "Cada baja es una oportunidad disfrazada.",
+                            "Tu unico trabajo ahora: ESPERAR."
                         ],
-                        tips: ["NO vendas en panico", "El bot compro barato", "Cuando suba ganaras mas", "ESPERAR es tu trabajo"]
+                        tips: ["NO vendas en panico", "Bot trabaja 24/7", "Espera el rebote", "Confia en el proceso"]
                     };
                 }
-                // 2. DIAMOND HANDS - ROI > 5%
+                // 3. DIAMOND HANDS - ROI > 5%
                 else if (roi > 5) {
                     mode = {
                         icon: '💎',
@@ -3448,23 +3466,6 @@
                             "El grid esta funcionando perfectamente."
                         ],
                         tips: ["Disfruta el progreso", "No toques nada", "El bot sabe", "Celebra pequeno"]
-                    };
-                }
-                // 4. ACUMULACION - Flotante muy negativo (comprando mucho)
-                else if (flotante < -20) {
-                    mode = {
-                        icon: '🛒',
-                        title: 'MODO ACUMULACION',
-                        color: '#9b59b6',
-                        bgColor: 'rgba(155,89,182,0.15)',
-                        stat: 'Flotante: $' + flotante.toFixed(2),
-                        messages: [
-                            "El bot esta comprando a precios bajos.",
-                            "Acumulacion = Preparacion para el proximo rally.",
-                            "Mas lotes = Mas ganancias cuando suba.",
-                            "Esta es la fase de siembra."
-                        ],
-                        tips: ["Fase de compra", "Normal en mercado bajista", "Preparando ganancias", "Paciencia"]
                     };
                 }
                 // 5. CRECIMIENTO - Net positive
