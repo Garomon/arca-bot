@@ -6,5 +6,12 @@ node_modules/
 VPS_SECRET.txt
 
 # Temp files
+temp_*.js
 temp_*.json
+temp_*.txt
 nul
+1000
+checkpoints/
+*_current.js
+*_current.html
+*_clean.html
