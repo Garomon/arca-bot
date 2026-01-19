@@ -3395,7 +3395,7 @@
                 const roiText = roiEl ? roiEl.innerText : '0';
                 const roi = parseFloat(roiText.replace(/[+%]/g, '')) || 0;
 
-                // Determine mode based on conditions (priority order)
+                // Determine mode based on conditions (NO CONTRADICTIONS)
                 let mode = null;
 
                 // 1. ACUMULACION - Flotante muy negativo + net negativo = comprando en la baja
@@ -3405,7 +3405,7 @@
                         title: 'MODO ACUMULACION',
                         color: '#9b59b6',
                         bgColor: 'rgba(155,89,182,0.15)',
-                        stat: 'Comprando: $' + Math.abs(flotante).toFixed(0) + ' en lotes',
+                        stat: 'Lotes: $' + Math.abs(flotante).toFixed(0) + ' | Net: $' + netGain.toFixed(0),
                         messages: [
                             "El bot esta comprando a precios de DESCUENTO!",
                             "Acumulacion = Preparacion para el proximo rally.",
@@ -3413,10 +3413,27 @@
                             "Esta es la fase de SIEMBRA. La cosecha viene.",
                             "Los mejores traders compran cuando otros tienen miedo."
                         ],
-                        tips: ["Fase de compra", "Precios baratos", "Rally viene pronto", "NO toques nada"]
+                        tips: ["Fase de compra", "Precios baratos", "Rally viene", "NO toques nada"]
                     };
                 }
-                // 2. PACIENCIA - Net negativo pero flotante no tan extremo
+                // 2. HOLDING - Flotante muy negativo PERO net positivo = aguantando bolsas
+                else if (flotante < -20 && netGain >= 0) {
+                    mode = {
+                        icon: '💪',
+                        title: 'MODO HOLDING',
+                        color: '#f39c12',
+                        bgColor: 'rgba(243,156,18,0.15)',
+                        stat: 'Lotes: $' + Math.abs(flotante).toFixed(0) + ' | Net: +$' + netGain.toFixed(0),
+                        messages: [
+                            "Aguantando fuerte! Tu profit historico te respalda.",
+                            "Tienes lotes en rojo pero sigues en verde total.",
+                            "El mercado recuperara y esos lotes seran oro.",
+                            "HODL = Hold On for Dear Life. Vas bien."
+                        ],
+                        tips: ["Profit te protege", "Lotes recuperaran", "Mantente firme", "No vendas barato"]
+                    };
+                }
+                // 3. PACIENCIA - Net negativo pero flotante no tan extremo
                 else if (netGain < 0) {
                     mode = {
                         icon: '🧘',
@@ -3427,48 +3444,48 @@
                         messages: [
                             "Momento temporal. El bot sigue trabajando.",
                             "El mercado siempre cicla. Paciencia = Profit.",
-                            "Warren Buffett: El mercado transfiere dinero de impacientes a pacientes.",
+                            "Warren Buffett: El dinero pasa de impacientes a pacientes.",
                             "Cada baja es una oportunidad disfrazada.",
                             "Tu unico trabajo ahora: ESPERAR."
                         ],
-                        tips: ["NO vendas en panico", "Bot trabaja 24/7", "Espera el rebote", "Confia en el proceso"]
+                        tips: ["NO vendas", "Bot trabaja 24/7", "Espera rebote", "Confia"]
                     };
                 }
-                // 3. DIAMOND HANDS - ROI > 5%
+                // 4. DIAMOND HANDS - ROI > 5% (solo si no hay flotante extremo)
                 else if (roi > 5) {
                     mode = {
                         icon: '💎',
                         title: 'MODO DIAMOND HANDS',
                         color: '#00d4ff',
                         bgColor: 'rgba(0,212,255,0.15)',
-                        stat: 'ROI: ' + roi.toFixed(1) + '%',
+                        stat: 'ROI: +' + roi.toFixed(1) + '% | Net: +$' + netGain.toFixed(0),
                         messages: [
                             "Estas superando a la mayoria de traders!",
                             "El compounding esta haciendo su magia.",
                             "Cada dia que pasa, tu ventaja crece.",
                             "Este es el camino hacia MAGNATE."
                         ],
-                        tips: ["Mantente firme", "No retires capital", "Deja que compound", "Sigue el plan"]
+                        tips: ["Mantente firme", "No retires", "Deja compound", "Sigue el plan"]
                     };
                 }
-                // 3. COSECHA - Daily profit > $1
+                // 5. COSECHA - Daily profit > $1 (buen dia de trading)
                 else if (dailyProfit > 1) {
                     mode = {
                         icon: '🌾',
                         title: 'MODO COSECHA',
                         color: '#ffd700',
                         bgColor: 'rgba(255,215,0,0.15)',
-                        stat: 'Hoy: +$' + dailyProfit.toFixed(2),
+                        stat: 'Hoy: +$' + dailyProfit.toFixed(2) + ' | Net: +$' + netGain.toFixed(0),
                         messages: [
                             "Dia productivo! El bot esta tomando ganancias.",
-                            "Los sells de hoy son tu recompensa por la paciencia.",
+                            "Los sells de hoy son tu recompensa.",
                             "Cada ciclo completado te acerca a la meta.",
                             "El grid esta funcionando perfectamente."
                         ],
-                        tips: ["Disfruta el progreso", "No toques nada", "El bot sabe", "Celebra pequeno"]
+                        tips: ["Buen dia!", "No toques nada", "Bot sabe", "Celebra"]
                     };
                 }
-                // 5. CRECIMIENTO - Net positive
+                // 6. CRECIMIENTO - Net positive (crecimiento normal)
                 else if (netGain > 0) {
                     mode = {
                         icon: '🚀',
@@ -3482,10 +3499,10 @@
                             "Cada dolar ganado es tuyo para siempre.",
                             "El sistema funciona. Confia en el proceso."
                         ],
-                        tips: ["Mantente enfocado", "Considera aportar mas", "El exito atrae exito", "Sigue adelante"]
+                        tips: ["Enfocado", "Aporta mas", "Exito atrae exito", "Adelante"]
                     };
                 }
-                // 6. STANDBY - Default when nothing special
+                // 7. STANDBY - Default when nothing special
                 else {
                     mode = {
                         icon: '⚡',
