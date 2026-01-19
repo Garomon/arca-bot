@@ -710,9 +710,13 @@
                 <span class="stat-label">ROI Trading <span style="font-size:0.55rem;opacity:0.5;cursor:help;">ⓘ</span></span>
                 <span class="stat-val" id="global-roi">0%</span>
             </div>
-            <div class="stat-cell" title="APY GLOBAL: Rendimiento anualizado de TODOS los bots combinados. Fórmula: (Profit Realizado ÷ Capital Ponderado) × 365 días. Es el promedio general de tu sistema.">
-                <span class="stat-label">APY Global <span style="font-size:0.55rem;opacity:0.5;cursor:help;">ⓘ</span></span>
+            <div class="stat-cell" title="APY TRADING: Rendimiento del BOT basado en profit REALIZADO. NO incluye flotante. Útil para ver si la estrategia funciona.">
+                <span class="stat-label">APY Trading <span style="font-size:0.55rem;opacity:0.5;cursor:help;">ⓘ</span></span>
                 <span class="stat-val gold" id="global-apy">~0%</span>
+            </div>
+            <div class="stat-cell" title="APY REAL: Tu rendimiento REAL vs lo depositado. Incluye flotante y fees. LA VERDAD: ¿Ganas más que un banco?">
+                <span class="stat-label">APY Real <span style="font-size:0.55rem;opacity:0.5;cursor:help;">ⓘ</span></span>
+                <span class="stat-val" id="apy-real" style="color: var(--emerald-life);">0%</span>
             </div>
             <div class="stat-cell" title="Número de órdenes activas en el grid">
                 <span class="stat-label">Órdenes</span>
@@ -1455,6 +1459,20 @@
                         apyEl.innerText = `~${globalAPY.toFixed(0)}%`;
                         apyEl.style.color = globalAPY >= 50 ? 'var(--emerald-life)' : globalAPY >= 20 ? 'var(--gold-primary)' : '#fff';
                     }
+                }
+            }
+
+            // APY REAL: Based on actual equity vs deposits (THE TRUTH)
+            const apyRealEl = document.getElementById('apy-real');
+            if (apyRealEl && window.APY_DAYS_ACTIVE) {
+                const deposited = parseUSD('cap-deposited');
+                const daysActive = window.APY_DAYS_ACTIVE;
+                if (deposited > 0 && daysActive > 0) {
+                    const netGainPct = ((tEquity - deposited) / deposited) * 100;
+                    const apyReal = (netGainPct / daysActive) * 365;
+                    const sign = apyReal >= 0 ? '+' : '';
+                    apyRealEl.innerText = sign + apyReal.toFixed(0) + '%';
+                    apyRealEl.style.color = apyReal >= 5 ? 'var(--emerald-life)' : apyReal >= 0 ? 'var(--gold-primary)' : 'var(--ruby-danger)';
                 }
             }
 
