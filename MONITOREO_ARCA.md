@@ -1,5 +1,5 @@
 # 🦅 Guía de Monitoreo Maestro - Arca Bot (BTC, SOL & DOGE) v6.0
-*(Actualizado: 2026-01-12 - Life Coach System + RPG Progression + Wealth Roadmap)*
+*(Actualizado: 2026-01-16 - Life Coach System + RPG Progression + Wealth Roadmap)*
 
 **IP VPS:** `167.71.1.124`
 **Usuario:** `root`
@@ -12,17 +12,17 @@
 ```
 CONTEXTO DEL PROYECTO ARCA - GAROSSA WEALTH SYSTEM
 
-OBJETIVO: Guiar a Garossa desde ~$1,300 USD hasta $1,000,000 USD (élite millonaria)
+OBJETIVO: Guiar a Garossa desde ~$1,500 USD hasta $1,000,000 USD (élite millonaria)
 ESTRATEGIA: Grid Trading + Reinversión 100% + Inyección $500/mes + Escalamiento progresivo
 TIMELINE: 7-10 años de disciplina consistente
 
 ESTADO ACTUAL (Enero 2026):
-- Equity: ~$1,300 USD
-- Profit Realizado: ~$29 USD
-- APY Real: ~34% (TWR)
-- Días Activo: ~40 días
-- Nivel RPG: 8 (Señor de la Forja)
-- Misión Actual: Cruzar el Valle ($1,500)
+- Equity: ~$1,500 USD (~$26,500 MXN)
+- Profit Realizado: ~$38 USD
+- APY Real: ~38% (TWR)
+- Días Activo: ~44 días
+- Nivel RPG: 8 (Señor de la Forja) - XP: 3581/4500
+- Misión Actual: Cruzar el Valle ($1,500) - 100% COMPLETADA!
 
 BOTS ACTIVOS:
 - BTC/USDT (Puerto 3000) - Grid trading con SMART_DCA
@@ -36,6 +36,10 @@ SISTEMAS IMPLEMENTADOS:
 4. RPG Progression - Sistema de niveles y misiones
 5. Capital Tracker - Seguimiento de depósitos
 6. Profit Charts - Visualización de ganancias por bot
+7. Injection Indicator - Scoring 0-100 para decidir cuándo inyectar
+8. MXN Milestones - Metas en pesos (100K, 500K, 1M MXN)
+9. Cron Jobs - Backup cada hora + verificación profits 8am
+10. AI Training Data - Snapshots cada 30s para ML futuro
 
 COMPROMISO DEL USUARIO:
 - Depositar $500 USD/mes (sin falta)
@@ -44,8 +48,8 @@ COMPROMISO DEL USUARIO:
 - Escalar estrategias según nivel
 
 CONVERSIÓN MXN:
-- Usa Binance USDT/MXN rate (~18 MXN/USD)
-- NO usar rate bancario (20.5 es incorrecto)
+- Usa Binance USDT/MXN rate (~17.7 MXN/USD actual)
+- NO usar rate bancario (20.5 es incorrecto para P2P)
 
 SI EL BOT ESTÁ PAUSADO (SAFETY LOCK):
 - Ejecutar: node scripts/full_audit.js SYMBOL/USDT --fix
@@ -162,11 +166,11 @@ cat /root/arca-bot/reports/daily_report_*_DOGEUSDT_$(TZ='America/Mexico_City' da
 echo -e "\n🧬 --- 5.d TRAZABILIDAD DE LOTES (ÚLTIMOS 5) ---"; \
 grep -h "Matched Lots" /root/arca-bot/logs/VANTAGE01_*_activity*.log 2>/dev/null | tail -n 5; \
 echo -e "\n🏥 --- 6. [BTC] ACTIVIDAD (últimas 50 líneas) ---"; \
-tail -n 50 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
+tail -n 20 /root/arca-bot/logs/VANTAGE01_BTCUSDT_activity.log; \
 echo -e "\n🏥 --- 7. [SOL] ACTIVIDAD (últimas 50 líneas) ---"; \
-tail -n 50 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
+tail -n 20 /root/arca-bot/logs/VANTAGE01_SOLUSDT_activity.log; \
 echo -e "\n🏥 --- 8. [DOGE] ACTIVIDAD (últimas 50 líneas) ---"; \
-tail -n 50 /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity.log; \
+tail -n 20 /root/arca-bot/logs/VANTAGE01_DOGEUSDT_activity.log; \
 echo -e "\n🧠 --- 9.a [AI BTC] ENTRENAMIENTO [TIEMPO REAL] ---"; \
 tail -n 1 /root/arca-bot/logs/training_data/market_snapshots_BTCUSDT_$(date +%Y-%m-%d).jsonl 2>/dev/null || echo "Esperando primer dato del día..."; \
 echo -e "\n🧠 --- 9.b [AI SOL] ENTRENAMIENTO [TIEMPO REAL] ---"; \
@@ -205,38 +209,31 @@ echo "  node scripts/audit_deep_forensic.js  # 🔍 AUDITORIA FORENSE DE FEES"; 
 echo "  node scripts/check_ghosts.js         # 👻 CAZAFANTASMAS"; \
 echo "  node scripts/check_orphan_orders.js  # 🔗 ORDENES HUERFANAS"; \
 echo -e "\n🧬 --- 17. LIFE COACH STATUS [GUÍA DE VIDA] ---"; \
-curl -s http://localhost:3000/api/life-coach 2>/dev/null | node -e " \
-const chunks = []; \
-process.stdin.on('data', c => chunks.push(c)); \
-process.stdin.on('end', () => { \
-  try { \
-    const d = JSON.parse(Buffer.concat(chunks).toString()); \
-    console.log('  👤 Nivel:', d.level, '| Días Activo:', d.daysActive); \
-    console.log('  💰 Equity: \$' + (d.equity||0).toFixed(2)); \
-    console.log(''); \
-    console.log('  📋 MISIONES ACTIVAS:'); \
-    (d.missions||[]).forEach(m => { \
-      const pct = m.progressPercent || 0; \
-      const bar = '█'.repeat(Math.floor(pct/10)) + '░'.repeat(10-Math.floor(pct/10)); \
-      console.log('     ' + m.icon + ' ' + m.name + ': [' + bar + '] ' + pct + '%'); \
-      console.log('        ' + m.description + ' (+' + m.xpReward + ' XP)'); \
-    }); \
-    console.log(''); \
-    console.log('  💡 TIPS DEL MENTOR:'); \
-    (d.tips||[]).slice(0,2).forEach(t => console.log('     ' + t.icon + ' ' + t.tip)); \
-    console.log(''); \
-    console.log('  📈 ESTRATEGIAS:'); \
-    (d.strategies||[]).forEach(s => { \
-      const icon = s.unlocked ? '✅' : '🔒'; \
-      console.log('     ' + icon + ' ' + s.name + (s.unlocked ? '' : ' (Lvl ' + (s.minLevel||'?') + ')')); \
-    }); \
-    console.log(''); \
-    console.log('  🔥 HÁBITOS:'); \
-    console.log('     💎 Días sin retiro: ' + (d.habits?.noWithdrawalDays || 0)); \
-    console.log('     💉 Días desde inyección: ' + (d.habits?.lastInjectionDays || '?')); \
-    console.log('     📊 Meta mensual: \$' + (d.stats?.depositsThisMonth||0) + '/\$' + (d.stats?.monthlyGoal||500)); \
-  } catch(e) { console.log('  ⚠️ No se pudo cargar Life Coach API'); } \
-});" || echo "  ⚠️ Life Coach API no disponible"
+curl -s http://localhost:3000/api/life-coach 2>/dev/null | node -e '
+const chunks = [];
+process.stdin.on("data", c => chunks.push(c));
+process.stdin.on("end", () => {
+  try {
+    const d = JSON.parse(Buffer.concat(chunks).toString());
+    console.log("  👤 Nivel:", d.level, "| Días Activo:", d.daysActive);
+    console.log("  💰 Equity: $" + (d.equity||0).toFixed(2));
+    console.log("  🎯 APY: " + (d.currentAPY || 34) + "%");
+    console.log("");
+    console.log("  📋 MISIONES ACTIVAS:");
+    (d.missions||[]).forEach(m => {
+      const pct = m.progressPercent || 0;
+      const bar = "█".repeat(Math.floor(pct/10)) + "░".repeat(10-Math.floor(pct/10));
+      console.log("     " + m.icon + " " + m.name + ": [" + bar + "] " + pct + "%");
+    });
+    console.log("");
+    console.log("  💡 TIP:", (d.tips||[])[0]?.tip || "Sin tips");
+    console.log("");
+    console.log("  🔥 HÁBITOS:");
+    console.log("     💎 Días sin retiro: " + (d.habits?.noWithdrawalDays || 0));
+    console.log("     💵 Meta mensual: $" + (d.stats?.depositsThisMonth||0) + "/$" + (d.stats?.monthlyGoal||500));
+  } catch(e) { console.log("  ⚠️ No se pudo cargar Life Coach API"); }
+});
+' || echo "  ⚠️ Life Coach API no disponible"
 ```
 
 ---
@@ -266,6 +263,7 @@ npm run sync:up
 | API SOL Status | http://167.71.1.124:3001/api/status |
 | API DOGE Status | http://167.71.1.124:3004/api/status |
 | Life Coach API | http://167.71.1.124:3000/api/life-coach |
+| RPG API | http://167.71.1.124:3000/api/rpg |
 | Profit History | http://167.71.1.124:3000/api/profit-history |
 | Equity Snapshots | http://167.71.1.124:3000/api/equity-snapshots |
 
@@ -398,9 +396,9 @@ const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.A
 | APY Global | Rendimiento anualizado (TWR) |
 
 ### Conversión MXN
-- El dashboard usa **Binance USDT/MXN** (~18 MXN)
+- El dashboard usa **Binance USDT/MXN** (~17.7 MXN actual)
 - NO el rate bancario (20.5 es incorrecto)
-- Debe coincidir con lo que muestra Binance
+- El rate se actualiza en tiempo real desde la API de Binance
 
 ---
 
@@ -426,9 +424,9 @@ const b = new ccxt.binance({apiKey: process.env.BINANCE_API_KEY || process.env.A
 ## 🎯 9. Tu Roadmap Personal
 
 ```
-ACTUAL:     $1,300 USD (Nivel 8)
+ACTUAL:     $1,500 USD (Nivel 8) ✅ MILESTONE REACHED!
             ↓
-MILESTONE:  $1,500 USD (Cruzar el Valle) - ~$200 más
+PRÓXIMO:    $3,000 USD (iPhone nuevo / Nivel 10)
             ↓
 AÑO 1:      $8,000 - $12,000 USD
             ↓
@@ -454,6 +452,7 @@ RESULTADO: Libertad financiera en 7-10 años
 
 | Fecha | Versión | Cambios |
 |-------|---------|---------|
+| 2026-01-16 | v6.1 | Fear&Greed fix, Profit sync fix, Level sync fix, valores actualizados |
 | 2026-01-12 | v6.0 | Life Coach, RPG System, Prompt Maestro, MXN fix |
 | 2026-01-10 | v5.4 | Safety Lock Detection, Log Monitor |
 | 2026-01-08 | v5.3 | Fee Forensics, Ghost Trade Repair |

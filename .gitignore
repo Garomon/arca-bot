@@ -4,6 +4,7 @@ node_modules/
 .DS_Store
 
 VPS_SECRET.txt
+.claude/
 
 # Temp files
 temp_*.js
