@@ -3373,18 +3373,27 @@
                 const stratDiv = document.getElementById('mindset-strategy');
                 if (!section) return;
 
-                // Get data from dashboard elements
-                const parseNum = (id) => {
+                // Get data from dashboard elements (handles MXN suffix and negatives)
+                const parseUSD = (id) => {
                     const el = document.getElementById(id);
                     if (!el) return 0;
-                    return parseFloat(el.innerText.replace(/[$,%]/g, '').replace(',', '')) || 0;
+                    const text = el.innerText || el.textContent || '';
+                    // Extract first USD number (handles "-$8.14 ≈ $144 MXN" format)
+                    const match = text.match(/([+-]?)\s*\$?\s*([\d,.]+)/);
+                    if (match) {
+                        const sign = match[1] === '-' ? -1 : 1;
+                        const num = parseFloat(match[2].replace(',', '')) || 0;
+                        return sign * num;
+                    }
+                    return 0;
                 };
 
-                const netGain = parseNum('cap-profit');
-                const dailyProfit = parseNum('daily-profit');
-                const flotante = parseNum('unrealized-pnl');
+                const netGain = parseUSD('cap-profit');
+                const dailyProfit = parseUSD('daily-profit');
+                const flotante = parseUSD('unrealized-pnl');
                 const roiEl = document.getElementById('cap-roi');
-                const roi = roiEl ? parseFloat(roiEl.innerText) || 0 : 0;
+                const roiText = roiEl ? roiEl.innerText : '0';
+                const roi = parseFloat(roiText.replace(/[+%]/g, '')) || 0;
 
                 // Determine mode based on conditions (priority order)
                 let mode = null;
