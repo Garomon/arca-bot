@@ -1465,7 +1465,7 @@
             // APY REAL: Based on actual equity vs deposits (THE TRUTH)
             const apyRealEl = document.getElementById('apy-real');
             if (apyRealEl && window.APY_DAYS_ACTIVE) {
-                const deposited = window.APY_TWR_CAPITAL || parseFloat(document.getElementById("cap-deposited")?.innerText.replace(/[^0-9.-]/g, "")) || 0; // was parseUSD('cap-deposited');
+                const deposited = parseFloat(document.getElementById("cap-deposited")?.innerText.replace(/[^0-9.-]/g, "")) || 0; // was parseUSD('cap-deposited');
                 const daysActive = window.APY_DAYS_ACTIVE;
                 if (deposited > 0 && daysActive > 0) {
                     const netGainPct = ((tEquity - deposited) / deposited) * 100;
