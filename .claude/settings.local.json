@@ -25,7 +25,22 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: Life Coach bugs - correct days calculation + $500 monthly goal\n\n- Fixed LAUNCH_DATE from 2024-12-14 to 2025-12-03 \\(was showing 394 days instead of ~40\\)\n- Changed MONTHLY_INJECTION_GOAL from $300 to $500 \\(user agreement\\)\n- Added filter to exclude rebalances from deposit calculations\n- Updated dashboard default text to show $500 goal\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git push:*)",
       "Bash(curl -s http://167.71.1.124:3000/api/life-coach)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout:*)",
+      "Bash(dir \"C:\\\\Users\\\\garom\\\\Desktop\\\\Grid Bots Crypto\\\\Grid Bot Arca Garossa BTC - USDT\\\\temp_adaptive_helpers.js\")",
+      "Bash(curl:*)",
+      "Bash(certutil -encode:*)",
+      "Bash(powershell -Command \"[Convert]::ToBase64String\\([System.IO.File]::ReadAllBytes\\(''c:\\\\Users\\\\garom\\\\Desktop\\\\Grid Bots Crypto\\\\Grid Bot Arca Garossa BTC - USDT\\\\temp_all_fixes.js''\\)\\)\")",
+      "Bash(python3:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(where:*)",
+      "Bash(dir:*)",
+      "Read(//c/**)",
+      "Bash(powershell -Command \"\\(Get-ChildItem -Name tmpclaude-*\\).Count\")",
+      "Bash(powershell -Command \"Remove-Item -Path ''tmpclaude-*'' -Force; Write-Host ''Eliminados correctamente''\")",
+      "Bash(powershell -Command:*)",
+      "Bash(sshpass -p '7q2$TA/nVP!CsFi' ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"echo ''Conectado'' && ls -la /root/arca-bot/\")"
     ]
   }
 }
