@@ -259,6 +259,7 @@ async function rebuildInventory() {
         fs.copyFileSync(stateFile, stateFile + ".bak_rebuild_" + Date.now());
 
         // Update state with BOTH arrays
+        // CRITICAL: Set auditVerified=true so reconciliation doesn't overwrite!
         state.inventory = remainingLots.map(lot => ({
             id: lot.id,
             orderId: lot.id,
@@ -268,7 +269,8 @@ async function rebuildInventory() {
             remaining: lot.remaining,
             timestamp: lot.timestamp,
             fee: lot.feesUSD || 0,
-            feesUSD: lot.feesUSD || 0
+            feesUSD: lot.feesUSD || 0,
+            auditVerified: true  // Prevents reconciliation from overwriting
         }));
 
         state.inventoryLots = remainingLots.map(lot => ({
@@ -277,7 +279,8 @@ async function rebuildInventory() {
             amount: lot.amount,
             remaining: lot.remaining,
             fee: lot.feesUSD || 0,
-            timestamp: lot.timestamp
+            timestamp: lot.timestamp,
+            auditVerified: true  // Prevents reconciliation from overwriting
         }));
 
         state.filledOrders = filledOrders;
