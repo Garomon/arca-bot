@@ -4988,16 +4988,29 @@ function checkGeopoliticalContext(currentRegime = 'NEUTRAL', currentPrice = 0, e
     let defenseLevel = 0;
     let activeMessage = eventRisk.activeEvent;
 
+    // DYNAMIC ACCUMULATION: Check conditions before conflict resolution
+    const fearGreedValue = externalDataCache?.fearGreed?.value || 50;
+    const fgIndex = typeof fearGreedValue === 'object' ? fearGreedValue.value : fearGreedValue;
+    const isDynamicAccumulation = macroSentiment?.zone === 'BUY_DIP' || fgIndex < 35;
+
     // CASE 1: Crisis always wins (Level 3+)
     if (eventRisk.defenseLevel >= 3 || structureRisk.defenseLevel >= 3) {
         defenseLevel = Math.max(eventRisk.defenseLevel, structureRisk.defenseLevel);
         finalModifier = 'MAX_DEFENSE';
         activeMessage = "LIQUIDITY CRISIS DETECTED";
     }
-    // CASE 2: Inflationary Accumulation Override
-    else if (eventRisk.defenseLevel === -1) {
+    // CASE 2: Inflationary Accumulation Override (DYNAMIC)
+    // Triggers when: date-based event (-1) OR price below MA200 OR extreme fear (<35)
+    else if (eventRisk.defenseLevel === -1 || isDynamicAccumulation) {
         defenseLevel = -1;
-        // Keep event status/modifier (AGGRESSIVE)
+        finalStatus = 'INFLATIONARY_ACCUMULATION';
+        finalModifier = 'AGGRESSIVE';
+        if (macroSentiment?.zone === 'BUY_DIP') {
+            activeMessage = 'Price below MA200 - Dynamic Accumulation';
+        } else if (fgIndex < 35) {
+            activeMessage = 'Extreme Fear (' + fgIndex + ') - Dynamic Accumulation';
+        }
+        // else keep eventRisk.activeEvent
     }
     // CASE 3: Standard Risk Management (Highest Risk Wins)
     else {
