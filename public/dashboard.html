@@ -1545,9 +1545,14 @@
             const flotanteEl = document.getElementById(`flotante-${id}`);
             if (flotanteEl) {
                 const flotante = data.unrealizedPnL || 0;
-                const sign = flotante >= 0 ? "+" : "";
-                flotanteEl.innerText = `${sign}$${flotante.toFixed(2)}`;
-                flotanteEl.style.color = flotante >= 0 ? "var(--emerald-life)" : "var(--ruby-danger)";
+                if (flotante >= 0) {
+                    flotanteEl.innerHTML = `+$${flotante.toFixed(2)}`;
+                    flotanteEl.style.color = "var(--emerald-life)";
+                } else {
+                    // Negative = accumulating for future gains
+                    flotanteEl.innerHTML = `$${flotante.toFixed(2)} <span style="font-size:0.6rem;opacity:0.7;color:#ffd700">acumulando</span>`;
+                    flotanteEl.style.color = "var(--ruby-danger)";
+                }
             }
 
             if (dailyEl) dailyEl.innerText = `$${(data.dailyProfit || 0).toFixed(2)}`;
