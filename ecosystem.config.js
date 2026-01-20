@@ -42,18 +42,5 @@ module.exports = {
       },
       max_memory_restart: "800M"
     }
-    // Future bots
-    /*
-    {
-      name: "bot-eth",
-      script: "./grid_bot.js",
-      env: {
-        TRADING_PAIR: "ETH/BTC",
-        BOT_PORT: 3002,
-        CAPITAL_ALLOCATION: 0.33,
-        NODE_ENV: "production", BINANCE_API_KEY: "UWAlkUOGv4AAhU7pRtXG2qovJ7AfoUdMGEN4FYsussqTBhkh8SPNlPcEVGatEk6t", BINANCE_SECRET: "XpATUMxNJhUbOvcQLY2wbFs83lnfAky9RQQa8ukEbkWkNTq3VCbSV6bJ7ZLJ2LCr"
-      }
-    }
-    */
   ]
 };
