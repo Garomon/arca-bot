@@ -1,0 +1,16 @@
+{
+  "completedMilestones": ["reach_1500"],
+  "completedSideQuests": [],
+  "lastCheckIn": null,
+  "habits": {
+    "checkInStreak": 0,
+    "noWithdrawalDays": 44
+  },
+  "celebrations": [
+    {
+      "milestone": "reach_1500",
+      "date": "2026-01-15",
+      "equity": 1500.12
+    }
+  ]
+}

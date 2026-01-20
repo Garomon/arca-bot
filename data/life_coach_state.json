@@ -1,0 +1,30 @@
+{
+  "completedMilestones": [
+    "reach_1500"
+  ],
+  "redeemedRewards": [
+    "reach_1500"
+  ],
+  "completedSideQuests": [
+    "learn_compound",
+    "learn_dca",
+    "learn_staking",
+    "learn_defi",
+    "open_etf_account",
+    "learn_grid"
+  ],
+  "habits": {
+    "lastInjectionDate": null,
+    "injectionStreak": 0,
+    "lastCheckInDate": null,
+    "checkInStreak": 0,
+    "noWithdrawalDays": 44
+  },
+  "unlockedStrategies": [
+    "grid_trading"
+  ],
+  "notes": [],
+  "redeemedAt": {
+    "reach_1500": "2026-01-16T05:32:51.899Z"
+  }
+}

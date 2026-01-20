@@ -1,0 +1,83 @@
+{
+  "snapshots": [
+    {
+      "date": "2026-01-08",
+      "equity": 1125.9,
+      "capitalInvested": 1107.74,
+      "timestamp": 1767916465627
+    },
+    {
+      "date": "2026-01-09",
+      "equity": 1127.43,
+      "capitalInvested": 1107.74,
+      "timestamp": 1767920035681
+    },
+    {
+      "date": "2026-01-10",
+      "equity": 1125.22,
+      "capitalInvested": 1107.74,
+      "timestamp": 1768003338805
+    },
+    {
+      "date": "2026-01-11",
+      "equity": 1124.48,
+      "capitalInvested": 1107.74,
+      "timestamp": 1768089645911
+    },
+    {
+      "date": "2026-01-12",
+      "equity": 1296.5,
+      "capitalInvested": 1274.74,
+      "timestamp": 1768177658862
+    },
+    {
+      "date": "2026-01-13",
+      "equity": 1496.42,
+      "capitalInvested": 1469.74,
+      "timestamp": 1768284746816
+    },
+    {
+      "date": "2026-01-14",
+      "equity": 1504.64,
+      "capitalInvested": 1469.74,
+      "timestamp": 1768370588273
+    },
+    {
+      "date": "2026-01-15",
+      "equity": 1504.16,
+      "capitalInvested": 1469.74,
+      "timestamp": 1768457177452
+    },
+    {
+      "date": "2026-01-16",
+      "equity": 1501.04,
+      "capitalInvested": 1469.74,
+      "timestamp": 1768543399461
+    },
+    {
+      "date": "2026-01-17",
+      "equity": 1498.89,
+      "capitalInvested": 1469.74,
+      "timestamp": 1768630662028
+    },
+    {
+      "date": "2026-01-18",
+      "equity": 1497.91,
+      "capitalInvested": 1469.74,
+      "timestamp": 1768717526742
+    },
+    {
+      "date": "2026-01-19",
+      "equity": 1514.25,
+      "capitalInvested": 1525.74,
+      "timestamp": 1768803710064
+    },
+    {
+      "date": "2026-01-20",
+      "equity": 1505.6,
+      "capitalInvested": 1525.74,
+      "timestamp": 1768889885084
+    }
+  ],
+  "capitalInvested": 0
+}
