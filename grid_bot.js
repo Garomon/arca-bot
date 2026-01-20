@@ -846,25 +846,41 @@ function saveLifeCoachState(data) {
 
 // Side Quests - Educational missions
 const SIDE_QUESTS = [
-    // Beginner Education
-    { id: 'learn_compound', name: 'El Poder del Compuesto', description: 'Aprende cómo funciona el interés compuesto', xp: 200, category: 'education', minLevel: 1, url: 'https://www.investopedia.com/terms/c/compoundinterest.asp' },
-    { id: 'learn_dca', name: 'Dollar Cost Averaging', description: 'Entiende la estrategia DCA para reducir riesgo', xp: 200, category: 'education', minLevel: 1, url: 'https://www.investopedia.com/terms/d/dollarcostaveraging.asp' },
-    { id: 'learn_grid', name: 'Maestría Grid Trading', description: 'Domina la estrategia que usa tu bot', xp: 300, category: 'education', minLevel: 2 },
-
-    // Intermediate
-    { id: 'learn_staking', name: 'Staking 101', description: 'Aprende a generar rendimiento pasivo con staking', xp: 400, category: 'education', minLevel: 5, url: 'https://www.binance.com/en/staking' },
-    { id: 'learn_defi', name: 'Intro a DeFi', description: 'Entiende Aave, Compound y yield farming', xp: 500, category: 'education', minLevel: 7 },
-    { id: 'open_etf_account', name: 'Abre Cuenta de ETFs', description: 'Registrate en GBM+, Kuspit o similar para ETFs', xp: 600, category: 'action', minLevel: 8 },
-
-    // Advanced
-    { id: 'learn_futures', name: 'Futuros y Apalancamiento', description: 'Aprende margin trading de forma segura', xp: 700, category: 'education', minLevel: 10 },
-    { id: 'learn_reits', name: 'REITs Tokenizados', description: 'Real estate fraccionado: RealT, Lofty', xp: 600, category: 'education', minLevel: 12 },
-    { id: 'first_etf', name: 'Primera Compra ETF', description: 'Compra tu primer ETF (VOO, QQQ, VTI)', xp: 800, category: 'action', minLevel: 10 },
-
-    // Expert
-    { id: 'learn_tax', name: 'Optimización Fiscal', description: 'Aprende sobre impuestos en crypto en México', xp: 500, category: 'education', minLevel: 15 },
-    { id: 'diversify_realestate', name: 'Primera Inversión Inmobiliaria', description: 'Invierte en REIT o propiedad fraccionada', xp: 1000, category: 'action', minLevel: 15 },
+    // === BEGINNER (Level 1-4) ===
+    { id: "learn_compound", name: "El Poder del Compuesto", description: "Aprende cómo funciona el interés compuesto", xp: 200, category: "education", minLevel: 1 },
+    { id: "learn_dca", name: "Dollar Cost Averaging", description: "Entiende la estrategia DCA", xp: 200, category: "education", minLevel: 1 },
+    { id: "learn_grid", name: "Maestría Grid Trading", description: "Domina la estrategia que usa tu bot", xp: 300, category: "education", minLevel: 2 },
+    { id: "learn_volatility", name: "Entendiendo Volatilidad", description: "Aprende ATR, desviación estándar y VIX", xp: 250, category: "education", minLevel: 3 },
+    { id: "learn_rsi", name: "RSI y Momentum", description: "Indicadores de sobrecompra/sobreventa", xp: 300, category: "education", minLevel: 4 },
+    
+    // === INTERMEDIATE (Level 5-9) ===
+    { id: "learn_staking", name: "Staking 101", description: "Genera rendimiento pasivo con staking", xp: 400, category: "education", minLevel: 5 },
+    { id: "learn_orderbook", name: "Leyendo el Order Book", description: "Interpreta profundidad y liquidez", xp: 400, category: "education", minLevel: 5 },
+    { id: "learn_psychology", name: "Psicología del Trading", description: "Controla FOMO, FUD y emociones", xp: 450, category: "mindset", minLevel: 6 },
+    { id: "learn_risk", name: "Gestión de Riesgo", description: "Position sizing y drawdown máximo", xp: 500, category: "education", minLevel: 6 },
+    { id: "learn_defi", name: "Intro a DeFi", description: "Aave, Compound y yield farming", xp: 500, category: "education", minLevel: 7 },
+    { id: "learn_btc_cycles", name: "Ciclos de Bitcoin", description: "Halving, bull/bear y macro tendencias", xp: 550, category: "education", minLevel: 7 },
+    { id: "open_etf_account", name: "Abre Cuenta ETFs", description: "GBM+, Kuspit o similar", xp: 600, category: "action", minLevel: 8 },
+    { id: "learn_onchain", name: "Análisis On-Chain", description: "Métricas: MVRV, SOPR, NVT", xp: 600, category: "education", minLevel: 8 },
+    { id: "setup_coldwallet", name: "Cold Wallet", description: "Ledger/Trezor y self-custody", xp: 700, category: "action", minLevel: 9 },
+    { id: "learn_macro", name: "Macroeconomía", description: "Tasas, inflación y efecto en crypto", xp: 600, category: "education", minLevel: 9 },
+    
+    // === ADVANCED (Level 10-14) ===
+    { id: "learn_futures", name: "Futuros y Leverage", description: "Margin trading seguro", xp: 700, category: "education", minLevel: 10 },
+    { id: "first_etf", name: "Primera Compra ETF", description: "Compra VOO, QQQ o VTI", xp: 800, category: "action", minLevel: 10 },
+    { id: "learn_options", name: "Opciones Básicas", description: "Calls, puts y cobertura", xp: 750, category: "education", minLevel: 11 },
+    { id: "learn_reits", name: "REITs Tokenizados", description: "RealT, Lofty - real estate fraccionado", xp: 600, category: "education", minLevel: 12 },
+    { id: "automate_savings", name: "Automatiza Ahorro", description: "Transferencias automáticas mensuales", xp: 500, category: "action", minLevel: 12 },
+    { id: "learn_defi_adv", name: "DeFi Avanzado", description: "LP, impermanent loss, yield", xp: 800, category: "education", minLevel: 13 },
+    { id: "portfolio_rebalance", name: "Primer Rebalanceo", description: "Rebalancea según allocation", xp: 600, category: "action", minLevel: 14 },
+    
+    // === EXPERT (Level 15+) ===
+    { id: "learn_tax", name: "Optimización Fiscal", description: "Impuestos crypto en México", xp: 500, category: "education", minLevel: 15 },
+    { id: "diversify_realestate", name: "Inversión Inmobiliaria", description: "REIT o propiedad fraccionada", xp: 1000, category: "action", minLevel: 15 },
+    { id: "mentor_someone", name: "Sé Mentor", description: "Enseña a alguien sobre inversión", xp: 1000, category: "action", minLevel: 18 },
+    { id: "emergency_fund", name: "Fondo de Emergencia", description: "6 meses de gastos ahorrados", xp: 1200, category: "action", minLevel: 20 },
 ];
+
 
 // === MILLIONAIRE ROADMAP CALCULATOR ===
 function calculateMillionaireRoadmap(equity, currentAPY, monthlyInjection = 500) {
@@ -3001,6 +3017,19 @@ async function saveState() {
 
     try {
         const tempFile = `${CONFIG.stateFile}.tmp`;
+
+        // AUTO-SYNC: Keep inventoryLots in sync with inventory (prevents desync forever)
+        if (state.inventory) {
+            state.inventoryLots = state.inventory.map(lot => ({
+                id: lot.id || lot.orderId,
+                price: lot.price || lot.fillPrice,
+                amount: lot.amount,
+                remaining: lot.remaining || lot.amount,
+                fee: lot.fee || lot.feesUSD || 0,
+                timestamp: lot.timestamp
+            }));
+        }
+
         // Use Async Write with SAFE REPLACER
         const json = JSON.stringify(state, safeReplacer, 2);
         await fs.promises.writeFile(tempFile, json);
@@ -6532,13 +6561,14 @@ async function syncHistoricalTrades(deepClean = false) {
                 // FIX: Use REAL fee from Binance trade data
                 let realFeeUSDT = 0;
                 let feeCurrency = 'USDT';
+                let originalFee = 0;
                 if (trade.fee && trade.fee.cost > 0) {
                     if (trade.fee.currency === 'USDT') {
                         realFeeUSDT = trade.fee.cost;
                         feeCurrency = 'USDT';
                     } else if (trade.fee.currency === 'BNB') {
                         // Convert BNB to USDT (approximate - we don't have live price during sync)
-                        realFeeUSDT = trade.fee.cost * 700; // Conservative estimate
+                        originalFee = trade.fee.cost; realFeeUSDT = trade.fee.cost * 700;
                         feeCurrency = 'BNB';
                     } else if (trade.fee.currency === BASE_ASSET) {
                         realFeeUSDT = trade.fee.cost * trade.price;
@@ -6620,9 +6650,12 @@ async function syncHistoricalTrades(deepClean = false) {
 
                             log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
                         } else {
-                            // NO REAL DATA AVAILABLE - Skip this trade instead of using fake data
-                            log('SYNC', `⏭️ Skipping SELL #${trade.id} - No matching BUY found in history or inventory. Will sync on next cycle.`, 'warning');
-                            continue; // Skip to next trade - don't add with fake data
+                            buyPrice = sellPrice; // UNMATCHED - no profit - must have real match
+                            matchType = 'UNMATCHED';
+                            lotId = 'EST_' + trade.id;
+                            entryFee = realFeeUSDT;
+                            actualRemainingAfter = 0;
+                            log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - profit set to 0. Cost: ' + buyPrice.toFixed(2), 'warning');
                         }
                     }
 
@@ -6636,9 +6669,9 @@ async function syncHistoricalTrades(deepClean = false) {
 
                     orderRecord.costBasis = buyPrice;
                     orderRecord.spreadPct = spreadPct;
-                    orderRecord.fees = totalFees;
+                    orderRecord.fees = originalFee > 0 ? originalFee : totalFees; orderRecord.feesUSD = totalFees;
                     orderRecord.feeCurrency = feeCurrency;
-                    orderRecord.profit = netProfit;
+                    orderRecord.profit = (matchType === 'UNMATCHED') ? 0 : netProfit; // UNMATCHED = no profit
                     orderRecord.matchType = matchType;
                     orderRecord.matchedLots = [{
                         lotId: lotId,
@@ -6658,7 +6691,7 @@ async function syncHistoricalTrades(deepClean = false) {
                 } else {
                     // BUY orders: use REAL fee from trade
                     orderRecord.profit = 0;
-                    orderRecord.fees = realFeeUSDT;
+                    orderRecord.fees = originalFee > 0 ? originalFee : realFeeUSDT; orderRecord.feesUSD = realFeeUSDT;
                     orderRecord.feeCurrency = feeCurrency;
                 }
 
