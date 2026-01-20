@@ -377,36 +377,18 @@ async function analyzeAndProject() {
         currentXP = Math.floor(baseXP + xpHit_Profit + xpHit_Time);
 
         const LEVEL_DATA = [
-            // TIER 1: DESPERTAR (Primeros pasos)
-            { level: 1, xp: 0, title: "Soñador" },
-            { level: 2, xp: 100, title: "Aprendiz del Grid" },
-            { level: 3, xp: 250, title: "Iniciado" },
-            { level: 4, xp: 500, title: "Explorador de Mercados" },
-            { level: 5, xp: 800, title: "Guardián del Capital" },
-            // TIER 2: CRECIMIENTO (Construyendo base)
-            { level: 6, xp: 1200, title: "Estratega Novato" },
-            { level: 7, xp: 1800, title: "Domador de Volatilidad" },
-            { level: 8, xp: 2500, title: "Mercader Errante" },
-            { level: 9, xp: 3500, title: "Señor de la Forja" },
-            { level: 10, xp: 5000, title: "Maestro del Spread" },
-            // TIER 3: DOMINIO (Control del arte)
-            { level: 11, xp: 7000, title: "Arcano Financiero" },
-            { level: 12, xp: 10000, title: "Campeón del Grid" },
-            { level: 13, xp: 14000, title: "Leyenda Cripto" },
-            { level: 14, xp: 19000, title: "Titán del Mercado" },
-            { level: 15, xp: 25000, title: "Oráculo de Precios" },
-            // TIER 4: ASCENSIÓN (Riqueza creciente)
-            { level: 16, xp: 35000, title: "Conquistador Financiero" },
-            { level: 17, xp: 50000, title: "Emperador del Capital" },
-            { level: 18, xp: 70000, title: "Arquitecto de Fortunas" },
-            { level: 19, xp: 100000, title: "Señor del Compuesto" },
-            { level: 20, xp: 140000, title: "Inmortal del Trading" },
-            // TIER 5: TRASCENDENCIA (Elite millonaria)
-            { level: 21, xp: 200000, title: "Dios del Grid" },
-            { level: 22, xp: 300000, title: "Tejedor del Destino" },
-            { level: 23, xp: 450000, title: "El Eterno" },
-            { level: 24, xp: 700000, title: "Creador de Legados" },
-            { level: 25, xp: 1000000, title: "TRASCENDIDO - Cuna de Oro" }
+            { level: 1, xp: 0, title: "Novato del Grid" },
+            { level: 2, xp: 100, title: "Aprendiz de Trading" },
+            { level: 3, xp: 300, title: "Explorador de Mercados" },
+            { level: 4, xp: 600, title: "Comerciante Audaz" },
+            { level: 5, xp: 1000, title: "Estratega del Spread" },
+            { level: 6, xp: 1500, title: "Domador de Volatilidad" },
+            { level: 7, xp: 2200, title: "Mercader Errante" },
+            { level: 8, xp: 3000, title: "Señor de la Forja" },
+            { level: 9, xp: 4500, title: "Maestro del Grid" },
+            { level: 10, xp: 6000, title: "Arcano Financiero" },
+            { level: 11, xp: 8000, title: "Leyenda Cripto" },
+            { level: 50, xp: 150000, title: "Dios del Trading" }
         ];
 
         let currentLevelData = LEVEL_DATA[0];
@@ -423,16 +405,12 @@ async function analyzeAndProject() {
     }
 
     // Quest System (Dynamic based on equity/days)
-    let activeQuest, questStatus, questObjective, questProgress;
+    let activeQuest, questStatus;
     if (currentCapital >= 1500) {
         activeQuest = "El Rito de Fortalecimiento";
-        questObjective = "Mantener el sistema activo por 30 días";
-        questProgress = `${Math.min(daysActive, 30).toFixed(0)}/30 días`;
-        questStatus = daysActive >= 30 ? "COMPLETADA" : "EN PROGRESO";
+        questStatus = daysActive >= 30 ? "COMPLETADA (Esperando Recompensa)" : "EN PROGRESO";
     } else {
         activeQuest = "El Cruce del Valle";
-        questObjective = "Alcanzar $1,500 USD de capital";
-        questProgress = `${currentCapital.toFixed(0)}/$1,500 (${((currentCapital/1500)*100).toFixed(0)}%)`;
         questStatus = currentCapital >= 1500 ? "COMPLETADA" : "EN PROGRESO";
     }
 
@@ -452,8 +430,6 @@ async function analyzeAndProject() {
     log(`      Progreso:     [${xpBar}] ${(fillPercent * 100).toFixed(1)}%`);
     log("   ═════════════════════════════════════════════");
     log(`   📜 Misión Activa: ${activeQuest}`);
-    log(`   🎯 Objetivo:      ${questObjective}`);
-    log(`   📊 Progreso:      ${questProgress}`);
     log(`   ✅ Estado:        ${questStatus}`);
     log("   ═════════════════════════════════════════════");
 
