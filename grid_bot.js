@@ -5991,10 +5991,28 @@ async function handleOrderFill(order, fillPrice, actualFee) {
             const expectedBuyPrice = fillPrice / (1 + spacing);
             const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance for rounding
 
+            // P0 FIX: PROFIT GUARANTEE - Filter out lots that would result in loss
+            // A lot is only valid if buyPrice < sellPrice (positive spread)
+            const minProfitMargin = CONFIG.tradingFee * 2; // Must cover fees on both sides
+            const profitableCandidates = inventoryCandidates.filter(lot => {
+                const grossSpread = (fillPrice - lot.price) / lot.price;
+                return grossSpread > minProfitMargin; // Must have positive profit after fees
+            });
+
+            // Log if we filtered out unprofitable lots
+            const filteredCount = inventoryCandidates.length - profitableCandidates.length;
+            if (filteredCount > 0) {
+                log('SPREAD_MATCH', `⚠️ Filtered ${filteredCount} lots that would cause loss (buyPrice >= sellPrice)`, 'warning');
+            }
+
+            // Use profitable candidates if available, else fall back (but mark as problematic)
+            const candidatesToUse = profitableCandidates.length > 0 ? profitableCandidates : inventoryCandidates;
+            const usingFallback = profitableCandidates.length === 0 && inventoryCandidates.length > 0;
+
             // IMPROVED: Sort by composite score (price proximity + amount match)
             // This helps find the EXACT lot that corresponds to this SELL
             const sellAmount = order.amount;
-            inventoryCandidates.sort((a, b) => {
+            candidatesToUse.sort((a, b) => {
                 const priceDiffA = Math.abs(a.price - expectedBuyPrice) / expectedBuyPrice;
                 const priceDiffB = Math.abs(b.price - expectedBuyPrice) / expectedBuyPrice;
 
@@ -6009,14 +6027,20 @@ async function handleOrderFill(order, fillPrice, actualFee) {
                 return scoreA - scoreB;
             });
 
+            // Replace original candidates with filtered+sorted list
+            inventoryCandidates.length = 0;
+            candidatesToUse.forEach(c => inventoryCandidates.push(c));
+
             // Log the match attempt for transparency
             if (inventoryCandidates.length > 0) {
                 const bestMatch = inventoryCandidates[0];
                 const priceDiff = Math.abs(bestMatch.price - expectedBuyPrice);
+                const actualSpread = ((fillPrice - bestMatch.price) / bestMatch.price * 100).toFixed(3);
                 const matchQuality = priceDiff <= tolerance ? '✅ EXACT' : (priceDiff <= expectedBuyPrice * 0.02 ? '⚠️ CLOSE' : '❌ FALLBACK');
                 // Store match type for orderRecord (without emoji)
                 sellMatchType = priceDiff <= tolerance ? 'EXACT' : (priceDiff <= expectedBuyPrice * 0.02 ? 'CLOSE' : 'FALLBACK');
-                log('SPREAD_MATCH', `Sell @ $${fillPrice.toFixed(2)} → Expected Buy: $${expectedBuyPrice.toFixed(2)} | Best Lot: $${bestMatch.price.toFixed(2)} | ${matchQuality}`, matchQuality.includes('✅') ? 'success' : 'warning');
+                if (usingFallback) sellMatchType = 'NEGATIVE_FALLBACK';
+                log('SPREAD_MATCH', `Sell @ $${fillPrice.toFixed(2)} → Best Lot: $${bestMatch.price.toFixed(2)} | Spread: ${actualSpread}% | ${matchQuality}${usingFallback ? ' ⚠️ NO PROFITABLE MATCH' : ''}`, usingFallback ? 'error' : (matchQuality.includes('✅') ? 'success' : 'warning'));
             }
         } else if (ACCOUNTING_METHOD === 'LIFO') {
             // Newest First (Sort DESC by timestamp)
