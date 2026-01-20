@@ -1306,6 +1306,10 @@
                                 <div id="profit-${bot.id}" style="font-size: 1.1rem; color: var(--gold-primary);">-</div>
                             </div>
                         </div>
+                        <div style="background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05)); padding: 10px; border-radius: 6px; margin-bottom: 5px;" title="Ganancia/pérdida no realizada del inventario actual de este bot">
+                            <div style="font-size: 0.65rem; color: #666;">FLOTANTE <span style="font-size:0.5rem;opacity:0.5;">ⓘ</span></div>
+                            <div id="flotante-${bot.id}" style="font-size: 1rem; color: #eee;">-</div>
+                        </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                             <div title="Profit realizado de este bot en las últimas 24h">
                                 <div style="font-size: 0.65rem; color: #666;">HOY</div>
@@ -1537,6 +1541,15 @@
             }
 
             const dailyEl = document.getElementById(`daily-${id}`);
+            // FLOTANTE per bot
+            const flotanteEl = document.getElementById(`flotante-${id}`);
+            if (flotanteEl) {
+                const flotante = data.unrealizedPnL || 0;
+                const sign = flotante >= 0 ? "+" : "";
+                flotanteEl.innerText = `${sign}$${flotante.toFixed(2)}`;
+                flotanteEl.style.color = flotante >= 0 ? "var(--emerald-life)" : "var(--ruby-danger)";
+            }
+
             if (dailyEl) dailyEl.innerText = `$${(data.dailyProfit || 0).toFixed(2)}`;
 
             const winRate = data.winRate || 0;
@@ -2555,9 +2568,15 @@
                 currentPrice = window.GLOBAL_MARKET_HISTORY.history[window.GLOBAL_MARKET_HISTORY.history.length - 1].price;
             }
 
-            // Build clean equity curve: JUST deposits + profit (no scaling or volatility)
+            // Build clean equity curve: Use real equity for today, snapshots for past
+            const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
             const equityCurve = equityReconstructed.map((val, i) => {
                 const date = history[i].date;
+
+                // PRIORITY 0: For TODAY, use real Binance equity (matches VALOR ACTUAL)
+                if (date === todayStr && realCurrentEquity > 0) {
+                    return realCurrentEquity;
+                }
 
                 // PRIORITY 1: Use real Binance snapshot if available
                 if (snapshotMap.has(date)) {
@@ -2565,7 +2584,6 @@
                 }
 
                 // PRIORITY 2: Use reconstructed value (deposits + cumulative profit)
-                // NO volatility adjustment - this causes the weird fluctuations
                 return val;
             });
 
@@ -2851,6 +2869,11 @@
                     // Update summary cards
                     document.getElementById('cap-deposited').innerText = `$${data.totalDeposited.toFixed(2)}`;
                     document.getElementById('cap-current').innerText = `$${data.currentEquity.toFixed(2)}`;
+                    
+                    // SYNC: Update EQUITY GLOBAL to match VALOR ACTUAL (same source)
+                    const mxnRateSync = window.usdMxnRate || 18.0;
+                    const eqMXNSync = data.currentEquity * mxnRateSync;
+                    document.getElementById('global-equity').innerHTML = `$${data.currentEquity.toFixed(2)} <small style="color:#888;font-size:0.55em">≈ $${eqMXNSync.toFixed(0)} MXN</small>`;
 
                     // UPDATE HERO ROW (Protagonists)
                     const profitEl = document.getElementById('cap-profit');
@@ -3639,12 +3662,22 @@
 
             var nextEl = document.getElementById("next-rewards");
             if (nextEl && data.achievements) {
-                var locked = data.achievements.filter(function(x) { return x.status === "LOCKED"; }).slice(0, 3);
+                // Include IN_PROGRESS (current) + next 2 LOCKED
+                var inProgress = data.achievements.find(function(x) { return x.status === "IN_PROGRESS"; });
+                var locked = data.achievements.filter(function(x) { return x.status === "LOCKED"; }).slice(0, 2);
+                var upcoming = inProgress ? [inProgress].concat(locked) : locked.slice(0, 3);
+                
                 var h2 = "";
-                locked.forEach(function(a) {
-                    h2 += "<div style='background:rgba(20,20,30,0.6);border:1px solid #444;border-radius:10px;padding:15px;'>";
+                upcoming.forEach(function(a, idx) {
+                    var isActive = a.status === "IN_PROGRESS";
+                    var bg = isActive ? "rgba(0,200,255,0.15)" : "rgba(20,20,30,0.6)";
+                    var border = isActive ? "#00d4ff" : "#444";
+                    var labelColor = isActive ? "#00d4ff" : "#666";
+                    var tag = isActive ? " ⚡ ACTUAL" : "";
+                    
+                    h2 += "<div style='background:" + bg + ";border:1px solid " + border + ";border-radius:10px;padding:15px;'>";
                     h2 += "<div style='display:flex;justify-content:space-between;margin-bottom:10px;'>";
-                    h2 += "<span style='font-size:0.75rem;color:#666;'>Cap " + a.chapter + "</span>";
+                    h2 += "<span style='font-size:0.75rem;color:" + labelColor + ";'>Cap " + a.chapter + tag + "</span>";
                     h2 += "<span style='font-size:0.9rem;color:#b8860b;font-weight:bold;'>$" + a.equity.toLocaleString() + "</span></div>";
                     h2 += "<div style='font-size:0.85rem;color:#aaa;margin-bottom:8px;'>" + a.name + "</div>";
                     h2 += "<div style='font-size:0.95rem;color:#00ff64;'>" + a.lifeReward + "</div></div>";
