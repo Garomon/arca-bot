@@ -5787,6 +5787,10 @@ async function checkLiveOrders() {
         // Detect filled orders
         const filled = state.activeOrders.filter(o => !openOrderIds.has(o.id));
 
+        // P0 FIX: Track successfully processed orders and failed fetches
+        const processedOrderIds = new Set();
+        const failedFetchIds = new Set();
+
         for (const order of filled) {
             // SKIP if already being processed (Fix Race Condition)
             if (processingOrders.has(order.id)) continue;
@@ -5822,10 +5826,16 @@ async function checkLiveOrders() {
 
                     // Merge new data with order metadata
                     await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice, actualFee);
+                    processedOrderIds.add(order.id); // P0 FIX: Mark as successfully processed
+                } else if (info.status === 'canceled') {
+                    processedOrderIds.add(order.id); // P0 FIX: Canceled orders can be removed
+                    log('SYNC', `Order ${order.id} was canceled`, 'info');
                 }
             } catch (e) {
-                // Order might be gone, assume filled if not in openOrders? 
-                // Safer to ignore or check trades. For now, skip.
+                // P0 FIX: Track failed fetches - DON'T remove these from activeOrders!
+                // They will be retried on next cycle or caught by AUTO-SYNC
+                failedFetchIds.add(order.id);
+                log('WARN', `fetchOrder failed for ${order.id}: ${e.message}. Will retry.`, 'warning');
             } finally {
                 processingOrders.delete(order.id);
             }
@@ -5835,11 +5845,22 @@ async function checkLiveOrders() {
         const openOrdersAfter = await binance.fetchOpenOrders(CONFIG.pair);
         const openIdsAfter = new Set(openOrdersAfter.map(o => o.id));
 
-        // Update active list with FRESH data
-        state.activeOrders = state.activeOrders.filter(o => openIdsAfter.has(o.id));
+        // P0 FIX: Update active list but KEEP orders that failed to fetch
+        // Only remove orders that are: (1) still open on exchange, OR (2) successfully processed
+        // Keep orders where fetchOrder failed - they'll be retried
+        state.activeOrders = state.activeOrders.filter(o =>
+            openIdsAfter.has(o.id) || // Still open on exchange
+            failedFetchIds.has(o.id)   // Failed to fetch - keep for retry
+            // Note: processedOrderIds are removed (not in filter) since handleOrderFill already removed them
+        );
         saveState();
         emitGridState();
         updateBalance(); // Keep balance fresh
+
+        // P0 FIX: Log if we kept failed orders
+        if (failedFetchIds.size > 0) {
+            log('SYNC', `Kept ${failedFetchIds.size} orders for retry (fetchOrder failed)`, 'warning');
+        }
 
     } catch (e) {
         console.error('>> [ERROR] Check Failed:', e.message);
