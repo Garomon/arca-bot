@@ -248,6 +248,39 @@ app.get('/api/status', async (req, res) => {
         const currentValue = totalAmount * (state.currentPrice || 0);
         const unrealizedPnL = currentValue - totalCost;
 
+        // Calculate inventory health (lots in profit vs loss)
+        const currentPrice = state.currentPrice || 0;
+        let lotsInProfit = 0;
+        let lotsInLoss = 0;
+        let amountInProfit = 0;
+        let amountInLoss = 0;
+        let pnlInProfit = 0;
+        let pnlInLoss = 0;
+
+        inventory.forEach(lot => {
+            const lotPnL = (currentPrice - lot.price) * lot.remaining;
+            if (lotPnL >= 0) {
+                lotsInProfit++;
+                amountInProfit += lot.remaining;
+                pnlInProfit += lotPnL;
+            } else {
+                lotsInLoss++;
+                amountInLoss += lot.remaining;
+                pnlInLoss += lotPnL;
+            }
+        });
+
+        const inventoryHealth = {
+            lotsInProfit,
+            lotsInLoss,
+            totalLots: inventory.length,
+            profitPercent: inventory.length > 0 ? (lotsInProfit / inventory.length * 100) : 0,
+            amountInProfit,
+            amountInLoss,
+            pnlInProfit,
+            pnlInLoss
+        };
+
         // Get Global Equity from cached financials (same as main dashboard)
         let globalEquity = 0;
         let allocatedEquity = 0;
@@ -422,6 +455,7 @@ app.get('/api/status', async (req, res) => {
             inventoryAmount: totalAmount,
             inventoryValue: currentValue,
             avgCost: avgCost,
+            inventoryHealth: inventoryHealth,
 
             // Market analysis
             marketRegime: state.marketRegime || 'UNKNOWN',

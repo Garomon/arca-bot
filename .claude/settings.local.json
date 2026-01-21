@@ -40,7 +40,10 @@
       "Bash(powershell -Command \"\\(Get-ChildItem -Name tmpclaude-*\\).Count\")",
       "Bash(powershell -Command \"Remove-Item -Path ''tmpclaude-*'' -Force; Write-Host ''Eliminados correctamente''\")",
       "Bash(powershell -Command:*)",
-      "Bash(sshpass -p '7q2$TA/nVP!CsFi' ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"echo ''Conectado'' && ls -la /root/arca-bot/\")"
+      "Bash(sshpass -p '7q2$TA/nVP!CsFi' ssh -o StrictHostKeyChecking=no root@167.71.1.124 \"echo ''Conectado'' && ls -la /root/arca-bot/\")",
+      "Bash(ls:*)",
+      "Bash(pm2 start:*)",
+      "Bash(echo:*)"
     ]
   }
 }

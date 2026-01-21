@@ -1545,12 +1545,32 @@
             const flotanteEl = document.getElementById(`flotante-${id}`);
             if (flotanteEl) {
                 const flotante = data.unrealizedPnL || 0;
+                const health = data.inventoryHealth || {};
+                const lotsInProfit = health.lotsInProfit || 0;
+                const totalLots = health.totalLots || 0;
+                const profitPct = health.profitPercent || 0;
+
+                // Health indicator
+                let healthIcon = '🟢';
+                let healthColor = '#4ade80';
+                if (profitPct < 30) {
+                    healthIcon = '🔴';
+                    healthColor = '#f87171';
+                } else if (profitPct < 60) {
+                    healthIcon = '🟡';
+                    healthColor = '#fbbf24';
+                }
+
+                const healthText = totalLots > 0
+                    ? `<span style="font-size:0.65rem;opacity:0.85;color:${healthColor};margin-left:6px">${healthIcon} ${lotsInProfit}/${totalLots}</span>`
+                    : '';
+
                 if (flotante >= 0) {
-                    flotanteEl.innerHTML = `+$${flotante.toFixed(2)}`;
+                    flotanteEl.innerHTML = `+$${flotante.toFixed(2)}${healthText}`;
                     flotanteEl.style.color = "var(--emerald-life)";
                 } else {
                     // Negative = accumulating for future gains
-                    flotanteEl.innerHTML = `$${flotante.toFixed(2)} <span style="font-size:0.6rem;opacity:0.7;color:#ffd700">acumulando</span>`;
+                    flotanteEl.innerHTML = `$${flotante.toFixed(2)}${healthText}`;
                     flotanteEl.style.color = "var(--ruby-danger)";
                 }
             }
