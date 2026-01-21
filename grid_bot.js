@@ -6659,6 +6659,13 @@ async function syncHistoricalTrades(deepClean = false) {
                                 entryFee = matchedBuy.fee.cost * matchedBuy.price;
                             }
                         }
+                        // P0 FIX: Also consume from inventory if this lot exists there
+                        // This prevents double-matching when BUY is added to inventory during sync
+                        const inventoryLot = (state.inventory || []).find(lot => lot.id === lotId);
+                        if (inventoryLot) {
+                            inventoryLot.remaining = Math.max(0, inventoryLot.remaining - amount);
+                            log('SYNC', `🔗 Also consumed ${amount.toFixed(6)} from inventory lot ${lotId}`, 'debug');
+                        }
                     } else {
                         // No match in trade history - try to find in current inventory
                         const spacing = CONFIG.gridSpacing || 0.01;
@@ -6666,12 +6673,16 @@ async function syncHistoricalTrades(deepClean = false) {
                         const invTolerance = expectedBuyPrice * 0.02; // 2% tolerance
 
                         // Search inventory for matching lot (P0 FIX: also check usedBuyIds)
-                        const inventoryMatch = (state.inventory || []).find(lot =>
-                            lot.remaining > 0 &&
-                            lot.remaining >= amount && // P0 FIX: Must have enough remaining
-                            !usedBuyIds.has(lot.id) && // P0 FIX: Don't reuse matched lots
-                            Math.abs(lot.price - expectedBuyPrice) <= invTolerance
-                        );
+                        // P0 FIX: PROFIT GUARANTEE - lot.price must be < sellPrice with margin for fees
+                        const minProfitMargin = CONFIG.tradingFee * 2; // 0.15% minimum spread
+                        const inventoryMatch = (state.inventory || []).find(lot => {
+                            const grossSpread = (sellPrice - lot.price) / lot.price;
+                            return lot.remaining > 0 &&
+                                lot.remaining >= amount && // P0 FIX: Must have enough remaining
+                                !usedBuyIds.has(lot.id) && // P0 FIX: Don't reuse matched lots
+                                grossSpread > minProfitMargin && // P0 FIX: PROFIT GUARANTEE
+                                Math.abs(lot.price - expectedBuyPrice) <= invTolerance;
+                        });
 
                         if (inventoryMatch) {
                             // Found match in inventory - use REAL data
@@ -6749,6 +6760,27 @@ async function syncHistoricalTrades(deepClean = false) {
                     orderRecord.profit = 0;
                     orderRecord.fees = originalFee > 0 ? originalFee : realFeeUSDT; orderRecord.feesUSD = realFeeUSDT;
                     orderRecord.feeCurrency = feeCurrency;
+
+                    // P0 FIX: Also add synced BUYs to INVENTORY so future SELLs can find them
+                    // This prevents UNMATCHED sells after bot restarts
+                    if (!state.inventory) state.inventory = [];
+                    const existingLot = state.inventory.find(lot => lot.id === tradeId);
+                    const alreadyConsumed = usedBuyIds.has(tradeId);
+
+                    if (!existingLot && !alreadyConsumed) {
+                        state.inventory.push({
+                            id: tradeId,
+                            price: trade.price,
+                            amount: trade.amount,
+                            remaining: trade.amount, // Full amount available (SELLs processed later will consume)
+                            fee: realFeeUSDT,
+                            timestamp: trade.timestamp,
+                            source: 'SYNC' // Mark as synced from exchange history
+                        });
+                        log('SYNC', `➕ Added synced BUY to inventory: ${trade.amount.toFixed(6)} @ $${trade.price.toFixed(2)}`, 'info');
+                    } else if (alreadyConsumed) {
+                        log('SYNC', `⏭️ BUY ${tradeId} already consumed by a SELL, not adding to inventory`, 'debug');
+                    }
                 }
 
                 // Add to history
