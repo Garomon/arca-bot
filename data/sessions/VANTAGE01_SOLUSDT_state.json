@@ -1,13 +1,13 @@
 {
   "pair": "SOL/USDT",
   "balance": {
-    "total": 326.6800006,
-    "usdt": 46.61274585252003,
+    "total": 350.9656506,
+    "usdt": 94.48328964268003,
     "base": 2.7013883,
     "btc": 2.7013883,
     "locked": 48.24098
   },
-  "currentPrice": 126.71,
+  "currentPrice": 127.25,
   "entryPrice": 129.19,
   "activeOrders": [
     {
@@ -151,17 +151,6 @@
       "status": "open",
       "timestamp": 1769013618861,
       "clientOrderId": "VANTAGE01_SOLUSDT_sell_95923ef6",
-      "spacing": 0.007796623449736479
-    },
-    {
-      "id": "16121640716",
-      "side": "sell",
-      "price": 127.15,
-      "amount": 0.191,
-      "level": -3,
-      "status": "open",
-      "timestamp": 1769014602464,
-      "clientOrderId": "VANTAGE01_SOLUSDT_sell_e052d024",
       "spacing": 0.007796623449736479
     }
   ],
@@ -5181,13 +5170,13 @@
   "lastVolatility": "LOW",
   "lastRegime": "STRONG_BEAR",
   "metrics": {
-    "ticksInRange": 234611,
+    "ticksInRange": 234639,
     "ticksOutOfRange": 11309,
     "buyHoldStartPrice": 139.59,
     "metricsStartTime": 1767775292145
   },
-  "lastKnownEquity": 694.9743604807601,
-  "lastEquityCheck": 1769018845602,
+  "lastKnownEquity": 696.14751119128,
+  "lastEquityCheck": 1769019145699,
   "inventory": [
     {
       "id": "1780852780",
@@ -5681,7 +5670,7 @@
       "id": "16118838598",
       "price": 128.18,
       "amount": 0.298,
-      "remaining": 0.298,
+      "remaining": 0.107,
       "fee": 0.0286277724,
       "timestamp": 1769013286561
     },
@@ -5692,18 +5681,10 @@
       "remaining": 0.195,
       "fee": 0.0185633352,
       "timestamp": 1769013618442
-    },
-    {
-      "id": "16118839072",
-      "price": 126.17,
-      "amount": 0.191,
-      "remaining": 0.191,
-      "fee": 0.018060937,
-      "timestamp": 1769014602322
     }
   ],
   "inventoryStatus": "ESTIMATED",
-  "_lastTrackedUSDT": 326.6800006,
+  "_lastTrackedUSDT": 350.9656506,
   "lastSyncTime": 1769018901752,
   "lastGridReset": 1769004836371,
   "accumulatedProfit": 20.284881224058882,
@@ -6049,7 +6030,7 @@
       "id": "16118838598",
       "price": 128.18,
       "amount": 0.298,
-      "remaining": 0.298,
+      "remaining": 0.107,
       "fee": 0.0286277724,
       "timestamp": 1769013286561
     },
@@ -6060,14 +6041,6 @@
       "remaining": 0.195,
       "fee": 0.0185633352,
       "timestamp": 1769013618442
-    },
-    {
-      "id": "16118839072",
-      "price": 126.17,
-      "amount": 0.191,
-      "remaining": 0.191,
-      "fee": 0.018060937,
-      "timestamp": 1769014602322
     }
   ],
   "safetyLock": false
