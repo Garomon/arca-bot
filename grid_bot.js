@@ -3854,7 +3854,8 @@ function checkSafetyNet(level) {
             .map(lot => ({ ...lot })); // Shallow copy
 
         if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
-            const spacing = level.spacing || CONFIG.gridSpacing || 0.01;
+            // Use level's saved spacing, or current dynamic CONFIG.gridSpacing
+            const spacing = level.spacing || CONFIG.gridSpacing;
             const expectedBuyPrice = sellPrice / (1 + spacing);
             // Sort by proximity to expected buy price
             candidates.sort((a, b) => Math.abs(a.price - expectedBuyPrice) - Math.abs(b.price - expectedBuyPrice));
@@ -6008,8 +6009,8 @@ async function handleOrderFill(order, fillPrice, actualFee) {
         // Then find the lot closest to that expected buy price.
 
         if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
-            // Use the order's spacing if available, else default
-            const spacing = order.spacing || CONFIG.gridSpacing || 0.01;
+            // Use order's saved spacing, or current dynamic CONFIG.gridSpacing
+            const spacing = order.spacing || CONFIG.gridSpacing;
             const expectedBuyPrice = fillPrice / (1 + spacing);
             const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance for rounding
 
@@ -6694,15 +6695,17 @@ async function syncHistoricalTrades(deepClean = false) {
                         }
                     } else {
                         // No match in trade history - try to find in current inventory
-                        const spacing = CONFIG.gridSpacing || 0.01;
-                        const expectedBuyPrice = sellPrice / (1 + spacing);
-                        const invTolerance = expectedBuyPrice * 0.02; // 2% tolerance
-
-                        // Search inventory for matching lot (P0 FIX: also check usedBuyIds)
                         // P0 FIX: PROFIT GUARANTEE - lot.price must be < sellPrice with margin for fees
                         const minProfitMargin = CONFIG.tradingFee * 2; // 0.15% minimum spread
+
+                        // Search inventory using each lot's own spacing (dynamic, no hardcoded fallbacks)
                         const inventoryMatch = (state.inventory || []).find(lot => {
                             const grossSpread = (sellPrice - lot.price) / lot.price;
+                            // Use lot's saved spacing, or current CONFIG.gridSpacing if not saved
+                            const lotSpacing = lot.spacing || CONFIG.gridSpacing;
+                            const expectedBuyPrice = sellPrice / (1 + lotSpacing);
+                            const invTolerance = expectedBuyPrice * 0.02; // 2% tolerance
+
                             return lot.remaining > 0 &&
                                 lot.remaining >= amount && // P0 FIX: Must have enough remaining
                                 !usedBuyIds.has(lot.id) && // P0 FIX: Don't reuse matched lots
@@ -6725,9 +6728,8 @@ async function syncHistoricalTrades(deepClean = false) {
                             log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
                         } else {
                             // P0 FIX: Instead of UNMATCHED (profit=0), use grid spacing to estimate profit
-                            // This ensures synced sells still show realistic profit
-                            const spacing = CONFIG.gridSpacing || 0.008; // Default 0.8% for SOL
-                            const estimatedBuyPrice = sellPrice / (1 + spacing);
+                            // Uses current dynamic CONFIG.gridSpacing (no hardcoded fallbacks)
+                            const estimatedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
 
                             // Verify this gives positive profit after fees
                             const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
