@@ -5938,7 +5938,8 @@ async function handleOrderFill(order, fillPrice, actualFee) {
             amount: order.amount, // Track full amount
             remaining: order.amount, // Amount available to sell
             fee: buyFeeUSDT,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            spacing: order.spacing || CONFIG.gridSpacing // P0 FIX: Preserve spacing for GRID_ESTIMATED
         });
         log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} ${BASE_ASSET} @ $${fillPrice.toFixed(2)} | Fee: $${buyFeeUSDT.toFixed(4)}`, 'info');
     }
@@ -6800,7 +6801,8 @@ async function syncHistoricalTrades(deepClean = false) {
                             remaining: trade.amount, // Full amount available (SELLs processed later will consume)
                             fee: realFeeUSDT,
                             timestamp: trade.timestamp,
-                            source: 'SYNC' // Mark as synced from exchange history
+                            source: 'SYNC', // Mark as synced from exchange history
+                            spacing: CONFIG.gridSpacing // P0 FIX: Use current spacing (best guess for synced orders)
                         });
                         log('SYNC', `➕ Added synced BUY to inventory: ${trade.amount.toFixed(6)} @ $${trade.price.toFixed(2)}`, 'info');
                     } else if (alreadyConsumed) {
