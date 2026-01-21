@@ -6687,12 +6687,31 @@ async function syncHistoricalTrades(deepClean = false) {
 
                             log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
                         } else {
-                            buyPrice = sellPrice; // UNMATCHED - no profit - must have real match
-                            matchType = 'UNMATCHED';
-                            lotId = 'EST_' + trade.id;
-                            entryFee = realFeeUSDT;
-                            actualRemainingAfter = 0;
-                            log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - profit set to 0. Cost: ' + buyPrice.toFixed(2), 'warning');
+                            // P0 FIX: Instead of UNMATCHED (profit=0), use grid spacing to estimate profit
+                            // This ensures synced sells still show realistic profit
+                            const spacing = CONFIG.gridSpacing || 0.008; // Default 0.8% for SOL
+                            const estimatedBuyPrice = sellPrice / (1 + spacing);
+
+                            // Verify this gives positive profit after fees
+                            const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
+                            const minSpread = CONFIG.tradingFee * 2.5; // Must cover fees
+
+                            if (estimatedSpread >= minSpread) {
+                                buyPrice = estimatedBuyPrice;
+                                matchType = 'GRID_ESTIMATED';
+                                lotId = 'EST_' + trade.id;
+                                entryFee = estimatedBuyPrice * amount * CONFIG.tradingFee;
+                                actualRemainingAfter = 0;
+                                log('SYNC', `📊 SELL ${trade.id} estimated using grid spacing: Buy $${buyPrice.toFixed(2)} → Sell $${sellPrice.toFixed(2)} (${(estimatedSpread*100).toFixed(2)}%)`, 'info');
+                            } else {
+                                // Fallback: truly unmatched
+                                buyPrice = sellPrice;
+                                matchType = 'UNMATCHED';
+                                lotId = 'EST_' + trade.id;
+                                entryFee = realFeeUSDT;
+                                actualRemainingAfter = 0;
+                                log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - spread too small. Cost: ' + buyPrice.toFixed(2), 'warning');
+                            }
                         }
                     }
 
