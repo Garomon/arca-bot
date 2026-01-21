@@ -6645,15 +6645,19 @@ async function syncHistoricalTrades(deepClean = false) {
                     // Search for matching BUY: same/similar amount, lower price, earlier timestamp
                     let matchedBuy = null;
                     const tolerance = 0.001; // 0.1% tolerance for amount matching
+                    const minProfitMargin = CONFIG.tradingFee * 2; // P0 FIX: PROFIT GUARANTEE
 
                     for (const potentialBuy of trades) {
                         const potentialBuyId = potentialBuy.orderId || potentialBuy.order || potentialBuy.id;
+                        // P0 FIX: Calculate gross spread to ensure positive profit after fees
+                        const grossSpread = (sellPrice - potentialBuy.price) / potentialBuy.price;
+
                         if (potentialBuy.side === 'buy' &&
                             potentialBuy.timestamp < trade.timestamp &&
-                            potentialBuy.price < sellPrice &&
+                            grossSpread > minProfitMargin && // P0 FIX: PROFIT GUARANTEE - must cover fees
                             Math.abs(potentialBuy.amount - amount) / amount < tolerance &&
                             !usedBuyIds.has(potentialBuyId)) { // P0 FIX: Don't reuse already matched BUYs
-                            // Found a matching BUY
+                            // Found a matching BUY with guaranteed profit
                             matchedBuy = potentialBuy;
                             break; // Take the first (most recent) match
                         }
