@@ -3,10 +3,48 @@ const path = require('path');
 const http = require('http');
 
 // CONFIGURATION
-const MONTHLY_CONTRIBUTION_MXN = 10000;
 const MXN_USD_RATE = 20.5;
-const MONTHLY_CONTRIBUTION_USD = MONTHLY_CONTRIBUTION_MXN / MXN_USD_RATE;
 const MILLION_TARGET = 1000000;
+
+// Calculate REAL monthly contribution from deposits.json (like Life Coach)
+function calculateRealMonthlyContribution() {
+    try {
+        const depositsFile = path.join(__dirname, '..', 'data', 'deposits.json');
+        if (!fs.existsSync(depositsFile)) return 500; // Default fallback
+
+        const depositsData = JSON.parse(fs.readFileSync(depositsFile, 'utf8'));
+        if (!depositsData.deposits || depositsData.deposits.length === 0) return 500;
+
+        let totalDeposits = 0;
+        let firstDepositDate = null;
+
+        depositsData.deposits.forEach(d => {
+            // Skip rebalances (no actual deposit amount)
+            if (d.type === 'rebalance' || !d.amount) return;
+
+            if (d.amount > 0) {
+                totalDeposits += d.amount;
+                if (!firstDepositDate || d.date < firstDepositDate) {
+                    firstDepositDate = d.date;
+                }
+            }
+        });
+
+        if (!firstDepositDate || totalDeposits === 0) return 500;
+
+        // Calculate months active
+        const monthsActive = Math.max(1, Math.ceil((Date.now() - new Date(firstDepositDate)) / (1000 * 60 * 60 * 24 * 30)));
+        const avgMonthly = Math.round(totalDeposits / monthsActive);
+
+        return avgMonthly;
+    } catch (e) {
+        return 500; // Default fallback
+    }
+}
+
+// Use REAL data instead of hardcoded
+const MONTHLY_CONTRIBUTION_USD = calculateRealMonthlyContribution();
+const MONTHLY_CONTRIBUTION_MXN = MONTHLY_CONTRIBUTION_USD * MXN_USD_RATE;
 
 const BOT_DIR = path.join(__dirname, '..');
 const SESSIONS_DIR = path.join(BOT_DIR, 'data', 'sessions');
@@ -238,17 +276,21 @@ async function analyzeAndProject() {
     // Alias for backward compatibility with rest of script
     const currentCapital = totalCapital;
 
-    // Format percentages
-    const netYieldPct = (netEquityYield * 100).toFixed(3);
-    const cashYieldPct = (cashFlowYield * 100).toFixed(3);
-    const netAPY = (netEquityYield * 365 * 100).toFixed(0); // Simple APR approximation for robustness
-    const cashAPY = (cashFlowYield * 365 * 100).toFixed(0);
+    // UNIFIED: Use TWR APY (same as Life Coach) for consistency
+    // TWR APY = (totalProfit / twrCapital) * (365 / daysActive) * 100
+    const twrAPY = (totalProfit / twrCapital) * (365 / daysActive) * 100;
+    const netTwrAPY = ((totalCapital - totalInvested) / twrCapital) * (365 / daysActive) * 100;
+
+    // Derive daily yield FROM TWR APY (for consistent projections)
+    // dailyYield = (1 + APY)^(1/365) - 1
+    const projectionYield = Math.pow(1 + twrAPY / 100, 1 / 365) - 1;
+    const projectionYieldPct = (projectionYield * 100).toFixed(3);
 
     const logs = [];
     const log = (msg) => { console.log(msg); logs.push(msg); };
 
     // ═══════════════════════════════════════════════════════════
-    // ROAD TO $1M - NEW SECTION
+    // ROAD TO $1,000,000 USD
     // ═══════════════════════════════════════════════════════════
     log(`\n💎 ═══════════════════════════════════════════════════════════`);
     log(`                    ROAD TO $1,000,000 USD`);
@@ -261,16 +303,11 @@ async function analyzeAndProject() {
     log(`   Profit Realizado:   $${totalProfit.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD (Cash Flow)`);
     log(`   Días Activo:        ${daysActive.toFixed(1)} días`);
     log(`   -----------------------------------------------------------`);
-    log(`   🔥 CASH FLOW YIELD: ${cashYieldPct}% diario  (Tu "Motor")  -> TWR APY: ${cashAPY}%`);
-    log(`   🧊 NET EQUITY YIELD: ${netYieldPct}% diario  (Tu "Realidad") -> TWR APY: ${netAPY}%`);
+    log(`   🔥 TWR APY: ${twrAPY.toFixed(0)}% (Cash Flow) -> Daily: ${projectionYieldPct}%`);
+    log(`   🧊 TWR APY: ${netTwrAPY.toFixed(0)}% (Net Equity)`);
 
-    // We use Cash Flow Yield for the projection table because it represents the bot's work capacity
-    // But we label it clearly.
-    const projectionYield = cashFlowYield;
-    const projectionYieldPct = cashYieldPct;
-
-    log(`\n👉 USANDO 'CASH FLOW' (${projectionYieldPct}%) PARA PROYECCIÓN:`);
-    log(`   (Asumiendo que el mercado se recupera y permite realizar ganancias)`);
+    log(`\n👉 USANDO TWR APY (${twrAPY.toFixed(0)}%) PARA PROYECCIÓN:`);
+    log(`   (Consistente con Life Coach - método financiero estándar)`);
 
     // Time to milestones
     const to100k = timeToTarget(totalCapital, projectionYield, MONTHLY_CONTRIBUTION_USD, 100000);
@@ -456,6 +493,61 @@ async function analyzeAndProject() {
     log(`   📊 Progreso:      ${questProgress}`);
     log(`   ✅ Estado:        ${questStatus}`);
     log("   ═════════════════════════════════════════════");
+
+    // ═══════════════════════════════════════════════════════════
+    // 🚀 WEALTH ROADMAP: CAMINO A LA ÉLITE 0.001%
+    // ═══════════════════════════════════════════════════════════
+    log(`\n🚀 ═══════════════════════════════════════════════════════════`);
+    log(`              WEALTH ROADMAP: SNOWBALL STRATEGY`);
+    log(`═══════════════════════════════════════════════════════════`);
+    log(`\n   El bot es tu MÁQUINA DE CASH FLOW. Pero para ser millonario`);
+    log(`   más rápido, diversifica y REINVIERTE TODO en el bot.`);
+    log(`\n   ┌─────────────┬────────────────────────────────────────────┐`);
+    log(`   │   EQUITY    │   ACCIÓN ESTRATÉGICA                       │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $0-$5k     │ 🎯 100% al bot. No toques nada.            │`);
+    log(`   │             │    Solo acumula y deja componer.           │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $5k-$10k   │ 📚 Abre cuenta GBM+/Kuspit.                │`);
+    log(`   │             │    Aprende sobre VOO/VTI (S&P 500).        │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $10k-$25k  │ 📈 10-15% de profits → Index Funds.        │`);
+    log(`   │             │    Dividendos regresan al bot = SNOWBALL.  │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $25k-$50k  │ 🏠 Enganche para PRIMER DEPA (~$20k).      │`);
+    log(`   │             │    Renta ~$600/mes → regresa al bot.       │`);
+    log(`   │             │    El inquilino paga tu hipoteca.          │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $50k-$100k │ 🏘️ Segunda propiedad + más Index Funds.    │`);
+    log(`   │             │    3 fuentes: Bot + Renta + Dividendos.    │`);
+    log(`   │             │    Todo regresa al bot = BOLA DE NIEVE.    │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $100k-500k │ 🌟 ÉLITE: 50% reinvierte, 25% propiedades, │`);
+    log(`   │             │    25% ETFs. Múltiples ríos de dinero.     │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $500k+     │ 👑 MAGNATE: 3+ propiedades, $200k+ ETFs.   │`);
+    log(`   │             │    El dinero trabaja para TI.              │`);
+    log(`   ├─────────────┼────────────────────────────────────────────┤`);
+    log(`   │  $1M+       │ 🏆 MILLONARIO: Libertad financiera total.  │`);
+    log(`   │             │    Top 0.001% del planeta.                 │`);
+    log(`   └─────────────┴────────────────────────────────────────────┘`);
+    log(`\n   💡 LA CLAVE: Cada peso que generes de CUALQUIER fuente`);
+    log(`      (renta, dividendos, negocio) → REGRESA AL BOT.`);
+    log(`      Interés compuesto + múltiples fuentes = IMPARABLE.`);
+
+    // Show current position on the roadmap
+    let currentPhase = '';
+    if (currentCapital < 5000) currentPhase = '🎯 FASE: Acumulación pura';
+    else if (currentCapital < 10000) currentPhase = '📚 FASE: Preparando diversificación';
+    else if (currentCapital < 25000) currentPhase = '📈 FASE: Index Funds activos';
+    else if (currentCapital < 50000) currentPhase = '🏠 FASE: Real Estate unlock';
+    else if (currentCapital < 100000) currentPhase = '🏘️ FASE: Multi-asset snowball';
+    else if (currentCapital < 500000) currentPhase = '🌟 FASE: Élite mode';
+    else if (currentCapital < 1000000) currentPhase = '👑 FASE: Magnate status';
+    else currentPhase = '🏆 FASE: MILLONARIO - Lo lograste';
+
+    log(`\n   📍 TU POSICIÓN ACTUAL: ${currentPhase}`);
+    log(`      Capital: $${currentCapital.toLocaleString('en-US', { maximumFractionDigits: 0 })} USD`);
 
     // ═══════════════════════════════════════════════════════════
     // DISCLAIMER

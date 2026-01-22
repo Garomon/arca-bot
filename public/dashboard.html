@@ -1550,19 +1550,22 @@
                 const totalLots = health.totalLots || 0;
                 const profitPct = health.profitPercent || 0;
 
-                // Health indicator
-                let healthIcon = '🟢';
+                // Health indicator with elite insights
+                let healthIcon = '🌾';
                 let healthColor = '#4ade80';
+                let healthMsg = 'Cosecha lista';
                 if (profitPct < 30) {
-                    healthIcon = '🔴';
-                    healthColor = '#f87171';
+                    healthIcon = '🛒';
+                    healthColor = '#a78bfa';
+                    healthMsg = 'Comprando dip';
                 } else if (profitPct < 60) {
-                    healthIcon = '🟡';
+                    healthIcon = '⚡';
                     healthColor = '#fbbf24';
+                    healthMsg = 'Cargando';
                 }
 
                 const healthText = totalLots > 0
-                    ? `<span style="font-size:0.65rem;opacity:0.85;color:${healthColor};margin-left:6px">${healthIcon} ${lotsInProfit}/${totalLots}</span>`
+                    ? `<span style="font-size:0.6rem;opacity:0.9;color:${healthColor};margin-left:6px" title="${lotsInProfit} de ${totalLots} lotes en ganancia">${healthIcon} ${healthMsg}</span>`
                     : '';
 
                 if (flotante >= 0) {
