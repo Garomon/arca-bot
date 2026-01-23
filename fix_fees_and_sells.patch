@@ -1,0 +1,5 @@
+--- Fix 1: Store original fee + USD fee separately (around line 6550-6568)
+--- Change the BNB fee handling to store original amount
+
+--- Fix 2: Instead of skipping sells, use estimated cost basis (around line 6643-6645)
+--- Remove the continue statement and use fallback logic

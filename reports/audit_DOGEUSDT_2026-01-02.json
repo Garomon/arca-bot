@@ -1,0 +1,549 @@
+{
+  "generatedAt": "2026-01-02T23:39:52.524Z",
+  "method": "SPREAD_MATCH",
+  "pair": "DOGE/USDT",
+  "spacing": 0.01,
+  "tradingPeriod": {
+    "start": "2025-12-31T15:12:08.080Z",
+    "end": "2026-01-02T22:05:09.200Z",
+    "days": 3
+  },
+  "statistics": {
+    "totalTrades": 27,
+    "buyCount": 19,
+    "sellCount": 8,
+    "profitableSells": 8,
+    "losingSells": 0,
+    "winRate": "100.00%"
+  },
+  "matchQuality": {
+    "exactMatches": 5,
+    "closeMatches": 0,
+    "fallbackMatches": 3
+  },
+  "volume": {
+    "totalBuyVolume": 169.93819999999997,
+    "totalSellVolume": 105.42752000000002,
+    "totalFeesPaid": 0.00023851999999999993
+  },
+  "pnl": {
+    "realizedProfit": 3.227033395595241,
+    "unrealizedPnL": 1.8294899999999963,
+    "totalPnL": 5.056523395595237
+  },
+  "inventory": {
+    "remaining": 489,
+    "avgCost": 0.13873871165644172,
+    "currentPrice": 0.14248,
+    "value": 69.67272,
+    "lots": [
+      {
+        "price": 0.11682,
+        "remaining": 28,
+        "date": "2025-12-31T16:42:32.207Z"
+      },
+      {
+        "price": 0.14007,
+        "remaining": 461,
+        "date": "2026-01-02T21:37:08.169Z"
+      }
+    ]
+  },
+  "tradeLog": [
+    {
+      "type": "BUY",
+      "date": "2025-12-31T15:12:08.080Z",
+      "price": 0.12223,
+      "amount": 118,
+      "cost": 14.42314,
+      "fee": 0.00001253,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 118
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T15:33:08.518Z",
+      "price": 0.12072,
+      "amount": 128,
+      "cost": 15.45216,
+      "fee": 0.0000135,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 246
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T16:42:23.316Z",
+      "price": 0.11974,
+      "amount": 82,
+      "cost": 9.81868,
+      "fee": 0.00000861,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 328
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T16:42:27.000Z",
+      "price": 0.11877,
+      "amount": 82,
+      "cost": 9.73914,
+      "fee": 0.00000861,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 410
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T16:42:29.482Z",
+      "price": 0.1178,
+      "amount": 83,
+      "cost": 9.7774,
+      "fee": 0.00000871,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 493
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T16:42:32.207Z",
+      "price": 0.11682,
+      "amount": 84,
+      "cost": 9.81288,
+      "fee": 0.00000882,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 577
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T20:05:26.999Z",
+      "price": 0.11684,
+      "amount": 154,
+      "cost": 17.99336,
+      "fee": 0.00001566,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 731
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T08:58:42.635Z",
+      "price": 0.12035,
+      "amount": 150,
+      "revenue": 18.0525,
+      "fee": 0.0180525,
+      "costBasis": 0.11920973333333333,
+      "profit": 0.15297174999999785,
+      "spreadPct": 0.9565214473538518,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.11915841584158415,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.11877,
+          "amount": 82,
+          "age": 976,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.11974,
+          "amount": 68,
+          "age": 976,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 581
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T15:31:55.173Z",
+      "price": 0.1213,
+      "amount": 94,
+      "revenue": 11.4022,
+      "fee": 0.011402200000000001,
+      "costBasis": 0.12057404255319149,
+      "profit": 0.056827892500001184,
+      "spreadPct": 0.602084355335654,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12009900990099011,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.11974,
+          "amount": 14,
+          "age": 1370,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.12072,
+          "amount": 80,
+          "age": 1439,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 487
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T15:41:17.764Z",
+      "price": 0.12226,
+      "amount": 94,
+      "revenue": 11.49244,
+      "fee": 0.01149244,
+      "costBasis": 0.12145893617021276,
+      "profit": 0.06379761292372918,
+      "spreadPct": 0.6595346995832546,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12104950495049505,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.12072,
+          "amount": 48,
+          "age": 1448,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.12223,
+          "amount": 46,
+          "age": 1469,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 393
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T15:41:38.235Z",
+      "price": 0.12321,
+      "amount": 93,
+      "revenue": 11.45853,
+      "fee": 0.01145853,
+      "costBasis": 0.12122967741935485,
+      "profit": 0.1727016208413296,
+      "spreadPct": 1.6335295307227986,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12199009900990099,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.12223,
+          "amount": 72,
+          "age": 1470,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.1178,
+          "amount": 21,
+          "age": 1379,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 300
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T15:46:15.772Z",
+      "price": 0.12417,
+      "amount": 92,
+      "revenue": 11.42364,
+      "fee": 0.01142364,
+      "costBasis": 0.11748695652173913,
+      "profit": 0.6034068030855901,
+      "spreadPct": 5.688328029013402,
+      "matchType": "FALLBACK",
+      "expectedBuyPrice": 0.12294059405940594,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.1178,
+          "amount": 62,
+          "age": 1384,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 0.11684,
+          "amount": 30,
+          "age": 1181,
+          "matchType": "FALLBACK"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 208
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T15:46:27.142Z",
+      "price": 0.12512,
+      "amount": 91,
+      "revenue": 11.38592,
+      "fee": 0.01138592,
+      "costBasis": 0.11684000000000001,
+      "profit": 0.742084826363636,
+      "spreadPct": 7.086614173228342,
+      "matchType": "FALLBACK",
+      "expectedBuyPrice": 0.1238811881188119,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.11684,
+          "amount": 91,
+          "age": 1181,
+          "matchType": "FALLBACK"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 117
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-02T03:41:17.018Z",
+      "price": 0.12876,
+      "amount": 89,
+      "revenue": 11.459640000000002,
+      "fee": 0.011459640000000002,
+      "costBasis": 0.11682741573033707,
+      "profit": 1.0505311242857172,
+      "spreadPct": 10.213856221219448,
+      "matchType": "FALLBACK",
+      "expectedBuyPrice": 0.1274851485148515,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.11684,
+          "amount": 33,
+          "age": 1896,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 0.11682,
+          "amount": 56,
+          "age": 2099,
+          "matchType": "FALLBACK"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 28
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 36
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 44
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 52
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 60
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 68
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 76
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 84
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 92
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 100
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 108
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fee": 9.5e-7,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 116
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 504,
+      "cost": 70.59528,
+      "fee": 0.00006018,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 620
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-02T22:05:09.200Z",
+      "price": 0.14315,
+      "amount": 131,
+      "revenue": 18.75265,
+      "fee": 0.01875265,
+      "costBasis": 0.14006999999999997,
+      "profit": 0.38471176559523995,
+      "spreadPct": 2.198900549725157,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1403908437202155,
+      "lotsConsumed": [
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 8,
+          "age": 28,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 0.14007,
+          "amount": 43,
+          "age": 28,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 489
+    }
+  ]
+}

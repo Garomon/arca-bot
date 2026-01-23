@@ -15,7 +15,6 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const ARGS = process.argv.slice(2);
 const PAIR = ARGS.find(a => !a.startsWith('--')) || 'BTC/USDT';
 const FIX_MODE = ARGS.includes('--fix');
-const DEEP_CLEAN_MODE = ARGS.includes('--deep-clean');
 const PAIR_ID = PAIR.replace('/', '').toUpperCase();
 const BASE_ASSET = PAIR.split('/')[0];
 const FEE_RATE = 0.001; // 0.1% per trade
@@ -43,16 +42,6 @@ const binance = new ccxt.binance({
 
 async function fullAudit() {
     try {
-        // ==================== PHASE 0: FETCH BNB PRICE FOR FEE CONVERSION ====================
-        let bnbPrice = 600; // Fallback if fetch fails
-        try {
-            const bnbTicker = await binance.fetchTicker('BNB/USDT');
-            bnbPrice = bnbTicker.last || bnbTicker.close || 600;
-            console.log(`║  💰 BNB Price for fee conversion: $${bnbPrice.toFixed(2)}              ║`);
-        } catch (e) {
-            console.log(`║  ⚠️  Could not fetch BNB price, using fallback $${bnbPrice}            ║`);
-        }
-
         // ==================== PHASE 1: FETCH ALL TRADES ====================
         console.log('║  [PHASE 1] Fetching ALL trades from Binance...                   ║');
 
@@ -136,54 +125,35 @@ async function fullAudit() {
             const timestamp = trade.timestamp;
             const orderId = String(trade.order || trade.id);
 
-            // Convert fee to USDT based on fee currency
+            // Convert fee to USDT if in base asset
             let feeUSDT = feeCost;
-            if (feeAsset === 'BNB') {
-                // BNB fees: convert using BNB price
-                feeUSDT = feeCost * bnbPrice;
-            } else if (feeAsset === BASE_ASSET) {
-                // Base asset fees (BTC, SOL, DOGE): convert using trade price
+            if (feeAsset === BASE_ASSET) {
                 feeUSDT = feeCost * price;
             }
-            // If feeAsset is 'USDT', feeUSDT remains as feeCost (already in USDT)
 
             totalFeesPaid += feeUSDT;
 
             if (trade.side === 'buy') {
-                // FIX: Handle partial fills - aggregate by orderId
-                const existingLot = inventory.find(lot => lot.orderId === orderId);
-                if (existingLot) {
-                    // Partial fill - add to existing lot
-                    existingLot.amount += amount;
-                    existingLot.remaining += amount;
-                    existingLot.fee += feeUSDT;
-                    // Keep earliest timestamp
-                    if (timestamp < existingLot.timestamp) existingLot.timestamp = timestamp;
-                } else {
-                    // New lot
-                    inventory.push({
-                        orderId,
-                        tradeId: String(trade.id), // PATCH: Store actual Binance trade ID
-                        price,
-                        amount,
-                        remaining: amount,
-                        fee: feeUSDT,
-                        timestamp
-                    });
-                }
+                // Add to inventory
+                inventory.push({
+                    orderId,
+                    price,
+                    amount,
+                    remaining: amount,
+                    fee: feeUSDT,
+                    timestamp
+                });
 
                 buyCount++;
                 totalBuyVolume += cost;
 
                 tradeLog.push({
                     type: 'BUY',
-                    orderId: orderId, // FIX: Include Binance orderId for matching
                     date: new Date(timestamp).toISOString(),
                     price,
                     amount,
                     cost,
-                    fees: feeCost, // Frontend expects 'fees'
-                    feeCurrency: feeAsset, // Frontend expects 'feeCurrency'
+                    fee: feeUSDT,
                     profit: null,
                     spreadPct: null,
                     inventoryAfter: inventory.reduce((s, l) => s + l.remaining, 0)
@@ -211,138 +181,88 @@ async function fullAudit() {
                 const lotsConsumed = [];
                 let matchType = 'NONE';
 
-                // PROFIT REAL: Primero buscar BUYs con precio MENOR (profit positivo)
-                // Si no hay, buscar el más cercano (puede ser pérdida)
-                let sortedIndices = inventory
-                    .map((lot, idx) => idx)
-                    .filter(idx => inventory[idx].remaining > 0.00000001 && inventory[idx].price < price)
+                // Sort inventory by proximity to expected buy price (SPREAD_MATCH)
+                const candidates = inventory
+                    .map((lot, idx) => ({ ...lot, originalIndex: idx }))
+                    .filter(lot => lot.remaining > 0.00000001)
                     .sort((a, b) => {
-                        // Ordenar por cercanía al precio esperado
-                        const diffA = Math.abs(inventory[a].price - expectedBuyPrice);
-                        const diffB = Math.abs(inventory[b].price - expectedBuyPrice);
+                        const diffA = Math.abs(a.price - expectedBuyPrice);
+                        const diffB = Math.abs(b.price - expectedBuyPrice);
                         return diffA - diffB;
                     });
 
-                // Si no hay buys con precio menor, buscar el MÁS CERCANO (mostrará pérdida real)
-                if (sortedIndices.length === 0 && inventory.some(l => l.remaining > 0.00000001)) {
-                    sortedIndices = inventory
-                        .map((lot, idx) => idx)
-                        .filter(idx => inventory[idx].remaining > 0.00000001)
-                        .sort((a, b) => {
-                            // Ordenar por cercanía al precio de venta (el más cercano primero)
-                            const diffA = Math.abs(inventory[a].price - price);
-                            const diffB = Math.abs(inventory[b].price - price);
-                            return diffA - diffB;
-                        });
-                }
-
                 // Determine match quality
-                if (sortedIndices.length > 0) {
-                    const bestMatch = inventory[sortedIndices[0]];
+                if (candidates.length > 0) {
+                    const bestMatch = candidates[0];
                     const priceDiff = Math.abs(bestMatch.price - expectedBuyPrice);
                     if (priceDiff <= tolerance) {
                         matchType = 'EXACT';
                         exactMatches++;
-                    } else if (bestMatch.price >= price) {
-                        // Buy price >= Sell price = LOSS match
-                        matchType = 'LOSS';
-                        fallbackMatches++;
-                    } else if (sortedIndices.length === 1 && inventory.length === 1) {
-                        matchType = 'FALLBACK';
-                        fallbackMatches++;
-                    } else {
+                    } else if (priceDiff <= expectedBuyPrice * 0.02) {
                         matchType = 'CLOSE';
                         closeMatches++;
+                    } else {
+                        matchType = 'FALLBACK';
+                        fallbackMatches++;
                     }
-                } else if (inventory.length > 0) {
-                    matchType = 'FALLBACK';
-                    fallbackMatches++;
                 }
 
-                // CONSUME INVENTORY - work directly with inventory array
+                // Consume from sorted candidates
+                for (const candidate of candidates) {
+                    if (remainingToSell <= 0.00000001) break;
+
+                    const lot = inventory[candidate.originalIndex];
+                    if (lot.remaining <= 0.00000001) continue;
+
+                    const take = Math.min(remainingToSell, lot.remaining);
+                    totalCostBasis += (take * lot.price);
+
+                    if (lot.amount > 0) {
+                        totalEntryFees += (take / lot.amount) * lot.fee;
+                    }
+
+                    lotsConsumed.push({
+                        lotPrice: lot.price,
+                        amount: take,
+                        age: Math.round((timestamp - lot.timestamp) / (1000 * 60)),
+                        matchType
+                    });
+
+                    lot.remaining -= take;
+                    remainingToSell -= take;
+                }
+
+                // Clean up consumed lots
+                inventory = inventory.filter(l => l.remaining > 0.00000001);
+
+                // Handle shortfall
                 let shortfall = 0;
-
-                if (sortedIndices.length === 0) {
-                    // No hay NINGÚN buy en inventario - esto es raro, probablemente inicio del bot
-                    shortfall = amount;
-                    totalCostBasis = price * amount; // Sin referencia de costo
-                    matchType = 'NO_INVENTORY';
-                } else {
-                    for (const idx of sortedIndices) {
-                        if (remainingToSell <= 0.00000001) break;
-
-                        const lot = inventory[idx];
-                        if (lot.remaining <= 0.00000001) continue; // Skip depleted lots
-
-                        const take = Math.min(lot.remaining, remainingToSell);
-
-                        // Directly update the ACTUAL inventory object
-                        lot.remaining -= take;
-                        remainingToSell -= take;
-
-                        totalCostBasis += take * lot.price;
-                        const feePerUnit = lot.fee / lot.amount;
-                        totalEntryFees += take * feePerUnit;
-
-                        lotsConsumed.push({
-                            lotId: lot.orderId,
-                            price: lot.price,
-                            amountTaken: take
-                        });
-                    }
-
-                    if (remainingToSell > 0.00000001) {
-                        shortfall = remainingToSell;
-                        // FIX: No agregar shortfall al costBasis - solo cuenta la parte matcheada
-                        // El shortfall es inventory que llegará después (BUYs futuros)
-                        matchType = matchType === 'EXACT' ? 'PARTIAL' : 'ESTIMATED';
-                    }
+                if (remainingToSell > 0.00000001) {
+                    shortfall = remainingToSell;
+                    const estBuyPrice = price * 0.995;
+                    totalCostBasis += (remainingToSell * estBuyPrice);
                 }
 
-                // Profit Calculation - solo cuenta la porción matcheada
-                const matchedAmount = amount - shortfall;
-                const revenue = price * matchedAmount; // Solo revenue de lo matcheado
-                const avgCostBasis = matchedAmount > 0 ? totalCostBasis / matchedAmount : price;
-
-                // Profit solo de la parte matcheada (fees prorrateadas)
-                const feeRatio = matchedAmount / amount;
-                const profit = matchedAmount > 0
-                    ? revenue - totalCostBasis - totalEntryFees - (feeUSDT * feeRatio)
-                    : 0;
-                const spreadPct = matchedAmount > 0
-                    ? ((price - avgCostBasis) / avgCostBasis) * 100
-                    : 0;
+                const revenue = price * amount;
+                const sellFee = revenue * FEE_RATE;
+                const profit = revenue - totalCostBasis - totalEntryFees - sellFee;
+                const avgCostBasis = totalCostBasis / amount;
+                const spreadPct = ((price - avgCostBasis) / avgCostBasis) * 100;
 
                 totalRealizedProfit += profit;
                 sellCount++;
                 totalSellVolume += revenue;
 
-                // Track win/loss statistics (solo cuenta matcheados)
-                if (matchedAmount > 0) {
-                    if (profit > 0) {
-                        profitableSells++;
-                    } else if (profit < 0) {
-                        losingSells++;
-                    }
-                    // profit = 0 no cuenta como win ni loss
-                }
-
-                // Remove empty lots from inventory source (using originalIndex or just filter)
-                // Since 'candidates' refers to objects in 'inventory', modifying 'lot.remaining' updates 'inventory'.
-                // We just need to filter out empty ones now.
-                // Re-assigning inventory might break the reference if we are not careful? 
-                // We modified properties of objects in the array. Filter creates shallow copy.
-                inventory = inventory.filter(l => l.remaining > 0.00000001);
+                if (profit > 0) profitableSells++;
+                else losingSells++;
 
                 tradeLog.push({
                     type: 'SELL',
-                    orderId: orderId, // FIX: Include Binance orderId for matching
                     date: new Date(timestamp).toISOString(),
                     price,
                     amount,
                     revenue,
-                    fees: feeCost, // Frontend expects 'fees'
-                    feeCurrency: feeAsset, // Frontend expects 'feeCurrency'
+                    fee: sellFee,
                     costBasis: avgCostBasis,
                     profit,
                     spreadPct,
@@ -447,7 +367,6 @@ async function fullAudit() {
                     // Add to front of new array (to keep order)
                     cappedInventory.unshift({
                         ...lot,
-                        id: lot.tradeId || lot.orderId, // PATCH: Use trade ID, fallback to orderId
                         remaining: take,
                         amount: lot.amount
                     });
@@ -486,7 +405,7 @@ async function fullAudit() {
                 let stateUpdated = false;
 
                 // 1. Fix Stats (Profit/Inventory) if needed
-                if (needsFix || DEEP_CLEAN_MODE) {
+                if (needsFix) {
                     // Create backup
                     const backupPath = stateFilePath.replace('.json', `_backup_${Date.now()}.json`);
                     fs.writeFileSync(backupPath, JSON.stringify(state, null, 2));
@@ -498,70 +417,23 @@ async function fullAudit() {
                     state.accumulatedProfit = totalRealizedProfit;
                     console.log(`║  💰 Profit: $${oldProfit.toFixed(4)} → $${totalRealizedProfit.toFixed(4)}                           ║`);
 
+                    // Update inventory with audited lots
+                    const oldInvCount = (state.inventory || []).length;
+                    state.inventory = inventory.map(lot => ({
+                        id: lot.orderId || `AUDIT_${lot.timestamp}`,
+                        price: lot.price,
+                        amount: lot.remaining,
+                        remaining: lot.remaining,
+                        fee: lot.fee || 0,
+                        timestamp: lot.timestamp,
+                        recovered: true,
+                        auditVerified: true
+                    }));
+                    console.log(`║  📦 Inventory: ${oldInvCount} lots → ${state.inventory.length} lots (${remainingInventory.toFixed(6)} ${BASE_ASSET})     ║`);
+
                     // Update avg cost
                     state.entryPrice = avgInvCost;
                     console.log(`║  📊 Avg Cost: $${avgInvCost.toFixed(2).padEnd(42)}║`);
-
-                    // 1.1 DEEP CLEAN: Overwrite History
-                    // Reconstruct filledOrders from the verified tradeLog to eliminate phantoms
-                    // FIX: Aggregate partial fills for BUYs by orderId
-                    console.log(`║  🧹 DEEP CLEAN: Reconstructing history from verified API data...     ║`);
-
-                    // Aggregate BUYs by orderId
-                    const buysByOrderId = {};
-                    const sellOrders = [];
-
-                    tradeLog.forEach(t => {
-                        if (t.type === 'BUY') {
-                            const id = t.orderId || `REC_${new Date(t.date).getTime()}`;
-                            if (buysByOrderId[id]) {
-                                // Aggregate partial fill
-                                buysByOrderId[id].amount += t.amount;
-                                buysByOrderId[id].cost += (t.cost || 0);
-                                buysByOrderId[id].fees += (t.fees || 0);
-                            } else {
-                                buysByOrderId[id] = {
-                                    id,
-                                    symbol: PAIR,
-                                    side: 'buy',
-                                    price: t.price,
-                                    amount: t.amount,
-                                    cost: t.cost || 0,
-                                    fees: t.fees || 0,
-                                    feeCurrency: t.feeCurrency || 'USDT',
-                                    timestamp: new Date(t.date).getTime(),
-                                    datetime: t.date,
-                                    isNetProfit: true
-                                };
-                            }
-                        } else if (t.type === 'SELL') {
-                            // Incluir TODAS las sells - las sin match válido muestran profit=0
-                            sellOrders.push({
-                                id: t.orderId || `REC_${new Date(t.date).getTime()}`,
-                                symbol: PAIR,
-                                side: 'sell',
-                                price: t.price,
-                                amount: t.amount,
-                                cost: t.revenue,
-                                fees: t.fees || 0,
-                                feeCurrency: t.feeCurrency || 'USDT',
-                                costBasis: t.costBasis || 0,
-                                spreadPct: t.spreadPct !== null ? t.spreadPct : 0,
-                                profit: t.profit !== null ? t.profit : 0,
-                                timestamp: new Date(t.date).getTime(),
-                                datetime: t.date,
-                                matchType: t.matchType || undefined,
-                                matchedLots: t.lotsConsumed || undefined,
-                                isNetProfit: true
-                            });
-                        }
-                    });
-
-                    // Combine aggregated buys and sells, sort by timestamp desc
-                    state.filledOrders = [...Object.values(buysByOrderId), ...sellOrders]
-                        .sort((a, b) => b.timestamp - a.timestamp);
-                    state.archivedOrders = [];
-                    console.log(`║  ✨ History Sanitized: ${state.filledOrders.length} verified trades restored.         ║`);
 
                     stateUpdated = true;
                 } else {
@@ -581,23 +453,6 @@ async function fullAudit() {
                     if (ordersFixed > 0) {
                         console.log(`║  🔧 Fixed ${ordersFixed} active orders with missing Cost Basis (used Avg: $${avgInvCost.toFixed(2)}) ║`);
                         stateUpdated = true;
-                    }
-                }
-
-                // 1.6 Mark Inventory Lots as Audited (Prevents reconcile from overwriting on restart)
-                if (state.inventory && state.inventory.length > 0) {
-                    let lotsMarked = 0;
-                    state.inventory.forEach(lot => {
-                        if (!lot.auditVerified) {
-                            lot.auditVerified = true;
-                            lotsMarked++;
-                        }
-                    });
-                    if (lotsMarked > 0) {
-                        console.log(`║  🔒 Marked ${lotsMarked} inventory lots as auditVerified              ║`);
-                        stateUpdated = true;
-                    } else {
-                        console.log('║  ✅ All inventory lots already marked as verified.               ║');
                     }
                 }
 

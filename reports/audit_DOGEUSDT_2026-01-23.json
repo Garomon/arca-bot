@@ -1,0 +1,2883 @@
+{
+  "generatedAt": "2026-01-23T07:26:23.004Z",
+  "method": "SPREAD_MATCH",
+  "pair": "DOGE/USDT",
+  "spacing": 0.01,
+  "tradingPeriod": {
+    "start": "2025-12-31T15:12:08.080Z",
+    "end": "2026-01-22T16:44:19.244Z",
+    "days": 23
+  },
+  "statistics": {
+    "totalTrades": 148,
+    "buyCount": 88,
+    "sellCount": 60,
+    "profitableSells": 57,
+    "losingSells": 3,
+    "winRate": "95.00%"
+  },
+  "matchQuality": {
+    "exactMatches": 50,
+    "closeMatches": 7,
+    "fallbackMatches": 3
+  },
+  "volume": {
+    "totalBuyVolume": 1284.7698600000003,
+    "totalSellVolume": 881.288,
+    "totalFeesPaid": 1.6385284656999994
+  },
+  "pnl": {
+    "realizedProfit": 10.08476847602218,
+    "unrealizedPnL": -35.80475000000002,
+    "totalPnL": -25.71998152397784
+  },
+  "inventory": {
+    "remaining": 2743,
+    "avgCost": 0.13705846052196896,
+    "currentPrice": 0.12523,
+    "value": 343.50589,
+    "lots": [
+      {
+        "price": 0.14568,
+        "remaining": 170,
+        "date": "2026-01-14T13:49:18.351Z"
+      },
+      {
+        "price": 0.14808,
+        "remaining": 5,
+        "date": "2026-01-14T17:36:16.289Z"
+      },
+      {
+        "price": 0.14681,
+        "remaining": 151,
+        "date": "2026-01-14T18:35:39.742Z"
+      },
+      {
+        "price": 0.14633,
+        "remaining": 149,
+        "date": "2026-01-14T22:40:53.046Z"
+      },
+      {
+        "price": 0.14498,
+        "remaining": 100,
+        "date": "2026-01-15T01:31:58.875Z"
+      },
+      {
+        "price": 0.14305,
+        "remaining": 163,
+        "date": "2026-01-15T03:27:36.825Z"
+      },
+      {
+        "price": 0.1415,
+        "remaining": 120,
+        "date": "2026-01-15T15:38:20.340Z"
+      },
+      {
+        "price": 0.13995,
+        "remaining": 121,
+        "date": "2026-01-15T18:41:00.813Z"
+      },
+      {
+        "price": 0.13854,
+        "remaining": 17,
+        "date": "2026-01-16T04:52:03.047Z"
+      },
+      {
+        "price": 0.13884,
+        "remaining": 164,
+        "date": "2026-01-16T11:08:17.768Z"
+      },
+      {
+        "price": 0.13708,
+        "remaining": 166,
+        "date": "2026-01-17T07:01:25.157Z"
+      },
+      {
+        "price": 0.13598,
+        "remaining": 106,
+        "date": "2026-01-18T23:04:15.359Z"
+      },
+      {
+        "price": 0.13487,
+        "remaining": 107,
+        "date": "2026-01-18T23:22:52.133Z"
+      },
+      {
+        "price": 0.13377,
+        "remaining": 108,
+        "date": "2026-01-18T23:22:59.746Z"
+      },
+      {
+        "price": 0.13266,
+        "remaining": 109,
+        "date": "2026-01-18T23:46:18.271Z"
+      },
+      {
+        "price": 0.13156,
+        "remaining": 110,
+        "date": "2026-01-18T23:47:41.239Z"
+      },
+      {
+        "price": 0.13051,
+        "remaining": 201,
+        "date": "2026-01-19T00:00:24.376Z"
+      },
+      {
+        "price": 0.12957,
+        "remaining": 294,
+        "date": "2026-01-19T21:34:40.911Z"
+      },
+      {
+        "price": 0.12159,
+        "remaining": 330,
+        "date": "2026-01-21T16:44:22.523Z"
+      },
+      {
+        "price": 0.12061,
+        "remaining": 52,
+        "date": "2026-01-21T16:58:38.492Z"
+      }
+    ]
+  },
+  "tradeLog": [
+    {
+      "type": "BUY",
+      "orderId": "13317892782",
+      "date": "2025-12-31T15:12:08.080Z",
+      "price": 0.12223,
+      "amount": 118,
+      "cost": 14.42314,
+      "fees": 0.00001253,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 118
+    },
+    {
+      "type": "BUY",
+      "orderId": "13319824729",
+      "date": "2025-12-31T15:33:08.518Z",
+      "price": 0.12072,
+      "amount": 128,
+      "cost": 15.45216,
+      "fees": 0.0000135,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 246
+    },
+    {
+      "type": "BUY",
+      "orderId": "13319825085",
+      "date": "2025-12-31T16:42:23.316Z",
+      "price": 0.11974,
+      "amount": 82,
+      "cost": 9.81868,
+      "fees": 0.00000861,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 328
+    },
+    {
+      "type": "BUY",
+      "orderId": "13319825736",
+      "date": "2025-12-31T16:42:27.000Z",
+      "price": 0.11877,
+      "amount": 82,
+      "cost": 9.73914,
+      "fees": 0.00000861,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 410
+    },
+    {
+      "type": "BUY",
+      "orderId": "13319826274",
+      "date": "2025-12-31T16:42:29.482Z",
+      "price": 0.1178,
+      "amount": 83,
+      "cost": 9.7774,
+      "fees": 0.00000871,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 493
+    },
+    {
+      "type": "BUY",
+      "orderId": "13319826666",
+      "date": "2025-12-31T16:42:32.207Z",
+      "price": 0.11682,
+      "amount": 84,
+      "cost": 9.81288,
+      "fees": 0.00000882,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 577
+    },
+    {
+      "type": "BUY",
+      "orderId": "13320587698",
+      "date": "2025-12-31T20:05:26.999Z",
+      "price": 0.11684,
+      "amount": 154,
+      "cost": 17.99336,
+      "fees": 0.00001566,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 731
+    },
+    {
+      "type": "SELL",
+      "orderId": "13323525166",
+      "date": "2026-01-01T08:58:42.635Z",
+      "price": 0.12035,
+      "amount": 150,
+      "revenue": 18.0525,
+      "fees": 0.00001572,
+      "feeCurrency": "BNB",
+      "costBasis": 0.11920973333333333,
+      "profit": 0.14296592769999786,
+      "spreadPct": 0.9565214473538518,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.11915841584158415,
+      "lotsConsumed": [
+        {
+          "lotId": "13319825736",
+          "price": 0.11877,
+          "amountTaken": 82
+        },
+        {
+          "lotId": "13319825085",
+          "price": 0.11974,
+          "amountTaken": 68
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 581
+    },
+    {
+      "type": "SELL",
+      "orderId": "13323525171",
+      "date": "2026-01-01T15:31:55.173Z",
+      "price": 0.1213,
+      "amount": 94,
+      "revenue": 11.4022,
+      "fees": 0.00000996,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12057404255319149,
+      "profit": 0.05051640192500119,
+      "spreadPct": 0.602084355335654,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12009900990099011,
+      "lotsConsumed": [
+        {
+          "lotId": "13319825085",
+          "price": 0.11974,
+          "amountTaken": 14
+        },
+        {
+          "lotId": "13319824729",
+          "price": 0.12072,
+          "amountTaken": 80
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 487
+    },
+    {
+      "type": "SELL",
+      "orderId": "13323525183",
+      "date": "2026-01-01T15:41:17.764Z",
+      "price": 0.12226,
+      "amount": 94,
+      "revenue": 11.49244,
+      "fees": 0.00001003,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12145893617021276,
+      "profit": 0.05747865002923766,
+      "spreadPct": 0.6595346995832546,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12104950495049505,
+      "lotsConsumed": [
+        {
+          "lotId": "13319824729",
+          "price": 0.12072,
+          "amountTaken": 48
+        },
+        {
+          "lotId": "13317892782",
+          "price": 0.12223,
+          "amountTaken": 46
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 393
+    },
+    {
+      "type": "SELL",
+      "orderId": "13323525196",
+      "date": "2026-01-01T15:41:38.235Z",
+      "price": 0.12321,
+      "amount": 93,
+      "revenue": 11.45853,
+      "fees": 0.00000999,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12122967741935485,
+      "profit": 0.16647168494335124,
+      "spreadPct": 1.6335295307227986,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12199009900990099,
+      "lotsConsumed": [
+        {
+          "lotId": "13317892782",
+          "price": 0.12223,
+          "amountTaken": 72
+        },
+        {
+          "lotId": "13319826274",
+          "price": 0.1178,
+          "amountTaken": 21
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 300
+    },
+    {
+      "type": "SELL",
+      "orderId": "13323525333",
+      "date": "2026-01-01T15:46:15.772Z",
+      "price": 0.12417,
+      "amount": 92,
+      "revenue": 11.42364,
+      "fees": 0.00000996,
+      "feeCurrency": "BNB",
+      "costBasis": 0.11748695652173913,
+      "profit": 0.5974291558231899,
+      "spreadPct": 5.688328029013402,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.12294059405940594,
+      "lotsConsumed": [
+        {
+          "lotId": "13319826274",
+          "price": 0.1178,
+          "amountTaken": 62
+        },
+        {
+          "lotId": "13320587698",
+          "price": 0.11684,
+          "amountTaken": 30
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 208
+    },
+    {
+      "type": "SELL",
+      "orderId": "13323525339",
+      "date": "2026-01-01T15:46:27.142Z",
+      "price": 0.12512,
+      "amount": 91,
+      "revenue": 11.38592,
+      "fees": 0.00000993,
+      "feeCurrency": "BNB",
+      "costBasis": 0.11684000000000001,
+      "profit": 0.7363664698363633,
+      "spreadPct": 7.086614173228342,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.1238811881188119,
+      "lotsConsumed": [
+        {
+          "lotId": "13320587698",
+          "price": 0.11684,
+          "amountTaken": 91
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 117
+    },
+    {
+      "type": "SELL",
+      "orderId": "13328169923",
+      "date": "2026-01-02T03:41:17.018Z",
+      "price": 0.12876,
+      "amount": 89,
+      "revenue": 11.459640000000002,
+      "fees": 0.00000993,
+      "feeCurrency": "BNB",
+      "costBasis": 0.11682741573033707,
+      "profit": 1.04490245794286,
+      "spreadPct": 10.213856221219448,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.1274851485148515,
+      "lotsConsumed": [
+        {
+          "lotId": "13320587698",
+          "price": 0.11684,
+          "amountTaken": 33
+        },
+        {
+          "lotId": "13319826666",
+          "price": 0.11682,
+          "amountTaken": 56
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 28
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 36
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 44
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 52
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 60
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 68
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 76
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 84
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 92
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 100
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 108
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 8,
+      "cost": 1.12056,
+      "fees": 9.5e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 116
+    },
+    {
+      "type": "BUY",
+      "orderId": "13340097942",
+      "date": "2026-01-02T21:37:08.169Z",
+      "price": 0.14007,
+      "amount": 504,
+      "cost": 70.59528,
+      "fees": 0.00006018,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 620
+    },
+    {
+      "type": "SELL",
+      "orderId": "13340138031",
+      "date": "2026-01-02T22:05:09.200Z",
+      "price": 0.14315,
+      "amount": 131,
+      "revenue": 18.75265,
+      "fees": 0.00001593,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14007,
+      "profit": 0.3753262875707753,
+      "spreadPct": 2.198900549725137,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14173267326732672,
+      "lotsConsumed": [
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 131
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 489
+    },
+    {
+      "type": "SELL",
+      "orderId": "13345670786",
+      "date": "2026-01-03T09:47:20.400Z",
+      "price": 0.14269,
+      "amount": 107,
+      "revenue": 15.267830000000002,
+      "fees": 0.00001308,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14007,
+      "profit": 0.25728313528834706,
+      "spreadPct": 1.8704933247661963,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1412772277227723,
+      "lotsConsumed": [
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 107
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 382
+    },
+    {
+      "type": "BUY",
+      "orderId": "13347536701",
+      "date": "2026-01-03T16:07:36.332Z",
+      "price": 0.14111,
+      "amount": 120,
+      "cost": 16.933200000000003,
+      "fees": 0.00001455,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 502
+    },
+    {
+      "type": "SELL",
+      "orderId": "13347536780",
+      "date": "2026-01-03T23:17:56.882Z",
+      "price": 0.14341,
+      "amount": 118,
+      "revenue": 16.92238,
+      "fees": 0.00001443,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14111,
+      "profit": 0.24576356362499985,
+      "spreadPct": 1.6299340939692413,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.141990099009901,
+      "lotsConsumed": [
+        {
+          "lotId": "13347536701",
+          "price": 0.14111,
+          "amountTaken": 118
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 384
+    },
+    {
+      "type": "SELL",
+      "orderId": "13347536784",
+      "date": "2026-01-04T00:14:31.109Z",
+      "price": 0.14455,
+      "amount": 74,
+      "revenue": 10.696700000000002,
+      "fees": 0.00000909,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1400981081081081,
+      "profit": 0.313451396422299,
+      "spreadPct": 3.1776959389462704,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14311881188118813,
+      "lotsConsumed": [
+        {
+          "lotId": "13347536701",
+          "price": 0.14111,
+          "amountTaken": 2
+        },
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 72
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 310
+    },
+    {
+      "type": "SELL",
+      "orderId": "13347536834",
+      "date": "2026-01-04T00:17:24.136Z",
+      "price": 0.1457,
+      "amount": 74,
+      "revenue": 10.7818,
+      "fees": 0.00000917,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14007,
+      "profit": 0.4005634951125,
+      "spreadPct": 4.01941886199757,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.14425742574257425,
+      "lotsConsumed": [
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 74
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 236
+    },
+    {
+      "type": "SELL",
+      "orderId": "13347536849",
+      "date": "2026-01-04T00:34:50.165Z",
+      "price": 0.14685,
+      "amount": 73,
+      "revenue": 10.72005,
+      "fees": 0.00000912,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14007,
+      "profit": 0.47903453257989836,
+      "spreadPct": 4.840436924394951,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.14539603960396041,
+      "lotsConsumed": [
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 73
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 163
+    },
+    {
+      "type": "SELL",
+      "orderId": "13350569769",
+      "date": "2026-01-04T02:20:04.097Z",
+      "price": 0.14737,
+      "amount": 123,
+      "revenue": 18.12651,
+      "fees": 0.00001542,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14007,
+      "profit": 0.8710527172099661,
+      "spreadPct": 5.21167987434854,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.1459108910891089,
+      "lotsConsumed": [
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 123
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 40
+    },
+    {
+      "type": "BUY",
+      "orderId": "13353689350",
+      "date": "2026-01-04T06:49:37.366Z",
+      "price": 0.15037,
+      "amount": 130,
+      "cost": 19.5481,
+      "fees": 0.00001663,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 170
+    },
+    {
+      "type": "SELL",
+      "orderId": "13354328242",
+      "date": "2026-01-04T12:18:47.524Z",
+      "price": 0.15315,
+      "amount": 123,
+      "revenue": 18.83745,
+      "fees": 0.00001594,
+      "feeCurrency": "BNB",
+      "costBasis": 0.15037,
+      "profit": 0.3136834609838472,
+      "spreadPct": 1.848773026534551,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.15163366336633663,
+      "lotsConsumed": [
+        {
+          "lotId": "13353689350",
+          "price": 0.15037,
+          "amountTaken": 123
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 47
+    },
+    {
+      "type": "BUY",
+      "orderId": "13360004450",
+      "date": "2026-01-04T19:05:36.398Z",
+      "price": 0.14993,
+      "amount": 121,
+      "cost": 18.14153,
+      "fees": 0.00001532,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 168
+    },
+    {
+      "type": "BUY",
+      "orderId": "13360004503",
+      "date": "2026-01-04T19:05:52.179Z",
+      "price": 0.14843,
+      "amount": 85,
+      "cost": 12.61655,
+      "fees": 0.00001076,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 253
+    },
+    {
+      "type": "BUY",
+      "orderId": "13362724970",
+      "date": "2026-01-05T04:26:21.452Z",
+      "price": 0.14932,
+      "amount": 112,
+      "cost": 16.723840000000003,
+      "fees": 0.00001409,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 365
+    },
+    {
+      "type": "BUY",
+      "orderId": "13362725096",
+      "date": "2026-01-05T09:46:31.535Z",
+      "price": 0.14805,
+      "amount": 73,
+      "cost": 10.807649999999999,
+      "fees": 0.00000901,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 438
+    },
+    {
+      "type": "SELL",
+      "orderId": "13366754072",
+      "date": "2026-01-05T14:55:40.982Z",
+      "price": 0.14883,
+      "amount": 116,
+      "revenue": 17.26428,
+      "fees": 0.00001428,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1481908620689655,
+      "profit": 0.048507315650588106,
+      "spreadPct": 0.43129375327949687,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14735643564356435,
+      "lotsConsumed": [
+        {
+          "lotId": "13362725096",
+          "price": 0.14805,
+          "amountTaken": 73
+        },
+        {
+          "lotId": "13360004503",
+          "price": 0.14843,
+          "amountTaken": 43
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 322
+    },
+    {
+      "type": "SELL",
+      "orderId": "13366754109",
+      "date": "2026-01-05T16:35:54.620Z",
+      "price": 0.15042,
+      "amount": 84,
+      "revenue": 12.63528,
+      "fees": 0.00001047,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14932,
+      "profit": 0.0736326566249996,
+      "spreadPct": 0.7366729172247454,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14893069306930692,
+      "lotsConsumed": [
+        {
+          "lotId": "13362724970",
+          "price": 0.14932,
+          "amountTaken": 84
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 238
+    },
+    {
+      "type": "SELL",
+      "orderId": "13366754134",
+      "date": "2026-01-05T17:54:04.548Z",
+      "price": 0.152,
+      "amount": 83,
+      "revenue": 12.616,
+      "fees": 0.00001044,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14996710843373495,
+      "profit": 0.15003363052276367,
+      "spreadPct": 1.3555582870781997,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1504950495049505,
+      "lotsConsumed": [
+        {
+          "lotId": "13353689350",
+          "price": 0.15037,
+          "amountTaken": 7
+        },
+        {
+          "lotId": "13360004450",
+          "price": 0.14993,
+          "amountTaken": 76
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 155
+    },
+    {
+      "type": "SELL",
+      "orderId": "13366754150",
+      "date": "2026-01-05T17:54:37.216Z",
+      "price": 0.15359,
+      "amount": 82,
+      "revenue": 12.594380000000001,
+      "fees": 0.00001042,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14955707317073172,
+      "profit": 0.3121629810789769,
+      "spreadPct": 2.6965804717670334,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.15206930693069307,
+      "lotsConsumed": [
+        {
+          "lotId": "13360004450",
+          "price": 0.14993,
+          "amountTaken": 45
+        },
+        {
+          "lotId": "13362724970",
+          "price": 0.14932,
+          "amountTaken": 28
+        },
+        {
+          "lotId": "13360004503",
+          "price": 0.14843,
+          "amountTaken": 9
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 73
+    },
+    {
+      "type": "SELL",
+      "orderId": "13379176439",
+      "date": "2026-01-06T14:12:12.026Z",
+      "price": 0.15316,
+      "amount": 70,
+      "revenue": 10.7212,
+      "fees": 0.00000877,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13570757142857143,
+      "profit": 1.2065008115800393,
+      "spreadPct": 12.860320457959492,
+      "matchType": "CLOSE",
+      "expectedBuyPrice": 0.15164356435643564,
+      "lotsConsumed": [
+        {
+          "lotId": "13360004503",
+          "price": 0.14843,
+          "amountTaken": 33
+        },
+        {
+          "lotId": "13340097942",
+          "price": 0.14007,
+          "amountTaken": 12
+        },
+        {
+          "lotId": "13319826666",
+          "price": 0.11682,
+          "amountTaken": 25
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381448510",
+      "date": "2026-01-06T14:48:26.349Z",
+      "price": 0.15237,
+      "amount": 106,
+      "cost": 16.151220000000002,
+      "fees": 0.0000132,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 109
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381641852",
+      "date": "2026-01-06T15:36:52.355Z",
+      "price": 0.15168,
+      "amount": 107,
+      "cost": 16.229760000000002,
+      "fees": 0.00001327,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 216
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381641950",
+      "date": "2026-01-06T15:42:00.684Z",
+      "price": 0.15028,
+      "amount": 72,
+      "cost": 10.82016,
+      "fees": 0.00000885,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 288
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381642096",
+      "date": "2026-01-06T16:07:49.071Z",
+      "price": 0.14889,
+      "amount": 73,
+      "cost": 10.86897,
+      "fees": 0.00000891,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 361
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381642253",
+      "date": "2026-01-06T16:07:49.448Z",
+      "price": 0.14749,
+      "amount": 5,
+      "cost": 0.73745,
+      "fees": 6e-7,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 366
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381642253",
+      "date": "2026-01-06T16:07:49.448Z",
+      "price": 0.14749,
+      "amount": 68,
+      "cost": 10.02932,
+      "fees": 0.0000083,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 434
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381642698",
+      "date": "2026-01-06T16:07:52.018Z",
+      "price": 0.1461,
+      "amount": 74,
+      "cost": 10.8114,
+      "fees": 0.00000903,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 508
+    },
+    {
+      "type": "BUY",
+      "orderId": "13381642971",
+      "date": "2026-01-06T16:07:53.986Z",
+      "price": 0.1447,
+      "amount": 75,
+      "cost": 10.8525,
+      "fees": 0.00000915,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 583
+    },
+    {
+      "type": "SELL",
+      "orderId": "13383070601",
+      "date": "2026-01-06T16:07:58.084Z",
+      "price": 0.14683,
+      "amount": 75,
+      "revenue": 11.01225,
+      "fees": 0.00000898,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1447,
+      "profit": 0.14357640830000074,
+      "spreadPct": 1.4720110573600504,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14537623762376237,
+      "lotsConsumed": [
+        {
+          "lotId": "13381642971",
+          "price": 0.1447,
+          "amountTaken": 75
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 508
+    },
+    {
+      "type": "BUY",
+      "orderId": "13383184379",
+      "date": "2026-01-06T16:43:53.281Z",
+      "price": 0.14513,
+      "amount": 96,
+      "cost": 13.932480000000002,
+      "fees": 0.00001154,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 604
+    },
+    {
+      "type": "SELL",
+      "orderId": "13383191829",
+      "date": "2026-01-06T21:17:03.910Z",
+      "price": 0.14939,
+      "amount": 93,
+      "revenue": 13.89327,
+      "fees": 0.00001143,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1477910752688172,
+      "profit": 0.12838613306712132,
+      "spreadPct": 1.081881790408858,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1479108910891089,
+      "lotsConsumed": [
+        {
+          "lotId": "13381642253",
+          "price": 0.14749,
+          "amountTaken": 73
+        },
+        {
+          "lotId": "13381642096",
+          "price": 0.14889,
+          "amountTaken": 20
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 511
+    },
+    {
+      "type": "BUY",
+      "orderId": "13387045521",
+      "date": "2026-01-07T01:19:36.737Z",
+      "price": 0.14722,
+      "amount": 93,
+      "cost": 13.69146,
+      "fees": 0.00001132,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 604
+    },
+    {
+      "type": "SELL",
+      "orderId": "13388709120",
+      "date": "2026-01-07T03:00:32.161Z",
+      "price": 0.14869,
+      "amount": 93,
+      "revenue": 13.828169999999998,
+      "fees": 0.00001137,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14722,
+      "profit": 0.116468477899999,
+      "spreadPct": 0.9985056378209477,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1472178217821782,
+      "lotsConsumed": [
+        {
+          "lotId": "13387045521",
+          "price": 0.14722,
+          "amountTaken": 93
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 511
+    },
+    {
+      "type": "SELL",
+      "orderId": "13391116301",
+      "date": "2026-01-07T08:51:59.652Z",
+      "price": 0.1524,
+      "amount": 112,
+      "revenue": 17.0688,
+      "fees": 0.00001395,
+      "feeCurrency": "BNB",
+      "costBasis": 0.15078,
+      "profit": 0.1566749146168209,
+      "spreadPct": 1.0744130521289366,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1508910891089109,
+      "lotsConsumed": [
+        {
+          "lotId": "13381641950",
+          "price": 0.15028,
+          "amountTaken": 72
+        },
+        {
+          "lotId": "13381641852",
+          "price": 0.15168,
+          "amountTaken": 40
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 399
+    },
+    {
+      "type": "BUY",
+      "orderId": "13391116094",
+      "date": "2026-01-07T09:34:17.803Z",
+      "price": 0.14902,
+      "amount": 114,
+      "cost": 16.988280000000003,
+      "fees": 0.00001401,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 513
+    },
+    {
+      "type": "BUY",
+      "orderId": "13391116101",
+      "date": "2026-01-07T14:01:26.791Z",
+      "price": 0.14734,
+      "amount": 86,
+      "cost": 12.67124,
+      "fees": 0.00001053,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 599
+    },
+    {
+      "type": "BUY",
+      "orderId": "13391116105",
+      "date": "2026-01-07T14:31:27.778Z",
+      "price": 0.14565,
+      "amount": 87,
+      "cost": 12.67155,
+      "fees": 0.00001057,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 686
+    },
+    {
+      "type": "SELL",
+      "orderId": "13394076152",
+      "date": "2026-01-07T14:36:22.872Z",
+      "price": 0.14728,
+      "amount": 87,
+      "revenue": 12.81336,
+      "fees": 0.00001062,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14565,
+      "profit": 0.12290661289999955,
+      "spreadPct": 1.1191211809131427,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1458217821782178,
+      "lotsConsumed": [
+        {
+          "lotId": "13391116105",
+          "price": 0.14565,
+          "amountTaken": 87
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 599
+    },
+    {
+      "type": "BUY",
+      "orderId": "13394291069",
+      "date": "2026-01-07T15:15:41.715Z",
+      "price": 0.14581,
+      "amount": 87,
+      "cost": 12.685469999999999,
+      "fees": 0.00001059,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 686
+    },
+    {
+      "type": "SELL",
+      "orderId": "13395049516",
+      "date": "2026-01-07T16:09:51.291Z",
+      "price": 0.14727,
+      "amount": 87,
+      "revenue": 12.81249,
+      "fees": 0.00001067,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14581,
+      "profit": 0.10805416660000168,
+      "spreadPct": 1.00130306563337,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14581188118811883,
+      "lotsConsumed": [
+        {
+          "lotId": "13394291069",
+          "price": 0.14581,
+          "amountTaken": 87
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 599
+    },
+    {
+      "type": "BUY",
+      "orderId": "13395816029",
+      "date": "2026-01-07T19:12:50.625Z",
+      "price": 0.1458,
+      "amount": 87,
+      "cost": 12.684600000000001,
+      "fees": 0.00001063,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 686
+    },
+    {
+      "type": "SELL",
+      "orderId": "13397182514",
+      "date": "2026-01-07T22:33:52.370Z",
+      "price": 0.14726,
+      "amount": 87,
+      "revenue": 12.81162,
+      "fees": 0.00001068,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1458,
+      "profit": 0.10800956209999814,
+      "spreadPct": 1.0013717421124753,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1458019801980198,
+      "lotsConsumed": [
+        {
+          "lotId": "13395816029",
+          "price": 0.1458,
+          "amountTaken": 87
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 599
+    },
+    {
+      "type": "BUY",
+      "orderId": "13398175464",
+      "date": "2026-01-07T22:51:46.990Z",
+      "price": 0.14579,
+      "amount": 87,
+      "cost": 12.68373,
+      "fees": 0.00001061,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 686
+    },
+    {
+      "type": "SELL",
+      "orderId": "13398242777",
+      "date": "2026-01-08T00:46:51.558Z",
+      "price": 0.14725,
+      "amount": 87,
+      "revenue": 12.810749999999999,
+      "fees": 0.00001065,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14579,
+      "profit": 0.10805416659999814,
+      "spreadPct": 1.0014404280128877,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14579207920792078,
+      "lotsConsumed": [
+        {
+          "lotId": "13398175464",
+          "price": 0.14579,
+          "amountTaken": 87
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 599
+    },
+    {
+      "type": "BUY",
+      "orderId": "13398802975",
+      "date": "2026-01-08T02:38:21.679Z",
+      "price": 0.14578,
+      "amount": 87,
+      "cost": 12.68286,
+      "fees": 0.00001063,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 686
+    },
+    {
+      "type": "SELL",
+      "orderId": "13399848159",
+      "date": "2026-01-08T04:26:02.388Z",
+      "price": 0.14646,
+      "amount": 113,
+      "revenue": 16.54998,
+      "fees": 0.00001387,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14522778761061947,
+      "profit": 0.1147190093770124,
+      "spreadPct": 0.8484687466866261,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14500990099009903,
+      "lotsConsumed": [
+        {
+          "lotId": "13383184379",
+          "price": 0.14513,
+          "amountTaken": 96
+        },
+        {
+          "lotId": "13398802975",
+          "price": 0.14578,
+          "amountTaken": 17
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 573
+    },
+    {
+      "type": "BUY",
+      "orderId": "13399847842",
+      "date": "2026-01-08T06:17:07.614Z",
+      "price": 0.14396,
+      "amount": 114,
+      "cost": 16.41144,
+      "fees": 0.00001386,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 687
+    },
+    {
+      "type": "BUY",
+      "orderId": "13399847858",
+      "date": "2026-01-08T06:59:12.680Z",
+      "price": 0.14271,
+      "amount": 75,
+      "cost": 10.70325,
+      "fees": 0.00000912,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 762
+    },
+    {
+      "type": "SELL",
+      "orderId": "13401257506",
+      "date": "2026-01-08T08:01:15.427Z",
+      "price": 0.14458,
+      "amount": 108,
+      "revenue": 15.614639999999998,
+      "fees": 0.00001323,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14309194444444445,
+      "profit": 0.13719262951578762,
+      "spreadPct": 1.0399296489630643,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14314851485148514,
+      "lotsConsumed": [
+        {
+          "lotId": "13399847858",
+          "price": 0.14271,
+          "amountTaken": 75
+        },
+        {
+          "lotId": "13399847842",
+          "price": 0.14396,
+          "amountTaken": 33
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 654
+    },
+    {
+      "type": "BUY",
+      "orderId": "13401255416",
+      "date": "2026-01-08T11:20:07.216Z",
+      "price": 0.141,
+      "amount": 111,
+      "cost": 15.650999999999998,
+      "fees": 0.00001335,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 765
+    },
+    {
+      "type": "BUY",
+      "orderId": "13401255510",
+      "date": "2026-01-08T11:20:30.066Z",
+      "price": 0.13922,
+      "amount": 90,
+      "cost": 12.529800000000002,
+      "fees": 0.00001082,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 855
+    },
+    {
+      "type": "SELL",
+      "orderId": "13403521446",
+      "date": "2026-01-08T17:06:56.317Z",
+      "price": 0.14276,
+      "amount": 111,
+      "revenue": 15.84636,
+      "fees": 0.00001335,
+      "feeCurrency": "BNB",
+      "costBasis": 0.141,
+      "profit": 0.17154119700000264,
+      "spreadPct": 1.2482269503546184,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14134653465346533,
+      "lotsConsumed": [
+        {
+          "lotId": "13401255416",
+          "price": 0.141,
+          "amountTaken": 111
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 744
+    },
+    {
+      "type": "BUY",
+      "orderId": "13408467591",
+      "date": "2026-01-08T20:03:57.074Z",
+      "price": 0.14133,
+      "amount": 111,
+      "cost": 15.68763,
+      "fees": 0.00001327,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 855
+    },
+    {
+      "type": "BUY",
+      "orderId": "13410816289",
+      "date": "2026-01-09T08:04:35.507Z",
+      "price": 0.14127,
+      "amount": 118,
+      "cost": 16.66986,
+      "fees": 0.00001403,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 973
+    },
+    {
+      "type": "BUY",
+      "orderId": "13410816295",
+      "date": "2026-01-09T08:45:54.196Z",
+      "price": 0.14007,
+      "amount": 77,
+      "cost": 10.78539,
+      "fees": 0.00000909,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1050
+    },
+    {
+      "type": "BUY",
+      "orderId": "13410816299",
+      "date": "2026-01-09T08:50:07.020Z",
+      "price": 0.13887,
+      "amount": 78,
+      "cost": 10.831859999999999,
+      "fees": 0.00000917,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1128
+    },
+    {
+      "type": "SELL",
+      "orderId": "13411951278",
+      "date": "2026-01-09T09:00:51.452Z",
+      "price": 0.14004,
+      "amount": 78,
+      "revenue": 10.923119999999999,
+      "fees": 0.00000919,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13887,
+      "profit": 0.07488122760000013,
+      "spreadPct": 0.8425145819831529,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.13865346534653464,
+      "lotsConsumed": [
+        {
+          "lotId": "13410816299",
+          "price": 0.13887,
+          "amountTaken": 78
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1050
+    },
+    {
+      "type": "SELL",
+      "orderId": "13411827957",
+      "date": "2026-01-09T13:30:01.499Z",
+      "price": 0.14125,
+      "amount": 77,
+      "revenue": 10.876249999999999,
+      "fees": 0.00000914,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14007,
+      "profit": 0.07459719929999926,
+      "spreadPct": 0.8424359248946859,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.13985148514851484,
+      "lotsConsumed": [
+        {
+          "lotId": "13410816295",
+          "price": 0.14007,
+          "amountTaken": 77
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 973
+    },
+    {
+      "type": "SELL",
+      "orderId": "13413528604",
+      "date": "2026-01-09T15:22:11.280Z",
+      "price": 0.14033,
+      "amount": 130,
+      "revenue": 13.050690000000001,
+      "fees": 0.00001536,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13849741935483872,
+      "profit": 0.15069401844076885,
+      "spreadPct": 1.3231875754060831,
+      "matchType": "PARTIAL",
+      "expectedBuyPrice": 0.13894059405940595,
+      "lotsConsumed": [
+        {
+          "lotId": "13401255510",
+          "price": 0.13922,
+          "amountTaken": 90
+        },
+        {
+          "lotId": "13319826666",
+          "price": 0.11682,
+          "amountTaken": 3
+        }
+      ],
+      "shortfall": 37,
+      "inventoryAfter": 880
+    },
+    {
+      "type": "SELL",
+      "orderId": "13413528954",
+      "date": "2026-01-09T15:26:48.740Z",
+      "price": 0.14168,
+      "amount": 89,
+      "revenue": 12.60952,
+      "fees": 0.00001057,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14127,
+      "profit": 0.017620557680507277,
+      "spreadPct": 0.2902243930062955,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14027722772277226,
+      "lotsConsumed": [
+        {
+          "lotId": "13410816289",
+          "price": 0.14127,
+          "amountTaken": 89
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 791
+    },
+    {
+      "type": "SELL",
+      "orderId": "13413529034",
+      "date": "2026-01-09T15:32:47.919Z",
+      "price": 0.14303,
+      "amount": 88,
+      "revenue": 12.58664,
+      "fees": 0.00001051,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14133,
+      "profit": 0.13083902582612386,
+      "spreadPct": 1.2028585579848434,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1416138613861386,
+      "lotsConsumed": [
+        {
+          "lotId": "13408467591",
+          "price": 0.14133,
+          "amountTaken": 88
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 703
+    },
+    {
+      "type": "SELL",
+      "orderId": "13413529234",
+      "date": "2026-01-09T15:35:24.363Z",
+      "price": 0.14438,
+      "amount": 87,
+      "revenue": 12.561060000000001,
+      "fees": 0.00001046,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14377862068965516,
+      "profit": 0.03356363643826628,
+      "spreadPct": 0.41826754733091914,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14295049504950497,
+      "lotsConsumed": [
+        {
+          "lotId": "13399847842",
+          "price": 0.14396,
+          "amountTaken": 81
+        },
+        {
+          "lotId": "13408467591",
+          "price": 0.14133,
+          "amountTaken": 6
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 616
+    },
+    {
+      "type": "BUY",
+      "orderId": "13419431906",
+      "date": "2026-01-10T22:58:24.047Z",
+      "price": 0.13914,
+      "amount": 122,
+      "cost": 16.975080000000002,
+      "fees": 0.00001409,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 738
+    },
+    {
+      "type": "BUY",
+      "orderId": "13419431918",
+      "date": "2026-01-11T15:48:47.775Z",
+      "price": 0.13802,
+      "amount": 78,
+      "cost": 10.76556,
+      "fees": 0.00000895,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 816
+    },
+    {
+      "type": "BUY",
+      "orderId": "13419431924",
+      "date": "2026-01-11T15:48:51.777Z",
+      "price": 0.13689,
+      "amount": 79,
+      "cost": 10.81431,
+      "fees": 0.00000906,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 895
+    },
+    {
+      "type": "SELL",
+      "orderId": "13424126846",
+      "date": "2026-01-11T15:56:09.619Z",
+      "price": 0.13799,
+      "amount": 79,
+      "revenue": 10.90121,
+      "fees": 0.00000899,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13689,
+      "profit": 0.07079777549999998,
+      "spreadPct": 0.8035649061290012,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.13662376237623763,
+      "lotsConsumed": [
+        {
+          "lotId": "13419431924",
+          "price": 0.13689,
+          "amountTaken": 79
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 816
+    },
+    {
+      "type": "BUY",
+      "orderId": "13425921616",
+      "date": "2026-01-11T22:08:42.373Z",
+      "price": 0.13647,
+      "amount": 167,
+      "cost": 22.790490000000002,
+      "fees": 0.00001898,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 983
+    },
+    {
+      "type": "SELL",
+      "orderId": "13425921691",
+      "date": "2026-01-12T00:59:04.687Z",
+      "price": 0.13867,
+      "amount": 165,
+      "revenue": 22.88055,
+      "fees": 0.00001903,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13720272727272725,
+      "profit": 0.208318528186827,
+      "spreadPct": 1.0694195053106599,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.13729702970297028,
+      "lotsConsumed": [
+        {
+          "lotId": "13419431918",
+          "price": 0.13802,
+          "amountTaken": 78
+        },
+        {
+          "lotId": "13425921616",
+          "price": 0.13647,
+          "amountTaken": 87
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 818
+    },
+    {
+      "type": "SELL",
+      "orderId": "13425921694",
+      "date": "2026-01-12T02:08:04.123Z",
+      "price": 0.13977,
+      "amount": 104,
+      "revenue": 14.53608,
+      "fees": 0.00001205,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13914,
+      "profit": 0.04405529089016329,
+      "spreadPct": 0.45278137128071844,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1383861386138614,
+      "lotsConsumed": [
+        {
+          "lotId": "13419431906",
+          "price": 0.13914,
+          "amountTaken": 104
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 714
+    },
+    {
+      "type": "SELL",
+      "orderId": "13425921699",
+      "date": "2026-01-12T02:45:10.085Z",
+      "price": 0.14087,
+      "amount": 103,
+      "revenue": 13.805259999999999,
+      "fees": 0.00001199,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1369604081632653,
+      "profit": 0.3629974738472807,
+      "spreadPct": 2.8545416074360874,
+      "matchType": "PARTIAL",
+      "expectedBuyPrice": 0.13947524752475246,
+      "lotsConsumed": [
+        {
+          "lotId": "13419431906",
+          "price": 0.13914,
+          "amountTaken": 18
+        },
+        {
+          "lotId": "13425921616",
+          "price": 0.13647,
+          "amountTaken": 80
+        }
+      ],
+      "shortfall": 5,
+      "inventoryAfter": 616
+    },
+    {
+      "type": "SELL",
+      "orderId": "13425921712",
+      "date": "2026-01-12T02:50:40.738Z",
+      "price": 0.14197,
+      "amount": 102,
+      "revenue": 6.530620000000001,
+      "fees": 0.00001194,
+      "feeCurrency": "BNB",
+      "costBasis": 0.1412921739130435,
+      "profit": 0.021487353768723093,
+      "spreadPct": 0.47973363859039875,
+      "matchType": "PARTIAL",
+      "expectedBuyPrice": 0.14056435643564358,
+      "lotsConsumed": [
+        {
+          "lotId": "13410816289",
+          "price": 0.14127,
+          "amountTaken": 29
+        },
+        {
+          "lotId": "13408467591",
+          "price": 0.14133,
+          "amountTaken": 17
+        }
+      ],
+      "shortfall": 56,
+      "inventoryAfter": 570
+    },
+    {
+      "type": "BUY",
+      "orderId": "13430221428",
+      "date": "2026-01-12T08:35:43.739Z",
+      "price": 0.13727,
+      "amount": 43,
+      "cost": 5.90261,
+      "fees": 0.00000489,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 613
+    },
+    {
+      "type": "BUY",
+      "orderId": "13430221428",
+      "date": "2026-01-12T08:35:43.771Z",
+      "price": 0.13727,
+      "amount": 113,
+      "cost": 15.511510000000001,
+      "fees": 0.00001286,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 726
+    },
+    {
+      "type": "BUY",
+      "orderId": "13430221551",
+      "date": "2026-01-12T08:37:28.049Z",
+      "price": 0.13595,
+      "amount": 107,
+      "cost": 14.546649999999998,
+      "fees": 0.00001209,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 833
+    },
+    {
+      "type": "SELL",
+      "orderId": "13430441528",
+      "date": "2026-01-12T14:39:44.371Z",
+      "price": 0.13724,
+      "amount": 107,
+      "revenue": 14.68468,
+      "fees": 0.00001223,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13595,
+      "profit": 0.11633437120000231,
+      "spreadPct": 0.9488782640676818,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1358811881188119,
+      "lotsConsumed": [
+        {
+          "lotId": "13430221551",
+          "price": 0.13595,
+          "amountTaken": 107
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 726
+    },
+    {
+      "type": "SELL",
+      "orderId": "13430221639",
+      "date": "2026-01-12T16:30:03.134Z",
+      "price": 0.13989,
+      "amount": 153,
+      "revenue": 21.40317,
+      "fees": 0.00001768,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13727,
+      "profit": 0.36955776279038266,
+      "spreadPct": 1.9086471916660475,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1385049504950495,
+      "lotsConsumed": [
+        {
+          "lotId": "13430221428",
+          "price": 0.13727,
+          "amountTaken": 153
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 573
+    },
+    {
+      "type": "SELL",
+      "orderId": "13436759024",
+      "date": "2026-01-13T05:00:42.957Z",
+      "price": 0.13808,
+      "amount": 140,
+      "revenue": 0.41424000000000005,
+      "fees": 0.00001593,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13727,
+      "profit": 0.0018209672160439993,
+      "spreadPct": 0.5900779485685184,
+      "matchType": "PARTIAL",
+      "expectedBuyPrice": 0.13671287128712872,
+      "lotsConsumed": [
+        {
+          "lotId": "13430221428",
+          "price": 0.13727,
+          "amountTaken": 3
+        }
+      ],
+      "shortfall": 137,
+      "inventoryAfter": 570
+    },
+    {
+      "type": "SELL",
+      "orderId": "13436759024",
+      "date": "2026-01-13T05:01:01.200Z",
+      "price": 0.13808,
+      "amount": 24,
+      "revenue": 3.3139200000000004,
+      "fees": 0.00000273,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14578,
+      "profit": -0.18985138272068885,
+      "spreadPct": -5.281931677870754,
+      "matchType": "LOSS",
+      "expectedBuyPrice": 0.13671287128712872,
+      "lotsConsumed": [
+        {
+          "lotId": "13398802975",
+          "price": 0.14578,
+          "amountTaken": 24
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 546
+    },
+    {
+      "type": "SELL",
+      "orderId": "13436759033",
+      "date": "2026-01-13T05:20:15.739Z",
+      "price": 0.13917,
+      "amount": 104,
+      "revenue": 14.473679999999998,
+      "fees": 0.00001192,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14595846153846154,
+      "profit": -0.7279614960076763,
+      "spreadPct": -4.650954433822064,
+      "matchType": "LOSS",
+      "expectedBuyPrice": 0.13779207920792078,
+      "lotsConsumed": [
+        {
+          "lotId": "13398802975",
+          "price": 0.14578,
+          "amountTaken": 46
+        },
+        {
+          "lotId": "13381642698",
+          "price": 0.1461,
+          "amountTaken": 58
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 442
+    },
+    {
+      "type": "SELL",
+      "orderId": "13438195114",
+      "date": "2026-01-13T09:22:00.705Z",
+      "price": 0.1401,
+      "amount": 162,
+      "revenue": 22.6962,
+      "fees": 0.00001866,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14779722222222222,
+      "profit": -1.2812701293762965,
+      "spreadPct": -5.207961358467867,
+      "matchType": "LOSS",
+      "expectedBuyPrice": 0.13871287128712873,
+      "lotsConsumed": [
+        {
+          "lotId": "13381642698",
+          "price": 0.1461,
+          "amountTaken": 16
+        },
+        {
+          "lotId": "13391116101",
+          "price": 0.14734,
+          "amountTaken": 86
+        },
+        {
+          "lotId": "13381642096",
+          "price": 0.14889,
+          "amountTaken": 53
+        },
+        {
+          "lotId": "13391116094",
+          "price": 0.14902,
+          "amountTaken": 7
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 280
+    },
+    {
+      "type": "BUY",
+      "orderId": "13449391917",
+      "date": "2026-01-14T10:36:06.236Z",
+      "price": 0.14702,
+      "amount": 171,
+      "cost": 25.140420000000002,
+      "fees": 0.00002016,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 451
+    },
+    {
+      "type": "BUY",
+      "orderId": "13450048389",
+      "date": "2026-01-14T13:49:18.351Z",
+      "price": 0.14568,
+      "amount": 173,
+      "cost": 25.202640000000002,
+      "fees": 0.00002029,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 624
+    },
+    {
+      "type": "SELL",
+      "orderId": "13450048570",
+      "date": "2026-01-14T14:47:04.479Z",
+      "price": 0.14838,
+      "amount": 170,
+      "revenue": 25.224600000000002,
+      "fees": 0.00002013,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14702,
+      "profit": 0.19536286661579066,
+      "spreadPct": 0.9250442116718814,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.14691089108910893,
+      "lotsConsumed": [
+        {
+          "lotId": "13449391917",
+          "price": 0.14702,
+          "amountTaken": 170
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 454
+    },
+    {
+      "type": "BUY",
+      "orderId": "13453916228",
+      "date": "2026-01-14T17:36:16.289Z",
+      "price": 0.14808,
+      "amount": 153,
+      "cost": 22.656239999999997,
+      "fees": 0.00001812,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 607
+    },
+    {
+      "type": "BUY",
+      "orderId": "13453998503",
+      "date": "2026-01-14T18:35:39.742Z",
+      "price": 0.14681,
+      "amount": 151,
+      "cost": 22.168309999999998,
+      "fees": 0.00001769,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 758
+    },
+    {
+      "type": "SELL",
+      "orderId": "13454000035",
+      "date": "2026-01-14T19:30:00.076Z",
+      "price": 0.14939,
+      "amount": 148,
+      "revenue": 22.10972,
+      "fees": 0.00001753,
+      "feeCurrency": "BNB",
+      "costBasis": 0.14808,
+      "profit": 0.16260524871568632,
+      "spreadPct": 0.8846569421934128,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1479108910891089,
+      "lotsConsumed": [
+        {
+          "lotId": "13453916228",
+          "price": 0.14808,
+          "amountTaken": 148
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 610
+    },
+    {
+      "type": "BUY",
+      "orderId": "13456104701",
+      "date": "2026-01-14T22:40:53.046Z",
+      "price": 0.14633,
+      "amount": 149,
+      "cost": 21.803169999999998,
+      "fees": 0.00001729,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 759
+    },
+    {
+      "type": "BUY",
+      "orderId": "13456104705",
+      "date": "2026-01-15T01:31:58.875Z",
+      "price": 0.14498,
+      "amount": 100,
+      "cost": 14.498,
+      "fees": 0.00001163,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 859
+    },
+    {
+      "type": "BUY",
+      "orderId": "13457329611",
+      "date": "2026-01-15T03:27:36.825Z",
+      "price": 0.14305,
+      "amount": 163,
+      "cost": 23.31715,
+      "fees": 0.00001882,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1022
+    },
+    {
+      "type": "BUY",
+      "orderId": "13457329624",
+      "date": "2026-01-15T15:38:20.340Z",
+      "price": 0.1415,
+      "amount": 120,
+      "cost": 16.979999999999997,
+      "fees": 0.00001365,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1142
+    },
+    {
+      "type": "BUY",
+      "orderId": "13457329635",
+      "date": "2026-01-15T18:41:00.813Z",
+      "price": 0.13995,
+      "amount": 121,
+      "cost": 16.93395,
+      "fees": 0.00001364,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1263
+    },
+    {
+      "type": "BUY",
+      "orderId": "13464328922",
+      "date": "2026-01-16T04:52:03.047Z",
+      "price": 0.13854,
+      "amount": 176,
+      "cost": 24.38304,
+      "fees": 0.00001975,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1439
+    },
+    {
+      "type": "BUY",
+      "orderId": "13466746388",
+      "date": "2026-01-16T11:08:17.768Z",
+      "price": 0.13884,
+      "amount": 164,
+      "cost": 22.769759999999998,
+      "fees": 0.00001829,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1603
+    },
+    {
+      "type": "BUY",
+      "orderId": "13466746393",
+      "date": "2026-01-16T11:16:58.767Z",
+      "price": 0.13772,
+      "amount": 105,
+      "cost": 14.460600000000001,
+      "fees": 0.00001167,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1708
+    },
+    {
+      "type": "BUY",
+      "orderId": "13466746397",
+      "date": "2026-01-16T15:29:04.971Z",
+      "price": 0.1366,
+      "amount": 106,
+      "cost": 14.4796,
+      "fees": 0.00001171,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1814
+    },
+    {
+      "type": "BUY",
+      "orderId": "13466746414",
+      "date": "2026-01-16T15:33:34.855Z",
+      "price": 0.13548,
+      "amount": 107,
+      "cost": 14.49636,
+      "fees": 0.00001179,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1921
+    },
+    {
+      "type": "SELL",
+      "orderId": "13468826357",
+      "date": "2026-01-16T16:49:48.199Z",
+      "price": 0.13676,
+      "amount": 191,
+      "revenue": 26.12116,
+      "fees": 0.00002106,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13597256544502617,
+      "profit": 0.11281658493773705,
+      "spreadPct": 0.5791128176456897,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1354059405940594,
+      "lotsConsumed": [
+        {
+          "lotId": "13466746414",
+          "price": 0.13548,
+          "amountTaken": 107
+        },
+        {
+          "lotId": "13466746397",
+          "price": 0.1366,
+          "amountTaken": 84
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1730
+    },
+    {
+      "type": "SELL",
+      "orderId": "13468827034",
+      "date": "2026-01-16T20:57:35.456Z",
+      "price": 0.13787,
+      "amount": 122,
+      "revenue": 16.82014,
+      "fees": 0.0000135,
+      "feeCurrency": "BNB",
+      "costBasis": 0.13751803278688526,
+      "profit": 0.018813726519404987,
+      "spreadPct": 0.2559425887513823,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.1365049504950495,
+      "lotsConsumed": [
+        {
+          "lotId": "13466746397",
+          "price": 0.1366,
+          "amountTaken": 22
+        },
+        {
+          "lotId": "13466746393",
+          "price": 0.13772,
+          "amountTaken": 100
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1608
+    },
+    {
+      "type": "BUY",
+      "orderId": "13471470317",
+      "date": "2026-01-17T07:01:25.157Z",
+      "price": 0.13708,
+      "amount": 166,
+      "cost": 22.755280000000003,
+      "fees": 0.00001821,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1774
+    },
+    {
+      "type": "SELL",
+      "orderId": "13471470350",
+      "date": "2026-01-17T15:54:02.098Z",
+      "price": 0.1393,
+      "amount": 164,
+      "revenue": 22.845200000000002,
+      "fees": 0.00001805,
+      "feeCurrency": "BNB",
+      "costBasis": 0.138515,
+      "profit": 0.09622506457865312,
+      "spreadPct": 0.5667256253835382,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.13792079207920793,
+      "lotsConsumed": [
+        {
+          "lotId": "13466746393",
+          "price": 0.13772,
+          "amountTaken": 5
+        },
+        {
+          "lotId": "13464328922",
+          "price": 0.13854,
+          "amountTaken": 159
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1610
+    },
+    {
+      "type": "BUY",
+      "orderId": "13471470320",
+      "date": "2026-01-18T23:04:15.359Z",
+      "price": 0.13598,
+      "amount": 106,
+      "cost": 14.413879999999999,
+      "fees": 0.00001149,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1716
+    },
+    {
+      "type": "BUY",
+      "orderId": "13471470322",
+      "date": "2026-01-18T23:22:52.133Z",
+      "price": 0.13487,
+      "amount": 107,
+      "cost": 14.43109,
+      "fees": 0.00001152,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1823
+    },
+    {
+      "type": "BUY",
+      "orderId": "13471470325",
+      "date": "2026-01-18T23:22:59.746Z",
+      "price": 0.13377,
+      "amount": 108,
+      "cost": 14.44716,
+      "fees": 0.00001163,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1931
+    },
+    {
+      "type": "BUY",
+      "orderId": "13471470331",
+      "date": "2026-01-18T23:46:18.271Z",
+      "price": 0.13266,
+      "amount": 109,
+      "cost": 14.45994,
+      "fees": 0.00001155,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2040
+    },
+    {
+      "type": "BUY",
+      "orderId": "13471470341",
+      "date": "2026-01-18T23:47:41.239Z",
+      "price": 0.13156,
+      "amount": 110,
+      "cost": 14.4716,
+      "fees": 0.00001164,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2150
+    },
+    {
+      "type": "BUY",
+      "orderId": "13478762604",
+      "date": "2026-01-19T00:00:24.376Z",
+      "price": 0.13051,
+      "amount": 201,
+      "cost": 26.232509999999998,
+      "fees": 0.00002127,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2351
+    },
+    {
+      "type": "BUY",
+      "orderId": "13478763075",
+      "date": "2026-01-19T00:00:46.821Z",
+      "price": 0.12946,
+      "amount": 129,
+      "cost": 16.70034,
+      "fees": 0.00001355,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2480
+    },
+    {
+      "type": "SELL",
+      "orderId": "13486694505",
+      "date": "2026-01-19T19:36:30.463Z",
+      "price": 0.13018,
+      "amount": 178,
+      "revenue": 16.793219999999998,
+      "fees": 0.00001873,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12946,
+      "profit": 0.06868296086348055,
+      "spreadPct": 0.5561563417271732,
+      "matchType": "PARTIAL",
+      "expectedBuyPrice": 0.12889108910891087,
+      "lotsConsumed": [
+        {
+          "lotId": "13478763075",
+          "price": 0.12946,
+          "amountTaken": 129
+        }
+      ],
+      "shortfall": 49,
+      "inventoryAfter": 2351
+    },
+    {
+      "type": "BUY",
+      "orderId": "13487102280",
+      "date": "2026-01-19T21:34:40.911Z",
+      "price": 0.12957,
+      "amount": 294,
+      "cost": 38.093579999999996,
+      "fees": 0.0000309,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2645
+    },
+    {
+      "type": "BUY",
+      "orderId": "13495397859",
+      "date": "2026-01-20T22:33:27.568Z",
+      "price": 0.12259,
+      "amount": 368,
+      "cost": 45.11312,
+      "fees": 0.00003823,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3013
+    },
+    {
+      "type": "SELL",
+      "orderId": "13500343784",
+      "date": "2026-01-21T12:54:59.054Z",
+      "price": 0.12278,
+      "amount": 249,
+      "revenue": 30.57222,
+      "fees": 0.00002632,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12259,
+      "profit": 0.0007539804002712584,
+      "spreadPct": 0.15498817195529466,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12156435643564356,
+      "lotsConsumed": [
+        {
+          "lotId": "13495397859",
+          "price": 0.12259,
+          "amountTaken": 249
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2764
+    },
+    {
+      "type": "BUY",
+      "orderId": "13501098790",
+      "date": "2026-01-21T16:44:22.523Z",
+      "price": 0.12159,
+      "amount": 396,
+      "cost": 48.14964,
+      "fees": 0.00004146,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3160
+    },
+    {
+      "type": "BUY",
+      "orderId": "13501098793",
+      "date": "2026-01-21T16:58:38.492Z",
+      "price": 0.12061,
+      "amount": 254,
+      "cost": 30.63494,
+      "fees": 0.00002651,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3414
+    },
+    {
+      "type": "SELL",
+      "orderId": "13504229730",
+      "date": "2026-01-21T17:06:12.017Z",
+      "price": 0.12224,
+      "amount": 202,
+      "revenue": 24.69248,
+      "fees": 0.00002119,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12061,
+      "profit": 0.2915488971842534,
+      "spreadPct": 1.3514633944117458,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12102970297029703,
+      "lotsConsumed": [
+        {
+          "lotId": "13501098793",
+          "price": 0.12061,
+          "amountTaken": 202
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3212
+    },
+    {
+      "type": "SELL",
+      "orderId": "13504229766",
+      "date": "2026-01-21T18:51:39.928Z",
+      "price": 0.12374,
+      "amount": 159,
+      "revenue": 19.67466,
+      "fees": 0.00001687,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12233842767295598,
+      "profit": 0.19303608701184705,
+      "spreadPct": 1.1456517414060658,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12251485148514851,
+      "lotsConsumed": [
+        {
+          "lotId": "13495397859",
+          "price": 0.12259,
+          "amountTaken": 119
+        },
+        {
+          "lotId": "13501098790",
+          "price": 0.12159,
+          "amountTaken": 40
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3053
+    },
+    {
+      "type": "BUY",
+      "orderId": "13511723414",
+      "date": "2026-01-22T14:46:43.568Z",
+      "price": 0.12431,
+      "amount": 11,
+      "cost": 1.36741,
+      "fees": 0.00000115,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3064
+    },
+    {
+      "type": "BUY",
+      "orderId": "13511723414",
+      "date": "2026-01-22T14:46:43.591Z",
+      "price": 0.12431,
+      "amount": 11,
+      "cost": 1.36741,
+      "fees": 0.00000115,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3075
+    },
+    {
+      "type": "BUY",
+      "orderId": "13511723414",
+      "date": "2026-01-22T14:46:44.613Z",
+      "price": 0.12431,
+      "amount": 50,
+      "cost": 6.2155000000000005,
+      "fees": 0.00000528,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3125
+    },
+    {
+      "type": "BUY",
+      "orderId": "13511723414",
+      "date": "2026-01-22T14:46:44.690Z",
+      "price": 0.12431,
+      "amount": 50,
+      "cost": 6.2155000000000005,
+      "fees": 0.00000528,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3175
+    },
+    {
+      "type": "BUY",
+      "orderId": "13511723414",
+      "date": "2026-01-22T14:46:44.739Z",
+      "price": 0.12431,
+      "amount": 96,
+      "cost": 11.93376,
+      "fees": 0.00001013,
+      "feeCurrency": "BNB",
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3271
+    },
+    {
+      "type": "SELL",
+      "orderId": "13512382188",
+      "date": "2026-01-22T16:44:19.244Z",
+      "price": 0.12506,
+      "amount": 25,
+      "revenue": 3.1265,
+      "fees": 0.00000264,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12431,
+      "profit": 0.014042915760091567,
+      "spreadPct": 0.6033303837181245,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12382178217821782,
+      "lotsConsumed": [
+        {
+          "lotId": "13511723414",
+          "price": 0.12431,
+          "amountTaken": 25
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3246
+    },
+    {
+      "type": "SELL",
+      "orderId": "13512382188",
+      "date": "2026-01-22T16:44:19.244Z",
+      "price": 0.12506,
+      "amount": 48,
+      "revenue": 6.00288,
+      "fees": 0.00000508,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12430999999999999,
+      "profit": 0.026952406851376624,
+      "spreadPct": 0.6033303837181357,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12382178217821782,
+      "lotsConsumed": [
+        {
+          "lotId": "13511723414",
+          "price": 0.12431,
+          "amountTaken": 48
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3198
+    },
+    {
+      "type": "SELL",
+      "orderId": "13512382188",
+      "date": "2026-01-22T16:44:19.244Z",
+      "price": 0.12506,
+      "amount": 171,
+      "revenue": 21.385260000000002,
+      "fees": 0.00001812,
+      "feeCurrency": "BNB",
+      "costBasis": 0.12389643274853801,
+      "profit": 0.16673554557641365,
+      "spreadPct": 0.939145079199808,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 0.12382178217821782,
+      "lotsConsumed": [
+        {
+          "lotId": "13511723414",
+          "price": 0.12431,
+          "amountTaken": 145
+        },
+        {
+          "lotId": "13501098790",
+          "price": 0.12159,
+          "amountTaken": 26
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3027
+    }
+  ]
+}

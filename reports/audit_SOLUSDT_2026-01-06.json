@@ -1,0 +1,2563 @@
+{
+  "generatedAt": "2026-01-06T22:01:11.832Z",
+  "method": "SPREAD_MATCH",
+  "pair": "SOL/USDT",
+  "spacing": 0.008,
+  "tradingPeriod": {
+    "start": "2025-12-12T15:26:19.554Z",
+    "end": "2026-01-06T17:48:18.707Z",
+    "days": 26
+  },
+  "statistics": {
+    "totalTrades": 132,
+    "buyCount": 73,
+    "sellCount": 59,
+    "profitableSells": 51,
+    "losingSells": 8,
+    "winRate": "86.44%"
+  },
+  "matchQuality": {
+    "exactMatches": 56,
+    "closeMatches": 0,
+    "fallbackMatches": 3
+  },
+  "volume": {
+    "totalBuyVolume": 1716.1772499999995,
+    "totalSellVolume": 1559.1366300000004,
+    "totalFeesPaid": 2.635739739999998
+  },
+  "pnl": {
+    "realizedProfit": 6.82407097367411,
+    "unrealizedPnL": 1.7679200000000161,
+    "totalPnL": 8.591990973674125
+  },
+  "inventory": {
+    "remaining": 1.18825006,
+    "avgCost": 139.09550458715594,
+    "currentPrice": 140.57,
+    "value": 167.0323109342,
+    "lots": [
+      {
+        "price": 136.55,
+        "remaining": 0.015250060000000065,
+        "date": "2025-12-12T15:26:19.554Z"
+      },
+      {
+        "price": 130.5,
+        "remaining": 0.08499999999999999,
+        "date": "2026-01-03T07:20:08.400Z"
+      },
+      {
+        "price": 141.77,
+        "remaining": 0.269,
+        "date": "2026-01-06T14:32:10.190Z"
+      },
+      {
+        "price": 140.91,
+        "remaining": 0.27,
+        "date": "2026-01-06T16:07:50.404Z"
+      },
+      {
+        "price": 139.63,
+        "remaining": 0.181,
+        "date": "2026-01-06T16:26:06.100Z"
+      },
+      {
+        "price": 138.35,
+        "remaining": 0.183,
+        "date": "2026-01-06T16:43:56.360Z"
+      },
+      {
+        "price": 137.08,
+        "remaining": 0.185,
+        "date": "2026-01-06T17:48:18.707Z"
+      }
+    ]
+  },
+  "tradeLog": [
+    {
+      "type": "BUY",
+      "date": "2025-12-12T15:26:19.554Z",
+      "price": 136.55,
+      "amount": 0.153,
+      "cost": 20.89215,
+      "fee": 0.02089215,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.153
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-12T15:34:21.146Z",
+      "price": 135.09,
+      "amount": 0.149,
+      "cost": 20.12841,
+      "fee": 0.02012841,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.302
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-12T15:58:06.701Z",
+      "price": 133.63,
+      "amount": 0.109,
+      "cost": 14.565669999999999,
+      "fee": 0.014565670000000001,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.411
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-12T16:21:18.094Z",
+      "price": 132.18,
+      "amount": 0.11,
+      "cost": 14.539800000000001,
+      "fee": 0.014539800000000002,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.521
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-12T19:45:52.038Z",
+      "price": 130.72,
+      "amount": 0.111,
+      "cost": 14.50992,
+      "fee": 0.01450992,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.632
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-13T17:10:43.416Z",
+      "price": 132.47,
+      "amount": 0.116,
+      "cost": 15.366520000000001,
+      "fee": 0.01536652,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.748
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-13T21:31:49.506Z",
+      "price": 132.01,
+      "amount": 0.116,
+      "cost": 15.31316,
+      "fee": 0.01531316,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.864
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-14T00:33:49.217Z",
+      "price": 133.49,
+      "amount": 0.115,
+      "revenue": 15.351350000000002,
+      "fee": 0.015351350000000001,
+      "costBasis": 132.47,
+      "profit": 0.08671460000000196,
+      "spreadPct": 0.769985657129924,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 132.43055555555557,
+      "lotsConsumed": [
+        {
+          "lotPrice": 132.47,
+          "amount": 0.115,
+          "age": 443,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.749
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-14T08:25:10.499Z",
+      "price": 133.49,
+      "amount": 0.084,
+      "revenue": 11.213160000000002,
+      "fee": 0.011213160000000002,
+      "costBasis": 132.1834523809524,
+      "profit": 0.08743343000000178,
+      "spreadPct": 0.9884350843569688,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 132.43055555555557,
+      "lotsConsumed": [
+        {
+          "lotPrice": 132.47,
+          "amount": 0.0010000000000000009,
+          "age": 914,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 132.18,
+          "amount": 0.083,
+          "age": 2404,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.6649999999999999
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T09:30:47.358Z",
+      "price": 132.42,
+      "amount": 0.084,
+      "cost": 11.12328,
+      "fee": 0.011123279999999998,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.7489999999999999
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T10:13:41.489Z",
+      "price": 131.83,
+      "amount": 0.081,
+      "cost": 10.678230000000001,
+      "fee": 0.010678230000000002,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.8299999999999998
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T10:14:01.171Z",
+      "price": 131.07,
+      "amount": 0.086,
+      "cost": 11.272019999999998,
+      "fee": 0.01127202,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9159999999999998
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-14T10:24:48.394Z",
+      "price": 132.12,
+      "amount": 0.086,
+      "revenue": 11.362319999999999,
+      "fee": 0.011362319999999999,
+      "costBasis": 131.07,
+      "profit": 0.06766566000000095,
+      "spreadPct": 0.801098649576571,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 131.07142857142858,
+      "lotsConsumed": [
+        {
+          "lotPrice": 131.07,
+          "amount": 0.086,
+          "age": 11,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.8299999999999998
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T11:38:14.772Z",
+      "price": 131.06,
+      "amount": 0.086,
+      "cost": 11.27116,
+      "fee": 0.01127116,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9159999999999998
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T11:44:42.350Z",
+      "price": 130.48,
+      "amount": 0.058,
+      "cost": 7.5678399999999995,
+      "fee": 0.007567839999999999,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9739999999999999
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-14T12:19:11.254Z",
+      "price": 131.76,
+      "amount": 0.08,
+      "revenue": 10.540799999999999,
+      "fee": 0.0105408,
+      "costBasis": 130.72,
+      "profit": 0.06220159999999972,
+      "spreadPct": 0.795593635250912,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 130.7142857142857,
+      "lotsConsumed": [
+        {
+          "lotPrice": 130.72,
+          "amount": 0.08,
+          "age": 2433,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.8939999999999999
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T17:13:52.027Z",
+      "price": 130.08,
+      "amount": 0.083,
+      "cost": 10.796640000000002,
+      "fee": 0.010796640000000001,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9769999999999999
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T23:27:27.056Z",
+      "price": 129.14,
+      "amount": 0.058,
+      "cost": 7.490119999999999,
+      "fee": 0.007490119999999999,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.035
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-14T23:32:31.442Z",
+      "price": 128.79,
+      "amount": 0.058,
+      "cost": 7.46982,
+      "fee": 0.007469819999999999,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.093
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-15T02:18:08.033Z",
+      "price": 132.68,
+      "amount": 0.081,
+      "revenue": 10.74708,
+      "fee": 0.010747080000000001,
+      "costBasis": 131.83,
+      "profit": 0.04742468999999941,
+      "spreadPct": 0.6447697792611653,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 131.62698412698413,
+      "lotsConsumed": [
+        {
+          "lotPrice": 131.83,
+          "amount": 0.081,
+          "age": 964,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.012
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-15T14:15:14.226Z",
+      "price": 133.97,
+      "amount": 0.056,
+      "revenue": 7.50232,
+      "fee": 0.007502320000000001,
+      "costBasis": 132.42,
+      "profit": 0.07188216000000021,
+      "spreadPct": 1.1705180486331457,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 132.90674603174602,
+      "lotsConsumed": [
+        {
+          "lotPrice": 132.42,
+          "amount": 0.056,
+          "age": 1724,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.9560000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-15T14:16:47.060Z",
+      "price": 134.51,
+      "amount": 0.08,
+      "revenue": 10.7608,
+      "fee": 0.0107608,
+      "costBasis": 133.63,
+      "profit": 0.04894879999999935,
+      "spreadPct": 0.6585347601586437,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 133.4424603174603,
+      "lotsConsumed": [
+        {
+          "lotPrice": 133.63,
+          "amount": 0.08,
+          "age": 4219,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.8760000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-15T14:16:53.812Z",
+      "price": 135.27,
+      "amount": 0.055,
+      "revenue": 7.439850000000001,
+      "fee": 0.007439850000000001,
+      "costBasis": 134.32018181818182,
+      "profit": 0.037412540000000286,
+      "spreadPct": 0.7071299107559863,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 134.19642857142858,
+      "lotsConsumed": [
+        {
+          "lotPrice": 133.63,
+          "amount": 0.028999999999999998,
+          "age": 4219,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 135.09,
+          "amount": 0.026000000000000002,
+          "age": 4243,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.8210000000000002
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T15:20:38.764Z",
+      "price": 127.8,
+      "amount": 0.059,
+      "cost": 7.5402,
+      "fee": 0.0075401999999999995,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.8800000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T15:20:39.486Z",
+      "price": 127.49,
+      "amount": 0.059,
+      "cost": 7.521909999999999,
+      "fee": 0.00752191,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9390000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T15:57:10.971Z",
+      "price": 126.45,
+      "amount": 0.06,
+      "cost": 7.587,
+      "fee": 0.007587,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9990000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T16:12:48.950Z",
+      "price": 126.2,
+      "amount": 0.059,
+      "cost": 7.4458,
+      "fee": 0.0074458,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.058
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T17:51:03.303Z",
+      "price": 125.11,
+      "amount": 0.06,
+      "cost": 7.5066,
+      "fee": 0.0075066,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.118
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T17:51:11.807Z",
+      "price": 124.9,
+      "amount": 0.06,
+      "cost": 7.494,
+      "fee": 0.007494000000000001,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.1780000000000002
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-15T18:35:30.001Z",
+      "price": 123.77,
+      "amount": 0.061,
+      "cost": 7.549969999999999,
+      "fee": 0.00754997,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.239
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-16T10:35:30.554Z",
+      "price": 127.06,
+      "amount": 0.127,
+      "revenue": 16.13662,
+      "fee": 0.01613662,
+      "costBasis": 126.24944881889763,
+      "profit": 0.07076970000000025,
+      "spreadPct": 0.6420235404473636,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 126.0515873015873,
+      "lotsConsumed": [
+        {
+          "lotPrice": 126.2,
+          "amount": 0.059,
+          "age": 1103,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 126.45,
+          "amount": 0.06,
+          "age": 1118,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.11,
+          "amount": 0.008000000000000007,
+          "age": 1004,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.112
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-16T10:43:58.879Z",
+      "price": 128.42,
+      "amount": 0.092,
+      "revenue": 11.814639999999999,
+      "fee": 0.01181464,
+      "costBasis": 127.60119565217391,
+      "profit": 0.05177604999999923,
+      "spreadPct": 0.6416901845167968,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 127.40079365079363,
+      "lotsConsumed": [
+        {
+          "lotPrice": 127.49,
+          "amount": 0.059,
+          "age": 1163,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 127.8,
+          "amount": 0.033,
+          "age": 1163,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.0200000000000002
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-16T13:30:19.905Z",
+      "price": 129.78,
+      "amount": 0.091,
+      "revenue": 11.80998,
+      "fee": 0.01180998,
+      "costBasis": 128.91692307692307,
+      "profit": 0.05499858000000028,
+      "spreadPct": 0.6694830302162462,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 128.75,
+      "lotsConsumed": [
+        {
+          "lotPrice": 128.79,
+          "amount": 0.058,
+          "age": 2278,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 129.14,
+          "amount": 0.032999999999999995,
+          "age": 2283,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.929
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-17T16:32:49.656Z",
+      "price": 124.87,
+      "amount": 0.095,
+      "cost": 11.86265,
+      "fee": 0.01186265,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.024
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-18T13:43:21.242Z",
+      "price": 126.33,
+      "amount": 0.082,
+      "revenue": 10.35906,
+      "fee": 0.01035906,
+      "costBasis": 125.03317073170732,
+      "profit": 0.08572821999999942,
+      "spreadPct": 1.0371881803072747,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 125.32738095238095,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.11,
+          "amount": 0.05199999999999999,
+          "age": 4072,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.9,
+          "amount": 0.030000000000000013,
+          "age": 4072,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.9420000000000002
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-18T15:30:05.343Z",
+      "price": 128.75,
+      "amount": 0.08,
+      "revenue": 10.3,
+      "fee": 0.0103,
+      "costBasis": 129.04525,
+      "profit": -0.044243619999999304,
+      "spreadPct": -0.2287957131316418,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 127.72817460317461,
+      "lotsConsumed": [
+        {
+          "lotPrice": 127.8,
+          "amount": 0.025999999999999995,
+          "age": 4329,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 129.14,
+          "amount": 0.02500000000000001,
+          "age": 5283,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 130.08,
+          "amount": 0.028999999999999998,
+          "age": 5656,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.8620000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-18T17:23:19.672Z",
+      "price": 121.49,
+      "amount": 0.085,
+      "cost": 10.32665,
+      "fee": 0.01032665,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9470000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-18T18:14:00.145Z",
+      "price": 123.86,
+      "amount": 0.085,
+      "revenue": 10.5281,
+      "fee": 0.0105281,
+      "costBasis": 123.12623529411765,
+      "profit": 0.041376169999999594,
+      "spreadPct": 0.595945051133555,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 122.87698412698413,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.77,
+          "amount": 0.061,
+          "age": 4299,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 121.49,
+          "amount": 0.024000000000000007,
+          "age": 51,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.8620000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-18T19:37:46.375Z",
+      "price": 119.07,
+      "amount": 0.087,
+      "cost": 10.359089999999998,
+      "fee": 0.01035909,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.9490000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-21T01:58:51.761Z",
+      "price": 125.08,
+      "amount": 0.167,
+      "cost": 20.888360000000002,
+      "fee": 0.020888359999999998,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.116
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-21T13:30:09.514Z",
+      "price": 123.89,
+      "amount": 0.115,
+      "cost": 14.24735,
+      "fee": 0.01424735,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.231
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-21T15:53:48.463Z",
+      "price": 125.07,
+      "amount": 0.122,
+      "revenue": 15.258539999999998,
+      "fee": 0.01525854,
+      "costBasis": 123.94622950819672,
+      "profit": 0.10672001999999844,
+      "spreadPct": 0.9066596832047675,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.07738095238095,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.89,
+          "amount": 0.115,
+          "age": 144,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.87,
+          "amount": 0.006999999999999992,
+          "age": 5721,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.1090000000000002
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-21T17:16:52.596Z",
+      "price": 126.23,
+      "amount": 0.121,
+      "revenue": 15.27383,
+      "fee": 0.01527383,
+      "costBasis": 125.08,
+      "profit": 0.10874149000000077,
+      "spreadPct": 0.9194115765909863,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 125.22817460317461,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.08,
+          "amount": 0.121,
+          "age": 918,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.9880000000000002
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-22T00:14:13.511Z",
+      "price": 127.48,
+      "amount": 0.083,
+      "revenue": 10.58084,
+      "fee": 0.010580840000000001,
+      "costBasis": 124.99722891566265,
+      "profit": 0.1851143900000004,
+      "spreadPct": 1.9862609002416507,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 126.46825396825398,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.08,
+          "amount": 0.04600000000000001,
+          "age": 1335,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.9,
+          "amount": 0.029999999999999985,
+          "age": 9023,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.87,
+          "amount": 0.007000000000000006,
+          "age": 6221,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.905
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-22T00:15:26.799Z",
+      "price": 128.48,
+      "amount": 0.226,
+      "revenue": 29.036479999999997,
+      "fee": 0.029036479999999996,
+      "costBasis": 128.41181415929202,
+      "profit": -0.04264755000000074,
+      "spreadPct": 0.05309935160902385,
+      "matchType": "FALLBACK",
+      "expectedBuyPrice": 127.46031746031746,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.87,
+          "amount": 0.081,
+          "age": 6223,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 130.08,
+          "amount": 0.054000000000000006,
+          "age": 10502,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 130.48,
+          "amount": 0.058,
+          "age": 10831,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 130.72,
+          "amount": 0.031,
+          "age": 13230,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 131.06,
+          "amount": 0.0020000000000000087,
+          "age": 10837,
+          "matchType": "FALLBACK"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.679
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T00:20:28.556Z",
+      "price": 126.82,
+      "amount": 0.229,
+      "cost": 29.04178,
+      "fee": 0.02904178,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.908
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T02:05:20.846Z",
+      "price": 125.63,
+      "amount": 0.204,
+      "cost": 25.628519999999998,
+      "fee": 0.02562852,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.112
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T02:05:38.283Z",
+      "price": 124.91,
+      "amount": 0.157,
+      "cost": 19.61087,
+      "fee": 0.01961087,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.2690000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-22T08:21:04.530Z",
+      "price": 127.18,
+      "amount": 0.217,
+      "revenue": 27.59806,
+      "fee": 0.02759806,
+      "costBasis": 125.70129032258065,
+      "profit": 0.26600475999999895,
+      "spreadPct": 1.1763679383279397,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 126.17063492063492,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.63,
+          "amount": 0.204,
+          "age": 376,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 126.82,
+          "amount": 0.013000000000000012,
+          "age": 481,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.052
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T08:51:37.187Z",
+      "price": 126.21,
+      "amount": 0.217,
+      "cost": 27.38757,
+      "fee": 0.027387569999999997,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.2690000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-22T15:10:18.148Z",
+      "price": 128.75,
+      "amount": 0.215,
+      "revenue": 27.68125,
+      "fee": 0.027681249999999998,
+      "costBasis": 126.82,
+      "profit": 0.36000245000000103,
+      "spreadPct": 1.5218419807601378,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 127.72817460317461,
+      "lotsConsumed": [
+        {
+          "lotPrice": 126.82,
+          "amount": 0.215,
+          "age": 890,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.054
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T15:36:13.169Z",
+      "price": 126.77,
+      "amount": 0.218,
+      "cost": 27.635859999999997,
+      "fee": 0.02763586,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.272
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-22T15:55:25.586Z",
+      "price": 127.76,
+      "amount": 0.218,
+      "revenue": 27.85168,
+      "fee": 0.027851680000000004,
+      "costBasis": 126.76999999999998,
+      "profit": 0.16033246000000434,
+      "spreadPct": 0.7809418632168679,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 126.74603174603175,
+      "lotsConsumed": [
+        {
+          "lotPrice": 126.77,
+          "amount": 0.218,
+          "age": 19,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.054
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T17:06:07.147Z",
+      "price": 126.77,
+      "amount": 0.218,
+      "cost": 27.635859999999997,
+      "fee": 0.02763586,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.272
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T19:07:17.036Z",
+      "price": 125.77,
+      "amount": 0.143,
+      "cost": 17.98511,
+      "fee": 0.01798511,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.415
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-22T19:51:11.740Z",
+      "price": 124.78,
+      "amount": 0.14,
+      "cost": 17.4692,
+      "fee": 0.017469199999999997,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.5550000000000002
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-23T03:04:44.638Z",
+      "price": 125.41,
+      "amount": 0.081,
+      "cost": 10.15821,
+      "fee": 0.01015821,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.6360000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-23T03:04:45.421Z",
+      "price": 125.41,
+      "amount": 0.24,
+      "cost": 30.098399999999998,
+      "fee": 0.0300984,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.8760000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-23T03:04:45.720Z",
+      "price": 125.41,
+      "amount": 0.017,
+      "cost": 2.13197,
+      "fee": 0.00213197,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.893
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-23T06:17:51.234Z",
+      "price": 124.41,
+      "amount": 0.219,
+      "cost": 27.24579,
+      "fee": 0.02724579,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.112
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-23T13:36:33.530Z",
+      "price": 123.42,
+      "amount": 0.217,
+      "cost": 26.782140000000002,
+      "fee": 0.02678214,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.329
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-23T14:55:18.347Z",
+      "price": 122.42,
+      "amount": 0.219,
+      "cost": 26.80998,
+      "fee": 0.02680998,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.548
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-23T16:41:14.500Z",
+      "price": 124.41,
+      "amount": 0.217,
+      "revenue": 26.996969999999997,
+      "fee": 0.02699697,
+      "costBasis": 123.42000000000002,
+      "profit": 0.16105088999999562,
+      "spreadPct": 0.8021390374331394,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.42261904761904,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.42,
+          "amount": 0.217,
+          "age": 185,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.331
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-23T20:44:33.968Z",
+      "price": 125.39,
+      "amount": 0.219,
+      "revenue": 27.46041,
+      "fee": 0.02746041,
+      "costBasis": 124.41,
+      "profit": 0.15991380000000005,
+      "spreadPct": 0.7877180290973427,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.39484126984127,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.41,
+          "amount": 0.219,
+          "age": 867,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.112
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-24T01:41:18.782Z",
+      "price": 123.35,
+      "amount": 0.311,
+      "cost": 38.36185,
+      "fee": 0.03836185,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.423
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-24T02:09:48.886Z",
+      "price": 122.55,
+      "amount": 0.228,
+      "cost": 27.9414,
+      "fee": 0.0279414,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.6510000000000002
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-24T05:29:08.169Z",
+      "price": 121.41,
+      "amount": 0.338,
+      "cost": 41.03658,
+      "fee": 0.041036579999999996,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.9890000000000003
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-24T16:33:55.852Z",
+      "price": 123.43,
+      "amount": 0.332,
+      "revenue": 40.97876,
+      "fee": 0.04097876,
+      "costBasis": 122.4642469879518,
+      "profit": 0.23899311000000129,
+      "spreadPct": 0.7885999675833739,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 122.45039682539684,
+      "lotsConsumed": [
+        {
+          "lotPrice": 122.42,
+          "amount": 0.219,
+          "age": 1539,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 122.55,
+          "amount": 0.11300000000000002,
+          "age": 864,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.657
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T00:44:19.057Z",
+      "price": 122.22,
+      "amount": 0.325,
+      "cost": 39.7215,
+      "fee": 0.0397215,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.982
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-25T02:40:09.567Z",
+      "price": 122.9,
+      "amount": 0.325,
+      "revenue": 39.9425,
+      "fee": 0.039942500000000006,
+      "costBasis": 122.22,
+      "profit": 0.14133600000000363,
+      "spreadPct": 0.5563737522500465,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 121.92460317460318,
+      "lotsConsumed": [
+        {
+          "lotPrice": 122.22,
+          "amount": 0.325,
+          "age": 116,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.657
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T10:35:26.192Z",
+      "price": 121.54,
+      "amount": 0.253,
+      "cost": 30.74962,
+      "fee": 0.030749620000000005,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.91
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-25T13:43:25.407Z",
+      "price": 122.21,
+      "amount": 0.253,
+      "revenue": 30.91913,
+      "fee": 0.03091913,
+      "costBasis": 121.41,
+      "profit": 0.14076414000000081,
+      "spreadPct": 0.6589243060703379,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 121.24007936507935,
+      "lotsConsumed": [
+        {
+          "lotPrice": 121.41,
+          "amount": 0.253,
+          "age": 1934,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.657
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-25T15:44:02.503Z",
+      "price": 123.58,
+      "amount": 0.321,
+      "revenue": 39.66918,
+      "fee": 0.03966918,
+      "costBasis": 123.06339563862927,
+      "profit": 0.08665746999999971,
+      "spreadPct": 0.41978718260603864,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 122.59920634920634,
+      "lotsConsumed": [
+        {
+          "lotPrice": 122.55,
+          "amount": 0.11499999999999999,
+          "age": 2254,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.35,
+          "amount": 0.20600000000000002,
+          "age": 2283,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.3360000000000003
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-25T16:25:00.400Z",
+      "price": 124.26,
+      "amount": 0.247,
+      "revenue": 30.692220000000002,
+      "fee": 0.030692220000000003,
+      "costBasis": 124.17315789473683,
+      "profit": -0.03991298999999492,
+      "spreadPct": 0.06993629439366462,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.27380952380953,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.35,
+          "amount": 0.10499999999999998,
+          "age": 2324,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.78,
+          "amount": 0.14,
+          "age": 4114,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.91,
+          "amount": 0.0020000000000000018,
+          "age": 5179,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.089
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T16:51:23.246Z",
+      "price": 123.57,
+      "amount": 0.247,
+      "cost": 30.52179,
+      "fee": 0.030521789999999997,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.336
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T20:03:27.246Z",
+      "price": 123.32,
+      "amount": 0.377,
+      "cost": 46.49164,
+      "fee": 0.04649164,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.713
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T22:41:37.050Z",
+      "price": 122.62,
+      "amount": 0.292,
+      "cost": 35.80504,
+      "fee": 0.03580504,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3.005
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T22:47:34.707Z",
+      "price": 121.93,
+      "amount": 0.219,
+      "cost": 26.70267,
+      "fee": 0.02670267,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3.2239999999999998
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T23:32:38.909Z",
+      "price": 121.24,
+      "amount": 0.22,
+      "cost": 26.6728,
+      "fee": 0.0266728,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3.444
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-25T23:36:34.707Z",
+      "price": 120.54,
+      "amount": 0.221,
+      "cost": 26.63934,
+      "fee": 0.02663934,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 3.665
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-26T02:02:45.416Z",
+      "price": 121.21,
+      "amount": 0.221,
+      "revenue": 26.787409999999998,
+      "fee": 0.026787409999999998,
+      "costBasis": 120.54,
+      "profit": 0.09464324999999704,
+      "spreadPct": 0.5558320889331239,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 120.24801587301586,
+      "lotsConsumed": [
+        {
+          "lotPrice": 120.54,
+          "amount": 0.221,
+          "age": 146,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3.444
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-26T02:13:51.519Z",
+      "price": 121.92,
+      "amount": 0.22,
+      "revenue": 26.822400000000002,
+      "fee": 0.026822400000000003,
+      "costBasis": 121.24,
+      "profit": 0.09610480000000307,
+      "spreadPct": 0.5608709996700816,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 120.95238095238095,
+      "lotsConsumed": [
+        {
+          "lotPrice": 121.24,
+          "amount": 0.22,
+          "age": 161,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 3.2239999999999998
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-26T02:15:12.168Z",
+      "price": 122.84,
+      "amount": 0.352,
+      "revenue": 43.23968,
+      "fee": 0.04323968,
+      "costBasis": 121.78264204545457,
+      "profit": 0.28608282999999624,
+      "spreadPct": 0.8682337127739321,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 121.86507936507937,
+      "lotsConsumed": [
+        {
+          "lotPrice": 121.93,
+          "amount": 0.219,
+          "age": 208,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 121.54,
+          "amount": 0.13299999999999998,
+          "age": 940,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.872
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-26T02:21:26.124Z",
+      "price": 123.71,
+      "amount": 0.24,
+      "revenue": 29.690399999999997,
+      "fee": 0.0296904,
+      "costBasis": 122.62,
+      "profit": 0.20248079999999782,
+      "spreadPct": 0.8889251345620528,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 122.7281746031746,
+      "lotsConsumed": [
+        {
+          "lotPrice": 122.62,
+          "amount": 0.24,
+          "age": 220,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.632
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-26T13:48:10.142Z",
+      "price": 124.58,
+      "amount": 0.213,
+      "revenue": 26.535539999999997,
+      "fee": 0.026535539999999996,
+      "costBasis": 123.57,
+      "profit": 0.1622740499999985,
+      "spreadPct": 0.8173504896010401,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.59126984126983,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.57,
+          "amount": 0.213,
+          "age": 1257,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.419
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-26T15:02:17.957Z",
+      "price": 121.1,
+      "amount": 0.357,
+      "cost": 43.232699999999994,
+      "fee": 0.0432327,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 2.776
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-26T15:47:02.284Z",
+      "price": 121.96,
+      "amount": 0.357,
+      "revenue": 43.539719999999996,
+      "fee": 0.04353972,
+      "costBasis": 121.1,
+      "profit": 0.2202475800000014,
+      "spreadPct": 0.710156895127993,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 120.99206349206348,
+      "lotsConsumed": [
+        {
+          "lotPrice": 121.1,
+          "amount": 0.357,
+          "age": 45,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.419
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-27T15:13:47.014Z",
+      "price": 123.36,
+      "amount": 0.34,
+      "revenue": 41.942400000000006,
+      "fee": 0.041942400000000005,
+      "costBasis": 122.25638235294117,
+      "profit": 0.291720430000002,
+      "spreadPct": 0.9027075935167124,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 122.38095238095238,
+      "lotsConsumed": [
+        {
+          "lotPrice": 122.62,
+          "amount": 0.05199999999999999,
+          "age": 2432,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 121.54,
+          "amount": 0.12000000000000002,
+          "age": 3158,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 121.49,
+          "amount": 0.061,
+          "age": 12830,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.32,
+          "amount": 0.10700000000000001,
+          "age": 2590,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 2.0789999999999997
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-27T21:13:02.586Z",
+      "price": 123.88,
+      "amount": 0.283,
+      "revenue": 35.05804,
+      "fee": 0.03505804,
+      "costBasis": 123.33148409893992,
+      "profit": 0.08526915000000308,
+      "spreadPct": 0.4447492909596681,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 122.89682539682539,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.32,
+          "amount": 0.27,
+          "age": 2950,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.57,
+          "amount": 0.012999999999999956,
+          "age": 3142,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.796
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-27T21:50:27.314Z",
+      "price": 124.41,
+      "amount": 0.226,
+      "revenue": 28.11666,
+      "fee": 0.02811666,
+      "costBasis": 124.89610619469026,
+      "profit": -0.16620318000000117,
+      "spreadPct": -0.38920844652475733,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.42261904761904,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.57,
+          "amount": 0.021000000000000046,
+          "age": 3179,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.91,
+          "amount": 0.155,
+          "age": 8385,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.41,
+          "amount": 0.04999999999999996,
+          "age": 6886,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.57
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-27T22:15:05.340Z",
+      "price": 124.93,
+      "amount": 0.182,
+      "revenue": 22.73726,
+      "fee": 0.02273726,
+      "costBasis": 125.41,
+      "profit": -0.13292188000000033,
+      "spreadPct": -0.382744597719472,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.93849206349206,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.41,
+          "amount": 0.03100000000000004,
+          "age": 6910,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.41,
+          "amount": 0.15099999999999997,
+          "age": 6910,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.388
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-27T22:24:02.575Z",
+      "price": 124.4,
+      "amount": 0.182,
+      "cost": 22.6408,
+      "fee": 0.022640800000000003,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.5699999999999998
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-27T23:47:10.175Z",
+      "price": 124.93,
+      "amount": 0.182,
+      "revenue": 22.73726,
+      "fee": 0.02273726,
+      "costBasis": 124.39999999999999,
+      "profit": 0.051081940000000436,
+      "spreadPct": 0.4260450160771828,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.93849206349206,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.4,
+          "amount": 0.182,
+          "age": 83,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.388
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-28T00:15:51.552Z",
+      "price": 124.4,
+      "amount": 0.182,
+      "cost": 22.6408,
+      "fee": 0.022640800000000003,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.5699999999999998
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-28T18:47:08.322Z",
+      "price": 123.35,
+      "amount": 0.283,
+      "cost": 34.908049999999996,
+      "fee": 0.034908049999999996,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.8529999999999998
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-28T23:49:42.144Z",
+      "price": 125.45,
+      "amount": 0.182,
+      "revenue": 22.8319,
+      "fee": 0.022831900000000002,
+      "costBasis": 124.39999999999999,
+      "profit": 0.14562730000000224,
+      "spreadPct": 0.8440514469453468,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.45436507936508,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.4,
+          "amount": 0.182,
+          "age": 1414,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.6709999999999998
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-29T00:23:00.120Z",
+      "price": 125.97,
+      "amount": 0.181,
+      "revenue": 22.80057,
+      "fee": 0.022800570000000003,
+      "costBasis": 125.55917127071822,
+      "profit": 0.028833220000002203,
+      "spreadPct": 0.32719929983926604,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.97023809523809,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.41,
+          "amount": 0.08900000000000002,
+          "age": 8478,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.41,
+          "amount": 0.017,
+          "age": 8478,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.77,
+          "amount": 0.07499999999999997,
+          "age": 8956,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.49
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-29T00:24:02.926Z",
+      "price": 126.5,
+      "amount": 0.18,
+      "revenue": 22.77,
+      "fee": 0.02277,
+      "costBasis": 126.04377777777778,
+      "profit": 0.03666211999999976,
+      "spreadPct": 0.3619553700037208,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 125.49603174603175,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.77,
+          "amount": 0.06800000000000002,
+          "age": 8957,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 126.21,
+          "amount": 0.11199999999999997,
+          "age": 9572,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.3099999999999998
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-29T00:30:42.898Z",
+      "price": 127.34,
+      "amount": 0.373,
+      "revenue": 47.497820000000004,
+      "fee": 0.04749782,
+      "costBasis": 126.16321715817693,
+      "profit": 0.3443833000000094,
+      "spreadPct": 0.9327463807043536,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 126.32936507936508,
+      "lotsConsumed": [
+        {
+          "lotPrice": 126.21,
+          "amount": 0.10500000000000002,
+          "age": 9579,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 126.77,
+          "amount": 0.218,
+          "age": 9085,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 126.82,
+          "amount": 0.0010000000000000009,
+          "age": 10090,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.35,
+          "amount": 0.04899999999999996,
+          "age": 344,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.937
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-29T00:31:08.064Z",
+      "price": 128.01,
+      "amount": 0.292,
+      "revenue": 37.378919999999994,
+      "fee": 0.037378919999999996,
+      "costBasis": 124.88143835616438,
+      "profit": 0.8396956999999976,
+      "spreadPct": 2.5052255043002383,
+      "matchType": "FALLBACK",
+      "expectedBuyPrice": 126.9940476190476,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.35,
+          "amount": 0.234,
+          "age": 344,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 131.06,
+          "amount": 0.05799999999999997,
+          "age": 20933,
+          "matchType": "FALLBACK"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.645
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-29T01:05:22.396Z",
+      "price": 126.29,
+      "amount": 0.368,
+      "cost": 46.474720000000005,
+      "fee": 0.046474720000000004,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.013
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-29T01:39:06.673Z",
+      "price": 127.28,
+      "amount": 0.359,
+      "revenue": 45.69352,
+      "fee": 0.04569352,
+      "costBasis": 126.29,
+      "profit": 0.26437836999999914,
+      "spreadPct": 0.783910048301524,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 126.26984126984127,
+      "lotsConsumed": [
+        {
+          "lotPrice": 126.29,
+          "amount": 0.359,
+          "age": 34,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.654
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-29T01:39:48.376Z",
+      "price": 128.07,
+      "amount": 0.264,
+      "revenue": 33.81048,
+      "fee": 0.03381048,
+      "costBasis": 129.4535227272727,
+      "profit": -0.4332362100000032,
+      "spreadPct": -1.0687408871734356,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 127.05357142857142,
+      "lotsConsumed": [
+        {
+          "lotPrice": 126.29,
+          "amount": 0.009000000000000008,
+          "age": 34,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 131.06,
+          "amount": 0.026000000000000023,
+          "age": 21002,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 132.01,
+          "amount": 0.116,
+          "age": 21848,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 132.18,
+          "amount": 0.026999999999999996,
+          "age": 23599,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 132.42,
+          "amount": 0.028000000000000004,
+          "age": 21129,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 121.41,
+          "amount": 0.057999999999999975,
+          "age": 6971,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.39
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-29T09:47:55.511Z",
+      "price": 125.62,
+      "amount": 0.345,
+      "cost": 43.338899999999995,
+      "fee": 0.0433389,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.735
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-29T12:00:17.858Z",
+      "price": 124.98,
+      "amount": 0.338,
+      "cost": 42.24324000000001,
+      "fee": 0.04224324,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.073
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-29T12:07:07.057Z",
+      "price": 123.97,
+      "amount": 0.217,
+      "cost": 26.90149,
+      "fee": 0.02690149,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.29
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-29T12:16:06.007Z",
+      "price": 122.96,
+      "amount": 0.218,
+      "cost": 26.80528,
+      "fee": 0.02680528,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.508
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-30T07:07:10.152Z",
+      "price": 124.14,
+      "amount": 0.316,
+      "revenue": 39.22824,
+      "fee": 0.03922824,
+      "costBasis": 123.27322784810127,
+      "profit": 0.1957174199999976,
+      "spreadPct": 0.7031308963263103,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.1547619047619,
+      "lotsConsumed": [
+        {
+          "lotPrice": 122.96,
+          "amount": 0.218,
+          "age": 1131,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.97,
+          "amount": 0.098,
+          "age": 1140,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 1.192
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-30T08:08:01.344Z",
+      "price": 124.88,
+      "amount": 0.236,
+      "revenue": 29.471679999999996,
+      "fee": 0.029471679999999997,
+      "costBasis": 124.47072033898306,
+      "profit": 0.03774322999999552,
+      "spreadPct": 0.3288160138402896,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.88888888888889,
+      "lotsConsumed": [
+        {
+          "lotPrice": 123.97,
+          "amount": 0.119,
+          "age": 1201,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.98,
+          "amount": 0.11699999999999999,
+          "age": 1208,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.956
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-30T16:19:29.130Z",
+      "price": 125.95,
+      "amount": 0.367,
+      "revenue": 46.22365,
+      "fee": 0.04622365,
+      "costBasis": 125.23460490463216,
+      "profit": 0.1703652499999974,
+      "spreadPct": 0.5712439432476526,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.95039682539682,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.98,
+          "amount": 0.22100000000000003,
+          "age": 1699,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.62,
+          "amount": 0.14599999999999996,
+          "age": 1832,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.589
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-30T17:47:23.124Z",
+      "price": 124.45,
+      "amount": 0.372,
+      "cost": 46.2954,
+      "fee": 0.0462954,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.961
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-30T23:21:30.274Z",
+      "price": 124.72,
+      "amount": 0.316,
+      "revenue": 39.41152,
+      "fee": 0.039411520000000005,
+      "costBasis": 124.45,
+      "profit": 0.006582280000002945,
+      "spreadPct": 0.21695460024105748,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.73015873015873,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.45,
+          "amount": 0.316,
+          "age": 334,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.645
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-31T01:16:08.684Z",
+      "price": 125.47,
+      "amount": 0.236,
+      "revenue": 29.610919999999997,
+      "fee": 0.02961092,
+      "costBasis": 125.34237288135594,
+      "profit": -0.029071720000003402,
+      "spreadPct": 0.10182280398095178,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.47420634920634,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.45,
+          "amount": 0.055999999999999994,
+          "age": 449,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 125.62,
+          "amount": 0.18,
+          "age": 2368,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.40900000000000003
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T16:43:03.134Z",
+      "price": 124.41,
+      "amount": 0.307,
+      "cost": 38.19387,
+      "fee": 0.0000334,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.716
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T20:21:07.036Z",
+      "price": 124.08,
+      "amount": 0.253,
+      "cost": 31.39224,
+      "fee": 0.00002728,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.969
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-31T20:28:14.978Z",
+      "price": 124.82,
+      "amount": 0.253,
+      "revenue": 31.579459999999997,
+      "fee": 0.03157946,
+      "costBasis": 124.08,
+      "profit": 0.1556132599999964,
+      "spreadPct": 0.596389426176656,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 123.82936507936508,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.08,
+          "amount": 0.253,
+          "age": 7,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.716
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-31T20:28:14.987Z",
+      "price": 125.58,
+      "amount": 0.25,
+      "revenue": 31.395,
+      "fee": 0.031395,
+      "costBasis": 124.41,
+      "profit": 0.261077801302932,
+      "spreadPct": 0.9404388714733557,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.58333333333333,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.41,
+          "amount": 0.25,
+          "age": 225,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.466
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T20:28:16.745Z",
+      "price": 124.73,
+      "amount": 0.25,
+      "cost": 31.1825,
+      "fee": 0.00002696,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.716
+    },
+    {
+      "type": "BUY",
+      "date": "2025-12-31T20:34:34.897Z",
+      "price": 123.51,
+      "amount": 0.225,
+      "cost": 27.78975,
+      "fee": 0.00002427,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.941
+    },
+    {
+      "type": "SELL",
+      "date": "2025-12-31T22:25:03.623Z",
+      "price": 125.07,
+      "amount": 0.228,
+      "revenue": 28.51596,
+      "fee": 0.02851596,
+      "costBasis": 123.73500000000001,
+      "profit": 0.27583939349706316,
+      "spreadPct": 1.078918656806869,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.07738095238095,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.41,
+          "amount": 0.056999999999999995,
+          "age": 342,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.51,
+          "amount": 0.171,
+          "age": 110,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.7130000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T17:30:31.637Z",
+      "price": 125.64,
+      "amount": 0.245,
+      "revenue": 30.7818,
+      "fee": 0.0307818,
+      "costBasis": 124.73,
+      "profit": 0.19214177920000086,
+      "spreadPct": 0.7295758839092412,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 124.64285714285714,
+      "lotsConsumed": [
+        {
+          "lotPrice": 124.73,
+          "amount": 0.245,
+          "age": 1262,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.468
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-01T23:01:05.198Z",
+      "price": 126.26,
+      "amount": 0.265,
+      "revenue": 33.4589,
+      "fee": 0.0334589,
+      "costBasis": 125.20264150943396,
+      "profit": 0.22084922600000068,
+      "spreadPct": 0.844517717692381,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 125.2579365079365,
+      "lotsConsumed": [
+        {
+          "lotPrice": 125.62,
+          "amount": 0.019000000000000017,
+          "age": 5113,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 124.73,
+          "amount": 0.0050000000000000044,
+          "age": 1593,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 123.51,
+          "amount": 0.05399999999999999,
+          "age": 1587,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 121.41,
+          "amount": 0.027000000000000045,
+          "age": 12572,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 119.07,
+          "amount": 0.087,
+          "age": 20363,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 135.09,
+          "amount": 0.07299999999999995,
+          "age": 29247,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.20300000000000004
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-02T09:11:48.851Z",
+      "price": 128.8,
+      "amount": 0.177,
+      "revenue": 22.7976,
+      "fee": 0.0227976,
+      "costBasis": 136.13757062146894,
+      "profit": -1.345643950000002,
+      "spreadPct": -5.389820449985164,
+      "matchType": "FALLBACK",
+      "expectedBuyPrice": 127.77777777777779,
+      "lotsConsumed": [
+        {
+          "lotPrice": 135.09,
+          "amount": 0.050000000000000044,
+          "age": 29857,
+          "matchType": "FALLBACK"
+        },
+        {
+          "lotPrice": 136.55,
+          "amount": 0.12699999999999995,
+          "age": 29865,
+          "matchType": "FALLBACK"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.02600000000000005
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-03T06:41:14.225Z",
+      "price": 131.49,
+      "amount": 0.301,
+      "cost": 39.57849,
+      "fee": 0.00003397,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.32700000000000007
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-03T07:20:08.400Z",
+      "price": 130.5,
+      "amount": 0.313,
+      "cost": 40.8465,
+      "fee": 0.00003518,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.6400000000000001
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-03T22:36:41.420Z",
+      "price": 133.39,
+      "amount": 0.207,
+      "revenue": 27.611729999999994,
+      "fee": 0.027611729999999994,
+      "costBasis": 131.49,
+      "profit": 0.3656649085714214,
+      "spreadPct": 1.4449768043197027,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 132.3313492063492,
+      "lotsConsumed": [
+        {
+          "lotPrice": 131.49,
+          "amount": 0.207,
+          "age": 955,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.43300000000000005
+    },
+    {
+      "type": "SELL",
+      "date": "2026-01-04T00:05:32.746Z",
+      "price": 134.33,
+      "amount": 0.322,
+      "revenue": 43.25426,
+      "fee": 0.04325426,
+      "costBasis": 130.78900621118012,
+      "profit": 1.096909505102693,
+      "spreadPct": 2.707409354500622,
+      "matchType": "EXACT",
+      "expectedBuyPrice": 133.2638888888889,
+      "lotsConsumed": [
+        {
+          "lotPrice": 131.49,
+          "amount": 0.094,
+          "age": 1044,
+          "matchType": "EXACT"
+        },
+        {
+          "lotPrice": 130.5,
+          "amount": 0.228,
+          "age": 1005,
+          "matchType": "EXACT"
+        }
+      ],
+      "shortfall": null,
+      "inventoryAfter": 0.11100000000000004
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-06T14:32:10.190Z",
+      "price": 141.77,
+      "amount": 0.269,
+      "cost": 38.13613000000001,
+      "fee": 0.0000312,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.38000000000000006
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-06T16:07:50.404Z",
+      "price": 140.91,
+      "amount": 0.27,
+      "cost": 38.045700000000004,
+      "fee": 0.00003116,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.6500000000000001
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-06T16:26:06.100Z",
+      "price": 139.63,
+      "amount": 0.181,
+      "cost": 25.27303,
+      "fee": 0.00002083,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 0.8310000000000002
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-06T16:43:56.360Z",
+      "price": 138.35,
+      "amount": 0.183,
+      "cost": 25.31805,
+      "fee": 0.000021,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.0140000000000002
+    },
+    {
+      "type": "BUY",
+      "date": "2026-01-06T17:48:18.707Z",
+      "price": 137.08,
+      "amount": 0.185,
+      "cost": 25.359800000000003,
+      "fee": 0.00002117,
+      "profit": null,
+      "spreadPct": null,
+      "inventoryAfter": 1.1990000000000003
+    }
+  ]
+}
