@@ -6720,7 +6720,9 @@ async function syncHistoricalTrades(deepClean = false) {
 
                             // P0 FIX: Update inventory remaining and mark as used
                             actualRemainingAfter = Number((inventoryMatch.remaining - amount).toFixed(8));
-                            inventoryMatch.remaining = actualRemainingAfter;
+                            // FIX: Do NOT modify lot.remaining here - handleOrderFill already did it
+                            // This was causing DOUBLE CONSUMPTION of lots
+                            // inventoryMatch.remaining = actualRemainingAfter;  // DISABLED - causes double consumption
                             usedBuyIds.add(lotId);
 
                             log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
@@ -6749,7 +6751,9 @@ async function syncHistoricalTrades(deepClean = false) {
                                 entryFee = bestLot.fee ? (amount / bestLot.amount) * bestLot.fee : 0;
 
                                 actualRemainingAfter = Number((bestLot.remaining - amount).toFixed(8));
-                                bestLot.remaining = actualRemainingAfter;
+                                // FIX: Do NOT modify lot.remaining here - handleOrderFill already did it
+                                // This was causing DOUBLE CONSUMPTION of lots
+                                // bestLot.remaining = actualRemainingAfter;  // DISABLED - causes double consumption
                                 usedBuyIds.add(lotId);
 
                                 const actualSpread = ((sellPrice - buyPrice) / buyPrice * 100).toFixed(2);
