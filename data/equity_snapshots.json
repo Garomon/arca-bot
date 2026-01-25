@@ -77,6 +77,36 @@
       "equity": 1505.6,
       "capitalInvested": 1525.74,
       "timestamp": 1768889885084
+    },
+    {
+      "date": "2026-01-21",
+      "equity": 1762.06,
+      "capitalInvested": 1809.74,
+      "timestamp": 1769022909613
+    },
+    {
+      "date": "2026-01-22",
+      "equity": 1789.04,
+      "capitalInvested": 1809.74,
+      "timestamp": 1769063320331
+    },
+    {
+      "date": "2026-01-23",
+      "equity": 2069.38,
+      "capitalInvested": 2095.74,
+      "timestamp": 1769149117361
+    },
+    {
+      "date": "2026-01-24",
+      "equity": 2064.48,
+      "capitalInvested": 2095.74,
+      "timestamp": 1769234565192
+    },
+    {
+      "date": "2026-01-25",
+      "equity": 2051.08,
+      "capitalInvested": 2095.74,
+      "timestamp": 1769322577619
     }
   ],
   "capitalInvested": 0
