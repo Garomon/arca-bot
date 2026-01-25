@@ -248,39 +248,6 @@ app.get('/api/status', async (req, res) => {
         const currentValue = totalAmount * (state.currentPrice || 0);
         const unrealizedPnL = currentValue - totalCost;
 
-        // Calculate inventory health (lots in profit vs loss)
-        const currentPrice = state.currentPrice || 0;
-        let lotsInProfit = 0;
-        let lotsInLoss = 0;
-        let amountInProfit = 0;
-        let amountInLoss = 0;
-        let pnlInProfit = 0;
-        let pnlInLoss = 0;
-
-        inventory.forEach(lot => {
-            const lotPnL = (currentPrice - lot.price) * lot.remaining;
-            if (lotPnL >= 0) {
-                lotsInProfit++;
-                amountInProfit += lot.remaining;
-                pnlInProfit += lotPnL;
-            } else {
-                lotsInLoss++;
-                amountInLoss += lot.remaining;
-                pnlInLoss += lotPnL;
-            }
-        });
-
-        const inventoryHealth = {
-            lotsInProfit,
-            lotsInLoss,
-            totalLots: inventory.length,
-            profitPercent: inventory.length > 0 ? (lotsInProfit / inventory.length * 100) : 0,
-            amountInProfit,
-            amountInLoss,
-            pnlInProfit,
-            pnlInLoss
-        };
-
         // Get Global Equity from cached financials (same as main dashboard)
         let globalEquity = 0;
         let allocatedEquity = 0;
@@ -452,10 +419,16 @@ app.get('/api/status', async (req, res) => {
             // Orders and inventory
             activeOrders: state.activeOrders?.length || 0,
             inventoryLots: inventory.length,
+            inventoryHealth: (() => {
+                const currentPrice = state.currentPrice || 0;
+                const lotsInProfit = inventory.filter(l => l.price < currentPrice).length;
+                const lotsInLoss = inventory.filter(l => l.price >= currentPrice).length;
+                const profitPercent = inventory.length > 0 ? (lotsInProfit / inventory.length) * 100 : 0;
+                return { totalLots: inventory.length, lotsInProfit, lotsInLoss, profitPercent };
+            })(),
             inventoryAmount: totalAmount,
             inventoryValue: currentValue,
             avgCost: avgCost,
-            inventoryHealth: inventoryHealth,
 
             // Market analysis
             marketRegime: state.marketRegime || 'UNKNOWN',
@@ -3888,7 +3861,8 @@ function checkSafetyNet(level) {
             .map(lot => ({ ...lot })); // Shallow copy
 
         if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
-            const spacing = level.spacing || CONFIG.gridSpacing || 0.01;
+            // Use level's saved spacing, or current dynamic CONFIG.gridSpacing
+            const spacing = level.spacing || CONFIG.gridSpacing;
             const expectedBuyPrice = sellPrice / (1 + spacing);
             // Sort by proximity to expected buy price
             candidates.sort((a, b) => Math.abs(a.price - expectedBuyPrice) - Math.abs(b.price - expectedBuyPrice));
@@ -5821,6 +5795,10 @@ async function checkLiveOrders() {
         // Detect filled orders
         const filled = state.activeOrders.filter(o => !openOrderIds.has(o.id));
 
+        // P0 FIX: Track successfully processed orders and failed fetches
+        const processedOrderIds = new Set();
+        const failedFetchIds = new Set();
+
         for (const order of filled) {
             // SKIP if already being processed (Fix Race Condition)
             if (processingOrders.has(order.id)) continue;
@@ -5856,10 +5834,16 @@ async function checkLiveOrders() {
 
                     // Merge new data with order metadata
                     await handleOrderFill({ ...order, amount: filledAmount }, realFillPrice, actualFee);
+                    processedOrderIds.add(order.id); // P0 FIX: Mark as successfully processed
+                } else if (info.status === 'canceled') {
+                    processedOrderIds.add(order.id); // P0 FIX: Canceled orders can be removed
+                    log('SYNC', `Order ${order.id} was canceled`, 'info');
                 }
             } catch (e) {
-                // Order might be gone, assume filled if not in openOrders? 
-                // Safer to ignore or check trades. For now, skip.
+                // P0 FIX: Track failed fetches - DON'T remove these from activeOrders!
+                // They will be retried on next cycle or caught by AUTO-SYNC
+                failedFetchIds.add(order.id);
+                log('WARN', `fetchOrder failed for ${order.id}: ${e.message}. Will retry.`, 'warning');
             } finally {
                 processingOrders.delete(order.id);
             }
@@ -5869,11 +5853,22 @@ async function checkLiveOrders() {
         const openOrdersAfter = await binance.fetchOpenOrders(CONFIG.pair);
         const openIdsAfter = new Set(openOrdersAfter.map(o => o.id));
 
-        // Update active list with FRESH data
-        state.activeOrders = state.activeOrders.filter(o => openIdsAfter.has(o.id));
+        // P0 FIX: Update active list but KEEP orders that failed to fetch
+        // Only remove orders that are: (1) still open on exchange, OR (2) successfully processed
+        // Keep orders where fetchOrder failed - they'll be retried
+        state.activeOrders = state.activeOrders.filter(o =>
+            openIdsAfter.has(o.id) || // Still open on exchange
+            failedFetchIds.has(o.id)   // Failed to fetch - keep for retry
+            // Note: processedOrderIds are removed (not in filter) since handleOrderFill already removed them
+        );
         saveState();
         emitGridState();
         updateBalance(); // Keep balance fresh
+
+        // P0 FIX: Log if we kept failed orders
+        if (failedFetchIds.size > 0) {
+            log('SYNC', `Kept ${failedFetchIds.size} orders for retry (fetchOrder failed)`, 'warning');
+        }
 
     } catch (e) {
         console.error('>> [ERROR] Check Failed:', e.message);
@@ -5951,7 +5946,8 @@ async function handleOrderFill(order, fillPrice, actualFee) {
             amount: order.amount, // Track full amount
             remaining: order.amount, // Amount available to sell
             fee: buyFeeUSDT,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            spacing: order.spacing || CONFIG.gridSpacing // P0 FIX: Preserve spacing for GRID_ESTIMATED
         });
         log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} ${BASE_ASSET} @ $${fillPrice.toFixed(2)} | Fee: $${buyFeeUSDT.toFixed(4)}`, 'info');
     }
@@ -6020,8 +6016,8 @@ async function handleOrderFill(order, fillPrice, actualFee) {
         // Then find the lot closest to that expected buy price.
 
         if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
-            // Use the order's spacing if available, else default
-            const spacing = order.spacing || CONFIG.gridSpacing || 0.01;
+            // Use order's saved spacing, or current dynamic CONFIG.gridSpacing
+            const spacing = order.spacing || CONFIG.gridSpacing;
             const expectedBuyPrice = fillPrice / (1 + spacing);
             const tolerance = expectedBuyPrice * 0.005; // 0.5% tolerance for rounding
 
@@ -6658,15 +6654,19 @@ async function syncHistoricalTrades(deepClean = false) {
                     // Search for matching BUY: same/similar amount, lower price, earlier timestamp
                     let matchedBuy = null;
                     const tolerance = 0.001; // 0.1% tolerance for amount matching
+                    const minProfitMargin = CONFIG.tradingFee * 2; // P0 FIX: PROFIT GUARANTEE
 
                     for (const potentialBuy of trades) {
                         const potentialBuyId = potentialBuy.orderId || potentialBuy.order || potentialBuy.id;
+                        // P0 FIX: Calculate gross spread to ensure positive profit after fees
+                        const grossSpread = (sellPrice - potentialBuy.price) / potentialBuy.price;
+
                         if (potentialBuy.side === 'buy' &&
                             potentialBuy.timestamp < trade.timestamp &&
-                            potentialBuy.price < sellPrice &&
+                            grossSpread > minProfitMargin && // P0 FIX: PROFIT GUARANTEE - must cover fees
                             Math.abs(potentialBuy.amount - amount) / amount < tolerance &&
                             !usedBuyIds.has(potentialBuyId)) { // P0 FIX: Don't reuse already matched BUYs
-                            // Found a matching BUY
+                            // Found a matching BUY with guaranteed profit
                             matchedBuy = potentialBuy;
                             break; // Take the first (most recent) match
                         }
@@ -6693,97 +6693,100 @@ async function syncHistoricalTrades(deepClean = false) {
                                 entryFee = matchedBuy.fee.cost * matchedBuy.price;
                             }
                         }
+                        // P0 FIX: Also consume from inventory if this lot exists there
+                        // This prevents double-matching when BUY is added to inventory during sync
+                        const inventoryLot = (state.inventory || []).find(lot => lot.id === lotId);
+                        if (inventoryLot) {
+                            inventoryLot.remaining = Math.max(0, inventoryLot.remaining - amount);
+                            log('SYNC', `🔗 Also consumed ${amount.toFixed(6)} from inventory lot ${lotId}`, 'debug');
+                        }
                     } else {
                         // No match in trade history - try to find in current inventory
-                        const spacing = CONFIG.gridSpacing || 0.01;
-                        const expectedBuyPrice = sellPrice / (1 + spacing);
-                        const invTolerance = expectedBuyPrice * 0.02; // 2% tolerance
-
-                        // Search inventory for matching lot (P0 FIX: also check usedBuyIds)
                         // P0 FIX: PROFIT GUARANTEE - lot.price must be < sellPrice with margin for fees
                         const minProfitMargin = CONFIG.tradingFee * 2; // 0.15% minimum spread
-                        const inventoryMatch = (state.inventory || []).find(lot => {
+
+                        // FIX: Get ALL profitable candidate lots for MULTI-LOT consumption
+                        const candidateLots = (state.inventory || []).filter(lot => {
                             const grossSpread = (sellPrice - lot.price) / lot.price;
                             return lot.remaining > 0 &&
-                                lot.remaining >= amount && // P0 FIX: Must have enough remaining
-                                !usedBuyIds.has(lot.id) && // P0 FIX: Don't reuse matched lots
-                                grossSpread > minProfitMargin && // P0 FIX: PROFIT GUARANTEE
-                                Math.abs(lot.price - expectedBuyPrice) <= invTolerance;
+                                !usedBuyIds.has(lot.id) &&
+                                grossSpread > minProfitMargin; // Must be profitable
+                        }).sort((a, b) => {
+                            // Sort by price match to expected (closest first)
+                            const lotSpacingA = a.spacing || CONFIG.gridSpacing;
+                            const lotSpacingB = b.spacing || CONFIG.gridSpacing;
+                            const expectedA = sellPrice / (1 + lotSpacingA);
+                            const expectedB = sellPrice / (1 + lotSpacingB);
+                            return Math.abs(a.price - expectedA) - Math.abs(b.price - expectedB);
                         });
 
-                        if (inventoryMatch) {
-                            // Found match in inventory - use REAL data
-                            buyPrice = inventoryMatch.price;
-                            matchType = 'SYNC_MATCHED';
-                            lotId = inventoryMatch.id;
-                            entryFee = inventoryMatch.fee ? (amount / inventoryMatch.amount) * inventoryMatch.fee : 0;
+                        // MULTI-LOT consumption loop (like handleOrderFill)
+                        let remainingToConsume = amount;
+                        let totalCostBasis = 0;
+                        let totalEntryFee = 0;
+                        const syncMatchedLots = [];
 
-                            // P0 FIX: Update inventory remaining and mark as used
-                            actualRemainingAfter = Number((inventoryMatch.remaining - amount).toFixed(8));
-                            // FIX: Do NOT modify lot.remaining here - handleOrderFill already did it
-                            // This was causing DOUBLE CONSUMPTION of lots
-                            // inventoryMatch.remaining = actualRemainingAfter;  // DISABLED - causes double consumption
-                            usedBuyIds.add(lotId);
+                        for (const lot of candidateLots) {
+                            if (remainingToConsume <= 0.00000001) break;
 
-                            log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
-                        } else {
-                            // === BEST_PROFIT_MATCH: Fallback to ANY profitable lot (sorted by best profit) ===
-                            // This handles grid resets where lot prices don't match expected spacing
-                            const profitableLots = (state.inventory || []).filter(lot => {
-                                const grossSpread = (sellPrice - lot.price) / lot.price;
-                                return lot.remaining > 0 &&
-                                    lot.remaining >= amount * 0.95 && // 95% tolerance for amount
-                                    !usedBuyIds.has(lot.id) &&
-                                    grossSpread > minProfitMargin; // Must be profitable
-                            }).sort((a, b) => {
-                                // Sort by profit margin (highest first)
-                                const spreadA = (sellPrice - a.price) / a.price;
-                                const spreadB = (sellPrice - b.price) / b.price;
-                                return spreadB - spreadA;
+                            const take = Math.min(remainingToConsume, lot.remaining);
+                            totalCostBasis += (take * lot.price);
+
+                            if (lot.fee && lot.amount > 0) {
+                                totalEntryFee += (take / lot.amount) * lot.fee;
+                            }
+
+                            const remainingAfter = Number((lot.remaining - take).toFixed(8));
+
+                            syncMatchedLots.push({
+                                lotId: lot.id,
+                                buyPrice: lot.price,
+                                amountTaken: take,
+                                remainingAfter: remainingAfter
                             });
 
-                            if (profitableLots.length > 0) {
-                                // Use best profitable lot (even if price doesn't match spacing)
-                                const bestLot = profitableLots[0];
-                                buyPrice = bestLot.price;
-                                matchType = 'BEST_PROFIT_MATCH';
-                                lotId = bestLot.id;
-                                entryFee = bestLot.fee ? (amount / bestLot.amount) * bestLot.fee : 0;
+                            // Update lot and mark as used
+                            lot.remaining = remainingAfter;
+                            usedBuyIds.add(lot.id);
+                            remainingToConsume = Number((remainingToConsume - take).toFixed(8));
+                        }
 
-                                actualRemainingAfter = Number((bestLot.remaining - amount).toFixed(8));
-                                // FIX: Do NOT modify lot.remaining here - handleOrderFill already did it
-                                // This was causing DOUBLE CONSUMPTION of lots
-                                // bestLot.remaining = actualRemainingAfter;  // DISABLED - causes double consumption
-                                usedBuyIds.add(lotId);
+                        if (syncMatchedLots.length > 0 && remainingToConsume <= 0.00000001) {
+                            // Success: consumed from inventory (single or multiple lots)
+                            const avgBuyPrice = totalCostBasis / amount;
+                            buyPrice = avgBuyPrice;
+                            matchType = syncMatchedLots.length === 1 ? 'SYNC_MATCHED' : 'SYNC_MULTI_MATCH';
+                            lotId = syncMatchedLots.map(m => m.lotId).join('+');
+                            entryFee = totalEntryFee;
+                            actualRemainingAfter = syncMatchedLots[syncMatchedLots.length - 1].remainingAfter;
+                            // Store all matched lots for orderRecord
+                            orderRecord._syncMatchedLots = syncMatchedLots;
 
-                                const actualSpread = ((sellPrice - buyPrice) / buyPrice * 100).toFixed(2);
-                                log('SYNC', `🎯 BEST_PROFIT_MATCH: Lot #${lotId} @ $${buyPrice.toFixed(2)} | Spread: ${actualSpread}% | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
+                            if (syncMatchedLots.length === 1) {
+                                log('SYNC', `✅ Found matching lot in inventory: #${lotId} @ ${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
                             } else {
-                                // P0 FIX: Instead of UNMATCHED (profit=0), use grid spacing to estimate profit
-                                // This ensures synced sells still show realistic profit
-                                const spacing = CONFIG.gridSpacing || 0.008; // Default 0.8% for SOL
-                                const estimatedBuyPrice = sellPrice / (1 + spacing);
+                                log('SYNC', `✅ MULTI-LOT MATCH: ${syncMatchedLots.length} lots consumed | Avg Buy: ${avgBuyPrice.toFixed(2)} | IDs: ${lotId}`, 'success');
+                            }
+                        } else {
+                            // No match - use grid spacing estimation
+                            const estimatedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
+                            const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
+                            const minSpread = CONFIG.tradingFee * 2.5;
 
-                                // Verify this gives positive profit after fees
-                                const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
-                                const minSpread = CONFIG.tradingFee * 2.5; // Must cover fees
-
-                                if (estimatedSpread >= minSpread) {
-                                    buyPrice = estimatedBuyPrice;
-                                    matchType = 'GRID_ESTIMATED';
-                                    lotId = 'EST_' + trade.id;
-                                    entryFee = estimatedBuyPrice * amount * CONFIG.tradingFee;
-                                    actualRemainingAfter = 0;
-                                    log('SYNC', `📊 SELL ${trade.id} estimated using grid spacing: Buy $${buyPrice.toFixed(2)} → Sell $${sellPrice.toFixed(2)} (${(estimatedSpread*100).toFixed(2)}%)`, 'info');
-                                } else {
-                                    // Fallback: truly unmatched
-                                    buyPrice = sellPrice;
-                                    matchType = 'UNMATCHED';
-                                    lotId = 'EST_' + trade.id;
-                                    entryFee = realFeeUSDT;
-                                    actualRemainingAfter = 0;
-                                    log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - spread too small. Cost: ' + buyPrice.toFixed(2), 'warning');
-                                }
+                            if (estimatedSpread >= minSpread) {
+                                buyPrice = estimatedBuyPrice;
+                                matchType = 'GRID_ESTIMATED';
+                                lotId = 'EST_' + trade.id;
+                                entryFee = estimatedBuyPrice * amount * CONFIG.tradingFee;
+                                actualRemainingAfter = 0;
+                                log('SYNC', `📊 SELL ${trade.id} estimated using grid spacing: Buy ${buyPrice.toFixed(2)} → Sell ${sellPrice.toFixed(2)} (${(estimatedSpread*100).toFixed(2)}%)`, 'info');
+                            } else {
+                                buyPrice = sellPrice;
+                                matchType = 'UNMATCHED';
+                                lotId = 'EST_' + trade.id;
+                                entryFee = realFeeUSDT;
+                                actualRemainingAfter = 0;
+                                log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - spread too small. Cost: ' + buyPrice.toFixed(2), 'warning');
                             }
                         }
                     }
@@ -6822,6 +6825,28 @@ async function syncHistoricalTrades(deepClean = false) {
                     orderRecord.profit = 0;
                     orderRecord.fees = originalFee > 0 ? originalFee : realFeeUSDT; orderRecord.feesUSD = realFeeUSDT;
                     orderRecord.feeCurrency = feeCurrency;
+
+                    // P0 FIX: Also add synced BUYs to INVENTORY so future SELLs can find them
+                    // This prevents UNMATCHED sells after bot restarts
+                    if (!state.inventory) state.inventory = [];
+                    const existingLot = state.inventory.find(lot => lot.id === tradeId);
+                    const alreadyConsumed = usedBuyIds.has(tradeId);
+
+                    if (!existingLot && !alreadyConsumed) {
+                        state.inventory.push({
+                            id: tradeId,
+                            price: trade.price,
+                            amount: trade.amount,
+                            remaining: trade.amount, // Full amount available (SELLs processed later will consume)
+                            fee: realFeeUSDT,
+                            timestamp: trade.timestamp,
+                            source: 'SYNC', // Mark as synced from exchange history
+                            spacing: CONFIG.gridSpacing // P0 FIX: Use current spacing (best guess for synced orders)
+                        });
+                        log('SYNC', `➕ Added synced BUY to inventory: ${trade.amount.toFixed(6)} @ $${trade.price.toFixed(2)}`, 'info');
+                    } else if (alreadyConsumed) {
+                        log('SYNC', `⏭️ BUY ${tradeId} already consumed by a SELL, not adding to inventory`, 'debug');
+                    }
                 }
 
                 // Add to history
