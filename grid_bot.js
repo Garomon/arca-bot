@@ -3860,6 +3860,21 @@ function checkSafetyNet(level) {
             .filter(lot => lot.remaining > 0.00000001)
             .map(lot => ({ ...lot })); // Shallow copy
 
+        // P0 FIX v2: DIRECT PRICE CHECK - Block if sell price is below ALL inventory lots
+        if (candidates.length > 0) {
+            const lowestLotPrice = Math.min(...candidates.map(l => l.price));
+            const minProfitMargin = (CONFIG.tradingFee || 0.001) * 2;
+            const minSellPrice = lowestLotPrice * (1 + minProfitMargin);
+            
+            if (sellPrice < minSellPrice) {
+                log("GUARD", "🛡️ PRICE_CHECK: Sell @ $" + sellPrice.toFixed(2) + " blocked - below min profitable price $" + minSellPrice.toFixed(2) + " (lowest lot: $" + lowestLotPrice.toFixed(2) + ")", "warn");
+                return {
+                    safe: false,
+                    reason: "PRICE_BELOW_COST: Sell @ $" + sellPrice.toFixed(2) + " is below minimum profitable price $" + minSellPrice.toFixed(2) + " (lowest lot: $" + lowestLotPrice.toFixed(2) + ")"
+                };
+            }
+        }
+
         if (ACCOUNTING_METHOD === 'SPREAD_MATCH') {
             // Use level's saved spacing, or current dynamic CONFIG.gridSpacing
             const spacing = level.spacing || CONFIG.gridSpacing;
@@ -3895,6 +3910,15 @@ function checkSafetyNet(level) {
 
         const avgCost = costBasis / consumedAmount;
         const profitPct = ((sellPrice - avgCost) / avgCost) * 100;
+
+        // P0 FIX v2: Handle NaN/Infinity edge cases
+        if (!Number.isFinite(profitPct)) {
+            log("GUARD", "🛡️ NaN_CHECK: profitPct is " + profitPct + " - blocking sell for safety", "error");
+            return {
+                safe: false,
+                reason: "INVALID_CALC: profitPct=" + profitPct + " (avgCost=" + avgCost + ", consumed=" + consumedAmount + "). Blocking sell."
+            };
+        }
 
         // 5. DECISION: Block if loss > 0.5% (Strict Profit Protection)
         // Grid bot should NEVER sell below cost. We allow -0.5% only for slippage/fees buffer.

@@ -854,14 +854,16 @@ function renderTradeHistory() {
                 if (t.matchType === 'EXACT') matchIndicator = '✅';           // Perfect FIFO match
                 else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';      // Close price match
                 else if (t.matchType === 'RECOVERED') matchIndicator = '🔍';  // Found real BUY in Binance history
-                else if (t.matchType === 'SYNC_MATCHED') matchIndicator = '✅'; // Synced with real BUY match
+                else if (t.matchType === 'SYNC_MATCHED' || t.matchType === 'SYNC_MULTI_MATCH') matchIndicator = '✅'; // Synced with real BUY match
                 else if (t.matchType === 'SYNC_FALLBACK') matchIndicator = '⚠️'; // Synced with grid fallback
                 else if (t.matchType === 'FALLBACK') matchIndicator = '⚠️';   // Grid spacing fallback (no real data)
                 else if (t.matchType === 'ESTIMATED' || t.matchType === 'SYNC_ESTIMATED') matchIndicator = '⚠️'; // Legacy
-                else if (t.matchType === 'REPAIRED') matchIndicator = '🔧';   // Manually repaired
+                else if (t.matchType === 'REPAIRED') matchIndicator = '🔧';
+                else if (t.matchType === 'REAL_LOSS_VERIFIED' || t.matchType === 'LOSS') matchIndicator = '📉';
+                else if (t.matchType === 'PARTIAL') matchIndicator = '⚡';   // Manually repaired
 
                 // Build tooltip with matched lots info
-                const lots = t.matchedLots || t.lotsUsed || [];
+                const lots = t._syncMatchedLots || t.matchedLots || t.lotsUsed || [];
                 if (lots.length > 0) {
                     // Backend saves: lotId, buyPrice/price, amountTaken/amount
                     matchTooltip = `${t.matchType}: ` + lots.map(l => {
@@ -891,7 +893,7 @@ function renderTradeHistory() {
                     return `$${val.toFixed(4)}`;
                 })()}
                 </td>
-                <td class="text-center" style="vertical-align: middle; cursor: help;" title="${matchTooltip}">${matchIndicator}</td>
+                <td class="text-center" style="vertical-align: middle; cursor: help;" title="${matchTooltip}">${(t.match && t.match !== "-") ? "<span style='font-family:monospace;font-size:0.85em;color:#fff'>" + t.match + "</span>" : matchIndicator}</td>
                 <td class="text-end text-muted" style="vertical-align: middle;">${parseFloat(t.amount || 0).toFixed(5)}</td>
                 <td class="text-end pe-3 fw-bold ${profitClass}" style="vertical-align: middle;">$${(isBuy ? 0 : (t.profit || 0)).toFixed(4)}</td>
             `;
