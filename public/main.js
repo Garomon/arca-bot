@@ -853,7 +853,7 @@ function renderTradeHistory() {
             if (!isBuy && t.matchType) {
                 if (t.matchType === 'EXACT') matchIndicator = '✅';           // Perfect FIFO match
                 else if (t.matchType === 'CLOSE') matchIndicator = '⚠️';      // Close price match
-                else if (t.matchType === 'RECOVERED') matchIndicator = '🔍';  // Found real BUY in Binance history
+                else if (t.matchType === 'RECOVERED' || t.matchType === 'SYNC_RECOVERED') matchIndicator = '🔍';  // Found real BUY in Binance history
                 else if (t.matchType === 'SYNC_MATCHED' || t.matchType === 'SYNC_MULTI_MATCH') matchIndicator = '✅'; // Synced with real BUY match
                 else if (t.matchType === 'SYNC_FALLBACK') matchIndicator = '⚠️'; // Synced with grid fallback
                 else if (t.matchType === 'FALLBACK') matchIndicator = '⚠️';   // Grid spacing fallback (no real data)

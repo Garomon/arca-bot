@@ -1,127 +1,289 @@
 {
   "pair": "DOGE/USDT",
   "balance": {
-    "total": 708.2048913,
-    "usdt": 61.7046691167599,
-    "base": 2332,
-    "btc": 2332,
-    "locked": 70.3572
+    "total": 829.4977776,
+    "usdt": 17.85394729633998,
+    "base": 1807,
+    "btc": 1807,
+    "locked": 156.48934000000003
   },
-  "currentPrice": 0.12176,
-  "entryPrice": 0.12025,
+  "currentPrice": 0.12262,
+  "entryPrice": 0.12226,
   "activeOrders": [
     {
-      "id": "13529055534",
+      "id": "13537546905",
       "side": "buy",
-      "price": 0.11736,
-      "amount": 150,
+      "price": 0.12128,
+      "amount": 192,
+      "level": -1,
+      "status": "open",
+      "timestamp": 1769450442535,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_de99a650",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547175",
+      "side": "buy",
+      "price": 0.1203,
+      "amount": 123,
+      "level": -2,
+      "status": "open",
+      "timestamp": 1769450442925,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_d84369fb",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547216",
+      "side": "buy",
+      "price": 0.11933,
+      "amount": 124,
       "level": -3,
       "status": "open",
-      "timestamp": 1769365616512,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_02959b18",
+      "timestamp": 1769450443314,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_3bb52f62",
       "spacing": 0.008
     },
     {
-      "id": "13529055918",
+      "id": "13537547232",
       "side": "buy",
-      "price": 0.1164,
-      "amount": 151,
+      "price": 0.11835,
+      "amount": 125,
       "level": -4,
       "status": "open",
-      "timestamp": 1769365616917,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_718ee149",
+      "timestamp": 1769450443700,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_212b14eb",
       "spacing": 0.008
     },
     {
-      "id": "13529056177",
+      "id": "13537547416",
       "side": "buy",
-      "price": 0.11544,
-      "amount": 152,
+      "price": 0.11737,
+      "amount": 126,
       "level": -5,
       "status": "open",
-      "timestamp": 1769365617324,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_295a05b3",
+      "timestamp": 1769450444510,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_27cd3888",
       "spacing": 0.008
     },
     {
-      "id": "13529056388",
+      "id": "13537547425",
       "side": "buy",
-      "price": 0.11448,
-      "amount": 154,
+      "price": 0.11639,
+      "amount": 127,
       "level": -6,
       "status": "open",
-      "timestamp": 1769365617727,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_51ad3e5f",
+      "timestamp": 1769450444902,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_effc77ca",
       "spacing": 0.008
+    },
+    {
+      "id": "13537547457",
+      "side": "buy",
+      "price": 0.11541,
+      "amount": 128,
+      "level": -7,
+      "status": "open",
+      "timestamp": 1769450445292,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_70e1f101",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547476",
+      "side": "buy",
+      "price": 0.11444,
+      "amount": 129,
+      "level": -8,
+      "status": "open",
+      "timestamp": 1769450445685,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_f050277f",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547486",
+      "side": "buy",
+      "price": 0.11346,
+      "amount": 131,
+      "level": -9,
+      "status": "open",
+      "timestamp": 1769450446072,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_1c642070",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547501",
+      "side": "buy",
+      "price": 0.11248,
+      "amount": 132,
+      "level": -10,
+      "status": "open",
+      "timestamp": 1769450446895,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_buy_70e27b50",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547513",
+      "side": "sell",
+      "price": 0.12422,
+      "amount": 119,
+      "level": 2,
+      "status": "open",
+      "timestamp": 1769450447682,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_9caf73f0",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547515",
+      "side": "sell",
+      "price": 0.12519,
+      "amount": 118,
+      "level": 3,
+      "status": "open",
+      "timestamp": 1769450448078,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_a3b43cdf",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547519",
+      "side": "sell",
+      "price": 0.12617,
+      "amount": 117,
+      "level": 4,
+      "status": "open",
+      "timestamp": 1769450448467,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_5b889d22",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547533",
+      "side": "sell",
+      "price": 0.12715,
+      "amount": 116,
+      "level": 5,
+      "status": "open",
+      "timestamp": 1769450449289,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_37cb6fe8",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547607",
+      "side": "sell",
+      "price": 0.13008,
+      "amount": 114,
+      "level": 8,
+      "status": "open",
+      "timestamp": 1769450449988,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_4a7df69f",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547714",
+      "side": "sell",
+      "price": 0.13106,
+      "amount": 113,
+      "level": 9,
+      "status": "open",
+      "timestamp": 1769450450379,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_56931454",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547820",
+      "side": "sell",
+      "price": 0.13204,
+      "amount": 112,
+      "level": 10,
+      "status": "open",
+      "timestamp": 1769450450771,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_29cec333",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547873",
+      "side": "sell",
+      "price": 0.13302,
+      "amount": 111,
+      "level": 11,
+      "status": "open",
+      "timestamp": 1769450453034,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_4564ba7f",
+      "spacing": 0.008
+    },
+    {
+      "id": "13537547884",
+      "side": "sell",
+      "price": 0.134,
+      "amount": 110,
+      "level": 12,
+      "status": "open",
+      "timestamp": 1769450453436,
+      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_c68532bf",
+      "spacing": 0.008
+    }
+  ],
+  "filledOrders": [
+    {
+      "id": "13537547507",
+      "side": "sell",
+      "price": 0.12324,
+      "amount": 189,
+      "timestamp": 1769452275675,
+      "fillPrice": 0.12324,
+      "status": "filled",
+      "isEstimated": true,
+      "isNetProfit": false,
+      "costBasis": 0.12226190476190477,
+      "spreadPct": 0.7999999999999985,
+      "fees": 0.0000199,
+      "feesUSD": 0.031260625,
+      "feeCurrency": "BNB",
+      "profit": 0.15359937500000048,
+      "matchType": "GRID_ESTIMATED",
+      "matchedLots": [
+        {
+          "lotId": "EST_1446933078",
+          "buyPrice": 0.12226190476190477,
+          "amountTaken": 189,
+          "remainingAfter": 0,
+          "timestamp": 1769452275675
+        }
+      ]
     },
     {
       "id": "13529056687",
       "side": "sell",
       "price": 0.12314,
       "amount": 143,
-      "level": 3,
-      "status": "open",
-      "timestamp": 1769365619400,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_c5dfd15d",
-      "spacing": 0.008
+      "timestamp": 1769438497814,
+      "fillPrice": 0.12314,
+      "status": "filled",
+      "isEstimated": false,
+      "isNetProfit": false,
+      "_syncMatchedLots": [
+        {
+          "lotId": "13518350141",
+          "buyPrice": 0.12201,
+          "amountTaken": 143,
+          "remainingAfter": 113
+        }
+      ],
+      "costBasis": 0.12201000000000001,
+      "spreadPct": 0.9261535939677011,
+      "fees": 0.00001508,
+      "feesUSD": 0.023639554859375,
+      "feeCurrency": "BNB",
+      "profit": 0.13795044514062535,
+      "matchType": "SYNC_MATCHED",
+      "matchedLots": [
+        {
+          "lotId": "13518350141",
+          "buyPrice": 0.12201000000000001,
+          "amountTaken": 143,
+          "remainingAfter": 113,
+          "timestamp": 1769438497814
+        }
+      ],
+      "buyPrice": 0.12201000000000001
     },
-    {
-      "id": "13529056736",
-      "side": "sell",
-      "price": 0.1241,
-      "amount": 142,
-      "level": 4,
-      "status": "open",
-      "timestamp": 1769365619811,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_66e14e76",
-      "spacing": 0.008
-    },
-    {
-      "id": "13529056857",
-      "side": "sell",
-      "price": 0.12506,
-      "amount": 140,
-      "level": 5,
-      "status": "open",
-      "timestamp": 1769365620214,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_a7a2a706",
-      "spacing": 0.008
-    },
-    {
-      "id": "13529057085",
-      "side": "sell",
-      "price": 0.12602,
-      "amount": 139,
-      "level": 6,
-      "status": "open",
-      "timestamp": 1769365620622,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_0dc93e9d",
-      "spacing": 0.008
-    },
-    {
-      "id": "13529057173",
-      "side": "sell",
-      "price": 0.12698,
-      "amount": 138,
-      "level": 7,
-      "status": "open",
-      "timestamp": 1769365621476,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_2f8669a4",
-      "spacing": 0.008
-    },
-    {
-      "id": "13529057229",
-      "side": "sell",
-      "price": 0.12987,
-      "amount": 135,
-      "level": 10,
-      "status": "open",
-      "timestamp": 1769365622198,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_7f7584d7",
-      "spacing": 0.008
-    }
-  ],
-  "filledOrders": [
     {
       "id": "13529056642",
       "side": "sell",
@@ -130,7 +292,7 @@
       "timestamp": 1769389856730,
       "fillPrice": 0.12217,
       "status": "filled",
-      "isEstimated": true,
+      "isEstimated": false,
       "isNetProfit": false,
       "_syncMatchedLots": [
         {
@@ -155,7 +317,8 @@
           "remainingAfter": 114,
           "timestamp": 1769389856730
         }
-      ]
+      ],
+      "buyPrice": 0.12087
     },
     {
       "id": "13529056520",
@@ -165,7 +328,7 @@
       "timestamp": 1769389458125,
       "fillPrice": 0.12121,
       "status": "filled",
-      "isEstimated": true,
+      "isEstimated": false,
       "isNetProfit": false,
       "_syncMatchedLots": [
         {
@@ -196,7 +359,8 @@
           "remainingAfter": 238,
           "timestamp": 1769389458125
         }
-      ]
+      ],
+      "buyPrice": 0.11984105263157895
     },
     {
       "id": "13529054902",
@@ -2969,12 +3133,12 @@
       "isNetProfit": true
     }
   ],
-  "totalProfit": 11.6814420601128,
-  "volatilityRegime": "NORMAL",
+  "totalProfit": 11.972991880253428,
+  "volatilityRegime": "LOW",
   "isPaused": false,
   "pauseUntil": null,
   "pauseReason": null,
-  "initialCapital": 628.24097206506,
+  "initialCapital": 472.10669489775995,
   "capitalHistory": [
     {
       "amount": 203.41934678078,
@@ -3813,31 +3977,73 @@
       "reason": "USDT_DEPOSIT",
       "delta": 6.362076000000002,
       "rawUSDT": 31.81038000000001
+    },
+    {
+      "amount": 520.16559564448,
+      "timestamp": 1769415810655,
+      "reason": "USDT_DEPOSIT",
+      "delta": 8.297004940000011,
+      "rawUSDT": 41.485024700000054
+    },
+    {
+      "amount": 518.24116991462,
+      "timestamp": 1769433485852,
+      "reason": "USDT_DEPOSIT",
+      "delta": 7.208971999999995,
+      "rawUSDT": 36.04485999999997
+    },
+    {
+      "amount": 521.63286330394,
+      "timestamp": 1769440282961,
+      "reason": "USDT_DEPOSIT",
+      "delta": 6.564664319999998,
+      "rawUSDT": 32.823321599999986
+    },
+    {
+      "amount": 518.25352464882,
+      "timestamp": 1769442406263,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -8.387966400000005,
+      "rawUSDT": -41.939832000000024
+    },
+    {
+      "amount": 519.8740242499001,
+      "timestamp": 1769459849456,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -7.023169600000006,
+      "rawUSDT": -35.11584800000003
+    },
+    {
+      "type": "WITHDRAWAL",
+      "amount": 156.1342771673,
+      "timestamp": 1769492940955,
+      "equityBefore": 521.9793172464,
+      "equityAfter": 365.8450400791
     }
   ],
   "firstTradeTime": 1767257922635,
   "isLive": true,
-  "startTime": 1769365613264,
-  "marketRegime": "BEAR",
+  "startTime": 1769450441691,
+  "marketRegime": "WEAK_BEAR",
   "emergencyStop": false,
   "maxDrawdown": 0,
   "lastRebalance": {
-    "timestamp": 1769364023469,
+    "timestamp": 1769450436857,
     "triggers": [
       "VOLATILITY"
     ]
   },
   "lastFillTime": 1769370819737,
-  "lastVolatility": "LOW",
-  "lastRegime": "BEAR",
+  "lastVolatility": "NORMAL",
+  "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 168221,
+    "ticksInRange": 186000,
     "ticksOutOfRange": 33968,
     "buyHoldStartPrice": 0.1404,
     "metricsStartTime": 1767390502513
   },
-  "lastKnownEquity": 517.9193091167599,
-  "lastEquityCheck": 1769405333233,
+  "lastKnownEquity": 521.79640321544,
+  "lastEquityCheck": 1769493232205,
   "inventory": [
     {
       "id": "13478762604",
@@ -3973,7 +4179,7 @@
       "id": "13518350141",
       "price": 0.12201,
       "amount": 256,
-      "remaining": 256,
+      "remaining": 113,
       "fee": 0.023422308,
       "timestamp": 1769351313213,
       "spacing": 0.008,
@@ -3990,53 +4196,12 @@
       "auditVerified": true
     },
     {
-      "id": "13528758516",
-      "price": 0.11971,
-      "amount": 300,
-      "remaining": 238,
-      "fee": 0.0270078856,
-      "timestamp": 1769364786165,
-      "spacing": 0.008,
-      "auditVerified": true
-    },
-    {
-      "id": "13529054505",
-      "price": 0.11929,
-      "amount": 232,
-      "remaining": 4,
-      "fee": 0.0207508851,
-      "timestamp": 1769368842200,
-      "spacing": 0.008,
-      "auditVerified": true
-    },
-    {
-      "id": "13529054902",
-      "price": 0.11833,
-      "amount": 149,
-      "remaining": 5,
-      "fee": 0.013230227200000002,
-      "timestamp": 1769370819736,
-      "spacing": 0.008,
-      "auditVerified": true
-    },
-    {
       "id": "13317892782",
       "price": 0.12223,
       "amount": 118,
-      "remaining": 118,
+      "remaining": 103,
       "fee": 0.00001253,
       "timestamp": 1767193928080,
-      "source": "RECONCILE",
-      "spacing": 0.008,
-      "auditVerified": true
-    },
-    {
-      "id": "13319824729",
-      "price": 0.12072,
-      "amount": 128,
-      "remaining": 128,
-      "fee": 0.0000135,
-      "timestamp": 1767195188518,
       "source": "RECONCILE",
       "spacing": 0.008,
       "auditVerified": true
@@ -4062,13 +4227,33 @@
       "source": "RECONCILE",
       "spacing": 0.008,
       "auditVerified": true
+    },
+    {
+      "orderId": "13529054902",
+      "tradeId": "1446062912",
+      "price": 0.11833,
+      "amount": 149,
+      "remaining": 149,
+      "timestamp": 1769370815503,
+      "auditVerified": true,
+      "source": "RECONCILE_v2"
+    },
+    {
+      "orderId": "13529054505",
+      "tradeId": "1446006846",
+      "price": 0.11929,
+      "amount": 52,
+      "remaining": 52,
+      "timestamp": 1769368838897,
+      "auditVerified": true,
+      "source": "RECONCILE_v2"
     }
   ],
   "inventoryStatus": "VERIFIED",
-  "_lastTrackedUSDT": 708.2048913,
-  "lastSyncTime": 1769405160871,
-  "lastGridReset": 1769365613264,
-  "accumulatedProfit": 11.6814420601128,
+  "_lastTrackedUSDT": 829.4977776,
+  "lastSyncTime": 1769493634433,
+  "lastGridReset": 1769450441691,
+  "accumulatedProfit": 11.972991880253428,
   "estimatedProfit": 0,
   "feeCorrectionApplied": true,
   "accountingMethod": "SPREAD_MATCH",
@@ -4187,7 +4372,7 @@
       "id": "13518350141",
       "price": 0.12201,
       "amount": 256,
-      "remaining": 256,
+      "remaining": 113,
       "fee": 0.023422308,
       "timestamp": 1769351313213
     },
@@ -4200,44 +4385,12 @@
       "timestamp": 1769357529971
     },
     {
-      "id": "13528758516",
-      "price": 0.11971,
-      "amount": 300,
-      "remaining": 238,
-      "fee": 0.0270078856,
-      "timestamp": 1769364786165
-    },
-    {
-      "id": "13529054505",
-      "price": 0.11929,
-      "amount": 232,
-      "remaining": 4,
-      "fee": 0.0207508851,
-      "timestamp": 1769368842200
-    },
-    {
-      "id": "13529054902",
-      "price": 0.11833,
-      "amount": 149,
-      "remaining": 5,
-      "fee": 0.013230227200000002,
-      "timestamp": 1769370819736
-    },
-    {
       "id": "13317892782",
       "price": 0.12223,
       "amount": 118,
-      "remaining": 118,
+      "remaining": 103,
       "fee": 0.00001253,
       "timestamp": 1767193928080
-    },
-    {
-      "id": "13319824729",
-      "price": 0.12072,
-      "amount": 128,
-      "remaining": 128,
-      "fee": 0.0000135,
-      "timestamp": 1767195188518
     },
     {
       "id": "13319825085",
@@ -4254,6 +4407,22 @@
       "remaining": 44,
       "fee": 0.00000861,
       "timestamp": 1767199347000
+    },
+    {
+      "id": "13529054902",
+      "price": 0.11833,
+      "amount": 149,
+      "remaining": 149,
+      "fee": 0,
+      "timestamp": 1769370815503
+    },
+    {
+      "id": "13529054505",
+      "price": 0.11929,
+      "amount": 52,
+      "remaining": 52,
+      "fee": 0,
+      "timestamp": 1769368838897
     }
   ],
   "safetyLock": false,

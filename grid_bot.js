@@ -6792,25 +6792,65 @@ async function syncHistoricalTrades(deepClean = false) {
                                 log('SYNC', `✅ MULTI-LOT MATCH: ${syncMatchedLots.length} lots consumed | Avg Buy: ${avgBuyPrice.toFixed(2)} | IDs: ${lotId}`, 'success');
                             }
                         } else {
-                            // No match - use grid spacing estimation
-                            const estimatedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
-                            const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
-                            const minSpread = CONFIG.tradingFee * 2.5;
+                            // P0 FIX v3: Before estimating, try to find REAL buy in Binance history
+                            const expectedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
+                            const priceTolerance = CONFIG.gridSpacing * 2; // 2x spacing tolerance
 
-                            if (estimatedSpread >= minSpread) {
-                                buyPrice = estimatedBuyPrice;
-                                matchType = 'GRID_ESTIMATED';
-                                lotId = 'EST_' + trade.id;
-                                entryFee = estimatedBuyPrice * amount * CONFIG.tradingFee;
-                                actualRemainingAfter = 0;
-                                log('SYNC', `📊 SELL ${trade.id} estimated using grid spacing: Buy ${buyPrice.toFixed(2)} → Sell ${sellPrice.toFixed(2)} (${(estimatedSpread*100).toFixed(2)}%)`, 'info');
+                            // Search allTrades for a buy that matches this sell
+                            const candidateBuys = allTrades.filter(t =>
+                                t.side === 'buy' &&
+                                t.timestamp < trade.timestamp && // Buy must be before sell
+                                Math.abs(t.price - expectedBuyPrice) / expectedBuyPrice < priceTolerance
+                            ).sort((a, b) => {
+                                // Sort by price proximity to expected
+                                return Math.abs(a.price - expectedBuyPrice) - Math.abs(b.price - expectedBuyPrice);
+                            });
+
+                            if (candidateBuys.length > 0) {
+                                // Found real buy in Binance! Use it and create lot
+                                const realBuy = candidateBuys[0];
+                                buyPrice = realBuy.price;
+                                matchType = 'SYNC_RECOVERED';
+                                lotId = realBuy.order?.toString() || realBuy.id?.toString();
+                                entryFee = realBuy.price * amount * CONFIG.tradingFee;
+                                actualRemainingAfter = Math.max(0, realBuy.amount - amount);
+
+                                // Add this buy to inventory for future matches
+                                const recoveredLot = {
+                                    orderId: lotId,
+                                    tradeId: realBuy.id?.toString(),
+                                    price: realBuy.price,
+                                    amount: realBuy.amount,
+                                    remaining: actualRemainingAfter,
+                                    timestamp: realBuy.timestamp,
+                                    auditVerified: true,
+                                    source: 'SYNC_RECOVERED'
+                                };
+                                state.inventory.push(recoveredLot);
+                                state.inventoryLots.push({ ...recoveredLot });
+
+                                log('SYNC', `🔍 RECOVERED real buy from Binance: #${lotId} @ $${buyPrice.toFixed(2)} for SELL ${trade.id}`, 'success');
                             } else {
-                                buyPrice = sellPrice;
-                                matchType = 'UNMATCHED';
-                                lotId = 'EST_' + trade.id;
-                                entryFee = realFeeUSDT;
-                                actualRemainingAfter = 0;
-                                log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - spread too small. Cost: ' + buyPrice.toFixed(2), 'warning');
+                                // No real buy found - fallback to grid spacing estimation
+                                const estimatedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
+                                const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
+                                const minSpread = CONFIG.tradingFee * 2.5;
+
+                                if (estimatedSpread >= minSpread) {
+                                    buyPrice = estimatedBuyPrice;
+                                    matchType = 'GRID_ESTIMATED';
+                                    lotId = 'EST_' + trade.id;
+                                    entryFee = estimatedBuyPrice * amount * CONFIG.tradingFee;
+                                    actualRemainingAfter = 0;
+                                    log('SYNC', `📊 SELL ${trade.id} estimated using grid spacing: Buy ${buyPrice.toFixed(2)} → Sell ${sellPrice.toFixed(2)} (${(estimatedSpread*100).toFixed(2)}%)`, 'info');
+                                } else {
+                                    buyPrice = sellPrice;
+                                    matchType = 'UNMATCHED';
+                                    lotId = 'EST_' + trade.id;
+                                    entryFee = realFeeUSDT;
+                                    actualRemainingAfter = 0;
+                                    log('SYNC', '⚠️ SELL ' + trade.id + ' UNMATCHED - spread too small. Cost: ' + buyPrice.toFixed(2), 'warning');
+                                }
                             }
                         }
                     }
