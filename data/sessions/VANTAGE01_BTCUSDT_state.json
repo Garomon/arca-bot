@@ -2,12 +2,12 @@
   "pair": "BTC/USDT",
   "balance": {
     "total": 829.4977776,
-    "usdt": 9.809660521420028,
+    "usdt": 9.521488355320116,
     "base": 0.00321257,
     "btc": 0.00321257,
     "locked": 382.42320789999997
   },
-  "currentPrice": 88515.99,
+  "currentPrice": 88392,
   "entryPrice": 88800,
   "activeOrders": [
     {
@@ -5386,13 +5386,13 @@
   "lastVolatility": "LOW",
   "lastRegime": "BEAR",
   "metrics": {
-    "ticksInRange": 165085,
+    "ticksInRange": 165290,
     "ticksOutOfRange": 78543,
     "buyHoldStartPrice": 89622.01,
     "metricsStartTime": 1767350119253
   },
-  "lastKnownEquity": 1043.63162076548,
-  "lastEquityCheck": 1769493093814,
+  "lastKnownEquity": 1043.6761814607198,
+  "lastEquityCheck": 1769495233898,
   "inventory": [
     {
       "id": "55631025737",
@@ -5643,11 +5643,12 @@
       "remaining": 0.0003699999999999988,
       "timestamp": 1769459848765,
       "auditVerified": true,
-      "source": "RECONCILE_v2"
+      "source": "RECONCILE_v2",
+      "id": "55918449131"
     }
   ],
   "inventoryStatus": "ESTIMATED",
-  "lastSyncTime": 1769493951453,
+  "lastSyncTime": 1769495167760,
   "_lastTrackedUSDT": 829.4977776,
   "lastGridReset": 1769482813761,
   "accumulatedProfit": 16.276652963749843,

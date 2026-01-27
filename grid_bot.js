@@ -5974,6 +5974,8 @@ async function handleOrderFill(order, fillPrice, actualFee) {
             spacing: order.spacing || CONFIG.gridSpacing // P0 FIX: Preserve spacing for GRID_ESTIMATED
         });
         log('INVENTORY', `➕ Added Lot: ${order.amount.toFixed(6)} ${BASE_ASSET} @ $${fillPrice.toFixed(2)} | Fee: $${buyFeeUSDT.toFixed(4)}`, 'info');
+        // P0 FIX: Persist inventory immediately to prevent lost buys on crash
+        saveState();
     }
     else if (order.side === 'sell') {
         // INVENTORY TRACKING: Consume lots (FIFO)

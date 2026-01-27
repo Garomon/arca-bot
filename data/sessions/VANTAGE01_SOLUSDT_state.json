@@ -2,12 +2,12 @@
   "pair": "SOL/USDT",
   "balance": {
     "total": 829.4977776,
-    "usdt": 85.5241620096599,
+    "usdt": 85.56579747312003,
     "base": 4.12997311,
     "btc": 4.12997311,
     "locked": 177.3419
   },
-  "currentPrice": 124.49,
+  "currentPrice": 124.3,
   "entryPrice": 121.98,
   "activeOrders": [
     {
@@ -6051,13 +6051,13 @@
   "lastVolatility": "HIGH",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 321810,
+    "ticksInRange": 322052,
     "ticksOutOfRange": 15181,
     "buyHoldStartPrice": 139.59,
     "metricsStartTime": 1767775292145
   },
-  "lastKnownEquity": 1043.4281082271598,
-  "lastEquityCheck": 1769493094825,
+  "lastKnownEquity": 1043.6397670185602,
+  "lastEquityCheck": 1769495234303,
   "inventory": [
     {
       "id": "16113405807",
@@ -6355,7 +6355,8 @@
       "remaining": 0.2,
       "timestamp": 1769370818605,
       "auditVerified": true,
-      "source": "RECONCILE_v2"
+      "source": "RECONCILE_v2",
+      "id": "16148223335"
     },
     {
       "orderId": "16148222907",
@@ -6365,12 +6366,13 @@
       "remaining": 0.17813237999999937,
       "timestamp": 1769370803966,
       "auditVerified": true,
-      "source": "RECONCILE_v2"
+      "source": "RECONCILE_v2",
+      "id": "16148222907"
     }
   ],
   "inventoryStatus": "ESTIMATED",
   "_lastTrackedUSDT": 829.4977776,
-  "lastSyncTime": 1769493939797,
+  "lastSyncTime": 1769495151813,
   "lastGridReset": 1769421649301,
   "accumulatedProfit": 22.097101294883743,
   "estimatedProfit": 0,
