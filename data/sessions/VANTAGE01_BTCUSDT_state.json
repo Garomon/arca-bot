@@ -2,12 +2,12 @@
   "pair": "BTC/USDT",
   "balance": {
     "total": 944.8174103,
-    "usdt": 138.12307132486,
+    "usdt": 138.46788362898008,
     "base": 0.00408257,
     "btc": 0.00408257,
     "locked": 305.6738149
   },
-  "currentPrice": 89196.89,
+  "currentPrice": 88997.05,
   "entryPrice": 87368,
   "activeOrders": [
     {
@@ -5623,13 +5623,13 @@
   "lastVolatility": "LOW",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 173946,
+    "ticksInRange": 174072,
     "ticksOutOfRange": 78543,
     "buyHoldStartPrice": 89622.01,
     "metricsStartTime": 1767350119253
   },
-  "lastKnownEquity": 1052.5055924277601,
-  "lastEquityCheck": 1769544991740,
+  "lastKnownEquity": 1054.9701253182,
+  "lastEquityCheck": 1769545953284,
   "inventory": [
     {
       "id": "55631025737",
@@ -5642,18 +5642,6 @@
       "auditVerified": true,
       "orderId": "55631025737",
       "tradeId": "5795516718"
-    },
-    {
-      "id": "55631026000",
-      "price": 88380.21,
-      "amount": 0.00027,
-      "remaining": 0.00001,
-      "fee": 0.017896992525000002,
-      "timestamp": 1768997581174,
-      "recovered": true,
-      "auditVerified": true,
-      "orderId": "55631026000",
-      "tradeId": "5795644268"
     },
     {
       "id": "55715729634",
@@ -5863,10 +5851,21 @@
       "auditVerified": true,
       "reconciled": true,
       "note": "Added to match Binance balance"
+    },
+    {
+      "id": "RECONCILE_1769546445929",
+      "price": 88933.09,
+      "amount": 0.00027000000000000114,
+      "remaining": 0.00027000000000000114,
+      "fee": 0,
+      "timestamp": 1769546445929,
+      "auditVerified": true,
+      "reconciled": true,
+      "note": "Added to match Binance balance"
     }
   ],
   "inventoryStatus": "ESTIMATED",
-  "lastSyncTime": 1769545356403,
+  "lastSyncTime": 1769545967053,
   "_lastTrackedUSDT": 944.8174103,
   "lastGridReset": 1769535823663,
   "accumulatedProfit": 16.6963938941982,

@@ -2,12 +2,12 @@
   "pair": "SOL/USDT",
   "balance": {
     "total": 944.8174103,
-    "usdt": 108.25935168220042,
+    "usdt": 109.05532753394039,
     "base": 3.51497311,
     "btc": 3.51497311,
     "locked": 215.82222000000002
   },
-  "currentPrice": 127.22,
+  "currentPrice": 126.75,
   "entryPrice": 126.26,
   "activeOrders": [
     {
@@ -5076,7 +5076,7 @@
       "isNetProfit": true
     }
   ],
-  "totalProfit": 22.68194456988374,
+  "totalProfit": 22.87493409988374,
   "volatilityRegime": "NORMAL",
   "isPaused": false,
   "pauseUntil": null,
@@ -6400,13 +6400,13 @@
   "lastVolatility": "LOW",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 332104,
+    "ticksInRange": 332249,
     "ticksOutOfRange": 15181,
     "buyHoldStartPrice": 139.59,
     "metricsStartTime": 1767775292145
   },
-  "lastKnownEquity": 1052.52147074992,
-  "lastEquityCheck": 1769544991692,
+  "lastKnownEquity": 1054.9701253182,
+  "lastEquityCheck": 1769545952447,
   "inventory": [
     {
       "id": "16136675770",
@@ -6690,13 +6690,24 @@
       "timestamp": 1769535760519,
       "spacing": 0.006584731347390098,
       "auditVerified": true
+    },
+    {
+      "id": "RECONCILE_1769546446181",
+      "price": 126.78,
+      "amount": 0.3160000000000025,
+      "remaining": 0.3160000000000025,
+      "fee": 0,
+      "timestamp": 1769546446181,
+      "auditVerified": true,
+      "reconciled": true,
+      "note": "Added to match Binance balance"
     }
   ],
   "inventoryStatus": "ESTIMATED",
   "_lastTrackedUSDT": 944.8174103,
-  "lastSyncTime": 1769545211838,
+  "lastSyncTime": 1769546470440,
   "lastGridReset": 1769533244415,
-  "accumulatedProfit": 22.68194456988374,
+  "accumulatedProfit": 22.87493409988374,
   "estimatedProfit": 0,
   "feeCorrectionApplied": true,
   "accountingMethod": "SPREAD_MATCH",
@@ -6898,6 +6909,14 @@
       "remaining": 0.194,
       "fee": 0.0180331525,
       "timestamp": 1769535760519
+    },
+    {
+      "id": "RECONCILE_1769546446181",
+      "price": 126.78,
+      "amount": 0.3160000000000025,
+      "remaining": 0.3160000000000025,
+      "fee": 0,
+      "timestamp": 1769546446181
     }
   ],
   "safetyLock": false,

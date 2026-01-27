@@ -2,12 +2,12 @@
   "pair": "DOGE/USDT",
   "balance": {
     "total": 944.8174103,
-    "usdt": 50.25975536820002,
+    "usdt": 50.88769823421998,
     "base": 993,
     "btc": 993,
     "locked": 189.33276000000004
   },
-  "currentPrice": 0.12591,
+  "currentPrice": 0.12517,
   "entryPrice": 0.12565,
   "activeOrders": [
     {
@@ -4250,13 +4250,13 @@
   "lastVolatility": "LOW",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 196440,
+    "ticksInRange": 196583,
     "ticksOutOfRange": 33968,
     "buyHoldStartPrice": 0.1404,
     "metricsStartTime": 1767390502513
   },
-  "lastKnownEquity": 526.2479742138801,
-  "lastEquityCheck": 1769544991810,
+  "lastKnownEquity": 527.4719541513999,
+  "lastEquityCheck": 1769545951225,
   "inventory": [
     {
       "id": "13478762604",
@@ -4346,7 +4346,7 @@
       "id": "13515874421",
       "price": 0.12428,
       "amount": 254,
-      "remaining": 254,
+      "remaining": 136,
       "fee": 0.02367534,
       "timestamp": 1769158140074,
       "recovered": true,
@@ -4414,11 +4414,22 @@
       "auditVerified": true,
       "reconciled": true,
       "note": "Added to match Binance balance"
+    },
+    {
+      "id": "RECONCILE_1769546446432",
+      "price": 0.12518,
+      "amount": 118,
+      "remaining": 118,
+      "fee": 0,
+      "timestamp": 1769546446432,
+      "auditVerified": true,
+      "reconciled": true,
+      "note": "Added to match Binance balance"
     }
   ],
   "inventoryStatus": "VERIFIED",
   "_lastTrackedUSDT": 944.8174103,
-  "lastSyncTime": 1769545246261,
+  "lastSyncTime": 1769546470166,
   "lastGridReset": 1769545234265,
   "accumulatedProfit": 13.05805542025343,
   "estimatedProfit": 0,
@@ -4491,7 +4502,7 @@
       "id": "13515874421",
       "price": 0.12428,
       "amount": 254,
-      "remaining": 254,
+      "remaining": 136,
       "fee": 0.02367534,
       "timestamp": 1769158140074
     },
@@ -4534,6 +4545,14 @@
       "remaining": 38,
       "fee": 0,
       "timestamp": 1769545329841
+    },
+    {
+      "id": "RECONCILE_1769546446432",
+      "price": 0.12518,
+      "amount": 118,
+      "remaining": 118,
+      "fee": 0,
+      "timestamp": 1769546446432
     }
   ],
   "safetyLock": false,

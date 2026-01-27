@@ -6817,21 +6817,34 @@ async function syncHistoricalTrades(deepClean = false) {
                                 entryFee = realBuy.price * amount * CONFIG.tradingFee;
                                 actualRemainingAfter = Math.max(0, realBuy.amount - amount);
 
-                                // Add this buy to inventory for future matches
-                                const recoveredLot = {
-                                    orderId: lotId,
-                                    tradeId: realBuy.id?.toString(),
-                                    price: realBuy.price,
-                                    amount: realBuy.amount,
-                                    remaining: actualRemainingAfter,
-                                    timestamp: realBuy.timestamp,
-                                    auditVerified: true,
-                                    source: 'SYNC_RECOVERED'
-                                };
-                                state.inventory.push(recoveredLot);
-                                state.inventoryLots.push({ ...recoveredLot });
+                                // P0 FIX: Check if lot already exists in inventory and UPDATE it
+                                const existingLot = state.inventory.find(l =>
+                                    String(l.id).endsWith(lotId) ||
+                                    String(l.id) === String(lotId) ||
+                                    String(l.orderId) === String(lotId)
+                                );
 
-                                log('SYNC', `🔍 RECOVERED real buy from Binance: #${lotId} @ $${buyPrice.toFixed(2)} for SELL ${trade.id}`, 'success');
+                                if (existingLot) {
+                                    // Update existing lot's remaining instead of creating duplicate
+                                    existingLot.remaining = Math.max(0, existingLot.remaining - amount);
+                                    log('SYNC', `🔍 RECOVERED: Updated existing lot #${lotId} | Sold ${amount.toFixed(6)} | Remaining: ${existingLot.remaining.toFixed(6)}`, 'success');
+                                } else {
+                                    // Add this buy to inventory for future matches (new lot)
+                                    const recoveredLot = {
+                                        id: lotId,
+                                        orderId: lotId,
+                                        tradeId: realBuy.id?.toString(),
+                                        price: realBuy.price,
+                                        amount: realBuy.amount,
+                                        remaining: actualRemainingAfter,
+                                        timestamp: realBuy.timestamp,
+                                        auditVerified: true,
+                                        source: 'SYNC_RECOVERED'
+                                    };
+                                    state.inventory.push(recoveredLot);
+                                    if (state.inventoryLots) state.inventoryLots.push({ ...recoveredLot });
+                                    log('SYNC', `🔍 RECOVERED: Created new lot #${lotId} @ $${buyPrice.toFixed(2)} | Remaining: ${actualRemainingAfter.toFixed(6)}`, 'success');
+                                }
                             } else {
                                 // No real buy found - fallback to grid spacing estimation
                                 const estimatedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
