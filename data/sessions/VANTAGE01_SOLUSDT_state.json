@@ -2,12 +2,12 @@
   "pair": "SOL/USDT",
   "balance": {
     "total": 829.4977776,
-    "usdt": 85.2431994888201,
+    "usdt": 85.5241620096599,
     "base": 4.12997311,
     "btc": 4.12997311,
     "locked": 177.3419
   },
-  "currentPrice": 124.47,
+  "currentPrice": 124.49,
   "entryPrice": 121.98,
   "activeOrders": [
     {
@@ -6051,7 +6051,7 @@
   "lastVolatility": "HIGH",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 321794,
+    "ticksInRange": 321810,
     "ticksOutOfRange": 15181,
     "buyHoldStartPrice": 139.59,
     "metricsStartTime": 1767775292145
@@ -6067,7 +6067,9 @@
       "fee": 0.028147766255849863,
       "timestamp": 1768948398343,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16113405807",
+      "tradeId": "1827717514"
     },
     {
       "id": "16113406033",
@@ -6077,7 +6079,9 @@
       "fee": 0.0212405625,
       "timestamp": 1768948409103,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16113406033",
+      "tradeId": "1827722362"
     },
     {
       "id": "16113406155",
@@ -6087,7 +6091,9 @@
       "fee": 0.0203258475,
       "timestamp": 1768948418759,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16113406155",
+      "tradeId": "1827731333"
     },
     {
       "id": "16118838598",
@@ -6097,7 +6103,9 @@
       "fee": 0.02864823,
       "timestamp": 1769013281195,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16118838598",
+      "tradeId": "1828669591"
     },
     {
       "id": "16118838674",
@@ -6107,7 +6115,9 @@
       "fee": 0.018600075,
       "timestamp": 1769013615794,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16118838674",
+      "tradeId": "1828688150"
     },
     {
       "id": "16118839072",
@@ -6117,7 +6127,9 @@
       "fee": 0.0180738525,
       "timestamp": 1769014595873,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16118839072",
+      "tradeId": "1828744834"
     },
     {
       "id": "16125932505",
@@ -6127,7 +6139,9 @@
       "fee": 0.02510856,
       "timestamp": 1769038822263,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16125932505",
+      "tradeId": "1829390839"
     },
     {
       "id": "16129427168",
@@ -6137,7 +6151,9 @@
       "fee": 0.025936980000000005,
       "timestamp": 1769092606543,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16129427168",
+      "tradeId": "1829847151"
     },
     {
       "id": "16130040340",
@@ -6147,7 +6163,9 @@
       "fee": 0.0284550825,
       "timestamp": 1769095693455,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16130040340",
+      "tradeId": "1829978189"
     },
     {
       "id": "16134089190",
@@ -6157,7 +6175,9 @@
       "fee": 0.0335301525,
       "timestamp": 1769151484503,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16134089190",
+      "tradeId": "1830608191"
     },
     {
       "id": "16135567850",
@@ -6167,7 +6187,9 @@
       "fee": 0.030034462499999998,
       "timestamp": 1769157296013,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16135567850",
+      "tradeId": "1830651762"
     },
     {
       "id": "16136675770",
@@ -6177,7 +6199,9 @@
       "fee": 0.03599835,
       "timestamp": 1769178772679,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16136675770",
+      "tradeId": "1830809207"
     },
     {
       "id": "16136675776",
@@ -6187,7 +6211,9 @@
       "fee": 0.026930475,
       "timestamp": 1769179558447,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16136675776",
+      "tradeId": "1830856770"
     },
     {
       "id": "16142290047",
@@ -6197,7 +6223,9 @@
       "fee": 0.03008715,
       "timestamp": 1769240419717,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16142290047",
+      "tradeId": "1831619773"
     },
     {
       "id": "16142290052",
@@ -6207,7 +6235,9 @@
       "fee": 0.022524915,
       "timestamp": 1769330474646,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16142290052",
+      "tradeId": "1831942936"
     },
     {
       "id": "16142290053",
@@ -6217,7 +6247,9 @@
       "fee": 0.01749609,
       "timestamp": 1769356844044,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16142290053",
+      "tradeId": "1832105626"
     },
     {
       "id": "16142290059",
@@ -6227,7 +6259,9 @@
       "fee": 0.01757565,
       "timestamp": 1769356926139,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16142290059",
+      "tradeId": "1832118716"
     },
     {
       "id": "16146392840",
@@ -6237,7 +6271,9 @@
       "fee": 0.035548012500000004,
       "timestamp": 1769357185530,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16146392840",
+      "tradeId": "1832176361"
     },
     {
       "id": "16146393483",
@@ -6247,7 +6283,9 @@
       "fee": 0.020705805000000004,
       "timestamp": 1769361278228,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16146393483",
+      "tradeId": "1832359346"
     },
     {
       "id": "16148222609",
@@ -6257,7 +6295,9 @@
       "fee": 0.02943525,
       "timestamp": 1769366677733,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16148222609",
+      "tradeId": "1832491793"
     },
     {
       "id": "16148222671",
@@ -6267,7 +6307,9 @@
       "fee": 0.021142949999999997,
       "timestamp": 1769369183330,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16148222671",
+      "tradeId": "1832554557"
     },
     {
       "id": "16148222687",
@@ -6277,7 +6319,9 @@
       "fee": 0.017605890000000003,
       "timestamp": 1769369186465,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16148222687",
+      "tradeId": "1832559331"
     },
     {
       "id": "16148222907",
@@ -6287,7 +6331,9 @@
       "fee": 0.017576460000000002,
       "timestamp": 1769370803966,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16148222907",
+      "tradeId": "1832635929"
     },
     {
       "id": "16148223335",
@@ -6297,7 +6343,9 @@
       "fee": 0.017632500000000002,
       "timestamp": 1769370818605,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "16148223335",
+      "tradeId": "1832656745"
     },
     {
       "orderId": "16148223335",

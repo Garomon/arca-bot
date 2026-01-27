@@ -2,12 +2,12 @@
   "pair": "BTC/USDT",
   "balance": {
     "total": 829.4977776,
-    "usdt": 9.626977511940254,
+    "usdt": 9.809660521420028,
     "base": 0.00321257,
     "btc": 0.00321257,
     "locked": 382.42320789999997
   },
-  "currentPrice": 88482.19,
+  "currentPrice": 88515.99,
   "entryPrice": 88800,
   "activeOrders": [
     {
@@ -5386,7 +5386,7 @@
   "lastVolatility": "LOW",
   "lastRegime": "BEAR",
   "metrics": {
-    "ticksInRange": 165075,
+    "ticksInRange": 165085,
     "ticksOutOfRange": 78543,
     "buyHoldStartPrice": 89622.01,
     "metricsStartTime": 1767350119253
@@ -5402,7 +5402,9 @@
       "fee": 0.0061702253475750465,
       "timestamp": 1768996664607,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55631025737",
+      "tradeId": "5795516718"
     },
     {
       "id": "55631026000",
@@ -5412,7 +5414,9 @@
       "fee": 0.017896992525000002,
       "timestamp": 1768997581174,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55631026000",
+      "tradeId": "5795644268"
     },
     {
       "id": "55631027992",
@@ -5422,7 +5426,9 @@
       "fee": 0.0176974389,
       "timestamp": 1769015652648,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55631027992",
+      "tradeId": "5798040486"
     },
     {
       "id": "55715729634",
@@ -5432,7 +5438,9 @@
       "fee": 0.026752329000000002,
       "timestamp": 1769092612100,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55715729634",
+      "tradeId": "5801947099"
     },
     {
       "id": "55715729845",
@@ -5442,7 +5450,9 @@
       "fee": 0.021294314400000004,
       "timestamp": 1769095583041,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55715729845",
+      "tradeId": "5802379994"
     },
     {
       "id": "55753030409",
@@ -5452,7 +5462,9 @@
       "fee": 0.03087830385,
       "timestamp": 1769147776190,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55753030409",
+      "tradeId": "5804646346"
     },
     {
       "id": "55753030462",
@@ -5462,7 +5474,9 @@
       "fee": 0.024712088175,
       "timestamp": 1769159878665,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55753030462",
+      "tradeId": "5805199522"
     },
     {
       "id": "55753030552",
@@ -5472,7 +5486,9 @@
       "fee": 0.018606590099999997,
       "timestamp": 1769181439585,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55753030552",
+      "tradeId": "5806297190"
     },
     {
       "id": "55783001451",
@@ -5482,7 +5498,9 @@
       "fee": 0.0047182905,
       "timestamp": 1769195842185,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55783001451",
+      "tradeId": "5807818566"
     },
     {
       "id": "55783001451",
@@ -5492,7 +5510,9 @@
       "fee": 0.032353992,
       "timestamp": 1769195842188,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55783001451",
+      "tradeId": "5807818566"
     },
     {
       "id": "55783002478",
@@ -5502,7 +5522,9 @@
       "fee": 0.02882708175,
       "timestamp": 1769200326040,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55783002478",
+      "tradeId": "5808212026"
     },
     {
       "id": "55810273129",
@@ -5512,7 +5534,9 @@
       "fee": 0.030757443449999998,
       "timestamp": 1769304808052,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55810273129",
+      "tradeId": "5809702420"
     },
     {
       "id": "55810273163",
@@ -5522,7 +5546,9 @@
       "fee": 0.024615362774999996,
       "timestamp": 1769321560202,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55810273163",
+      "tradeId": "5809978836"
     },
     {
       "id": "55836516967",
@@ -5532,7 +5558,9 @@
       "fee": 0.031187930999999995,
       "timestamp": 1769356472965,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55836516967",
+      "tradeId": "5810805307"
     },
     {
       "id": "55836517178",
@@ -5542,7 +5570,9 @@
       "fee": 0.024428821724999997,
       "timestamp": 1769357233209,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55836517178",
+      "tradeId": "5810912290"
     },
     {
       "id": "55840506807",
@@ -5552,7 +5582,9 @@
       "fee": 0.036775199999999994,
       "timestamp": 1769358023065,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55840506807",
+      "tradeId": "5811062924"
     },
     {
       "id": "55840506901",
@@ -5562,7 +5594,9 @@
       "fee": 0.029403000000000002,
       "timestamp": 1769366676794,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55840506901",
+      "tradeId": "5811745146"
     },
     {
       "id": "55840507291",
@@ -5572,7 +5606,9 @@
       "fee": 0.0200508,
       "timestamp": 1769370819365,
       "recovered": true,
-      "auditVerified": true
+      "auditVerified": true,
+      "orderId": "55840507291",
+      "tradeId": "5812267648"
     },
     {
       "id": "55884512536",
@@ -5581,7 +5617,10 @@
       "remaining": 0.00048,
       "fee": 0.031455584,
       "timestamp": 1769442407971,
-      "spacing": 0.0050748605862495485
+      "spacing": 0.0050748605862495485,
+      "orderId": "55884512536",
+      "tradeId": "5816590960",
+      "auditVerified": true
     },
     {
       "id": "55918449131",
@@ -5591,7 +5630,10 @@
       "fee": 0.021105000000000002,
       "timestamp": 1769459848765,
       "source": "SYNC",
-      "spacing": 0.005
+      "spacing": 0.005,
+      "orderId": "55918449131",
+      "tradeId": "5817796492",
+      "auditVerified": true
     },
     {
       "orderId": "55918449131",
