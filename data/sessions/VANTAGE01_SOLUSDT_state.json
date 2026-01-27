@@ -2,12 +2,12 @@
   "pair": "SOL/USDT",
   "balance": {
     "total": 829.4977776,
-    "usdt": 85.51610935379995,
+    "usdt": 85.2431994888201,
     "base": 4.12997311,
     "btc": 4.12997311,
     "locked": 177.3419
   },
-  "currentPrice": 124.68,
+  "currentPrice": 124.47,
   "entryPrice": 121.98,
   "activeOrders": [
     {
@@ -6051,7 +6051,7 @@
   "lastVolatility": "HIGH",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 321739,
+    "ticksInRange": 321794,
     "ticksOutOfRange": 15181,
     "buyHoldStartPrice": 139.59,
     "metricsStartTime": 1767775292145
@@ -6322,7 +6322,7 @@
   ],
   "inventoryStatus": "ESTIMATED",
   "_lastTrackedUSDT": 829.4977776,
-  "lastSyncTime": 1769493634814,
+  "lastSyncTime": 1769493939797,
   "lastGridReset": 1769421649301,
   "accumulatedProfit": 22.097101294883743,
   "estimatedProfit": 0,

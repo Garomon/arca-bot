@@ -2,12 +2,12 @@
   "pair": "DOGE/USDT",
   "balance": {
     "total": 829.4977776,
-    "usdt": 17.85394729633998,
+    "usdt": 17.589576245260048,
     "base": 1807,
     "btc": 1807,
     "locked": 156.48934000000003
   },
-  "currentPrice": 0.12262,
+  "currentPrice": 0.12255,
   "entryPrice": 0.12226,
   "activeOrders": [
     {
@@ -4037,7 +4037,7 @@
   "lastVolatility": "NORMAL",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 186000,
+    "ticksInRange": 186057,
     "ticksOutOfRange": 33968,
     "buyHoldStartPrice": 0.1404,
     "metricsStartTime": 1767390502513
@@ -4251,7 +4251,7 @@
   ],
   "inventoryStatus": "VERIFIED",
   "_lastTrackedUSDT": 829.4977776,
-  "lastSyncTime": 1769493634433,
+  "lastSyncTime": 1769493938902,
   "lastGridReset": 1769450441691,
   "accumulatedProfit": 11.972991880253428,
   "estimatedProfit": 0,
