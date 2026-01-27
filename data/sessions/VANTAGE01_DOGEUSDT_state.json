@@ -1,13 +1,13 @@
 {
   "pair": "DOGE/USDT",
   "balance": {
-    "total": 829.4977776,
-    "usdt": 17.528472301979946,
+    "total": 898.1895926,
+    "usdt": 45.12138204098011,
     "base": 1807,
     "btc": 1807,
     "locked": 156.48934000000003
   },
-  "currentPrice": 0.12243,
+  "currentPrice": 0.12424,
   "entryPrice": 0.12226,
   "activeOrders": [
     {
@@ -121,28 +121,6 @@
       "spacing": 0.008
     },
     {
-      "id": "13537547513",
-      "side": "sell",
-      "price": 0.12422,
-      "amount": 119,
-      "level": 2,
-      "status": "open",
-      "timestamp": 1769450447682,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_9caf73f0",
-      "spacing": 0.008
-    },
-    {
-      "id": "13537547515",
-      "side": "sell",
-      "price": 0.12519,
-      "amount": 118,
-      "level": 3,
-      "status": "open",
-      "timestamp": 1769450448078,
-      "clientOrderId": "VANTAGE01_DOGEUSDT_sell_a3b43cdf",
-      "spacing": 0.008
-    },
-    {
       "id": "13537547519",
       "side": "sell",
       "price": 0.12617,
@@ -221,6 +199,74 @@
     }
   ],
   "filledOrders": [
+    {
+      "id": "13537547515",
+      "side": "sell",
+      "price": 0.12519,
+      "amount": 118,
+      "timestamp": 1769530055571,
+      "fillPrice": 0.12519,
+      "status": "filled",
+      "isEstimated": true,
+      "isNetProfit": false,
+      "costBasis": 0.12428,
+      "spreadPct": 0.7322175732217526,
+      "fees": 0.00001244,
+      "feesUSD": 0.01970678,
+      "feeCurrency": "BNB",
+      "profit": 0.08767322000000091,
+      "matchType": "SYNC_RECOVERED",
+      "matchedLots": [
+        {
+          "lotId": "13515874421",
+          "buyPrice": 0.12428,
+          "amountTaken": 118,
+          "remainingAfter": 136,
+          "timestamp": 1769530055571
+        }
+      ]
+    },
+    {
+      "id": "13537547513",
+      "side": "sell",
+      "price": 0.12422,
+      "amount": 119,
+      "timestamp": 1769529971593,
+      "fillPrice": 0.12422,
+      "status": "filled",
+      "isEstimated": true,
+      "isNetProfit": false,
+      "_syncMatchedLots": [
+        {
+          "lotId": "13529054505",
+          "buyPrice": 0.11929,
+          "amountTaken": 52,
+          "remainingAfter": 0
+        },
+        {
+          "lotId": "13529054902",
+          "buyPrice": 0.11833,
+          "amountTaken": 67,
+          "remainingAfter": 82
+        }
+      ],
+      "costBasis": 0.11874949579831932,
+      "spreadPct": 4.606759940245656,
+      "fees": 0.00001247,
+      "feesUSD": 0.008728999999999999,
+      "feeCurrency": "BNB",
+      "profit": 0.6422610000000002,
+      "matchType": "SYNC_MULTI_MATCH",
+      "matchedLots": [
+        {
+          "lotId": "13529054505+13529054902",
+          "buyPrice": 0.11874949579831932,
+          "amountTaken": 119,
+          "remainingAfter": 82,
+          "timestamp": 1769529971593
+        }
+      ]
+    },
     {
       "id": "13537547507",
       "side": "sell",
@@ -3133,7 +3179,7 @@
       "isNetProfit": true
     }
   ],
-  "totalProfit": 11.972991880253428,
+  "totalProfit": 12.702926100253428,
   "volatilityRegime": "LOW",
   "isPaused": false,
   "pauseUntil": null,
@@ -4019,6 +4065,55 @@
       "timestamp": 1769492940955,
       "equityBefore": 521.9793172464,
       "equityAfter": 365.8450400791
+    },
+    {
+      "amount": 521.17755314104,
+      "timestamp": 1769495468217,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -8.48140512,
+      "rawUSDT": -42.4070256
+    },
+    {
+      "amount": 519.97059376048,
+      "timestamp": 1769507777867,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -6.6800906799999895,
+      "rawUSDT": -33.40045339999995
+    },
+    {
+      "amount": 519.5162201074,
+      "timestamp": 1769519842781,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -6.790850000000001,
+      "rawUSDT": -33.95425
+    },
+    {
+      "amount": 521.16221864168,
+      "timestamp": 1769523349500,
+      "reason": "USDT_DEPOSIT",
+      "delta": 6.831549999999993,
+      "rawUSDT": 34.157749999999965
+    },
+    {
+      "amount": 521.8839101042801,
+      "timestamp": 1769523451490,
+      "reason": "USDT_DEPOSIT",
+      "delta": 7.075200800000016,
+      "rawUSDT": 35.37600400000008
+    },
+    {
+      "amount": 522.1390098619801,
+      "timestamp": 1769529566985,
+      "reason": "USDT_DEPOSIT",
+      "delta": 6.798367999999982,
+      "rawUSDT": 33.99183999999991
+    },
+    {
+      "amount": 524.35028409082,
+      "timestamp": 1769529969570,
+      "reason": "USDT_DEPOSIT",
+      "delta": 5.103826000000004,
+      "rawUSDT": 25.51913000000002
     }
   ],
   "firstTradeTime": 1767257922635,
@@ -4037,13 +4132,13 @@
   "lastVolatility": "NORMAL",
   "lastRegime": "WEAK_BEAR",
   "metrics": {
-    "ticksInRange": 186316,
+    "ticksInRange": 194115,
     "ticksOutOfRange": 33968,
     "buyHoldStartPrice": 0.1404,
     "metricsStartTime": 1767390502513
   },
-  "lastKnownEquity": 521.8141947841401,
-  "lastEquityCheck": 1769495232914,
+  "lastKnownEquity": 525.1527758421001,
+  "lastEquityCheck": 1769533514093,
   "inventory": [
     {
       "id": "13478762604",
@@ -4202,34 +4297,10 @@
       "tradeId": "1444746050"
     },
     {
-      "id": "13518350141",
-      "price": 0.12201,
-      "amount": 256,
-      "remaining": 113,
-      "fee": 0.023422308,
-      "timestamp": 1769351313213,
-      "spacing": 0.008,
-      "auditVerified": true,
-      "orderId": "13518350141",
-      "tradeId": "1445676831"
-    },
-    {
-      "id": "13527146661",
-      "price": 0.12087,
-      "amount": 258,
-      "remaining": 114,
-      "fee": 0.023408496,
-      "timestamp": 1769357529971,
-      "spacing": 0.008,
-      "auditVerified": true,
-      "orderId": "13527146661",
-      "tradeId": "1445758634"
-    },
-    {
       "id": "13317892782",
       "price": 0.12223,
       "amount": 118,
-      "remaining": 103,
+      "remaining": 93,
       "fee": 0.00001253,
       "timestamp": 1767193928080,
       "source": "RECONCILE",
@@ -4265,33 +4336,33 @@
       "tradeId": "1418082876"
     },
     {
-      "orderId": "13529054902",
-      "tradeId": "1446062912",
-      "price": 0.11833,
-      "amount": 149,
-      "remaining": 149,
-      "timestamp": 1769370815503,
+      "orderId": "13515874421",
+      "tradeId": "1444628786",
+      "price": 0.12428,
+      "amount": 254,
+      "remaining": 136,
+      "timestamp": 1769158140074,
       "auditVerified": true,
-      "source": "RECONCILE_v2",
-      "id": "13529054902"
+      "source": "SYNC_RECOVERED",
+      "id": "RECONCILE_1769158140074"
     },
     {
-      "orderId": "13529054505",
-      "tradeId": "1446006846",
-      "price": 0.11929,
-      "amount": 52,
-      "remaining": 52,
-      "timestamp": 1769368838897,
+      "id": "RECONCILE_1769533567111",
+      "price": 0.12427,
+      "amount": 65,
+      "remaining": 65,
+      "fee": 0,
+      "timestamp": 1769533567111,
       "auditVerified": true,
-      "source": "RECONCILE_v2",
-      "id": "13529054505"
+      "reconciled": true,
+      "note": "Added to match Binance balance"
     }
   ],
   "inventoryStatus": "VERIFIED",
-  "_lastTrackedUSDT": 829.4977776,
-  "lastSyncTime": 1769495451969,
+  "_lastTrackedUSDT": 898.1895926,
+  "lastSyncTime": 1769533397230,
   "lastGridReset": 1769450441691,
-  "accumulatedProfit": 11.972991880253428,
+  "accumulatedProfit": 12.702926100253428,
   "estimatedProfit": 0,
   "feeCorrectionApplied": true,
   "accountingMethod": "SPREAD_MATCH",
@@ -4407,26 +4478,10 @@
       "timestamp": 1769178770985
     },
     {
-      "id": "13518350141",
-      "price": 0.12201,
-      "amount": 256,
-      "remaining": 113,
-      "fee": 0.023422308,
-      "timestamp": 1769351313213
-    },
-    {
-      "id": "13527146661",
-      "price": 0.12087,
-      "amount": 258,
-      "remaining": 114,
-      "fee": 0.023408496,
-      "timestamp": 1769357529971
-    },
-    {
       "id": "13317892782",
       "price": 0.12223,
       "amount": 118,
-      "remaining": 103,
+      "remaining": 93,
       "fee": 0.00001253,
       "timestamp": 1767193928080
     },
@@ -4447,20 +4502,20 @@
       "timestamp": 1767199347000
     },
     {
-      "id": "13529054902",
-      "price": 0.11833,
-      "amount": 149,
-      "remaining": 149,
+      "id": "RECONCILE_1769158140074",
+      "price": 0.12428,
+      "amount": 254,
+      "remaining": 136,
       "fee": 0,
-      "timestamp": 1769370815503
+      "timestamp": 1769158140074
     },
     {
-      "id": "13529054505",
-      "price": 0.11929,
-      "amount": 52,
-      "remaining": 52,
+      "id": "RECONCILE_1769533567111",
+      "price": 0.12427,
+      "amount": 65,
+      "remaining": 65,
       "fee": 0,
-      "timestamp": 1769368838897
+      "timestamp": 1769533567111
     }
   ],
   "safetyLock": false,

@@ -1,25 +1,244 @@
 {
   "pair": "BTC/USDT",
   "balance": {
-    "total": 829.4977776,
-    "usdt": 9.521488355320116,
-    "base": 0.00321257,
-    "btc": 0.00321257,
-    "locked": 382.42320789999997
+    "total": 898.1895926,
+    "usdt": 59.2154236942003,
+    "base": 0.00706257,
+    "btc": 0.00706257,
+    "locked": 297.9680351
   },
-  "currentPrice": 88392,
-  "entryPrice": 88800,
+  "currentPrice": 88474.62,
+  "entryPrice": 88000.01,
   "activeOrders": [
     {
-      "id": "55931859905",
+      "id": "55942666539",
       "side": "buy",
-      "price": 88347.97,
-      "amount": 0.00048,
+      "price": 87560.01,
+      "amount": 0.0004,
       "level": -1,
       "status": "open",
-      "timestamp": 1769482816196,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_d11a163c",
-      "spacing": 0.005090470426280039
+      "timestamp": 1769515310642,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_c595ff6f",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942666591",
+      "side": "buy",
+      "price": 87120.01,
+      "amount": 0.00032,
+      "level": -2,
+      "status": "open",
+      "timestamp": 1769515311035,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_53869eae",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942666737",
+      "side": "buy",
+      "price": 86680.01,
+      "amount": 0.00024,
+      "level": -3,
+      "status": "open",
+      "timestamp": 1769515311430,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_d0a0ed1d",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942666804",
+      "side": "buy",
+      "price": 86240.01,
+      "amount": 0.00023,
+      "level": -4,
+      "status": "open",
+      "timestamp": 1769515311822,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_69665ed5",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942666861",
+      "side": "buy",
+      "price": 85800.01,
+      "amount": 0.00023,
+      "level": -5,
+      "status": "open",
+      "timestamp": 1769515312218,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_30f793e4",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667036",
+      "side": "buy",
+      "price": 85360.01,
+      "amount": 0.00023,
+      "level": -6,
+      "status": "open",
+      "timestamp": 1769515313050,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_97f5b1ab",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667195",
+      "side": "buy",
+      "price": 84920.01,
+      "amount": 0.00023,
+      "level": -7,
+      "status": "open",
+      "timestamp": 1769515314115,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_bd804cc6",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667259",
+      "side": "buy",
+      "price": 84480.01,
+      "amount": 0.00023,
+      "level": -8,
+      "status": "open",
+      "timestamp": 1769515314509,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_1b5c3ff0",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667456",
+      "side": "buy",
+      "price": 84040.01,
+      "amount": 0.00023,
+      "level": -9,
+      "status": "open",
+      "timestamp": 1769515315764,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_84f11fef",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667572",
+      "side": "buy",
+      "price": 83600.01,
+      "amount": 0.00023,
+      "level": -10,
+      "status": "open",
+      "timestamp": 1769515316162,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_296fa89a",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667634",
+      "side": "buy",
+      "price": 83160.01,
+      "amount": 0.00023,
+      "level": -11,
+      "status": "open",
+      "timestamp": 1769515316552,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_ec67bec1",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667741",
+      "side": "buy",
+      "price": 82720.01,
+      "amount": 0.00023,
+      "level": -12,
+      "status": "open",
+      "timestamp": 1769515316950,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_516a77c1",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942667881",
+      "side": "buy",
+      "price": 82280.01,
+      "amount": 0.00024,
+      "level": -13,
+      "status": "open",
+      "timestamp": 1769515317342,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_581800de",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942668249",
+      "side": "buy",
+      "price": 81840.01,
+      "amount": 0.00024,
+      "level": -14,
+      "status": "open",
+      "timestamp": 1769515318600,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_88651513",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942668352",
+      "side": "sell",
+      "price": 88880.01,
+      "amount": 0.00031,
+      "level": 2,
+      "status": "open",
+      "timestamp": 1769515319393,
+      "clientOrderId": "VANTAGE01_BTCUSDT_sell_3d9aba0f",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942668552",
+      "side": "sell",
+      "price": 89320.01,
+      "amount": 0.00023,
+      "level": 3,
+      "status": "open",
+      "timestamp": 1769515319785,
+      "clientOrderId": "VANTAGE01_BTCUSDT_sell_d96c2c31",
+      "spacing": 0.005
+    },
+    {
+      "id": "55942669012",
+      "side": "sell",
+      "price": 89760.01,
+      "amount": 0.00022,
+      "level": 4,
+      "status": "open",
+      "timestamp": 1769515320183,
+      "clientOrderId": "VANTAGE01_BTCUSDT_sell_e94601a2",
+      "spacing": 0.005
+    }
+  ],
+  "filledOrders": [
+    {
+      "id": "55942668312",
+      "side": "sell",
+      "price": 88440.01,
+      "amount": 0.0004,
+      "timestamp": 1769523449548,
+      "fillPrice": 88440.01,
+      "status": "filled",
+      "isEstimated": true,
+      "isNetProfit": false,
+      "_syncMatchedLots": [
+        {
+          "lotId": "55836517178",
+          "buyPrice": 88031.79,
+          "amountTaken": 0.00017,
+          "remainingAfter": 0
+        },
+        {
+          "lotId": "55931860066",
+          "buyPrice": 87895.93,
+          "amountTaken": 0.00023,
+          "remainingAfter": 0.00015
+        }
+      ],
+      "costBasis": 87953.6705,
+      "spreadPct": 0.5529496350013067,
+      "fees": 0.00003001,
+      "feesUSD": 0.04739148143552631,
+      "feeCurrency": "BNB",
+      "profit": 0.14714431856447785,
+      "matchType": "SYNC_MULTI_MATCH",
+      "matchedLots": [
+        {
+          "lotId": "55836517178+55931860066",
+          "buyPrice": 87953.6705,
+          "amountTaken": 0.0004,
+          "remainingAfter": 0.00015,
+          "timestamp": 1769523449548
+        }
+      ]
     },
     {
       "id": "55931860066",
@@ -28,320 +247,31 @@
       "amount": 0.00038,
       "level": -2,
       "status": "open",
-      "timestamp": 1769482816587,
+      "timestamp": 1769507781703,
       "clientOrderId": "VANTAGE01_BTCUSDT_buy_b4598f73",
-      "spacing": 0.005090470426280039
+      "spacing": 0.005090470426280039,
+      "fillPrice": 87895.93,
+      "profit": 0,
+      "isNetProfit": true,
+      "fees": 0.025047664,
+      "feeCurrency": "BNB-"
     },
     {
-      "id": "55931860599",
+      "id": "55931859905",
       "side": "buy",
-      "price": 87443.9,
-      "amount": 0.00028,
-      "level": -3,
+      "price": 88347.97,
+      "amount": 0.00048,
+      "level": -1,
       "status": "open",
-      "timestamp": 1769482816974,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_dd1844bd",
-      "spacing": 0.005090470426280039
+      "timestamp": 1769495469024,
+      "clientOrderId": "VANTAGE01_BTCUSDT_buy_d11a163c",
+      "spacing": 0.005090470426280039,
+      "fillPrice": 88347.97,
+      "profit": 0,
+      "isNetProfit": true,
+      "fees": 0.0317952,
+      "feeCurrency": "BNB-"
     },
-    {
-      "id": "55931860866",
-      "side": "buy",
-      "price": 86991.86,
-      "amount": 0.00027,
-      "level": -4,
-      "status": "open",
-      "timestamp": 1769482817370,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_893f5ef3",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931861537",
-      "side": "buy",
-      "price": 86539.83,
-      "amount": 0.00027,
-      "level": -5,
-      "status": "open",
-      "timestamp": 1769482817761,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_1679b07f",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931861728",
-      "side": "buy",
-      "price": 86087.8,
-      "amount": 0.00027,
-      "level": -6,
-      "status": "open",
-      "timestamp": 1769482818583,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_3760a02c",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931861800",
-      "side": "buy",
-      "price": 85635.76,
-      "amount": 0.00027,
-      "level": -7,
-      "status": "open",
-      "timestamp": 1769482818978,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_6b3a7316",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931861843",
-      "side": "buy",
-      "price": 85183.73,
-      "amount": 0.00028,
-      "level": -8,
-      "status": "open",
-      "timestamp": 1769482819366,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_ed675058",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931863517",
-      "side": "buy",
-      "price": 84731.7,
-      "amount": 0.00028,
-      "level": -9,
-      "status": "open",
-      "timestamp": 1769482819757,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_e2bb31b8",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931863764",
-      "side": "buy",
-      "price": 84279.66,
-      "amount": 0.00028,
-      "level": -10,
-      "status": "open",
-      "timestamp": 1769482820149,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_50391e9b",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931864266",
-      "side": "buy",
-      "price": 83827.63,
-      "amount": 0.00028,
-      "level": -11,
-      "status": "open",
-      "timestamp": 1769482820969,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_570f99bc",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931864369",
-      "side": "buy",
-      "price": 83375.59,
-      "amount": 0.00028,
-      "level": -12,
-      "status": "open",
-      "timestamp": 1769482821358,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_4b012383",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931864614",
-      "side": "buy",
-      "price": 82923.56,
-      "amount": 0.00028,
-      "level": -13,
-      "status": "open",
-      "timestamp": 1769482821750,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_d6e0882d",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931864774",
-      "side": "buy",
-      "price": 82471.53,
-      "amount": 0.00029,
-      "level": -14,
-      "status": "open",
-      "timestamp": 1769482822142,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_27d69b50",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931864879",
-      "side": "buy",
-      "price": 82019.49,
-      "amount": 0.00029,
-      "level": -15,
-      "status": "open",
-      "timestamp": 1769482822534,
-      "clientOrderId": "VANTAGE01_BTCUSDT_buy_7a788a0e",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931865574",
-      "side": "sell",
-      "price": 89252.03,
-      "amount": 0.00047,
-      "level": 1,
-      "status": "open",
-      "timestamp": 1769482823354,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_57fa0d69",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866233",
-      "side": "sell",
-      "price": 89704.07,
-      "amount": 0.00037,
-      "level": 2,
-      "status": "open",
-      "timestamp": 1769482823743,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_cdb5c64a",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866347",
-      "side": "sell",
-      "price": 90156.1,
-      "amount": 0.00027,
-      "level": 3,
-      "status": "open",
-      "timestamp": 1769482824136,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_6cf4f30f",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866475",
-      "side": "sell",
-      "price": 90608.14,
-      "amount": 0.00026,
-      "level": 4,
-      "status": "open",
-      "timestamp": 1769482824524,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_c081e01b",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866538",
-      "side": "sell",
-      "price": 91060.17,
-      "amount": 0.00026,
-      "level": 5,
-      "status": "open",
-      "timestamp": 1769482824916,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_ea17b7ea",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866627",
-      "side": "sell",
-      "price": 91512.2,
-      "amount": 0.00026,
-      "level": 6,
-      "status": "open",
-      "timestamp": 1769482825739,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_7066ef7f",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866684",
-      "side": "sell",
-      "price": 91964.24,
-      "amount": 0.00026,
-      "level": 7,
-      "status": "open",
-      "timestamp": 1769482826128,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_7ea1378a",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866853",
-      "side": "sell",
-      "price": 92416.27,
-      "amount": 0.00025,
-      "level": 8,
-      "status": "open",
-      "timestamp": 1769482826798,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_77d934b2",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931866897",
-      "side": "sell",
-      "price": 92868.3,
-      "amount": 0.00025,
-      "level": 9,
-      "status": "open",
-      "timestamp": 1769482827186,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_04920c67",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931867099",
-      "side": "sell",
-      "price": 93320.34,
-      "amount": 0.00025,
-      "level": 10,
-      "status": "open",
-      "timestamp": 1769482828011,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_e3990a6d",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931867160",
-      "side": "sell",
-      "price": 93772.37,
-      "amount": 0.00025,
-      "level": 11,
-      "status": "open",
-      "timestamp": 1769482828401,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_0f39fa04",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931867390",
-      "side": "sell",
-      "price": 94224.41,
-      "amount": 0.00025,
-      "level": 12,
-      "status": "open",
-      "timestamp": 1769482828794,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_6a9dcfd4",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931867491",
-      "side": "sell",
-      "price": 94676.44,
-      "amount": 0.00025,
-      "level": 13,
-      "status": "open",
-      "timestamp": 1769482829181,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_0dd67433",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931867724",
-      "side": "sell",
-      "price": 95128.47,
-      "amount": 0.00025,
-      "level": 14,
-      "status": "open",
-      "timestamp": 1769482829578,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_369f92b7",
-      "spacing": 0.005090470426280039
-    },
-    {
-      "id": "55931868030",
-      "side": "sell",
-      "price": 95580.51,
-      "amount": 0.00025,
-      "level": 15,
-      "status": "open",
-      "timestamp": 1769482830399,
-      "clientOrderId": "VANTAGE01_BTCUSDT_sell_e4e41556",
-      "spacing": 0.005090470426280039
-    }
-  ],
-  "filledOrders": [
     {
       "id": "55918449131",
       "side": "buy",
@@ -4419,8 +4349,8 @@
       "isNetProfit": true
     }
   ],
-  "totalProfit": 16.276652963749843,
-  "volatilityRegime": "NORMAL",
+  "totalProfit": 16.423797282314325,
+  "volatilityRegime": "LOW",
   "isPaused": false,
   "pauseUntil": null,
   "pauseReason": null,
@@ -5368,31 +5298,80 @@
       "reason": "USDT_WITHDRAWAL",
       "delta": -14.046339200000013,
       "rawUSDT": -35.11584800000003
+    },
+    {
+      "amount": 1042.35510628208,
+      "timestamp": 1769495467780,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -16.96281024,
+      "rawUSDT": -42.4070256
+    },
+    {
+      "amount": 1039.64513252124,
+      "timestamp": 1769507780471,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -13.360181359999979,
+      "rawUSDT": -33.40045339999995
+    },
+    {
+      "amount": 1039.0324402148,
+      "timestamp": 1769519842601,
+      "reason": "USDT_WITHDRAWAL",
+      "delta": -13.581700000000001,
+      "rawUSDT": -33.95425
+    },
+    {
+      "amount": 1042.3130892833601,
+      "timestamp": 1769523348219,
+      "reason": "USDT_DEPOSIT",
+      "delta": 13.663099999999986,
+      "rawUSDT": 34.157749999999965
+    },
+    {
+      "amount": 1043.82211005376,
+      "timestamp": 1769523452787,
+      "reason": "USDT_DEPOSIT",
+      "delta": 14.150401600000032,
+      "rawUSDT": 35.37600400000008
+    },
+    {
+      "amount": 1044.2171474066,
+      "timestamp": 1769529566918,
+      "reason": "USDT_DEPOSIT",
+      "delta": 13.596735999999964,
+      "rawUSDT": 33.99183999999991
+    },
+    {
+      "amount": 1047.4997778702798,
+      "timestamp": 1769529969761,
+      "reason": "USDT_DEPOSIT",
+      "delta": 10.207652000000008,
+      "rawUSDT": 25.51913000000002
     }
   ],
   "firstTradeTime": 1765123045197,
   "isLive": true,
-  "startTime": 1769482813761,
+  "startTime": 1769515308576,
   "marketRegime": "BEAR",
   "emergencyStop": false,
   "maxDrawdown": 0,
   "lastRebalance": {
-    "timestamp": 1769482803021,
+    "timestamp": 1769515289125,
     "triggers": [
       "VOLATILITY"
     ]
   },
-  "lastFillTime": 1769442407972,
-  "lastVolatility": "LOW",
+  "lastFillTime": 1769507781703,
+  "lastVolatility": "NORMAL",
   "lastRegime": "BEAR",
   "metrics": {
-    "ticksInRange": 165290,
+    "ticksInRange": 171997,
     "ticksOutOfRange": 78543,
     "buyHoldStartPrice": 89622.01,
     "metricsStartTime": 1767350119253
   },
-  "lastKnownEquity": 1043.6761814607198,
-  "lastEquityCheck": 1769495233898,
+  "lastKnownEquity": 1050.3281195766401,
+  "lastEquityCheck": 1769533513943,
   "inventory": [
     {
       "id": "55631025737",
@@ -5563,18 +5542,6 @@
       "tradeId": "5810805307"
     },
     {
-      "id": "55836517178",
-      "price": 88031.79,
-      "amount": 0.00037,
-      "remaining": 0.00017,
-      "fee": 0.024428821724999997,
-      "timestamp": 1769357233209,
-      "recovered": true,
-      "auditVerified": true,
-      "orderId": "55836517178",
-      "tradeId": "5810912290"
-    },
-    {
       "id": "55840506807",
       "price": 87560,
       "amount": 0.00056,
@@ -5623,19 +5590,6 @@
       "auditVerified": true
     },
     {
-      "id": "55918449131",
-      "price": 87789.62,
-      "amount": 0.0004,
-      "remaining": 0.0004,
-      "fee": 0.021105000000000002,
-      "timestamp": 1769459848765,
-      "source": "SYNC",
-      "spacing": 0.005,
-      "orderId": "55918449131",
-      "tradeId": "5817796492",
-      "auditVerified": true
-    },
-    {
       "orderId": "55918449131",
       "tradeId": "5817796492",
       "price": 87789.62,
@@ -5645,13 +5599,44 @@
       "auditVerified": true,
       "source": "RECONCILE_v2",
       "id": "55918449131"
+    },
+    {
+      "id": "55931859905",
+      "price": 88347.97,
+      "amount": 0.00048,
+      "remaining": 0.00048,
+      "fee": 0.0317952,
+      "timestamp": 1769495469020,
+      "spacing": 0.005090470426280039,
+      "auditVerified": true
+    },
+    {
+      "id": "55931860066",
+      "price": 87895.93,
+      "amount": 0.00038,
+      "remaining": 0.00015,
+      "fee": 0.025047664,
+      "timestamp": 1769507781698,
+      "spacing": 0.005090470426280039,
+      "auditVerified": true
+    },
+    {
+      "id": "RECONCILE_1769533566852",
+      "price": 88482.63,
+      "amount": 0.0003999999999999993,
+      "remaining": 0.0003999999999999993,
+      "fee": 0,
+      "timestamp": 1769533566852,
+      "auditVerified": true,
+      "reconciled": true,
+      "note": "Added to match Binance balance"
     }
   ],
   "inventoryStatus": "ESTIMATED",
-  "lastSyncTime": 1769495167760,
-  "_lastTrackedUSDT": 829.4977776,
-  "lastGridReset": 1769482813761,
-  "accumulatedProfit": 16.276652963749843,
+  "lastSyncTime": 1769533447245,
+  "_lastTrackedUSDT": 898.1895926,
+  "lastGridReset": 1769515308576,
+  "accumulatedProfit": 16.423797282314325,
   "estimatedProfit": 0,
   "feeCorrectionApplied": true,
   "accountingMethod": "SPREAD_MATCH",
@@ -5776,14 +5761,6 @@
       "timestamp": 1769356472965
     },
     {
-      "id": "55836517178",
-      "price": 88031.79,
-      "amount": 0.00037,
-      "remaining": 0.00017,
-      "fee": 0.024428821724999997,
-      "timestamp": 1769357233209
-    },
-    {
       "id": "55840506807",
       "price": 87560,
       "amount": 0.00056,
@@ -5818,18 +5795,34 @@
     {
       "id": "55918449131",
       "price": 87789.62,
-      "amount": 0.0004,
-      "remaining": 0.0004,
-      "fee": 0.021105000000000002,
-      "timestamp": 1769459848765
-    },
-    {
-      "id": "55918449131",
-      "price": 87789.62,
       "amount": 0.0003699999999999988,
       "remaining": 0.0003699999999999988,
       "fee": 0,
       "timestamp": 1769459848765
+    },
+    {
+      "id": "55931859905",
+      "price": 88347.97,
+      "amount": 0.00048,
+      "remaining": 0.00048,
+      "fee": 0.0317952,
+      "timestamp": 1769495469020
+    },
+    {
+      "id": "55931860066",
+      "price": 87895.93,
+      "amount": 0.00038,
+      "remaining": 0.00015,
+      "fee": 0.025047664,
+      "timestamp": 1769507781698
+    },
+    {
+      "id": "RECONCILE_1769533566852",
+      "price": 88482.63,
+      "amount": 0.0003999999999999993,
+      "remaining": 0.0003999999999999993,
+      "fee": 0,
+      "timestamp": 1769533566852
     }
   ],
   "safetyLock": false,
