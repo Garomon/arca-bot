@@ -5764,6 +5764,55 @@ async function detectCapitalChange() {
         return null;
     }
 }
+// ============================================
+// AUTO-SYNC INVENTORY (SAFE - Only adds, never deletes)
+// Runs every 30 minutes to keep inventory in sync with Binance
+// ============================================
+async function autoSyncInventory() {
+    try {
+        const balance = await binance.fetchBalance();
+        const baseAsset = CONFIG.pair.split("/")[0];
+        const realBalance = parseFloat(balance[baseAsset]?.total || 0);
+        
+        const invBalance = state.inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
+        const diff = realBalance - invBalance;
+        
+        // Tolerance based on asset
+        const tolerance = baseAsset === "DOGE" ? 1 : (baseAsset === "SOL" ? 0.001 : 0.00001);
+        
+        if (Math.abs(diff) <= tolerance) {
+            return; // Already synced
+        }
+        
+        if (diff > tolerance) {
+            // Binance has MORE than inventory - ADD a reconciliation lot
+            const currentPrice = state.currentPrice || (await binance.fetchTicker(CONFIG.pair)).last;
+            
+            const reconLot = {
+                id: "AUTOSYNC_" + Date.now(),
+                orderId: "AUTOSYNC_" + Date.now(),
+                price: currentPrice,
+                amount: diff,
+                remaining: diff,
+                timestamp: Date.now(),
+                auditVerified: true,
+                source: "AUTO_SYNC"
+            };
+            
+            state.inventory.push(reconLot);
+            if (state.inventoryLots) state.inventoryLots.push({ ...reconLot });
+            
+            saveState();
+            log("AUTO_SYNC", "Added " + diff.toFixed(6) + " " + baseAsset + " to inventory (was missing from Binance)", "success");
+        } else {
+            // Binance has LESS than inventory - just warn, dont delete
+            log("AUTO_SYNC", "Inventory has " + Math.abs(diff).toFixed(6) + " " + baseAsset + " more than Binance. Manual review needed.", "warning");
+        }
+    } catch (e) {
+        log("AUTO_SYNC", "Error: " + e.message, "error");
+    }
+}
+
 
 // PHASE 5: Time-Weighted APY Calculation
 // Uses TWR (Time-Weighted Return) for accurate capital averaging
@@ -7211,6 +7260,13 @@ server.listen(BOT_PORT, async () => {
     setInterval(async () => {
         await detectCapitalChange();
     }, 5 * 60 * 1000); // Check every 5 minutes
+
+
+    // PHASE 6: AUTO-SYNC INVENTORY (Every 30 minutes)
+    // Keeps inventory synced with Binance - only ADDS missing balance, never deletes
+    setInterval(async () => {
+        await autoSyncInventory();
+    }, 30 * 60 * 1000); // Check every 30 minutes
 
     // === DAILY PERFORMANCE REPORT ===
     const REPORTS_DIR = path.join(__dirname, 'reports');
