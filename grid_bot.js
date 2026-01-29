@@ -6304,10 +6304,13 @@ async function handleOrderFill(order, fillPrice, actualFee) {
                         }
 
                         if (matchedLots.length === 0) {
+                            // BUG FIX: amountTaken should be the actual BUY amount, not the SELL amount
+                            // The SELL might be larger than the BUY it matched with
+                            const actualTaken = Math.min(order.amount, potentialBuy.amount || order.amount);
                             matchedLots.push({
                                 lotId: potentialBuy.orderId || potentialBuy.order || potentialBuy.id,
                                 buyPrice: realBuyPrice,
-                                amountTaken: order.amount,
+                                amountTaken: actualTaken,
                                 remainingAfter: 0,
                                 timestamp: potentialBuy.timestamp
                             });
