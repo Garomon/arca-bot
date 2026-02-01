@@ -1463,10 +1463,11 @@ app.get('/api/life-coach', async (req, res) => {
             }
         } catch (e) { }
         
-        // Calculate average monthly injection
+        // Calculate average monthly injection (use precise days, not ceil to avoid jumps)
         let avgMonthlyInjection = 500; // Default
         if (firstDepositDate && totalDeposits > 0) {
-            const monthsActive = Math.max(1, Math.ceil((Date.now() - new Date(firstDepositDate)) / (1000 * 60 * 60 * 24 * 30)));
+            const daysActiveDeposits = (Date.now() - new Date(firstDepositDate)) / (1000 * 60 * 60 * 24);
+            const monthsActive = Math.max(1, daysActiveDeposits / 30.44); // 30.44 = avg days/month
             avgMonthlyInjection = Math.round(totalDeposits / monthsActive);
         }
 

@@ -195,7 +195,23 @@
         "score": 99,
         "emoji": "🟢"
       }
+    },
+    {
+      "id": 12,
+      "date": "2026-01-31",
+      "amount": 228,
+      "note": "Compra MXN→USDT",
+      "allocation": {
+        "BTC": 40,
+        "SOL": 40,
+        "DOGE": 20
+      },
+      "indicator": {
+        "signal": "GREEN",
+        "score": 100,
+        "emoji": "🟢"
+      }
     }
   ],
-  "nextId": 12
+  "nextId": 13
 }
