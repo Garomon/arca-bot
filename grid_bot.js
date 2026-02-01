@@ -6994,13 +6994,20 @@ async function syncHistoricalTrades(deepClean = false) {
                     orderRecord.feeCurrency = feeCurrency;
                     orderRecord.profit = (matchType === 'UNMATCHED') ? 0 : netProfit; // UNMATCHED = no profit
                     orderRecord.matchType = matchType;
-                    orderRecord.matchedLots = [{
-                        lotId: lotId,
-                        buyPrice: buyPrice,
-                        amountTaken: amount,
-                        remainingAfter: actualRemainingAfter, // P0 FIX: Use real remaining
-                        timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
-                    }];
+                    // FIX: Use _syncMatchedLots if available (for SYNC_MATCHED/SYNC_MULTI_MATCH)
+                    // This preserves multiple lot information instead of overwriting with single lot
+                    if (orderRecord._syncMatchedLots && orderRecord._syncMatchedLots.length > 0) {
+                        orderRecord.matchedLots = orderRecord._syncMatchedLots;
+                        delete orderRecord._syncMatchedLots; // Clean up temporary property
+                    } else {
+                        orderRecord.matchedLots = [{
+                            lotId: lotId,
+                            buyPrice: buyPrice,
+                            amountTaken: amount,
+                            remainingAfter: actualRemainingAfter, // P0 FIX: Use real remaining
+                            timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
+                        }];
+                    }
 
                     // P0 FIX: Block sync sells with negative spread
                     if (spreadPct < -0.1 && !matchedBuy) {
