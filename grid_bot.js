@@ -1463,11 +1463,10 @@ app.get('/api/life-coach', async (req, res) => {
             }
         } catch (e) { }
         
-        // Calculate average monthly injection (use precise days, not ceil to avoid jumps)
+        // Calculate average monthly injection
         let avgMonthlyInjection = 500; // Default
         if (firstDepositDate && totalDeposits > 0) {
-            const daysActiveDeposits = (Date.now() - new Date(firstDepositDate)) / (1000 * 60 * 60 * 24);
-            const monthsActive = Math.max(1, daysActiveDeposits / 30.44); // 30.44 = avg days/month
+            const monthsActive = Math.max(1, Math.ceil((Date.now() - new Date(firstDepositDate)) / (1000 * 60 * 60 * 24 * 30)));
             avgMonthlyInjection = Math.round(totalDeposits / monthsActive);
         }
 
@@ -5806,46 +5805,8 @@ async function autoSyncInventory() {
             saveState();
             log("AUTO_SYNC", "Added " + diff.toFixed(6) + " " + baseAsset + " to inventory (was missing from Binance)", "success");
         } else {
-            // Binance has LESS than inventory - REDUCE inventory to match
-            const excess = Math.abs(diff);
-            log("AUTO_SYNC", "Inventory has " + excess.toFixed(6) + " " + baseAsset + " more than Binance. Adjusting...", "warning");
-
-            // Sort: remove AUTO_SYNC/RECONCILE lots first, then newest lots
-            const sortedForRemoval = [...state.inventory].sort((a, b) => {
-                const aIsSpecial = (a.source || '').includes('SYNC') || (a.source || '').includes('RECONCILE');
-                const bIsSpecial = (b.source || '').includes('SYNC') || (b.source || '').includes('RECONCILE');
-                if (aIsSpecial && !bIsSpecial) return -1;
-                if (!aIsSpecial && bIsSpecial) return 1;
-                return (b.timestamp || 0) - (a.timestamp || 0);
-            });
-
-            let remainingToRemove = excess;
-            const lotsToRemove = [];
-
-            for (const lot of sortedForRemoval) {
-                if (remainingToRemove <= tolerance) break;
-                const lotAmt = lot.remaining || lot.amount || 0;
-                if (lotAmt <= 0) continue;
-
-                if (lotAmt <= remainingToRemove) {
-                    lotsToRemove.push(lot.id || lot.orderId);
-                    remainingToRemove -= lotAmt;
-                    log("AUTO_SYNC", `Removing lot ${(lot.source || 'NORMAL')}: ${lotAmt.toFixed(6)} ${baseAsset}`, "info");
-                } else {
-                    lot.remaining = lotAmt - remainingToRemove;
-                    lot.amount = lot.remaining;
-                    log("AUTO_SYNC", `Reduced lot by ${remainingToRemove.toFixed(6)} ${baseAsset}`, "info");
-                    remainingToRemove = 0;
-                }
-            }
-
-            state.inventory = state.inventory.filter(l => !lotsToRemove.includes(l.id || l.orderId));
-            if (state.inventoryLots) {
-                state.inventoryLots = state.inventoryLots.filter(l => !lotsToRemove.includes(l.id || l.orderId));
-            }
-
-            saveState();
-            log("AUTO_SYNC", `Adjusted inventory to match Binance.`, "success");
+            // Binance has LESS than inventory - just warn, dont delete
+            log("AUTO_SYNC", "Inventory has " + Math.abs(diff).toFixed(6) + " " + baseAsset + " more than Binance. Manual review needed.", "warning");
         }
     } catch (e) {
         log("AUTO_SYNC", "Error: " + e.message, "error");
@@ -6038,13 +5999,11 @@ async function handleOrderFill(order, fillPrice, actualFee) {
                 } catch (e) {
                     buyFeeUSDT = actualFee.cost * 890; // Fallback estimate
                 }
-                // BUG FIX: feeCurrency should indicate the value is in USDT (already converted)
-                buyFeeCurrency = 'USDT';
+                buyFeeCurrency = 'BNB-';
             } else if (actualFee.currency === BASE_ASSET) {
                 // Fee paid in base asset (BTC, SOL, DOGE) - convert using fill price
                 buyFeeUSDT = actualFee.cost * fillPrice;
-                // BUG FIX: feeCurrency should indicate the value is in USDT (already converted)
-                buyFeeCurrency = 'USDT';
+                buyFeeCurrency = 'BNB-';
             } else {
                 // Unknown currency - estimate
                 buyFeeUSDT = estimateFeeUSDT(fillPrice, order.amount);
@@ -6231,30 +6190,12 @@ async function handleOrderFill(order, fillPrice, actualFee) {
         }
 
         // P0 FIX: Inventory Shortfall Handling
-        // BUG FIX: When there's not enough inventory, we must:
-        // 1. Estimate the cost for the missing portion
-        // 2. Add it to matchedLots so profit is calculated on TOTAL sold, not just matched
         if (remainingToSell > 0.00000001) {
             log('WARN', `Inventory shortfall: Missing ${remainingToSell.toFixed(8)} ${BASE_ASSET}. Estimating cost basis.`, 'warning');
             // Estimate cost for the missing portion
             const estimatedBuyPrice = fillPrice / (1 + CONFIG.gridSpacing);
             costBasis += (remainingToSell * estimatedBuyPrice);
             entryFees += (remainingToSell * estimatedBuyPrice * CONFIG.tradingFee);
-
-            // BUG FIX: Add estimated lot to matchedLots for transparency and correct profit calculation
-            matchedLots.push({
-                lotId: 'ESTIMATED_SHORTFALL',
-                buyPrice: estimatedBuyPrice,
-                amountTaken: remainingToSell,
-                remainingAfter: 0,
-                timestamp: Date.now(),
-                source: 'SHORTFALL_ESTIMATE'
-            });
-
-            // Mark that this sell had a shortfall (for matchType)
-            if (!sellMatchType) sellMatchType = 'PARTIAL_ESTIMATED';
-            else sellMatchType = sellMatchType + '_PARTIAL';
-
             remainingToSell = 0;
         }
 
@@ -6305,13 +6246,10 @@ async function handleOrderFill(order, fillPrice, actualFee) {
                         }
 
                         if (matchedLots.length === 0) {
-                            // BUG FIX: amountTaken should be the actual BUY amount, not the SELL amount
-                            // The SELL might be larger than the BUY it matched with
-                            const actualTaken = Math.min(order.amount, potentialBuy.amount || order.amount);
                             matchedLots.push({
                                 lotId: potentialBuy.orderId || potentialBuy.order || potentialBuy.id,
                                 buyPrice: realBuyPrice,
-                                amountTaken: actualTaken,
+                                amountTaken: order.amount,
                                 remainingAfter: 0,
                                 timestamp: potentialBuy.timestamp
                             });
@@ -6995,20 +6933,13 @@ async function syncHistoricalTrades(deepClean = false) {
                     orderRecord.feeCurrency = feeCurrency;
                     orderRecord.profit = (matchType === 'UNMATCHED') ? 0 : netProfit; // UNMATCHED = no profit
                     orderRecord.matchType = matchType;
-                    // FIX: Use _syncMatchedLots if available (for SYNC_MATCHED/SYNC_MULTI_MATCH)
-                    // This preserves multiple lot information instead of overwriting with single lot
-                    if (orderRecord._syncMatchedLots && orderRecord._syncMatchedLots.length > 0) {
-                        orderRecord.matchedLots = orderRecord._syncMatchedLots;
-                        delete orderRecord._syncMatchedLots; // Clean up temporary property
-                    } else {
-                        orderRecord.matchedLots = [{
-                            lotId: lotId,
-                            buyPrice: buyPrice,
-                            amountTaken: amount,
-                            remainingAfter: actualRemainingAfter, // P0 FIX: Use real remaining
-                            timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
-                        }];
-                    }
+                    orderRecord.matchedLots = [{
+                        lotId: lotId,
+                        buyPrice: buyPrice,
+                        amountTaken: amount,
+                        remainingAfter: actualRemainingAfter, // P0 FIX: Use real remaining
+                        timestamp: matchedBuy ? matchedBuy.timestamp : trade.timestamp
+                    }];
 
                     // P0 FIX: Block sync sells with negative spread
                     if (spreadPct < -0.1 && !matchedBuy) {
@@ -7025,16 +6956,13 @@ async function syncHistoricalTrades(deepClean = false) {
 
                     // P0 FIX: Also add synced BUYs to INVENTORY so future SELLs can find them
                     // This prevents UNMATCHED sells after bot restarts
-                    // P1 FIX: Use string comparison to avoid type mismatches
                     if (!state.inventory) state.inventory = [];
-                    const tradeIdStr = String(tradeId);
-                    const existingLot = state.inventory.find(lot => String(lot.id) === tradeIdStr || String(lot.orderId) === tradeIdStr);
-                    const alreadyConsumed = usedBuyIds.has(tradeId) || usedBuyIds.has(tradeIdStr);
+                    const existingLot = state.inventory.find(lot => lot.id === tradeId);
+                    const alreadyConsumed = usedBuyIds.has(tradeId);
 
                     if (!existingLot && !alreadyConsumed) {
                         state.inventory.push({
-                            id: tradeIdStr,
-                            orderId: tradeIdStr,
+                            id: tradeId,
                             price: trade.price,
                             amount: trade.amount,
                             remaining: trade.amount, // Full amount available (SELLs processed later will consume)
@@ -7045,9 +6973,7 @@ async function syncHistoricalTrades(deepClean = false) {
                         });
                         log('SYNC', `➕ Added synced BUY to inventory: ${trade.amount.toFixed(6)} @ $${trade.price.toFixed(2)}`, 'info');
                     } else if (alreadyConsumed) {
-                        log('SYNC', `⏭️ BUY ${tradeIdStr} already consumed by a SELL, not adding to inventory`, 'debug');
-                    } else if (existingLot) {
-                        log('SYNC', `⏭️ BUY ${tradeIdStr} already exists in inventory, skipping`, 'debug');
+                        log('SYNC', `⏭️ BUY ${tradeId} already consumed by a SELL, not adding to inventory`, 'debug');
                     }
                 }
 
@@ -7341,6 +7267,28 @@ server.listen(BOT_PORT, async () => {
     setInterval(async () => {
         await autoSyncInventory();
     }, 30 * 60 * 1000); // Check every 30 minutes
+
+    // PHASE 7: AUTO-DEPLOY IDLE USDT (Every 10 minutes)
+    // If significant USDT is sitting free, refresh grid to deploy it
+    setInterval(async () => {
+        if (isRebalancing || state.isPaused || state.emergencyStop) return;
+        
+        try {
+            const balance = await exchange.fetchBalance();
+            const freeUsdt = balance.USDT?.free || 0;
+            const allocation = parseFloat(process.env.CAPITAL_ALLOCATION || 0.33);
+            const myShare = freeUsdt * allocation;
+            
+            // If more than $30 of my share is sitting idle, deploy it
+            if (myShare > 30) {
+                log("AUTO_DEPLOY", `$${myShare.toFixed(2)} USDT idle (total free: $${freeUsdt.toFixed(2)}) - triggering grid refresh`, "warning");
+                await initializeGrid(true);
+            }
+        } catch (e) {
+            // Silent fail - not critical
+        }
+    }, 10 * 60 * 1000); // Every 10 minutes
+
 
     // === DAILY PERFORMANCE REPORT ===
     const REPORTS_DIR = path.join(__dirname, 'reports');
