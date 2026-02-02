@@ -2975,9 +2975,9 @@
             // Filter deposits for current month (excluding rebalances)
             const monthlyDeposits = (deposits || []).filter(d => {
                 if (d.type === 'rebalance') return false;
-                const depositDate = new Date(d.date);
-                return depositDate.getFullYear() === currentYear &&
-                       depositDate.getMonth() === currentMonth;
+                const [year, month] = d.date.split("-").map(Number);
+                return year === currentYear &&
+                       (month - 1) === currentMonth;
             });
 
             // Calculate total for this month
