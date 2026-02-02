@@ -6098,7 +6098,7 @@ async function handleOrderFill(order, fillPrice, actualFee) {
 
             // P0 FIX: PROFIT GUARANTEE - Filter out lots that would result in loss
             // A lot is only valid if buyPrice < sellPrice (positive spread)
-            const minProfitMargin = CONFIG.tradingFee * 4; // OPTIMIZED: Min 0.4% spread based on insights on both sides
+            const minProfitMargin = CONFIG.tradingFee * 2; // OPTIMIZED: Min 0.4% spread based on insights on both sides
             const profitableCandidates = inventoryCandidates.filter(lot => {
                 const grossSpread = (fillPrice - lot.price) / lot.price;
                 return grossSpread > minProfitMargin; // Must have positive profit after fees
@@ -6729,7 +6729,7 @@ async function syncHistoricalTrades(deepClean = false) {
                     // Search for matching BUY: same/similar amount, lower price, earlier timestamp
                     let matchedBuy = null;
                     const tolerance = 0.001; // 0.1% tolerance for amount matching
-                    const minProfitMargin = CONFIG.tradingFee * 4; // INSIGHT-OPTIMIZED: 0.4% min spread // P0 FIX: PROFIT GUARANTEE
+                    const minProfitMargin = CONFIG.tradingFee * 2; // INSIGHT-OPTIMIZED: 0.2% min spread (covers fees) // P0 FIX: PROFIT GUARANTEE
 
                     for (const potentialBuy of trades) {
                         const potentialBuyId = potentialBuy.orderId || potentialBuy.order || potentialBuy.id;
@@ -6778,7 +6778,7 @@ async function syncHistoricalTrades(deepClean = false) {
                     } else {
                         // No match in trade history - try to find in current inventory
                         // P0 FIX: PROFIT GUARANTEE - lot.price must be < sellPrice with margin for fees
-                        const minProfitMargin = CONFIG.tradingFee * 4; // INSIGHT-OPTIMIZED: 0.4% min spread // 0.15% minimum spread
+                        const minProfitMargin = CONFIG.tradingFee * 2; // INSIGHT-OPTIMIZED: 0.2% min spread (covers fees) // 0.15% minimum spread
 
                         // FIX: Get ALL profitable candidate lots for MULTI-LOT consumption
                         const candidateLots = (state.inventory || []).filter(lot => {
@@ -6898,7 +6898,7 @@ async function syncHistoricalTrades(deepClean = false) {
                                 // No real buy found - fallback to grid spacing estimation
                                 const estimatedBuyPrice = sellPrice / (1 + CONFIG.gridSpacing);
                                 const estimatedSpread = (sellPrice - estimatedBuyPrice) / estimatedBuyPrice;
-                                const minSpread = CONFIG.tradingFee * 4; // INSIGHT-OPTIMIZED
+                                const minSpread = CONFIG.tradingFee * 2; // INSIGHT-OPTIMIZED
 
                                 if (estimatedSpread >= minSpread) {
                                     buyPrice = estimatedBuyPrice;
