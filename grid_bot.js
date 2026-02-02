@@ -7274,7 +7274,7 @@ server.listen(BOT_PORT, async () => {
         if (isRebalancing || state.isPaused || state.emergencyStop) return;
         
         try {
-            const balance = await exchange.fetchBalance();
+            const balance = await binance.fetchBalance();
             const freeUsdt = balance.USDT?.free || 0;
             const allocation = parseFloat(process.env.CAPITAL_ALLOCATION || 0.33);
             const myShare = freeUsdt * allocation;
@@ -7285,9 +7285,27 @@ server.listen(BOT_PORT, async () => {
                 await initializeGrid(true);
             }
         } catch (e) {
-            // Silent fail - not critical
+            log("AUTO_DEPLOY", "Error: " + e.message, "error");
         }
     }, 10 * 60 * 1000); // Every 10 minutes
+
+    // Immediate first check after 30 seconds
+    setTimeout(async () => {
+        if (isRebalancing || state.isPaused || state.emergencyStop) return;
+        try {
+            const balance = await binance.fetchBalance();
+            const freeUsdt = balance.USDT?.free || 0;
+            const allocation = parseFloat(process.env.CAPITAL_ALLOCATION || 0.33);
+            const myShare = freeUsdt * allocation;
+            log("AUTO_DEPLOY", `Initial check: ${myShare.toFixed(2)} idle (threshold: $30)`, "info");
+            if (myShare > 30) {
+                log("AUTO_DEPLOY", `Deploying ${myShare.toFixed(2)} USDT`, "warning");
+                await initializeGrid(true);
+            }
+        } catch (e) {
+            log("AUTO_DEPLOY", "Initial check error: " + e.message, "error");
+        }
+    }, 30000); // 30 seconds after start
 
 
     // === DAILY PERFORMANCE REPORT ===
