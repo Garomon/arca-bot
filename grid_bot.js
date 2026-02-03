@@ -3015,6 +3015,7 @@ const safeReplacer = (key, value) => {
     return value;
 };
 
+// P0 FIX: Sync lot remaining between inventory and inventoryLots to prevent desyncfunction syncLotRemaining(lotId, newRemaining) {    // Update in inventory    const invLot = (state.inventory || []).find(l => l.id === lotId || String(l.id) === String(lotId));    if (invLot) invLot.remaining = newRemaining;    // Update in inventoryLots    const invLotsLot = (state.inventoryLots || []).find(l => l.id === lotId || String(l.id) === String(lotId));    if (invLotsLot) invLotsLot.remaining = newRemaining;}
 async function saveState() {
     if (isSaving) {
         pendingSave = true;
@@ -6185,6 +6186,7 @@ async function handleOrderFill(order, fillPrice, actualFee) {
             });
 
             lot.remaining = remainingAfter;
+            syncLotRemaining(lot.id, remainingAfter); // P0 FIX: Keep inventoryLots in sync
             remainingToSell = Number((remainingToSell - take).toFixed(8));
             consumedLots++;
         }
@@ -6773,6 +6775,7 @@ async function syncHistoricalTrades(deepClean = false) {
                         const inventoryLot = (state.inventory || []).find(lot => lot.id === lotId);
                         if (inventoryLot) {
                             inventoryLot.remaining = Math.max(0, inventoryLot.remaining - amount);
+                            syncLotRemaining(lotId, inventoryLot.remaining); // P0 FIX: Keep inventoryLots in sync
                             log('SYNC', `🔗 Also consumed ${amount.toFixed(6)} from inventory lot ${lotId}`, 'debug');
                         }
                     } else {
@@ -6822,6 +6825,7 @@ async function syncHistoricalTrades(deepClean = false) {
 
                             // Update lot and mark as used
                             lot.remaining = remainingAfter;
+                            syncLotRemaining(lot.id, remainingAfter); // P0 FIX: Keep inventoryLots in sync
                             usedBuyIds.add(lot.id);
                             remainingToConsume = Number((remainingToConsume - take).toFixed(8));
                         }
@@ -6877,6 +6881,7 @@ async function syncHistoricalTrades(deepClean = false) {
                                     // Update existing lot's remaining instead of creating duplicate
                                     existingLot.remaining = Math.max(0, existingLot.remaining - amount);
                                     log('SYNC', `🔍 RECOVERED: Updated existing lot #${lotId} | Sold ${amount.toFixed(6)} | Remaining: ${existingLot.remaining.toFixed(6)}`, 'success');
+                                    syncLotRemaining(lotId, existingLot.remaining); // P0 FIX: Keep inventoryLots in sync
                                 } else {
                                     // Add this buy to inventory for future matches (new lot)
                                     const recoveredLot = {
