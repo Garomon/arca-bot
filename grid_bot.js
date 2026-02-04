@@ -5770,10 +5770,64 @@ async function detectCapitalChange() {
 // Runs every 30 minutes to keep inventory in sync with Binance
 // ============================================
 async function autoSyncInventory() {
-    // P0 FIX: DISABLED - This function was causing duplicate AUTOSYNC lots
-    // Reconciliation is now handled externally via reconcile_all.js
-    // The syncLotRemaining() function keeps inventory in sync during runtime
-    return;
+    // P0 FIX v2: Now properly syncs BOTH ways (add AND reduce)
+    try {
+        const balance = await binance.fetchBalance();
+        const baseAsset = CONFIG.pair.split("/")[0];
+        const realBalance = parseFloat(balance[baseAsset]?.free || 0); // Use FREE not TOTAL
+        
+        const invBalance = state.inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
+        const diff = realBalance - invBalance;
+        
+        // Tolerance based on asset
+        const tolerance = baseAsset === "DOGE" ? 1 : (baseAsset === "SOL" ? 0.001 : 0.00001);
+        
+        if (Math.abs(diff) <= tolerance) {
+            return; // Already synced
+        }
+        
+        if (diff > tolerance) {
+            // Binance has MORE than inventory - ADD a reconciliation lot
+            const currentPrice = state.currentPrice || (await binance.fetchTicker(CONFIG.pair)).last;
+            
+            const reconLot = {
+                id: "AUTOSYNC_" + Date.now(),
+                orderId: "AUTOSYNC_" + Date.now(),
+                price: currentPrice,
+                amount: diff,
+                remaining: diff,
+                timestamp: Date.now(),
+                auditVerified: true,
+                source: "AUTO_SYNC"
+            };
+            
+            state.inventory.push(reconLot);
+            if (state.inventoryLots) state.inventoryLots.push({ ...reconLot });
+            
+            saveState();
+            log("AUTO_SYNC", "Added " + diff.toFixed(6) + " " + baseAsset + " to inventory (Binance had more)", "success");
+        } else {
+            // P0 FIX v2: Binance has LESS - REDUCE lots to match (FIFO)
+            let toReduce = Math.abs(diff);
+            const sortedLots = state.inventory.filter(l => l.remaining > 0)
+                .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+            
+            for (const lot of sortedLots) {
+                if (toReduce <= tolerance) break;
+                const reduceAmount = Math.min(lot.remaining, toReduce);
+                lot.remaining -= reduceAmount;
+                toReduce -= reduceAmount;
+                
+                // Sync to inventoryLots
+                syncLotRemaining(lot.id, lot.remaining);
+            }
+            
+            saveState();
+            log("AUTO_SYNC", "Reduced inventory by " + Math.abs(diff).toFixed(6) + " " + baseAsset + " (Binance had less)", "warning");
+        }
+    } catch (e) {
+        log("AUTO_SYNC", "Error: " + e.message, "error");
+    }
 }
 
 
@@ -6592,6 +6646,20 @@ async function syncProfitFromBinance() {
 }
 
 async function syncHistoricalTrades(deepClean = false) {
+    // P0 FIX v3: Skip if inventory already matches Binance (prevents duplicate lots after reconciliation)
+    try {
+        const bal = await binance.fetchBalance();
+        const baseAsset = CONFIG.pair.split('/')[0];
+        const binanceBal = parseFloat(bal[baseAsset]?.free || 0);
+        const invBal = (state.inventory || []).reduce((s, l) => s + (l.remaining || 0), 0);
+        const tol = baseAsset === 'DOGE' ? 1 : (baseAsset === 'SOL' ? 0.001 : 0.00001);
+        if (Math.abs(binanceBal - invBal) <= tol) {
+            log('SYNC', 'Inventory already matches Binance (' + invBal.toFixed(6) + ' = ' + binanceBal.toFixed(6) + '), skipping historical sync', 'info');
+            return;
+        }
+    } catch (e) {
+        log('SYNC', 'Balance check failed, proceeding with sync: ' + e.message, 'warning');
+    }
     try {
         // DEEP CLEAN: Clear history to rebuild strictly from Binance data
         if (deepClean) {
