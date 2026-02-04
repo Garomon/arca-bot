@@ -5816,60 +5816,59 @@ async function detectCapitalChange() {
 // Runs every 30 minutes to keep inventory in sync with Binance
 // ============================================
 async function autoSyncInventory() {
-    // P0 FIX v2: Now properly syncs BOTH ways (add AND reduce)
+    // REGLA CRITICA: Solo agregar lots con precios REALES de Binance trades
+    // NUNCA reducir automaticamente - eso solo debe pasar por SELLs reales
     try {
         const balance = await binance.fetchBalance();
         const baseAsset = CONFIG.pair.split("/")[0];
-        const realBalance = parseFloat(balance[baseAsset]?.free || 0); // Use FREE not TOTAL
+        const realBalance = parseFloat(balance[baseAsset]?.free || 0);
         
         const invBalance = state.inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
         const diff = realBalance - invBalance;
         
-        // Tolerance based on asset
-        const tolerance = baseAsset === "DOGE" ? 1 : (baseAsset === "SOL" ? 0.001 : 0.00001);
+        const tolerance = baseAsset === "DOGE" ? 1 : (baseAsset === "SOL" ? 0.01 : 0.0001);
         
         if (Math.abs(diff) <= tolerance) {
             return; // Already synced
         }
         
         if (diff > tolerance) {
-            // Binance has MORE than inventory - ADD a reconciliation lot
-            const currentPrice = state.currentPrice || (await binance.fetchTicker(CONFIG.pair)).last;
+            // Binance has MORE than inventory - Try to find REAL price from recent trades
+            let realPrice = null;
+            try {
+                // Fetch recent trades from Binance to find the actual buy price
+                const trades = await binance.fetchMyTrades(CONFIG.pair, undefined, 20);
+                const recentBuys = trades.filter(t => t.side === "buy").sort((a,b) => b.timestamp - a.timestamp);
+                if (recentBuys.length > 0) {
+                    realPrice = recentBuys[0].price;
+                    log("AUTO_SYNC", "Found real price from Binance trades: $" + realPrice.toFixed(2), "info");
+                }
+            } catch (e) {
+                log("AUTO_SYNC", "Could not fetch trades: " + e.message, "warning");
+            }
+            
+            // If we couldn't find real price, use current price but mark it
+            const priceToUse = realPrice || state.currentPrice || (await binance.fetchTicker(CONFIG.pair)).last;
+            const isRealPrice = realPrice !== null;
             
             const reconLot = {
-                id: "AUTOSYNC_" + Date.now(),
-                orderId: "AUTOSYNC_" + Date.now(),
-                price: currentPrice,
+                id: isRealPrice ? ("SYNC_REAL_" + Date.now()) : ("SYNC_ESTIMATED_" + Date.now()),
+                price: priceToUse,
                 amount: diff,
                 remaining: diff,
                 timestamp: Date.now(),
-                auditVerified: true,
-                source: "AUTO_SYNC"
+                source: isRealPrice ? "SYNC_FROM_BINANCE_TRADES" : "SYNC_ESTIMATED_PRICE"
             };
             
             state.inventory.push(reconLot);
             if (state.inventoryLots) state.inventoryLots.push({ ...reconLot });
             
             saveState();
-            log("AUTO_SYNC", "Added " + diff.toFixed(6) + " " + baseAsset + " to inventory (Binance had more)", "success");
+            log("AUTO_SYNC", "Added " + diff.toFixed(6) + " " + baseAsset + " @ $" + priceToUse.toFixed(2) + (isRealPrice ? " (REAL)" : " (ESTIMATED)"), isRealPrice ? "success" : "warning");
         } else {
-            // P0 FIX v2: Binance has LESS - REDUCE lots to match (FIFO)
-            let toReduce = Math.abs(diff);
-            const sortedLots = state.inventory.filter(l => l.remaining > 0)
-                .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-            
-            for (const lot of sortedLots) {
-                if (toReduce <= tolerance) break;
-                const reduceAmount = Math.min(lot.remaining, toReduce);
-                lot.remaining -= reduceAmount;
-                toReduce -= reduceAmount;
-                
-                // Sync to inventoryLots
-                syncLotRemaining(lot.id, lot.remaining);
-            }
-            
-            saveState();
-            log("AUTO_SYNC", "Reduced inventory by " + Math.abs(diff).toFixed(6) + " " + baseAsset + " (Binance had less)", "warning");
+            // REGLA CRITICA: NO reducir automaticamente
+            // Solo loguear la discrepancia - los SELLs reales deben manejar esto
+            log("AUTO_SYNC", "WARNING: Binance has " + Math.abs(diff).toFixed(6) + " " + baseAsset + " LESS than inventory. NOT auto-reducing. Check for untracked sells.", "error");
         }
     } catch (e) {
         log("AUTO_SYNC", "Error: " + e.message, "error");
