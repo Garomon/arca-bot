@@ -3032,7 +3032,7 @@ async function saveState() {
                 id: lot.id || lot.orderId,
                 price: lot.price || lot.fillPrice,
                 amount: lot.amount,
-                remaining: lot.remaining || lot.amount,
+                remaining: typeof lot.remaining === "number" ? lot.remaining : lot.amount,
                 fee: lot.fee || lot.feesUSD || 0,
                 timestamp: lot.timestamp
             }));
