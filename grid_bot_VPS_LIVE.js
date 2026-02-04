@@ -1,4 +1,36 @@
 /**
+ * ========================================================================
+ *                    REGLAS CRITICAS DE CONTABILIDAD
+ *                    NO MODIFICAR - GRABADO EN PIEDRA
+ * ========================================================================
+ *
+ *  FECHA: 2026-02-04 | CONTEXTO: Conversacion con Claude sobre accounting
+ *
+ *  PROBLEMA QUE OCURRIO:
+ *  - Scripts de reconciliacion borraron lotes REALES de compras
+ *  - Se perdieron lotes con precios de 0.12-0.15 en DOGE
+ *  - Se crearon AUTOSYNC lots con precios INVENTADOS
+ *
+ *  NUNCA HACER:
+ *  1. Filtrar lots con remaining <= 0 sin verificar que un SELL lo consumio
+ *  2. Hacer FIFO reduction para sincronizar con Binance
+ *  3. Crear AUTOSYNC lots con precios inventados/estimados
+ *  4. Borrar lots basandose solo en el balance de Binance
+ *  5. Modificar remaining sin un SELL real que lo justifique
+ *
+ *  SIEMPRE HACER:
+ *  1. Un BUY real -> Crea lot con ID del order y precio REAL del buy
+ *  2. Un SELL real -> Consume de lot(s), reduce remaining
+ *  3. remaining llega a 0 por SELL registrado -> OK eliminar lot
+ *  4. El lot.id DEBE ser el orderId del buy que lo creo
+ *  5. El lot.price DEBE ser el precio real de la compra
+ *
+ *  SI LEES ESTO Y PIENSAS EN HACER UN SCRIPT DE LIMPIEZA O SYNC:
+ *  -> NO LO HAGAS. Los lots son SAGRADOS.
+ *  -> Solo el flujo normal de BUY/SELL debe tocarlos.
+ * ========================================================================
+ */
+/**
  * VANTAGE // QUANTUM GRID BOT
  * Version: 3.0 (Multi-Core Edition)
  * Features: Multi-Pair, Persistence, Precision Math, Circuit Breakers
@@ -3035,9 +3067,9 @@ async function saveState() {
     try {
         const tempFile = `${CONFIG.stateFile}.tmp`;
 
-        // P0 FIX: Clean consumed lots (remaining <= 0) before saving
+        // DISABLED - REGLA CRITICA: NO borrar lots sin verificar SELL real
         if (state.inventory) {
-            state.inventory = state.inventory.filter(lot => lot.remaining > 0);
+            // state.inventory = state.inventory.filter(lot => lot.remaining > 0); // PELIGROSO - DESACTIVADO
         }
 
         // AUTO-SYNC: Keep inventoryLots in sync with inventory (prevents desync forever)
