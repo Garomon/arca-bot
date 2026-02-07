@@ -1,4 +1,36 @@
 /**
+ * ========================================================================
+ *                    REGLAS CRITICAS DE CONTABILIDAD
+ *                    NO MODIFICAR - GRABADO EN PIEDRA
+ * ========================================================================
+ *
+ *  FECHA: 2026-02-04 | CONTEXTO: Conversacion con Claude sobre accounting
+ *
+ *  PROBLEMA QUE OCURRIO:
+ *  - Scripts de reconciliacion borraron lotes REALES de compras
+ *  - Se perdieron lotes con precios de 0.12-0.15 en DOGE
+ *  - Se crearon AUTOSYNC lots con precios INVENTADOS
+ *
+ *  NUNCA HACER:
+ *  1. Filtrar lots con remaining <= 0 sin verificar que un SELL lo consumio
+ *  2. Hacer FIFO reduction para sincronizar con Binance
+ *  3. Crear AUTOSYNC lots con precios inventados/estimados
+ *  4. Borrar lots basandose solo en el balance de Binance
+ *  5. Modificar remaining sin un SELL real que lo justifique
+ *
+ *  SIEMPRE HACER:
+ *  1. Un BUY real -> Crea lot con ID del order y precio REAL del buy
+ *  2. Un SELL real -> Consume de lot(s), reduce remaining
+ *  3. remaining llega a 0 por SELL registrado -> OK eliminar lot
+ *  4. El lot.id DEBE ser el orderId del buy que lo creo
+ *  5. El lot.price DEBE ser el precio real de la compra
+ *
+ *  SI LEES ESTO Y PIENSAS EN HACER UN SCRIPT DE LIMPIEZA O SYNC:
+ *  -> NO LO HAGAS. Los lots son SAGRADOS.
+ *  -> Solo el flujo normal de BUY/SELL debe tocarlos.
+ * ========================================================================
+ */
+/**
  * VANTAGE // QUANTUM GRID BOT
  * Version: 3.0 (Multi-Core Edition)
  * Features: Multi-Pair, Persistence, Precision Math, Circuit Breakers
@@ -106,8 +138,6 @@ const CAPITAL_ALLOCATION = parseFloat(process.env.CAPITAL_ALLOCATION) || 1.0;
 // Prevents account ruin by limiting exposure
 const USDT_FLOOR_PERCENT = 0.15;      // Min 15% of equity must stay in USDT (pauses BUYs)
 const INVENTORY_CAP_PERCENT = 0.70;   // Max 70% of equity can be in BASE_ASSET (pauses BUYs)
-
-
 // Pair-specific presets
 const PAIR_PRESETS = {
     'BTC/USDT': {
@@ -202,8 +232,6 @@ const CONFIG = {
     // PROFIT OPTIMIZATION
     compoundProfits: true,
     minProfitToCompound: 0.5,
-
-
     // System Settings
     monitorInterval: 3000,
     orderDelay: 150,
@@ -226,8 +254,6 @@ console.log(`>> [CONFIG] Capital Allocation: ${(CAPITAL_ALLOCATION * 100).toFixe
 console.log(`>> [CONFIG] State File: ${CONFIG.stateFile}`);
 console.log(`>> [CONFIG] Grid Spacing: ${(CONFIG.gridSpacing * 100).toFixed(2)}%`);
 console.log(`>> [DOCTRINE] 🛡️ SAFETY NET ACTIVE: Tolerance -0.5% (Strict Profit Guard)`);
-
-
 // --- SERVER SETUP ---
 const app = express();
 const server = http.createServer(app);
@@ -331,8 +357,6 @@ app.get('/api/status', async (req, res) => {
             o.timestamp < startOfDayCDMX
         );
         const yesterdayProfit = yesterdayOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
-
-
         // Extract APY metrics from earlier apyData calculation
         const apy = parseFloat(apyData.projectedAPY) || 0;
         const daysActive = parseFloat(apyData.daysActive) || 1;
@@ -887,8 +911,6 @@ const SIDE_QUESTS = [
     { id: "mentor_someone", name: "Sé Mentor", description: "Enseña a alguien sobre inversión", xp: 1000, category: "action", minLevel: 18 },
     { id: "emergency_fund", name: "Fondo de Emergencia", description: "6 meses de gastos ahorrados", xp: 1200, category: "action", minLevel: 20 },
 ];
-
-
 // === MILLIONAIRE ROADMAP CALCULATOR ===
 function calculateMillionaireRoadmap(equity, currentAPY, monthlyInjection = 500) {
     const TARGET = 1000000;
@@ -2682,8 +2704,6 @@ app.delete('/api/deposits/:id', (req, res) => {
 
 // BOT_ID and PAIR_ID defined at top of file
 // (Removed duplicate definition)
-
-
 // ============================================
 // ENHANCED LOGGING SYSTEM - Full Transparency
 // ============================================
@@ -2881,8 +2901,6 @@ const externalDataCache = {
 
 // --- HELPER: Universal Equity Source of Truth (USDT + BTC + SOL) ---
 // (Moved to line ~1600 to be near Cache definitions)
-
-
 // Load State
 // Load State
 function loadState() {
@@ -2905,8 +2923,6 @@ function loadState() {
             // FIXED: Preserve saved values - no inflation
             state.totalProfit = saved.totalProfit || 0;
             state.accumulatedProfit = saved.accumulatedProfit || 0;
-
-
             if (saved.emergencyStop) {
                 state.accumulatedProfit = state.totalProfit;
             }
@@ -3015,7 +3031,16 @@ const safeReplacer = (key, value) => {
     return value;
 };
 
-// P0 FIX: Sync lot remaining between inventory and inventoryLots to prevent desyncfunction syncLotRemaining(lotId, newRemaining) {    // Update in inventory    const invLot = (state.inventory || []).find(l => l.id === lotId || String(l.id) === String(lotId));    if (invLot) invLot.remaining = newRemaining;    // Update in inventoryLots    const invLotsLot = (state.inventoryLots || []).find(l => l.id === lotId || String(l.id) === String(lotId));    if (invLotsLot) invLotsLot.remaining = newRemaining;}
+// P0 FIX: Sync lot remaining between inventory and inventoryLots to prevent desync
+function syncLotRemaining(lotId, newRemaining) {
+    // Update in inventory
+    const invLot = (state.inventory || []).find(l => l.id === lotId || String(l.id) === String(lotId));
+    if (invLot) invLot.remaining = newRemaining;
+    
+    // Update in inventoryLots
+    const invLotsLot = (state.inventoryLots || []).find(l => l.id === lotId || String(l.id) === String(lotId));
+    if (invLotsLot) invLotsLot.remaining = newRemaining;
+}
 async function saveState() {
     if (isSaving) {
         pendingSave = true;
@@ -3025,6 +3050,11 @@ async function saveState() {
 
     try {
         const tempFile = `${CONFIG.stateFile}.tmp`;
+
+        // DISABLED - REGLA CRITICA: NO borrar lots sin verificar SELL real
+        if (state.inventory) {
+            // state.inventory = state.inventory.filter(lot => lot.remaining > 0); // PELIGROSO - DESACTIVADO
+        }
 
         // AUTO-SYNC: Keep inventoryLots in sync with inventory (prevents desync forever)
         if (state.inventory) {
@@ -3267,8 +3297,6 @@ async function getDetailedFinancialsCached(ttlMs = 2000) {
 async function getDetailedFinancials() {
     return getDetailedFinancialsCached(2000);
 }
-
-
 
 async function updateBalance() {
     try {
@@ -4128,8 +4156,6 @@ async function placeOrder(level, skipBudgetCheck = false) {
         logDecision('ORDER_FAILED', [e.message], { level });
     }
 }
-
-
 // CRITICAL P0: Isolation - Cancel ONLY this bot's orders
 async function cancelAllOrders() {
     try {
@@ -4823,8 +4849,6 @@ async function getGlobalEquity() {
             }
         }
 
-
-
         // Update Cache
         equityCache.value = total;
         equityCache.ts = Date.now();
@@ -4959,8 +4983,6 @@ async function fetchBTCDominance() {
     }
     return { value: 50, signal: 'BALANCED', timestamp: Date.now() };
 }
-
-
 // TIME-BASED MARKET CHECK
 function checkMarketTiming() {
     const now = new Date();
@@ -5770,67 +5792,36 @@ async function detectCapitalChange() {
 // Runs every 30 minutes to keep inventory in sync with Binance
 // ============================================
 async function autoSyncInventory() {
-    // P0 FIX v2: Now properly syncs BOTH ways (add AND reduce)
+    // REGLA CRITICA: Solo agregar lots con precios REALES de Binance trades
+    // NUNCA reducir automaticamente - eso solo debe pasar por SELLs reales
     try {
         const balance = await binance.fetchBalance();
         const baseAsset = CONFIG.pair.split("/")[0];
-        const realBalance = parseFloat(balance[baseAsset]?.free || 0); // Use FREE not TOTAL
+        const realBalance = parseFloat(balance[baseAsset]?.free || 0);
         
         const invBalance = state.inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
         const diff = realBalance - invBalance;
         
-        // Tolerance based on asset
-        const tolerance = baseAsset === "DOGE" ? 1 : (baseAsset === "SOL" ? 0.001 : 0.00001);
+        const tolerance = baseAsset === "DOGE" ? 1 : (baseAsset === "SOL" ? 0.01 : 0.0001);
         
         if (Math.abs(diff) <= tolerance) {
             return; // Already synced
         }
         
         if (diff > tolerance) {
-            // Binance has MORE than inventory - ADD a reconciliation lot
-            const currentPrice = state.currentPrice || (await binance.fetchTicker(CONFIG.pair)).last;
-            
-            const reconLot = {
-                id: "AUTOSYNC_" + Date.now(),
-                orderId: "AUTOSYNC_" + Date.now(),
-                price: currentPrice,
-                amount: diff,
-                remaining: diff,
-                timestamp: Date.now(),
-                auditVerified: true,
-                source: "AUTO_SYNC"
-            };
-            
-            state.inventory.push(reconLot);
-            if (state.inventoryLots) state.inventoryLots.push({ ...reconLot });
-            
-            saveState();
-            log("AUTO_SYNC", "Added " + diff.toFixed(6) + " " + baseAsset + " to inventory (Binance had more)", "success");
+            // FIX 2026-02-07: SOLO LOGUEAR - NO CREAR LOTS
+            // Crear SYNC lots causaba DOBLE CONTEO y desync recurrente
+            // Los lots SOLO deben crearse en handleOrderFill (buy handler)
+            log("AUTO_SYNC", "INFO: Binance has " + diff.toFixed(6) + " " + baseAsset + " MORE than inventory. Buy handler will create the lot.", "warning");
         } else {
-            // P0 FIX v2: Binance has LESS - REDUCE lots to match (FIFO)
-            let toReduce = Math.abs(diff);
-            const sortedLots = state.inventory.filter(l => l.remaining > 0)
-                .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-            
-            for (const lot of sortedLots) {
-                if (toReduce <= tolerance) break;
-                const reduceAmount = Math.min(lot.remaining, toReduce);
-                lot.remaining -= reduceAmount;
-                toReduce -= reduceAmount;
-                
-                // Sync to inventoryLots
-                syncLotRemaining(lot.id, lot.remaining);
-            }
-            
-            saveState();
-            log("AUTO_SYNC", "Reduced inventory by " + Math.abs(diff).toFixed(6) + " " + baseAsset + " (Binance had less)", "warning");
+            // REGLA CRITICA: NO reducir automaticamente
+            // Solo loguear la discrepancia - los SELLs reales deben manejar esto
+            log("AUTO_SYNC", "WARNING: Binance has " + Math.abs(diff).toFixed(6) + " " + baseAsset + " LESS than inventory. NOT auto-reducing. Check for untracked sells.", "error");
         }
     } catch (e) {
         log("AUTO_SYNC", "Error: " + e.message, "error");
     }
 }
-
-
 // PHASE 5: Time-Weighted APY Calculation
 // Uses TWR (Time-Weighted Return) for accurate capital averaging
 function calculateAccurateAPY() {
@@ -5873,8 +5864,6 @@ function calculateNetProfit(buyPrice, sellPrice, amount) {
         feePercent: ((buyFee + sellFee) / (buyPrice * amount)) * 100
     };
 }
-
-
 // Race Condition Protection
 const processingOrders = new Set();
 async function checkLiveOrders() {
@@ -7164,8 +7153,6 @@ function emitGridState() {
     });
 }
 
-
-
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -7295,8 +7282,6 @@ server.listen(BOT_PORT, async () => {
     setInterval(async () => {
         await detectCapitalChange();
     }, 5 * 60 * 1000); // Check every 5 minutes
-
-
     // PHASE 6: AUTO-SYNC INVENTORY (Every 30 minutes)
     // Keeps inventory synced with Binance - only ADDS missing balance, never deletes
     setInterval(async () => {
@@ -7341,8 +7326,6 @@ server.listen(BOT_PORT, async () => {
             log("AUTO_DEPLOY", "Initial check error: " + e.message, "error");
         }
     }, 30000); // 30 seconds after start
-
-
     // === DAILY PERFORMANCE REPORT ===
     const REPORTS_DIR = path.join(__dirname, 'reports');
     if (!fs.existsSync(REPORTS_DIR)) {
@@ -7718,8 +7701,6 @@ app.post("/api/achievements/redeem", express.json(), (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-
 // MINDSET ANTI-FEAR SYSTEM - Psychological support during dips
 app.get("/api/mindset", async (req, res) => {
     try {
