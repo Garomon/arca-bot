@@ -5797,7 +5797,8 @@ async function autoSyncInventory() {
     try {
         const balance = await binance.fetchBalance();
         const baseAsset = CONFIG.pair.split("/")[0];
-        const realBalance = parseFloat(balance[baseAsset]?.free || 0);
+        // FIX 2026-02-08: Comparar vs TOTAL (no FREE) para incluir crypto en sell orders
+        const realBalance = parseFloat(balance[baseAsset]?.total || 0);
         
         const invBalance = state.inventory.reduce((sum, lot) => sum + (lot.remaining || 0), 0);
         const diff = realBalance - invBalance;
