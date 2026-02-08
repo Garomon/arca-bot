@@ -7767,3 +7767,114 @@ app.get("/api/mindset", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// ============================================
+// /api/phases - Flight Phase & Spring Indicator
+// ============================================
+app.get("/api/phases", (req, res) => {
+    try {
+        const inventory = state.inventory || [];
+        const price = state.currentPrice || 0;
+        const spread = CONFIG.gridSpacing || 0.005;
+        const baseAsset = CONFIG.pair.split("/")[0];
+
+        const totalRemaining = inventory.reduce((s, l) => s + (l.remaining || 0), 0);
+        const costBase = inventory.reduce((s, l) => s + (l.remaining || 0) * l.price, 0);
+
+        // Analyze each lot
+        const lots = inventory.map(lot => {
+            const sellTarget = lot.price * (1 + spread);
+            const progress = lot.price > 0 ? ((price - lot.price) / (sellTarget - lot.price)) * 100 : 0;
+            const recoveryNeeded = price > 0 ? ((sellTarget / price) - 1) * 100 : 999;
+            const potentialProfit = lot.remaining * (sellTarget - lot.price) * 0.999;
+            return { progress, recoveryNeeded, sellTarget, buyPrice: lot.price, remaining: lot.remaining, potentialProfit };
+        });
+        lots.sort((a, b) => b.progress - a.progress);
+
+        const readyLots = lots.filter(l => l.progress >= 100);
+        const hotLots = lots.filter(l => l.progress >= 75 && l.progress < 100);
+        const warmLots = lots.filter(l => l.progress >= 50 && l.progress < 75);
+        const coldLots = lots.filter(l => l.progress >= 0 && l.progress < 50);
+        const frozenLots = lots.filter(l => l.progress < 0);
+
+        // Recent activity
+        const now = Date.now();
+        const sells24h = (state.filledOrders || []).filter(o => o.side === "sell" && (o.timestamp || 0) > now - 86400000);
+        const profit24h = sells24h.reduce((s, o) => s + (o.profit || 0), 0);
+        const buys24h = (state.filledOrders || []).filter(o => o.side === "buy" && (o.timestamp || 0) > now - 86400000);
+        const activeSells = (state.activeOrders || []).filter(o => o.side === "sell");
+        const activeBuys = (state.activeOrders || []).filter(o => o.side === "buy");
+
+        // === DETERMINE PHASE ===
+        let phaseNum, phaseName, phaseColor, phaseIcon, nextStep;
+
+        if (readyLots.length >= lots.length * 0.3 && lots.length > 0) {
+            phaseNum = 5; phaseName = "CASCADA DE PROFIT"; phaseColor = "#00ff9d"; phaseIcon = "rocket";
+            nextStep = readyLots.length + " lots vendiendo. " + (lots.length - readyLots.length) + " restantes en camino.";
+        } else if (readyLots.length > 0 || (sells24h.length >= 2 && profit24h > 0)) {
+            phaseNum = 4; phaseName = "VENDIENDO"; phaseColor = "#00f0ff"; phaseIcon = "money";
+            const nxt = lots.find(l => l.progress < 100 && l.progress > 0);
+            nextStep = readyLots.length + " lots listos. " + (nxt ? "Proximo a +" + nxt.recoveryNeeded.toFixed(1) + "%." : "Precio subiendo.");
+        } else if (hotLots.length > 0 || (lots.length > 0 && lots[0].recoveryNeeded < 8)) {
+            phaseNum = 3; phaseName = "CALENTANDO MOTORES"; phaseColor = "#ffd700"; phaseIcon = "fire";
+            nextStep = "Falta +" + lots[0].recoveryNeeded.toFixed(1) + "% para primera venta.";
+        } else if (buys24h.length > 2 || activeBuys.length > 0) {
+            phaseNum = 1; phaseName = "CARGANDO COMBUSTIBLE"; phaseColor = "#ff6b35"; phaseIcon = "fuel";
+            nextStep = lots.length + " lots cargados. Bot comprando en la caida.";
+        } else {
+            phaseNum = 2; phaseName = "RESORTE COMPRIMIDO"; phaseColor = "#ff2a6d"; phaseIcon = "spring";
+            const nearest = lots.length > 0 ? lots[0] : null;
+            nextStep = nearest ? "Esperando. +" + nearest.recoveryNeeded.toFixed(1) + "% para primera venta." : "Sin lots.";
+        }
+
+        // Spring compression based on NEAREST lot's recovery
+        // 0% recovery = 0% compressed (about to sell!)
+        // 10%+ recovery = 100% compressed (fully wound)
+        const nearestRecovery = lots.length > 0 ? Math.max(0, lots[0].recoveryNeeded) : 100;
+        const springCompression = Math.max(0, Math.min(100, nearestRecovery * 10));
+
+        // Recovery scenarios
+        const scenarios = [5, 10, 15, 20, 30, 50].map(pctUp => {
+            const fp = price * (1 + pctUp / 100);
+            const selling = lots.filter(l => fp >= l.sellTarget);
+            const prof = selling.reduce((s, l) => s + l.potentialProfit, 0);
+            return { pctUp, futurePrice: parseFloat(fp.toFixed(2)), sellCount: selling.length, totalLots: lots.length, profit: parseFloat(prof.toFixed(4)) };
+        }).filter(s => s.sellCount > 0);
+
+        // Total potential if ALL lots sell
+        const totalPotential = lots.reduce((s, l) => s + l.potentialProfit, 0);
+
+        res.json({
+            pair: CONFIG.pair,
+            asset: baseAsset,
+            price,
+            phaseNum,
+            phaseName,
+            phaseColor,
+            phaseIcon,
+            nextStep,
+            springCompression: parseFloat(springCompression.toFixed(1)),
+            totalLots: lots.length,
+            readyLots: readyLots.length,
+            hotLots: hotLots.length,
+            warmLots: warmLots.length,
+            coldLots: coldLots.length,
+            frozenLots: frozenLots.length,
+            profit24h: parseFloat(profit24h.toFixed(4)),
+            sells24h: sells24h.length,
+            costBase: parseFloat(costBase.toFixed(2)),
+            currentValue: parseFloat((totalRemaining * price).toFixed(2)),
+            unrealizedPnl: parseFloat(((totalRemaining * price) - costBase).toFixed(2)),
+            totalPotential: parseFloat(totalPotential.toFixed(4)),
+            nearestSell: lots.length > 0 ? {
+                recoveryPct: parseFloat(lots[0].recoveryNeeded.toFixed(2)),
+                targetPrice: parseFloat(lots[0].sellTarget.toFixed(2))
+            } : null,
+            scenarios,
+            timestamp: Date.now()
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
